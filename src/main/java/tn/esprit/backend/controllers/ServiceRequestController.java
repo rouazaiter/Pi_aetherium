@@ -4,13 +4,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.backend.entities.ServiceRequest;
 import tn.esprit.backend.entities.ServiceRequestStatus;
+import tn.esprit.backend.services.interfaces.FileStorageService;
 import tn.esprit.backend.services.interfaces.ServiceRequestService;
 
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/service-requests")
@@ -18,6 +23,7 @@ import java.util.Map;
 public class ServiceRequestController {
 
     private final ServiceRequestService serviceRequestService;
+    private final FileStorageService fileStorageService;
 
     /**
      * Publier une nouvelle demande de service.
@@ -28,6 +34,31 @@ public class ServiceRequestController {
             @Valid @RequestBody ServiceRequest serviceRequest
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(serviceRequestService.createServiceRequest(creatorId, serviceRequest));
+    }
+
+    /**
+     * Variante "vrai upload" (multipart/form-data) pour joindre un fichier PDF/Word/PNG.
+     */
+    @PostMapping(value = "/add-service-request/{creator-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ServiceRequest> createServiceRequestMultipart(
+            @PathVariable("creator-id") Long creatorId,
+            @RequestParam String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime expiringDate,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        ServiceRequest sr = new ServiceRequest();
+        sr.setName(name);
+        sr.setDescription(description);
+        sr.setExpiringDate(expiringDate);
+
+        if (file != null && !file.isEmpty()) {
+            String storedFileName = fileStorageService.store(file);
+            sr.setFiles("/api/service-requests/files/" + storedFileName);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(serviceRequestService.createServiceRequest(creatorId, sr));
     }
 
     /**
@@ -72,6 +103,38 @@ public class ServiceRequestController {
             @RequestBody ServiceRequest serviceRequest
     ) {
         return ResponseEntity.ok(serviceRequestService.updateServiceRequest(id, requesterId, serviceRequest));
+    }
+
+    /**
+     * Variante upload "multipart/form-data" pour modifier une demande (optionnellement avec un nouveau fichier).
+     */
+    @PutMapping(value = "/modify-service-request/{id}/{requester-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ServiceRequest> updateServiceRequestMultipart(
+            @PathVariable Long id,
+            @PathVariable("requester-id") Long requesterId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime expiringDate,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        ServiceRequest payload = new ServiceRequest();
+
+        if (name != null) {
+            payload.setName(name);
+        }
+        if (description != null) {
+            payload.setDescription(description);
+        }
+        if (expiringDate != null) {
+            payload.setExpiringDate(expiringDate);
+        }
+
+        if (file != null && !file.isEmpty()) {
+            String storedFileName = fileStorageService.store(file);
+            payload.setFiles("/api/service-requests/files/" + storedFileName);
+        }
+
+        return ResponseEntity.ok(serviceRequestService.updateServiceRequest(id, requesterId, payload));
     }
 
     /**

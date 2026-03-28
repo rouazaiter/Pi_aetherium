@@ -1,13 +1,12 @@
-package tn.esprit.aetherium.skillhubbackend;
+package com.education.platform;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SkillHubBackendApplication {
+public class EducationPlatformApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SkillHubBackendApplication.class, args);
+        SpringApplication.run(EducationPlatformApplication.class, args);
     }
-
 }

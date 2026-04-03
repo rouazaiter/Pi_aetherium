@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.backend.dto.CreateApplicationRequest;
 import tn.esprit.backend.entities.Application;
 import tn.esprit.backend.entities.ApplicationStatus;
 import tn.esprit.backend.services.interfaces.ApplicationService;
@@ -26,10 +27,10 @@ public class ApplicationController {
     public ResponseEntity<Application> createApplication(
             @PathVariable("applicant-id") Long applicantId,
             @PathVariable("service-request-id") Long serviceRequestId,
-            @RequestBody Application application
+            @Valid @RequestBody CreateApplicationRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(applicationService.createApplication(applicantId, serviceRequestId, application.getMessage()));
+            .body(applicationService.createApplication(applicantId, serviceRequestId, request.message()));
     }
 
     /**

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import tn.esprit.backend.dto.NotificationDto;
 import tn.esprit.backend.entities.Application;
 import tn.esprit.backend.entities.ApplicationStatus;
 import tn.esprit.backend.entities.ServiceRequest;
@@ -25,6 +26,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ServiceRequestRepository serviceRequestRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -51,8 +53,23 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .serviceRequest(serviceRequest)
                 .applicant(applicant)
                 .build();
+////////////////////////////////////
+        Application saved = applicationRepository.save(application);
 
-        return applicationRepository.save(application);
+        Long creatorId = serviceRequest.getCreator().getId();
+        notificationService.notifyUser(
+                creatorId,
+                new NotificationDto(
+                        "NEW_APPLICATION",
+                        "Nouvelle candidature sur ta demande " + serviceRequest.getName(),
+                        serviceRequest.getId(),
+                        saved.getId(),
+                        LocalDateTime.now()
+                )
+        );
+
+        return saved;
+        /////////////////////////////////////////
     }
 
     @Override

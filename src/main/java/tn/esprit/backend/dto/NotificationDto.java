@@ -1,4 +1,11 @@
 package tn.esprit.backend.dto;
 
-public class NotificationDto {
-}
+import java.time.LocalDateTime;
+
+public record NotificationDto(
+  String type,
+  String message,
+  Long serviceRequestId,
+  Long applicationId,
+  LocalDateTime createdAt
+) {}

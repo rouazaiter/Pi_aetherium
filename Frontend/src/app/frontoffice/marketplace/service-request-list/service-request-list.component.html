@@ -1,0 +1,114 @@
+<section class="section courses" id="courses">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-lg-8">
+        <div class="section-heading">
+          <h6>Marketplace</h6>
+          <h2>Demandes de Services</h2>
+        </div>
+      </div>
+      <div class="col-lg-4 align-self-center text-end">
+        <div class="main-button">
+          <a routerLink="new">+ Nouvelle demande</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading / Error -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+    <!-- Mes demandes -->
+    <div *ngIf="myRequests.length > 0">
+      <h4 class="mb-4" style="color: #f35525;">Mes demandes</h4>
+      <div class="row event_box mb-5">
+        <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
+             *ngFor="let req of myRequests">
+          <div class="events_item">
+            <div class="thumb">
+              <a [routerLink]="['my', req.id]">
+                <img src="scholar-1.0.0/assets/images/course-01.jpg" alt="{{ req.name }}">
+              </a>
+              <span class="category">{{ req.status }}</span>
+              <span class="price">
+                <h6><em>#</em>{{ req.id }}</h6>
+              </span>
+            </div>
+            <div class="down-content">
+              <span class="author">{{ req.creator.username }}</span>
+              <h4>{{ req.name }}</h4>
+              <p class="mt-2" style="font-size:13px; color:#666;">{{ req.description }}</p>
+              <p *ngIf="req.expiringDate" style="font-size:12px; color:#aaa;">
+                Expire le {{ req.expiringDate | date:'dd/MM/yyyy' }}
+              </p>
+              <div class="d-flex gap-2 mt-3">
+                <a [routerLink]="['my', req.id]" class="main-button" style="font-size:13px; padding: 8px 16px;">Candidatures</a>
+                <a [routerLink]="['edit', req.id]" style="font-size:13px; padding: 8px 16px; border:1px solid #f35525; color:#f35525; border-radius:5px;">Modifier</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demandes disponibles -->
+    <div *ngIf="otherRequests.length > 0">
+      <h4 class="mb-4" style="color: #f35525;">Demandes disponibles</h4>
+
+      <!-- Filtres -->
+      <ul class="event_filter mb-4">
+        <li><a class="is_active" href="#!">Toutes</a></li>
+        <li><a href="#!">OPEN</a></li>
+        <li><a href="#!">CLOSED</a></li>
+      </ul>
+
+      <div class="row event_box">
+        <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
+             *ngFor="let req of otherRequests">
+          <div class="events_item">
+            <div class="thumb">
+              <a [routerLink]="['apply', req.id]">
+                <img src="scholar-1.0.0/assets/images/course-02.jpg" alt="{{ req.name }}">
+              </a>
+              <span class="category">{{ req.status }}</span>
+            </div>
+            <div class="down-content">
+              <span class="author">{{ req.creator.username }}</span>
+              <h4>{{ req.name }}</h4>
+              <p class="mt-2" style="font-size:13px; color:#666;">{{ req.description }}</p>
+              <p *ngIf="req.expiringDate" style="font-size:12px; color:#aaa;">
+                Expire le {{ req.expiringDate | date:'dd/MM/yyyy' }}
+              </p>
+              <div class="mt-3">
+                <a *ngIf="req.status === 'OPEN'"
+                   [routerLink]="['apply', req.id]"
+                   class="main-button"
+                   style="font-size:13px; padding: 8px 16px;">
+                  Postuler
+                </a>
+                <span *ngIf="req.status !== 'OPEN'"
+                      style="font-size:12px; color:#aaa; font-style:italic;">
+                  {{ req.status === 'CLOSED' ? 'Pourvue' : 'Expirée' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="myRequests.length === 0 && otherRequests.length === 0 && !loading"
+         class="text-center py-5">
+      <h5 style="color:#aaa;">Aucune demande de service pour le moment.</h5>
+      <div class="main-button d-inline-block mt-3">
+        <a routerLink="new">Créer la première demande</a>
+      </div>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,26 @@
+<header class="header-area header-sticky">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+          <!-- Logo -->
+          <a routerLink="/" class="logo">
+            <h1>Scholar</h1>
+          </a>
+
+          <!-- Menu -->
+          <ul class="nav">
+            <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
+            <li><a routerLink="/marketplace" routerLinkActive="active">Marketplace</a></li>
+            <li><a routerLink="/marketplace/new" routerLinkActive="active">Post a Request</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+
+          <a class="menu-trigger">
+            <span>Menu</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>

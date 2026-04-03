@@ -1,0 +1,61 @@
+<div class="apply-container" *ngIf="serviceRequest">
+
+  <a routerLink="/marketplace" class="back-link">← Retour</a>
+
+  <!-- détails de la demande -->
+  <div class="detail-header">
+    <h2>{{ serviceRequest.name }}</h2>
+    <span class="status-badge status-{{ serviceRequest.status.toLowerCase() }}">
+      {{ serviceRequest.status }}
+    </span>
+  </div>
+
+  <p class="description">{{ serviceRequest.description }}</p>
+
+  <div class="meta">
+    <span>Publiée par <strong>{{ serviceRequest.creator.username }}</strong></span>
+    <span>· {{ serviceRequest.createdAt | date:'dd/MM/yyyy' }}</span>
+    <span *ngIf="serviceRequest.expiringDate">
+      · Expire le {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}
+    </span>
+    <span *ngIf="serviceRequest.files">
+      · <a [href]="serviceRequest.files" target="_blank">Voir le fichier joint</a>
+    </span>
+  </div>
+
+  <hr />
+
+  <!-- déjà postulé -->
+  <div *ngIf="alreadyApplied" class="info-box">
+    Vous avez déjà postulé à cette demande.
+  </div>
+
+  <!-- demande fermée ou expirée -->
+  <div *ngIf="serviceRequest.status !== 'OPEN'" class="info-box warning">
+    Cette demande n'accepte plus de candidatures ({{ serviceRequest.status }}).
+  </div>
+
+  <!-- formulaire candidature -->
+  <form *ngIf="!alreadyApplied && serviceRequest.status === 'OPEN'"
+        [formGroup]="form" (ngSubmit)="onSubmit()">
+    <h3>Votre candidature</h3>
+
+    <div class="form-group">
+      <label for="message">Message de motivation *</label>
+      <textarea id="message" formControlName="message" rows="5"
+                placeholder="Expliquez pourquoi vous êtes le bon candidat..."></textarea>
+      <span class="error"
+            *ngIf="form.get('message')?.invalid && form.get('message')?.touched">
+        Le message est requis.
+      </span>
+    </div>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+    <div *ngIf="success" class="success">{{ success }}</div>
+
+    <button type="submit" class="btn-primary" [disabled]="form.invalid || loading">
+      {{ loading ? 'Envoi...' : 'Envoyer ma candidature' }}
+    </button>
+  </form>
+
+</div>

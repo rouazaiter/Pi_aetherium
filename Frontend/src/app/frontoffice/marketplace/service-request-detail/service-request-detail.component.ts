@@ -4,7 +4,7 @@ import { ServiceRequestService } from '../../../core/services/service-request.se
 import { ApplicationService } from '../../../core/services/application.service';
 import { ServiceRequest } from '../../../core/models/service-request.model';
 import { Application, ApplicationStatus } from '../../../core/models/application.model';
-import { CURRENT_USER_ID } from '../../../core/auth/current-user';
+import { CurrentUserService } from '../../../core/auth/current-user.service';
 
 @Component({
   selector: 'app-service-request-detail',
@@ -15,16 +15,20 @@ export class ServiceRequestDetailComponent implements OnInit {
   applications: Application[] = [];
   loading = false;
   error = '';
-  currentUserId = CURRENT_USER_ID;
+  currentUserId = 1;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private srService: ServiceRequestService,
-    private appService: ApplicationService
+    private appService: ApplicationService,
+    private currentUserService: CurrentUserService
   ) {}
 
   ngOnInit(): void {
+    this.currentUserId = this.currentUserService.currentUser.id;
+    this.currentUserService.currentUser$.subscribe(user => this.currentUserId = user.id);
+
     const id = Number(this.route.snapshot.params['id']);
     this.loading = true;
 

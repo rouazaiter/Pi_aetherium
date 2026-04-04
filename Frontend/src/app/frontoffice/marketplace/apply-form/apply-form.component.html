@@ -1,61 +1,108 @@
-<div class="apply-container" *ngIf="serviceRequest">
+<div class="apply-page-wrapper" *ngIf="serviceRequest">
 
-  <a routerLink="/marketplace" class="back-link">← Retour</a>
+  <div class="apply-card">
 
-  <!-- détails de la demande -->
-  <div class="detail-header">
-    <h2>{{ serviceRequest.name }}</h2>
-    <span class="status-badge status-{{ serviceRequest.status.toLowerCase() }}">
-      {{ serviceRequest.status }}
-    </span>
-  </div>
+    <!-- Retour -->
+    <a routerLink="/marketplace" class="back-link">
+      <i class="fa fa-arrow-left me-1"></i> Retour au marketplace
+    </a>
 
-  <p class="description">{{ serviceRequest.description }}</p>
-
-  <div class="meta">
-    <span>Publiée par <strong>{{ serviceRequest.creator.username }}</strong></span>
-    <span>· {{ serviceRequest.createdAt | date:'dd/MM/yyyy' }}</span>
-    <span *ngIf="serviceRequest.expiringDate">
-      · Expire le {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}
-    </span>
-    <span *ngIf="serviceRequest.files">
-      · <a [href]="serviceRequest.files" target="_blank">Voir le fichier joint</a>
-    </span>
-  </div>
-
-  <hr />
-
-  <!-- déjà postulé -->
-  <div *ngIf="alreadyApplied" class="info-box">
-    Vous avez déjà postulé à cette demande.
-  </div>
-
-  <!-- demande fermée ou expirée -->
-  <div *ngIf="serviceRequest.status !== 'OPEN'" class="info-box warning">
-    Cette demande n'accepte plus de candidatures ({{ serviceRequest.status }}).
-  </div>
-
-  <!-- formulaire candidature -->
-  <form *ngIf="!alreadyApplied && serviceRequest.status === 'OPEN'"
-        [formGroup]="form" (ngSubmit)="onSubmit()">
-    <h3>Votre candidature</h3>
-
-    <div class="form-group">
-      <label for="message">Message de motivation *</label>
-      <textarea id="message" formControlName="message" rows="5"
-                placeholder="Expliquez pourquoi vous êtes le bon candidat..."></textarea>
-      <span class="error"
-            *ngIf="form.get('message')?.invalid && form.get('message')?.touched">
-        Le message est requis.
-      </span>
+    <!-- En-tête de la demande -->
+    <div class="request-header">
+      <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+        <h2 class="request-title">{{ serviceRequest.name }}</h2>
+        <span class="status-badge status-{{ serviceRequest.status.toLowerCase() }}">
+          {{ serviceRequest.status }}
+        </span>
+      </div>
+      <p class="request-description">{{ serviceRequest.description }}</p>
+      <div class="request-meta">
+        <span class="meta-item">
+          <i class="fa fa-user-circle"></i>
+          {{ serviceRequest.creator.username }}
+        </span>
+        <span class="meta-item">
+          <i class="fa fa-calendar-alt"></i>
+          {{ serviceRequest.createdAt | date:'dd/MM/yyyy' }}
+        </span>
+        <span class="meta-item" *ngIf="serviceRequest.expiringDate">
+          <i class="fa fa-clock"></i>
+          Expire le {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}
+        </span>
+        <span class="meta-item" *ngIf="serviceRequest.files">
+          <i class="fa fa-paperclip"></i>
+          <a [href]="serviceRequest.files" target="_blank">Fichier joint</a>
+        </span>
+      </div>
     </div>
 
-    <div *ngIf="error" class="error">{{ error }}</div>
-    <div *ngIf="success" class="success">{{ success }}</div>
+    <hr class="divider" />
 
-    <button type="submit" class="btn-primary" [disabled]="form.invalid || loading">
-      {{ loading ? 'Envoi...' : 'Envoyer ma candidature' }}
-    </button>
-  </form>
+    <!-- Déjà postulé -->
+    <div *ngIf="alreadyApplied" class="info-banner info-applied">
+      <i class="fa fa-check-circle fa-lg"></i>
+      <div>
+        <strong>Candidature envoyée</strong>
+        <p class="mb-0">Vous avez déjà postulé à cette demande. Nous vous contacterons prochainement.</p>
+      </div>
+    </div>
 
+    <!-- Demande fermée -->
+    <div *ngIf="serviceRequest.status !== 'OPEN'" class="info-banner info-closed">
+      <i class="fa fa-lock fa-lg"></i>
+      <div>
+        <strong>Demande fermée</strong>
+        <p class="mb-0">Cette demande n'accepte plus de candidatures ({{ serviceRequest.status }}).</p>
+      </div>
+    </div>
+
+    <!-- Formulaire de candidature -->
+    <div class="apply-form-section" *ngIf="!alreadyApplied && serviceRequest.status === 'OPEN'">
+      <div class="apply-form-header">
+        <div class="apply-form-icon">
+          <i class="fa fa-paper-plane"></i>
+        </div>
+        <div>
+          <h3 class="apply-form-title">Votre candidature</h3>
+          <p class="apply-form-subtitle">Présentez-vous et expliquez pourquoi vous êtes le bon candidat.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <div class="mb-4">
+          <label for="message" class="form-label fw-semibold">
+            <i class="fa fa-comment-alt me-1 text-primary"></i>
+            Message de motivation <span class="text-danger">*</span>
+          </label>
+          <textarea
+            id="message"
+            class="form-control"
+            [class.is-invalid]="form.get('message')?.invalid && form.get('message')?.touched"
+            formControlName="message"
+            rows="6"
+            placeholder="Expliquez votre expérience, vos compétences et pourquoi vous êtes le bon candidat pour cette mission..."
+          ></textarea>
+          <div class="invalid-feedback">Le message de motivation est requis.</div>
+          <div class="form-text text-muted">{{ form.get('message')?.value?.length || 0 }} / 2000 caractères</div>
+        </div>
+
+        <!-- Alertes -->
+        <div *ngIf="error" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+          <i class="fa fa-exclamation-circle"></i> {{ error }}
+        </div>
+        <div *ngIf="success" class="alert alert-success d-flex align-items-center gap-2" role="alert">
+          <i class="fa fa-check-circle"></i> {{ success }}
+        </div>
+
+        <button type="submit" class="btn btn-apply btn-lg w-100" [disabled]="form.invalid || loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i *ngIf="!loading" class="fa fa-paper-plane me-2"></i>
+          {{ loading ? 'Envoi en cours...' : 'Envoyer ma candidature' }}
+        </button>
+
+      </form>
+    </div>
+
+  </div>
 </div>

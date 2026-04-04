@@ -42,7 +42,7 @@ export class HomeComponent implements OnInit {
     });
 
     // Mobile menu trigger
-    $('.menu-trigger').off('click').on('click', function () {
+    $('.menu-trigger').off('click').on('click', function (this: HTMLElement) {
       $(this).toggleClass('active');
       $('.header-area .nav').slideToggle(200);
     });

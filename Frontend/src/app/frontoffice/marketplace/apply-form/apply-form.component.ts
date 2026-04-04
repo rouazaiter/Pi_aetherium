@@ -4,11 +4,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
 import { ApplicationService } from '../../../core/services/application.service';
 import { ServiceRequest } from '../../../core/models/service-request.model';
-import { CURRENT_USER_ID } from '../../../core/auth/current-user';
+import { CurrentUserService } from '../../../core/auth/current-user.service';
 
 @Component({
   selector: 'app-apply-form',
-  templateUrl: './apply-form.component.html'
+  templateUrl: './apply-form.component.html',
+  styleUrls: ['./apply-form.component.css']
 })
 export class ApplyFormComponent implements OnInit {
   serviceRequest?: ServiceRequest;
@@ -17,17 +18,21 @@ export class ApplyFormComponent implements OnInit {
   error = '';
   success = '';
   alreadyApplied = false;
-  currentUserId = CURRENT_USER_ID;
+  currentUserId = 1;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private srService: ServiceRequestService,
-    private appService: ApplicationService
+    private appService: ApplicationService,
+    private currentUserService: CurrentUserService
   ) {}
 
   ngOnInit(): void {
+    this.currentUserId = this.currentUserService.currentUser.id;
+    this.currentUserService.currentUser$.subscribe(user => this.currentUserId = user.id);
+
     const id = Number(this.route.snapshot.params['id']);
 
     this.form = this.fb.group({

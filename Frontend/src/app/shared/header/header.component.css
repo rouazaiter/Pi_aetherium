@@ -1,0 +1,39 @@
+.session-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  padding: 0 0.6rem;
+}
+
+.session-switch span {
+  font-size: 0.85rem;
+  opacity: 0.95;
+}
+
+.session-switch select {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  min-width: 150px;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.35rem;
+}
+
+.session-switch select option {
+  color: #1c2a3b;
+}
+
+@media (max-width: 1024px) {
+  .session-switch {
+    color: #1e3551;
+    padding: 0.3rem 0;
+  }
+
+  .session-switch select {
+    color: #1e3551;
+    border-color: #cfd9e4;
+    background: #fff;
+  }
+}

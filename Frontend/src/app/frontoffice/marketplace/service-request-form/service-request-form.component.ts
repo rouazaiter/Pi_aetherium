@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
-
-// TODO: remplacer par l'id de l'utilisateur connecté (auth service)
-const CURRENT_USER_ID = 1;
+import { CurrentUserService } from '../../../core/auth/current-user.service';
 
 @Component({
   selector: 'app-service-request-form',
-  templateUrl: './service-request-form.component.html'
+  templateUrl: './service-request-form.component.html',
+  styleUrls: ['./service-request-form.component.css']
 })
 export class ServiceRequestFormComponent implements OnInit {
   form!: FormGroup;
@@ -18,15 +17,20 @@ export class ServiceRequestFormComponent implements OnInit {
   success = '';
   isEdit = false;
   requestId?: number;
+  currentUserId = 1;
 
   constructor(
     private fb: FormBuilder,
     private srService: ServiceRequestService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private currentUserService: CurrentUserService
   ) {}
 
   ngOnInit(): void {
+    this.currentUserId = this.currentUserService.currentUser.id;
+    this.currentUserService.currentUser$.subscribe(user => this.currentUserId = user.id);
+
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', Validators.maxLength(2000)],
@@ -71,8 +75,8 @@ export class ServiceRequestFormComponent implements OnInit {
     if (this.selectedFile) formData.append('file', this.selectedFile);
 
     const request$ = this.isEdit
-      ? this.srService.update(this.requestId!, CURRENT_USER_ID, formData)
-      : this.srService.create(CURRENT_USER_ID, formData);
+      ? this.srService.update(this.requestId!, this.currentUserId, formData)
+      : this.srService.create(this.currentUserId, formData);
 
     request$.subscribe({
       next: () => {

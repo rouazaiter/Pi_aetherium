@@ -1,38 +1,106 @@
-<div class="form-container">
-  <h2>{{ isEdit ? 'Modifier la demande' : 'Publier une demande de service' }}</h2>
+<div class="form-page-wrapper">
+  <div class="form-card">
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="name">Titre *</label>
-      <input id="name" type="text" formControlName="name" placeholder="Nom de la demande" />
-      <span class="error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
-        Le titre est requis.
-      </span>
+    <div class="form-card-header">
+      <div class="form-icon-wrapper">
+        <i class="fa {{ isEdit ? 'fa-edit' : 'fa-paper-plane' }}"></i>
+      </div>
+      <h2 class="form-title">{{ isEdit ? 'Modifier la demande' : 'Publier une demande de service' }}</h2>
+      <p class="form-subtitle">{{ isEdit ? 'Mettez à jour les informations de votre demande.' : 'Décrivez votre besoin et trouvez le bon prestataire.' }}</p>
     </div>
 
-    <div class="form-group">
-      <label for="description">Description</label>
-      <textarea id="description" formControlName="description" rows="4" placeholder="Décrivez votre besoin..."></textarea>
+    <div class="form-card-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Titre -->
+        <div class="mb-4">
+          <label for="name" class="form-label fw-semibold">
+            <i class="fa fa-tag me-1 text-primary"></i> Titre <span class="text-danger">*</span>
+          </label>
+          <input
+            id="name"
+            type="text"
+            class="form-control form-control-lg"
+            [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+            formControlName="name"
+            placeholder="Ex: Développement d'une application web..."
+          />
+          <div class="invalid-feedback">Le titre est requis (100 caractères max).</div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <label for="description" class="form-label fw-semibold">
+            <i class="fa fa-align-left me-1 text-primary"></i> Description
+          </label>
+          <textarea
+            id="description"
+            class="form-control"
+            formControlName="description"
+            rows="5"
+            placeholder="Décrivez votre besoin en détail : contexte, objectifs, contraintes..."
+          ></textarea>
+          <div class="form-text text-muted">{{ form.get('description')?.value?.length || 0 }} / 2000 caractères</div>
+        </div>
+
+        <!-- Date d'expiration -->
+        <div class="mb-4">
+          <label for="expiringDate" class="form-label fw-semibold">
+            <i class="fa fa-calendar me-1 text-primary"></i> Date d'expiration
+          </label>
+          <input
+            id="expiringDate"
+            type="datetime-local"
+            class="form-control"
+            formControlName="expiringDate"
+          />
+          <div class="form-text text-muted">Laissez vide si la demande n'a pas de date limite.</div>
+        </div>
+
+        <!-- Fichier joint -->
+        <div class="mb-4">
+          <label for="file" class="form-label fw-semibold">
+            <i class="fa fa-paperclip me-1 text-primary"></i> Fichier joint
+          </label>
+          <div class="file-upload-area" (click)="fileInput.click()">
+            <input
+              #fileInput
+              id="file"
+              type="file"
+              class="d-none"
+              (change)="onFileChange($event)"
+              accept=".pdf,.png,.jpg,.doc,.docx"
+            />
+            <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+            <p class="mb-0 text-muted">
+              {{ selectedFile ? selectedFile.name : 'Cliquez pour choisir un fichier' }}
+            </p>
+            <small class="text-muted">PDF, PNG, JPG, DOC, DOCX</small>
+          </div>
+        </div>
+
+        <!-- Alertes -->
+        <div *ngIf="error" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+          <i class="fa fa-exclamation-circle"></i> {{ error }}
+        </div>
+        <div *ngIf="success" class="alert alert-success d-flex align-items-center gap-2" role="alert">
+          <i class="fa fa-check-circle"></i> {{ success }}
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-lg px-5" [disabled]="form.invalid || loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i *ngIf="!loading" class="fa {{ isEdit ? 'fa-save' : 'fa-paper-plane' }} me-2"></i>
+            {{ loading ? 'Envoi en cours...' : (isEdit ? 'Mettre à jour' : 'Publier la demande') }}
+          </button>
+          <a routerLink="/marketplace" class="btn btn-outline-secondary btn-lg px-4">
+            <i class="fa fa-times me-1"></i> Annuler
+          </a>
+        </div>
+
+      </form>
     </div>
 
-    <div class="form-group">
-      <label for="expiringDate">Date d'expiration</label>
-      <input id="expiringDate" type="datetime-local" formControlName="expiringDate" />
-    </div>
-
-    <div class="form-group">
-      <label for="file">Fichier joint (PDF, image...)</label>
-      <input id="file" type="file" (change)="onFileChange($event)" accept=".pdf,.png,.jpg,.doc,.docx" />
-    </div>
-
-    <div *ngIf="error" class="error">{{ error }}</div>
-    <div *ngIf="success" class="success">{{ success }}</div>
-
-    <div class="form-actions">
-      <button type="submit" class="btn-primary" [disabled]="form.invalid || loading">
-        {{ loading ? 'Envoi...' : (isEdit ? 'Mettre à jour' : 'Publier') }}
-      </button>
-      <a routerLink="/marketplace" class="btn-secondary">Annuler</a>
-    </div>
-  </form>
+  </div>
 </div>

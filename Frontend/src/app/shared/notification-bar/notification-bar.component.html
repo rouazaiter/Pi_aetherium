@@ -1,0 +1,23 @@
+<section class="notification-bar">
+  <div class="notification-bar__header">
+    <div>
+      <h4>Notifications</h4>
+      <small *ngIf="currentUser$ | async as user">Session active: {{ user.username }} (ID {{ user.id }})</small>
+    </div>
+    <div class="notification-bar__actions">
+      <span class="notification-badge">{{ (unreadCount$ | async) ?? 0 }}</span>
+      <button type="button" (click)="clear()">Vider</button>
+    </div>
+  </div>
+
+  <div class="notification-list" *ngIf="notifications$ | async as notifications">
+    <p class="notification-empty" *ngIf="notifications.length === 0">
+      Aucune notification pour le moment.
+    </p>
+
+    <article class="notification-item" *ngFor="let notification of notifications">
+      <p>{{ notification.message }}</p>
+      <small>{{ notification.type }} • {{ notification.createdAt | date:'short' }}</small>
+    </article>
+  </div>
+</section>

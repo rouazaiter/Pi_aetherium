@@ -1,0 +1,251 @@
+.apply-page-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f4ff 0%, #fafafa 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.apply-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 720px;
+  padding: 2.5rem;
+}
+
+/* Retour */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #4e73df;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #224abe;
+}
+
+/* En-tête demande */
+.request-header {
+  margin-bottom: 1.5rem;
+}
+
+.request-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0.75rem;
+}
+
+.request-description {
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.request-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.meta-item i {
+  color: #4e73df;
+}
+
+.meta-item a {
+  color: #4e73df;
+  text-decoration: none;
+}
+
+.meta-item a:hover {
+  text-decoration: underline;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.status-open {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-closed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-in_progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Divider */
+.divider {
+  border: none;
+  border-top: 1.5px solid #f3f4f6;
+  margin: 1.5rem 0;
+}
+
+/* Info banners */
+.info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.info-applied {
+  background: #f0fff4;
+  color: #276749;
+  border: 1px solid #c6f6d5;
+}
+
+.info-closed {
+  background: #fff5f5;
+  color: #c53030;
+  border: 1px solid #fed7d7;
+}
+
+.info-banner i {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Section formulaire */
+.apply-form-section {
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1.5px solid #e5e7eb;
+}
+
+.apply-form-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.apply-form-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #4e73df, #224abe);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.apply-form-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0.2rem;
+}
+
+.apply-form-subtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 0;
+}
+
+/* Form controls */
+.form-label {
+  font-size: 0.9rem;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+
+.form-control {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  border-color: #4e73df;
+  box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.15);
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* Alerts */
+.alert {
+  border-radius: 10px;
+  font-size: 0.9rem;
+  border: none;
+}
+
+.alert-danger {
+  background: #fff5f5;
+  color: #c53030;
+}
+
+.alert-success {
+  background: #f0fff4;
+  color: #276749;
+}
+
+/* Bouton candidature */
+.btn-apply {
+  background: linear-gradient(135deg, #4e73df, #224abe);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.85rem;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-apply:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.btn-apply:disabled {
+  opacity: 0.6;
+}

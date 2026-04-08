@@ -1,0 +1,28 @@
+Avatars visage (images comme sur Google / banques d’images)
+============================================================
+
+1) Trouver des images LIBRES DE DROITS
+   - Ex. : unDraw (undraw.co), Open Peeps, Humaaans, ou banques avec filtre « free for commercial use ».
+   - Lire la licence : attribution, interdiction de revente, etc.
+
+2) Préparer 8 fichiers PNG ou WebP
+   - Noms EXACTS : 1.png, 2.png, … 8.png (tous obligatoires ; un numéro manquant = image cassée ou doublon provisoire).
+   - Taille conseillée : 256×256 px ou 512×512 px, carré, fond si possible uniforme.
+
+3) Les copier ici
+   education-ui/src/assets/avatars/1.png … 8.png
+
+4) Activer dans le code (UNIQUEMENT après avoir ajouté les 8 PNG)
+   Ouvrir : src/app/core/data/preset-avatars.ts
+   Mettre : USE_CUSTOM_PRESET_FACE_IMAGES = true
+   Si vous mettez true sans les fichiers, la grille affiche des images cassées (404).
+
+5) Rebuild / relancer
+   ng serve   ou   ng build
+   Recharger la page (Ctrl+F5).
+
+Le profil en base reste skillhub-preset:1 … :8 ; seule l’image affichée change.
+
+Alternative sans fichiers : URLs externes
+   Tu peux aussi coller une URL https dans le champ « URL d’image » du profil
+   (si l’image autorise l’affichage depuis ton site).

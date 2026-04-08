@@ -2,12 +2,12 @@
 
   <div class="apply-card">
 
-    <!-- Retour -->
+    <!-- Back -->
     <a routerLink="/marketplace" class="back-link">
-      <i class="fa fa-arrow-left me-1"></i> Retour au marketplace
+      <i class="fa fa-arrow-left me-1"></i> Back to marketplace
     </a>
 
-    <!-- En-tête de la demande -->
+    <!-- Request header -->
     <div class="request-header">
       <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
         <h2 class="request-title">{{ serviceRequest.name }}</h2>
@@ -27,44 +27,44 @@
         </span>
         <span class="meta-item" *ngIf="serviceRequest.expiringDate">
           <i class="fa fa-clock"></i>
-          Expire le {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}
+          Expires on {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}
         </span>
         <span class="meta-item" *ngIf="serviceRequest.files">
           <i class="fa fa-paperclip"></i>
-          <a [href]="serviceRequest.files" target="_blank">Fichier joint</a>
+          <a [href]="serviceRequest.files" target="_blank">Attached file</a>
         </span>
       </div>
     </div>
 
     <hr class="divider" />
 
-    <!-- Déjà postulé -->
+    <!-- Already applied -->
     <div *ngIf="alreadyApplied" class="info-banner info-applied">
       <i class="fa fa-check-circle fa-lg"></i>
       <div>
-        <strong>Candidature envoyée</strong>
-        <p class="mb-0">Vous avez déjà postulé à cette demande. Nous vous contacterons prochainement.</p>
+        <strong>Application submitted</strong>
+        <p class="mb-0">You already applied to this request. We will contact you soon.</p>
       </div>
     </div>
 
-    <!-- Demande fermée -->
+    <!-- Request closed -->
     <div *ngIf="serviceRequest.status !== 'OPEN'" class="info-banner info-closed">
       <i class="fa fa-lock fa-lg"></i>
       <div>
-        <strong>Demande fermée</strong>
-        <p class="mb-0">Cette demande n'accepte plus de candidatures ({{ serviceRequest.status }}).</p>
+        <strong>Request closed</strong>
+        <p class="mb-0">This request is no longer accepting applications ({{ serviceRequest.status }}).</p>
       </div>
     </div>
 
-    <!-- Formulaire de candidature -->
+    <!-- Application form -->
     <div class="apply-form-section" *ngIf="!alreadyApplied && serviceRequest.status === 'OPEN'">
       <div class="apply-form-header">
         <div class="apply-form-icon">
           <i class="fa fa-paper-plane"></i>
         </div>
         <div>
-          <h3 class="apply-form-title">Votre candidature</h3>
-          <p class="apply-form-subtitle">Présentez-vous et expliquez pourquoi vous êtes le bon candidat.</p>
+          <h3 class="apply-form-title">Your application</h3>
+          <p class="apply-form-subtitle">Introduce yourself and explain why you are the right candidate.</p>
         </div>
       </div>
 
@@ -73,7 +73,7 @@
         <div class="mb-4">
           <label for="message" class="form-label fw-semibold">
             <i class="fa fa-comment-alt me-1 text-primary"></i>
-            Message de motivation <span class="text-danger">*</span>
+            Cover message <span class="text-danger">*</span>
           </label>
           <textarea
             id="message"
@@ -81,10 +81,10 @@
             [class.is-invalid]="form.get('message')?.invalid && form.get('message')?.touched"
             formControlName="message"
             rows="6"
-            placeholder="Expliquez votre expérience, vos compétences et pourquoi vous êtes le bon candidat pour cette mission..."
+            placeholder="Explain your experience, your skills, and why you are the best candidate for this mission..."
           ></textarea>
-          <div class="invalid-feedback">Le message de motivation est requis.</div>
-          <div class="form-text text-muted">{{ form.get('message')?.value?.length || 0 }} / 2000 caractères</div>
+          <div class="invalid-feedback">Cover message is required.</div>
+          <div class="form-text text-muted">{{ form.get('message')?.value?.length || 0 }} / 2000 characters</div>
         </div>
 
         <!-- Alertes -->
@@ -98,7 +98,7 @@
         <button type="submit" class="btn btn-apply btn-lg w-100" [disabled]="form.invalid || loading">
           <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
           <i *ngIf="!loading" class="fa fa-paper-plane me-2"></i>
-          {{ loading ? 'Envoi en cours...' : 'Envoyer ma candidature' }}
+          {{ loading ? 'Submitting...' : 'Submit my application' }}
         </button>
 
       </form>

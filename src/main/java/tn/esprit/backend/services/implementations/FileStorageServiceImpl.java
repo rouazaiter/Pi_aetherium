@@ -41,14 +41,14 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public String store(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Fichier vide");
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Empty file");
         }
 
         String originalName = file.getOriginalFilename();
         String ext = extractExtension(originalName);
         if (!ALLOWED_EXTENSIONS.contains(ext)) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
-                    "Extension non autorisée: " + ext);
+                    "Unauthorized extension: " + ext);
         }
 
         // Vérification légère côté serveur: le content-type peut être spoofé,
@@ -56,7 +56,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         String contentType = file.getContentType();
         if (contentType != null && !ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
-                    "Content-Type non autorisé: " + contentType);
+                    "Unauthorized content type: " + contentType);
         }
 
         String storedFileName = UUID.randomUUID() + "." + ext;
@@ -67,7 +67,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             file.transferTo(target);
         } catch (IOException e) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Erreur lors du stockage du fichier", e);
+                    "Error while storing file", e);
         }
 
         return storedFileName;
@@ -76,18 +76,18 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public Resource load(String storedFileName) {
         if (!StringUtils.hasText(storedFileName)) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Nom de fichier manquant");
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "Missing file name");
         }
 
         String ext = extractExtension(storedFileName);
         if (!ALLOWED_EXTENSIONS.contains(ext)) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
-                    "Extension non autorisée: " + ext);
+                    "Unauthorized extension: " + ext);
         }
 
         Path target = getUploadDir().resolve(storedFileName).normalize();
         if (!Files.exists(target) || !Files.isRegularFile(target)) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Fichier introuvable");
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "File not found");
         }
 
         return new FileSystemResource(target.toFile());

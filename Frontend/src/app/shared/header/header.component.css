@@ -25,6 +25,12 @@
   color: #1c2a3b;
 }
 
+.nav-notification-slot {
+  display: flex;
+  align-items: center;
+  padding: 0 0.35rem;
+}
+
 @media (max-width: 1024px) {
   .session-switch {
     color: #1e3551;
@@ -35,5 +41,9 @@
     color: #1e3551;
     border-color: #cfd9e4;
     background: #fff;
+  }
+
+  .nav-notification-slot {
+    padding: 0.3rem 0;
   }
 }

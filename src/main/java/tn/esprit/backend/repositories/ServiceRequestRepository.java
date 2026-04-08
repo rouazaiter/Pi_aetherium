@@ -15,6 +15,7 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
     List<ServiceRequest> findByCreator(User creator);
     List<ServiceRequest> findByStatus(ServiceRequestStatus status);
     List<ServiceRequest> findByStatusAndExpiringDateAfter(ServiceRequestStatus status, LocalDateTime now);
+    List<ServiceRequest> findByCreatedAtGreaterThanEqual(LocalDateTime createdAt);
 
     @Query("SELECT sr FROM ServiceRequest sr WHERE sr.status <> tn.esprit.backend.entities.ServiceRequestStatus.EXPIRED AND sr.expiringDate IS NOT NULL AND sr.expiringDate < :now")
     List<ServiceRequest> findExpiredRequests(LocalDateTime now);

@@ -39,17 +39,17 @@ export class ApplyFormComponent implements OnInit {
       message: ['', [Validators.required, Validators.maxLength(2000)]]
     });
 
-    // charger la demande
+    // Load the request
     this.srService.getById(id).subscribe({
       next: (sr) => {
-        // si c'est MA demande → pas le droit de postuler
+        // If this is my own request, do not allow applying
         if (sr.creator.id === this.currentUserId) {
           this.router.navigate(['/marketplace']);
           return;
         }
         this.serviceRequest = sr;
 
-        // vérifier si déjà postulé
+        // Check whether user already applied
         this.appService.hasApplied(id, this.currentUserId).subscribe({
           next: (res) => this.alreadyApplied = res.hasApplied
         });
@@ -65,12 +65,12 @@ export class ApplyFormComponent implements OnInit {
 
     this.appService.apply(this.currentUserId, this.serviceRequest.id, this.form.value.message).subscribe({
       next: () => {
-        this.success = 'Candidature envoyée avec succès.';
+        this.success = 'Application submitted successfully.';
         this.alreadyApplied = true;
         this.loading = false;
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Erreur lors de la candidature.';
+        this.error = err?.error?.message || 'An error occurred while submitting your application.';
         this.loading = false;
       }
     });

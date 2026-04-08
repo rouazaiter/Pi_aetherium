@@ -5,17 +5,17 @@
       <div class="form-icon-wrapper">
         <i class="fa {{ isEdit ? 'fa-edit' : 'fa-paper-plane' }}"></i>
       </div>
-      <h2 class="form-title">{{ isEdit ? 'Modifier la demande' : 'Publier une demande de service' }}</h2>
-      <p class="form-subtitle">{{ isEdit ? 'Mettez à jour les informations de votre demande.' : 'Décrivez votre besoin et trouvez le bon prestataire.' }}</p>
+      <h2 class="form-title">{{ isEdit ? 'Edit request' : 'Publish a service request' }}</h2>
+      <p class="form-subtitle">{{ isEdit ? 'Update your request information.' : 'Describe your need and find the right provider.' }}</p>
     </div>
 
     <div class="form-card-body">
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
-        <!-- Titre -->
+        <!-- Title -->
         <div class="mb-4">
           <label for="name" class="form-label fw-semibold">
-            <i class="fa fa-tag me-1 text-primary"></i> Titre <span class="text-danger">*</span>
+            <i class="fa fa-tag me-1 text-primary"></i> Title <span class="text-danger">*</span>
           </label>
           <input
             id="name"
@@ -23,9 +23,9 @@
             class="form-control form-control-lg"
             [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
             formControlName="name"
-            placeholder="Ex: Développement d'une application web..."
+            placeholder="Ex: Web application development..."
           />
-          <div class="invalid-feedback">Le titre est requis (100 caractères max).</div>
+          <div class="invalid-feedback">Title is required (max 100 characters).</div>
         </div>
 
         <!-- Description -->
@@ -38,15 +38,15 @@
             class="form-control"
             formControlName="description"
             rows="5"
-            placeholder="Décrivez votre besoin en détail : contexte, objectifs, contraintes..."
+            placeholder="Describe your need in detail: context, goals, constraints..."
           ></textarea>
-          <div class="form-text text-muted">{{ form.get('description')?.value?.length || 0 }} / 2000 caractères</div>
+          <div class="form-text text-muted">{{ form.get('description')?.value?.length || 0 }} / 2000 characters</div>
         </div>
 
-        <!-- Date d'expiration -->
+        <!-- Expiration date -->
         <div class="mb-4">
           <label for="expiringDate" class="form-label fw-semibold">
-            <i class="fa fa-calendar me-1 text-primary"></i> Date d'expiration
+            <i class="fa fa-calendar me-1 text-primary"></i> Expiration date
           </label>
           <input
             id="expiringDate"
@@ -54,13 +54,13 @@
             class="form-control"
             formControlName="expiringDate"
           />
-          <div class="form-text text-muted">Laissez vide si la demande n'a pas de date limite.</div>
+          <div class="form-text text-muted">Leave empty if the request has no deadline.</div>
         </div>
 
-        <!-- Fichier joint -->
+        <!-- Attached file -->
         <div class="mb-4">
           <label for="file" class="form-label fw-semibold">
-            <i class="fa fa-paperclip me-1 text-primary"></i> Fichier joint
+            <i class="fa fa-paperclip me-1 text-primary"></i> Attached file
           </label>
           <div class="file-upload-area" (click)="fileInput.click()">
             <input
@@ -73,7 +73,7 @@
             />
             <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
             <p class="mb-0 text-muted">
-              {{ selectedFile ? selectedFile.name : 'Cliquez pour choisir un fichier' }}
+              {{ selectedFile ? selectedFile.name : 'Click to choose a file' }}
             </p>
             <small class="text-muted">PDF, PNG, JPG, DOC, DOCX</small>
           </div>
@@ -92,10 +92,10 @@
           <button type="submit" class="btn btn-primary btn-lg px-5" [disabled]="form.invalid || loading">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
             <i *ngIf="!loading" class="fa {{ isEdit ? 'fa-save' : 'fa-paper-plane' }} me-2"></i>
-            {{ loading ? 'Envoi en cours...' : (isEdit ? 'Mettre à jour' : 'Publier la demande') }}
+            {{ loading ? 'Submitting...' : (isEdit ? 'Update request' : 'Publish request') }}
           </button>
           <a routerLink="/marketplace" class="btn btn-outline-secondary btn-lg px-4">
-            <i class="fa fa-times me-1"></i> Annuler
+            <i class="fa fa-times me-1"></i> Cancel
           </a>
         </div>
 

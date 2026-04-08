@@ -4,22 +4,26 @@ import { ServiceRequestListComponent } from './service-request-list/service-requ
 import { ServiceRequestFormComponent } from './service-request-form/service-request-form.component';
 import { ServiceRequestDetailComponent } from './service-request-detail/service-request-detail.component';
 import { ApplyFormComponent } from './apply-form/apply-form.component';
+import { LeaderboardComponent } from './leaderboard/leaderboard.component';
 
 const routes: Routes = [
-  // liste principale (tout le monde)
+  // Main list (everyone)
   { path: '', component: ServiceRequestListComponent },
 
-  // créer une nouvelle demande
+  // Create a new request
   { path: 'new', component: ServiceRequestFormComponent },
 
-  // modifier MA demande
+  // Edit MY request
   { path: 'edit/:id', component: ServiceRequestFormComponent },
 
-  // détails de MA demande + candidatures reçues (créateur uniquement)
+  // Details of MY request + received applications (creator only)
   { path: 'my/:id', component: ServiceRequestDetailComponent },
 
-  // détails d'une demande + formulaire candidature (candidat uniquement)
-  { path: 'apply/:id', component: ApplyFormComponent }
+  // Request details + application form (candidate only)
+  { path: 'apply/:id', component: ApplyFormComponent },
+
+  // Advanced leaderboard
+  { path: 'leaderboard', component: LeaderboardComponent }
 ];
 
 @NgModule({

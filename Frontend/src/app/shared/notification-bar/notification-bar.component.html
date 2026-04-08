@@ -1,23 +1,29 @@
-<section class="notification-bar">
-  <div class="notification-bar__header">
-    <div>
-      <h4>Notifications</h4>
-      <small *ngIf="currentUser$ | async as user">Session active: {{ user.username }} (ID {{ user.id }})</small>
+<div class="nav-notifications" *ngIf="currentUser$ | async as user">
+  <button type="button" class="nav-notification-toggle" (click)="toggle($event)" [attr.aria-expanded]="isOpen">
+    <i class="fa fa-bell"></i>
+    <span class="notification-dot" *ngIf="((unreadCount$ | async) ?? 0) > 0"></span>
+    <span class="notification-count">{{ (unreadCount$ | async) ?? 0 }}</span>
+  </button>
+
+  <div class="nav-notification-dropdown" *ngIf="isOpen">
+    <div class="nav-notification-header">
+      <div>
+        <h4>Notifications</h4>
+        <small>Active session: {{ user.username }}</small>
+      </div>
+      <button type="button" class="clear-button" (click)="clear()">Clear all</button>
     </div>
-    <div class="notification-bar__actions">
-      <span class="notification-badge">{{ (unreadCount$ | async) ?? 0 }}</span>
-      <button type="button" (click)="clear()">Vider</button>
+
+    <div class="notification-list" *ngIf="notifications$ | async as notifications">
+      <p class="notification-empty" *ngIf="notifications.length === 0">
+        No notifications yet.
+      </p>
+
+      <article class="notification-item" *ngFor="let notification of notifications">
+        <span class="arrival-pill">New</span>
+        <p>{{ notification.message }}</p>
+        <small>{{ notification.type }} • {{ notification.createdAt | date:'short' }}</small>
+      </article>
     </div>
   </div>
-
-  <div class="notification-list" *ngIf="notifications$ | async as notifications">
-    <p class="notification-empty" *ngIf="notifications.length === 0">
-      Aucune notification pour le moment.
-    </p>
-
-    <article class="notification-item" *ngFor="let notification of notifications">
-      <p>{{ notification.message }}</p>
-      <small>{{ notification.type }} • {{ notification.createdAt | date:'short' }}</small>
-    </article>
-  </div>
-</section>
+</div>

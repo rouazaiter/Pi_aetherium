@@ -9,6 +9,7 @@ import tn.esprit.backend.entities.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
@@ -16,4 +17,5 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     List<Application> findByApplicant(User applicant);
     List<Application> findByServiceRequest(ServiceRequest serviceRequest);
     List<Application> findByServiceRequestAndStatus(ServiceRequest serviceRequest, ApplicationStatus status);
+    List<Application> findByAppliedAtGreaterThanEqual(LocalDateTime appliedAt);
 }

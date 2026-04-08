@@ -1,0 +1,93 @@
+<section class="section courses" id="leaderboard">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-lg-8">
+        <div class="section-heading">
+          <h6>Competition</h6>
+          <h2>Advanced Leaderboard</h2>
+        </div>
+      </div>
+      <div class="col-lg-4 text-end align-self-center">
+        <a routerLink="/marketplace" class="main-button">Back to Marketplace</a>
+      </div>
+    </div>
+
+    <div class="leaderboard-controls mb-4">
+      <label>
+        Type
+        <select [value]="leaderboardType" (change)="onTypeChange($any($event.target).value)">
+          <option value="APPLICANTS">Applicants</option>
+          <option value="CREATORS">Creators</option>
+        </select>
+      </label>
+
+      <label>
+        Period
+        <select [value]="days" (change)="onDaysChange($any($event.target).value)">
+          <option [value]="7">Last 7 days</option>
+          <option [value]="30">Last 30 days</option>
+          <option [value]="90">Last 90 days</option>
+          <option [value]="365">Last 365 days</option>
+        </select>
+      </label>
+
+      <label>
+        Top
+        <select [value]="limit" (change)="onLimitChange($any($event.target).value)">
+          <option [value]="10">Top 10</option>
+          <option [value]="20">Top 20</option>
+          <option [value]="50">Top 50</option>
+        </select>
+      </label>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+    <div class="table-responsive" *ngIf="!loading && entries.length > 0">
+      <table class="table leaderboard-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>User</th>
+          <th>Score</th>
+          <th>Success</th>
+          <th>Total</th>
+          <th>Pending</th>
+          <th>Failed</th>
+          <th>Badge</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let entry of entries" [class.top-three]="entry.rank <= 3">
+          <td>{{ entry.rank }}</td>
+          <td>
+            <strong>{{ entry.username }}</strong>
+            <div class="small text-muted">{{ entry.email }}</div>
+          </td>
+          <td>{{ entry.score }}</td>
+          <td>
+            {{ entry.successCount }}
+            <span class="small text-muted">({{ entry.successRate }}%)</span>
+          </td>
+          <td>{{ entry.totalCount }}</td>
+          <td>{{ entry.pendingCount }}</td>
+          <td>{{ entry.failedCount }}</td>
+          <td><span class="badge-chip">{{ entry.badge }}</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!loading && entries.length === 0" class="alert alert-info">
+      No data available for this period.
+    </div>
+
+    <div class="generated-at" *ngIf="generatedAt">
+      Updated at: {{ generatedAt | date:'dd/MM/yyyy HH:mm' }}
+    </div>
+  </div>
+</section>

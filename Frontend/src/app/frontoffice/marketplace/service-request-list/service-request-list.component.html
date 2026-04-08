@@ -29,14 +29,8 @@
         <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
              *ngFor="let req of myRequests">
           <div class="events_item">
-            <div class="thumb">
-              <a [routerLink]="['my', req.id]">
-                <img src="scholar-1.0.0/assets/images/course-01.jpg" alt="{{ req.name }}">
-              </a>
-              <span class="category">{{ req.status }}</span>
-              <span class="price">
-                <h6><em>#</em>{{ req.id }}</h6>
-              </span>
+            <div class="thumb request-visual">
+              <span class="category mb-2">{{ req.status }}</span>
             </div>
             <div class="down-content">
               <span class="author">{{ req.creator.username }}</span>
@@ -70,11 +64,8 @@
         <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
              *ngFor="let req of filteredRequests">
           <div class="events_item">
-            <div class="thumb">
-              <a [routerLink]="['apply', req.id]">
-                <img src="scholar-1.0.0/assets/images/course-02.jpg" alt="{{ req.name }}">
-              </a>
-              <span class="category">{{ req.status }}</span>
+            <div class="thumb request-visual">
+              <span class="category mb-2">{{ req.status }}</span>
             </div>
             <div class="down-content">
               <span class="author">{{ req.creator.username }}</span>

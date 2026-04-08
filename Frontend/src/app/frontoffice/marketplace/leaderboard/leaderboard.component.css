@@ -1,0 +1,60 @@
+.leaderboard-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.leaderboard-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: #22354d;
+}
+
+.leaderboard-controls select {
+  min-width: 170px;
+  border: 1px solid #dbe4ee;
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  background: #fff;
+}
+
+.leaderboard-table {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.leaderboard-table thead th {
+  background: #f4f7fb;
+  color: #1f3551;
+  font-weight: 700;
+}
+
+.leaderboard-table tr.top-three {
+  background: #fff5e9;
+}
+
+.badge-chip {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  background: #f35525;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.generated-at {
+  font-size: 0.85rem;
+  color: #6b7e94;
+}
+
+@media (max-width: 768px) {
+  .leaderboard-controls label,
+  .leaderboard-controls select {
+    width: 100%;
+  }
+}

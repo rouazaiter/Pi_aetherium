@@ -1,6 +1,6 @@
 <div class="detail-container" *ngIf="serviceRequest">
 
-  <a routerLink="/marketplace" class="back-link">← Retour</a>
+  <a routerLink="/marketplace" class="back-link">← Back</a>
 
   <div class="detail-header">
     <h2>{{ serviceRequest.name }}</h2>
@@ -12,24 +12,24 @@
   <p class="description">{{ serviceRequest.description }}</p>
 
   <div class="meta">
-    <span>Créée le {{ serviceRequest.createdAt | date:'dd/MM/yyyy' }}</span>
+    <span>Created on {{ serviceRequest.createdAt | date:'dd/MM/yyyy' }}</span>
     <span *ngIf="serviceRequest.expiringDate">
-      · Expire le {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}
+      · Expires on {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}
     </span>
     <span *ngIf="serviceRequest.files">
-      · <a [href]="serviceRequest.files" target="_blank">Voir le fichier joint</a>
+      · <a [href]="serviceRequest.files" target="_blank">View attached file</a>
     </span>
   </div>
 
   <hr />
 
-  <h3>Candidatures reçues ({{ applications.length }})</h3>
+  <h3>Received applications ({{ applications.length }})</h3>
 
-  <div *ngIf="loading">Chargement...</div>
+  <div *ngIf="loading">Loading...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
 
   <div *ngIf="applications.length === 0 && !loading" class="empty">
-    Aucune candidature pour le moment.
+    No applications yet.
   </div>
 
   <div class="application-card" *ngFor="let app of applications">
@@ -40,11 +40,11 @@
     </div>
     <p class="app-message">{{ app.message }}</p>
 
-    <!-- actions seulement si la demande est encore OPEN et candidature PENDING -->
+    <!-- Actions only if request is OPEN and application is PENDING -->
     <div class="app-actions"
          *ngIf="serviceRequest.status === 'OPEN' && app.status === 'PENDING'">
-      <button class="btn-accept" (click)="updateStatus(app.id, 'ACCEPTED')">Accepter</button>
-      <button class="btn-reject" (click)="updateStatus(app.id, 'REJECTED')">Rejeter</button>
+      <button class="btn-accept" (click)="updateStatus(app.id, 'ACCEPTED')">Accept</button>
+      <button class="btn-reject" (click)="updateStatus(app.id, 'REJECTED')">Reject</button>
     </div>
   </div>
 

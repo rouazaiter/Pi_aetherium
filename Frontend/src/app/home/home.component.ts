@@ -9,7 +9,7 @@ declare var $: any;
 export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
-    // Attendre que le DOM Angular soit prêt
+    // Wait until Angular has rendered the DOM
     setTimeout(() => this.initPlugins(), 300);
   }
 

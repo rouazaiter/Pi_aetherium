@@ -80,12 +80,12 @@ export class ServiceRequestFormComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
-        this.success = this.isEdit ? 'Demande mise à jour.' : 'Demande publiée avec succès.';
+        this.success = this.isEdit ? 'Request updated.' : 'Request published successfully.';
         this.loading = false;
         setTimeout(() => this.router.navigate(['/marketplace']), 1500);
       },
       error: (err) => {
-        this.error = err?.error?.message || 'Une erreur est survenue.';
+        this.error = err?.error?.message || 'An error occurred.';
         this.loading = false;
       }
     });

@@ -61,7 +61,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 creatorId,
                 new NotificationDto(
                         "NEW_APPLICATION",
-                        "Nouvelle candidature sur ta demande " + serviceRequest.getName(),
+                "New application on your request " + serviceRequest.getName(),
                         serviceRequest.getId(),
                         saved.getId(),
                         LocalDateTime.now()

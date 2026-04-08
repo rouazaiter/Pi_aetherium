@@ -34,7 +34,7 @@ export class ServiceRequestDetailComponent implements OnInit {
 
     this.srService.getById(id).subscribe({
       next: (sr) => {
-        // si ce n'est pas MA demande → rediriger
+        // If this is not my request, redirect
         if (sr.creator.id !== this.currentUserId) {
           this.router.navigate(['/marketplace']);
           return;
@@ -43,7 +43,7 @@ export class ServiceRequestDetailComponent implements OnInit {
         this.loadApplications(id);
       },
       error: () => {
-        this.error = 'Demande introuvable.';
+        this.error = 'Request not found.';
         this.loading = false;
       }
     });
@@ -56,7 +56,7 @@ export class ServiceRequestDetailComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.error = 'Erreur lors du chargement des candidatures.';
+        this.error = 'Error loading applications.';
         this.loading = false;
       }
     });
@@ -67,12 +67,12 @@ export class ServiceRequestDetailComponent implements OnInit {
       next: () => {
         const app = this.applications.find(a => a.id === appId);
         if (app) app.status = status;
-        // si accepté → recharger la demande (son statut passe à CLOSED)
+        // If accepted, reload the request (its status becomes CLOSED)
         if (status === 'ACCEPTED') {
           this.srService.getById(this.serviceRequest!.id).subscribe(sr => this.serviceRequest = sr);
         }
       },
-      error: (err) => this.error = err?.error?.message || 'Erreur.'
+      error: (err) => this.error = err?.error?.message || 'Error.'
     });
   }
 }

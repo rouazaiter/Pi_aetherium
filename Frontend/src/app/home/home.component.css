@@ -1,0 +1,72 @@
+:host ::ng-deep .main-banner .item .header-text {
+  padding: 42px 36px;
+  max-width: 640px;
+}
+
+:host ::ng-deep .main-banner .item .header-text .category {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+:host ::ng-deep .main-banner .item .header-text h2 {
+  font-size: 36px;
+  line-height: 1.15;
+  margin-top: 14px;
+}
+
+:host ::ng-deep .main-banner .item .header-text p {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 14px 0;
+}
+
+:host ::ng-deep .main-banner .buttons .main-button a,
+:host ::ng-deep .main-banner .buttons .icon-button a {
+  font-size: 13px;
+  padding: 10px 16px;
+}
+
+:host ::ng-deep .services .service-item {
+  padding: 20px;
+}
+
+:host ::ng-deep .services .service-item .main-content h4 {
+  font-size: 20px;
+}
+
+:host ::ng-deep .services .service-item .main-content p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+:host ::ng-deep .about-us .section-heading h2,
+:host ::ng-deep .contact-us .section-heading h2 {
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+:host ::ng-deep .about-us .section-heading p,
+:host ::ng-deep .contact-us .section-heading p,
+:host ::ng-deep .accordion-body {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+:host ::ng-deep .fun-facts .counter h2 {
+  font-size: 38px;
+}
+
+:host ::ng-deep .fun-facts .counter p {
+  font-size: 14px;
+}
+
+@media (max-width: 992px) {
+  :host ::ng-deep .main-banner .item .header-text h2 {
+    font-size: 28px;
+  }
+
+  :host ::ng-deep .about-us .section-heading h2,
+  :host ::ng-deep .contact-us .section-heading h2 {
+    font-size: 24px;
+  }
+}

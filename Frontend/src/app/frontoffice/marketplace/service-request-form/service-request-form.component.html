@@ -1,85 +1,112 @@
 <div class="form-page-wrapper">
   <div class="form-card">
-
-    <div class="form-card-header">
-      <div class="form-icon-wrapper">
-        <i class="fa {{ isEdit ? 'fa-edit' : 'fa-paper-plane' }}"></i>
-      </div>
-      <h2 class="form-title">{{ isEdit ? 'Edit request' : 'Publish a service request' }}</h2>
-      <p class="form-subtitle">{{ isEdit ? 'Update your request information.' : 'Describe your need and find the right provider.' }}</p>
+    <div class="form-card-header compact">
+      <h2 class="form-title">{{ isEdit ? 'Edit Request' : 'Publish Request' }}</h2>
+      <p class="form-subtitle">All fields are required.</p>
     </div>
 
-    <div class="form-card-body">
+    <div class="form-card-body compact">
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-
-        <!-- Title -->
-        <div class="mb-4">
-          <label for="name" class="form-label fw-semibold">
-            <i class="fa fa-tag me-1 text-primary"></i> Title <span class="text-danger">*</span>
-          </label>
-          <input
-            id="name"
-            type="text"
-            class="form-control form-control-lg"
-            [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
-            formControlName="name"
-            placeholder="Ex: Web application development..."
-          />
-          <div class="invalid-feedback">Title is required (max 100 characters).</div>
-        </div>
-
-        <!-- Description -->
-        <div class="mb-4">
-          <label for="description" class="form-label fw-semibold">
-            <i class="fa fa-align-left me-1 text-primary"></i> Description
-          </label>
-          <textarea
-            id="description"
-            class="form-control"
-            formControlName="description"
-            rows="5"
-            placeholder="Describe your need in detail: context, goals, constraints..."
-          ></textarea>
-          <div class="form-text text-muted">{{ form.get('description')?.value?.length || 0 }} / 2000 characters</div>
-        </div>
-
-        <!-- Expiration date -->
-        <div class="mb-4">
-          <label for="expiringDate" class="form-label fw-semibold">
-            <i class="fa fa-calendar me-1 text-primary"></i> Expiration date
-          </label>
-          <input
-            id="expiringDate"
-            type="datetime-local"
-            class="form-control"
-            formControlName="expiringDate"
-          />
-          <div class="form-text text-muted">Leave empty if the request has no deadline.</div>
-        </div>
-
-        <!-- Attached file -->
-        <div class="mb-4">
-          <label for="file" class="form-label fw-semibold">
-            <i class="fa fa-paperclip me-1 text-primary"></i> Attached file
-          </label>
-          <div class="file-upload-area" (click)="fileInput.click()">
+        <div class="compact-grid">
+          <div class="field-block">
+            <label for="name" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
             <input
-              #fileInput
-              id="file"
-              type="file"
-              class="d-none"
-              (change)="onFileChange($event)"
-              accept=".pdf,.png,.jpg,.doc,.docx"
+              id="name"
+              type="text"
+              class="form-control"
+              [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+              formControlName="name"
+              placeholder="Ex: Web application development"
             />
-            <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-            <p class="mb-0 text-muted">
-              {{ selectedFile ? selectedFile.name : 'Click to choose a file' }}
-            </p>
-            <small class="text-muted">PDF, PNG, JPG, DOC, DOCX</small>
+            <div class="invalid-feedback">Title is required.</div>
+          </div>
+
+          <div class="field-block">
+            <label for="expiringDate" class="form-label fw-semibold">Expiration Date <span class="text-danger">*</span></label>
+            <input
+              id="expiringDate"
+              type="datetime-local"
+              class="form-control"
+              [class.is-invalid]="form.get('expiringDate')?.invalid && form.get('expiringDate')?.touched"
+              formControlName="expiringDate"
+            />
+            <div class="invalid-feedback">Expiration date is required.</div>
+          </div>
+
+          <div class="field-block full-width">
+            <label for="description" class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+            <textarea
+              id="description"
+              class="form-control"
+              [class.is-invalid]="form.get('description')?.invalid && form.get('description')?.touched"
+              formControlName="description"
+              rows="3"
+              placeholder="Describe the request in detail"
+            ></textarea>
+            <div class="invalid-feedback">Description is required.</div>
+          </div>
+
+          <div class="field-block">
+            <label for="file" class="form-label fw-semibold">Attached File <span class="text-danger">*</span></label>
+            <div class="file-upload-area compact" (click)="fileInput.click()">
+              <input
+                #fileInput
+                id="file"
+                type="file"
+                class="d-none"
+                (change)="onFileChange($event)"
+                accept=".pdf,.png,.jpg,.doc,.docx"
+              />
+              <p class="mb-0 text-muted file-name">
+                {{ selectedFile ? selectedFile.name : (existingFileUrl ? 'Existing file attached' : 'Choose a file') }}
+              </p>
+            </div>
+          </div>
+
+          <div class="field-block">
+            <label for="calendlyLink" class="form-label fw-semibold">Calendly Link <span class="text-danger">*</span></label>
+            <input
+              id="calendlyLink"
+              type="url"
+              class="form-control"
+              [class.is-invalid]="form.get('calendlyLink')?.invalid && form.get('calendlyLink')?.touched"
+              formControlName="calendlyLink"
+              placeholder="https://calendly.com/username/meeting"
+            />
+            <div class="invalid-feedback">Valid Calendly URL is required.</div>
+          </div>
+
+          <div class="field-block full-width">
+            <label for="slotInput" class="form-label fw-semibold">Available Meeting Slots <span class="text-danger">*</span></label>
+            <div class="slot-picker-row">
+              <input
+                id="slotInput"
+                type="datetime-local"
+                class="form-control"
+                [value]="slotInput"
+                (change)="onSlotInputChange($event)"
+                (keydown)="$event.preventDefault()"
+                (paste)="$event.preventDefault()"
+                (drop)="$event.preventDefault()"
+              />
+              <button type="button" class="btn btn-outline-secondary" (click)="addSlotFromCalendar()">Add</button>
+            </div>
+
+            <div class="slot-list" *ngIf="selectedSlots.length > 0; else emptySlots">
+              <div class="slot-item" *ngFor="let slot of selectedSlots">
+                <span>{{ slot }}</span>
+                <button type="button" class="slot-remove" (click)="removeSlot(slot)">
+                  <i class="fa fa-times"></i>
+                </button>
+              </div>
+            </div>
+
+            <ng-template #emptySlots>
+              <div class="form-text text-danger">At least one slot is required.</div>
+            </ng-template>
           </div>
         </div>
 
-        <!-- Alertes -->
         <div *ngIf="error" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
           <i class="fa fa-exclamation-circle"></i> {{ error }}
         </div>
@@ -87,18 +114,16 @@
           <i class="fa fa-check-circle"></i> {{ success }}
         </div>
 
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary btn-lg px-5" [disabled]="form.invalid || loading">
+        <div class="form-actions compact">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="form.invalid || loading || (!selectedFile && !existingFileUrl) || selectedSlots.length === 0">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-            <i *ngIf="!loading" class="fa {{ isEdit ? 'fa-save' : 'fa-paper-plane' }} me-2"></i>
-            {{ loading ? 'Submitting...' : (isEdit ? 'Update request' : 'Publish request') }}
+            {{ loading ? 'Submitting...' : (isEdit ? 'Update Request' : 'Publish Request') }}
           </button>
-          <a routerLink="/marketplace" class="btn btn-outline-secondary btn-lg px-4">
-            <i class="fa fa-times me-1"></i> Cancel
-          </a>
+          <a routerLink="/marketplace" class="btn btn-outline-secondary">Cancel</a>
         </div>
-
       </form>
     </div>
 

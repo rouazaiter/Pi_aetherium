@@ -1,1 +1,74 @@
 /* You can add global styles to this file, and also import other style files */
+
+app-home .main-banner .item .header-text {
+	padding: 42px 36px;
+	max-width: 640px;
+}
+
+app-home .main-banner .item .header-text .category {
+	font-size: 12px;
+	padding: 6px 12px;
+}
+
+app-home .main-banner .item .header-text h2 {
+	font-size: 36px;
+	line-height: 1.15;
+	margin-top: 14px;
+}
+
+app-home .main-banner .item .header-text p {
+	font-size: 14px;
+	line-height: 1.55;
+	margin: 14px 0;
+}
+
+app-home .main-banner .buttons .main-button a,
+app-home .main-banner .buttons .icon-button a {
+	font-size: 13px;
+	padding: 10px 16px;
+}
+
+app-home .services .service-item {
+	padding: 20px;
+}
+
+app-home .services .service-item .main-content h4 {
+	font-size: 20px;
+}
+
+app-home .services .service-item .main-content p {
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+app-home .about-us .section-heading h2,
+app-home .contact-us .section-heading h2 {
+	font-size: 30px;
+	line-height: 1.2;
+}
+
+app-home .about-us .section-heading p,
+app-home .contact-us .section-heading p,
+app-home .accordion-body {
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+app-home .fun-facts .counter h2 {
+	font-size: 38px;
+}
+
+app-home .fun-facts .counter p {
+	font-size: 14px;
+}
+
+@media (max-width: 992px) {
+	app-home .main-banner .item .header-text h2 {
+		font-size: 28px;
+	}
+
+	app-home .about-us .section-heading h2,
+	app-home .contact-us .section-heading h2 {
+		font-size: 24px;
+	}
+}

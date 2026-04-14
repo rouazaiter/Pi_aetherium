@@ -1,19 +1,19 @@
 .apply-page-wrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f4ff 0%, #fafafa 100%);
+  background: linear-gradient(135deg, #f7f5f2 0%, #fafafa 100%);
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 2rem 1rem;
+  padding: 1rem;
 }
 
 .apply-card {
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 720px;
-  padding: 2.5rem;
+  max-width: 680px;
+  padding: 1.2rem;
 }
 
 /* Retour */
@@ -21,8 +21,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: #4e73df;
-  font-size: 0.9rem;
+  color: #8a4b10;
+  font-size: 0.82rem;
   font-weight: 500;
   text-decoration: none;
   margin-bottom: 1.5rem;
@@ -30,7 +30,7 @@
 }
 
 .back-link:hover {
-  color: #224abe;
+  color: #6f3d0d;
 }
 
 /* En-tête demande */
@@ -39,7 +39,7 @@
 }
 
 .request-title {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #1a202c;
   margin-bottom: 0.75rem;
@@ -47,7 +47,7 @@
 
 .request-description {
   color: #4b5563;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   line-height: 1.6;
   margin-bottom: 1rem;
 }
@@ -62,16 +62,16 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: #6b7280;
 }
 
 .meta-item i {
-  color: #4e73df;
+  color: #8a4b10;
 }
 
 .meta-item a {
-  color: #4e73df;
+  color: #8a4b10;
   text-decoration: none;
 }
 
@@ -84,7 +84,7 @@
   display: inline-block;
   padding: 0.3rem 0.9rem;
   border-radius: 50px;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -92,8 +92,8 @@
 }
 
 .status-open {
-  background: #d1fae5;
-  color: #065f46;
+  background: #fff4e5;
+  color: #a8550a;
 }
 
 .status-closed {
@@ -110,7 +110,7 @@
 .divider {
   border: none;
   border-top: 1.5px solid #f3f4f6;
-  margin: 1.5rem 0;
+  margin: 1rem 0;
 }
 
 /* Info banners */
@@ -118,15 +118,15 @@
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  border-radius: 10px;
   margin-bottom: 1.5rem;
 }
 
 .info-applied {
-  background: #f0fff4;
-  color: #276749;
-  border: 1px solid #c6f6d5;
+  background: #fff9ef;
+  color: #8a4b10;
+  border: 1px solid #f4dfbf;
 }
 
 .info-closed {
@@ -140,11 +140,87 @@
   flex-shrink: 0;
 }
 
+.meeting-options {
+  background: #fff9ef;
+  border: 1px solid #f4dfbf;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.meeting-options h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #2a2f36;
+}
+
+.meeting-note {
+  margin: 0.3rem 0 0;
+  font-size: 0.76rem;
+  color: #6b7280;
+}
+
+.meeting-mode-switch {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.meeting-mode-switch button,
+.account-choice-row button {
+  border: 1px solid #ddcfbe;
+  background: #fff;
+  color: #4f5a67;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.meeting-mode-switch button.active,
+.account-choice-row button.active {
+  border-color: #a65e16;
+  background: #a65e16;
+  color: #fff;
+}
+
+.account-choice-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.create-account-box {
+  border: 1px solid #ecd3b3;
+  background: #fff6e9;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.create-account-box p {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  color: #5a6472;
+}
+
+.calendly-embed-wrap {
+  margin-top: 0.5rem;
+}
+
+.calendly-frame {
+  width: 100%;
+  min-height: 500px;
+  border: 1px solid #e9ddcf;
+  border-radius: 10px;
+  background: #fff;
+}
+
 /* Section formulaire */
 .apply-form-section {
   background: #f9fafb;
-  border-radius: 16px;
-  padding: 2rem;
+  border-radius: 12px;
+  padding: 1rem;
   border: 1.5px solid #e5e7eb;
 }
 
@@ -156,50 +232,50 @@
 }
 
 .apply-form-icon {
-  width: 52px;
-  height: 52px;
-  background: linear-gradient(135deg, #4e73df, #224abe);
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #c26a17, #8a4b10);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 
 .apply-form-title {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #1a202c;
   margin-bottom: 0.2rem;
 }
 
 .apply-form-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: #6b7280;
   margin-bottom: 0;
 }
 
 /* Form controls */
 .form-label {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: #374151;
   margin-bottom: 0.4rem;
 }
 
 .form-control {
   border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 0.65rem 1rem;
-  font-size: 0.95rem;
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.85rem;
   background: #fff;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-control:focus {
-  border-color: #4e73df;
-  box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.15);
+  border-color: #c26a17;
+  box-shadow: 0 0 0 3px rgba(194, 106, 23, 0.18);
 }
 
 .form-control.is-invalid {
@@ -208,13 +284,13 @@
 
 textarea.form-control {
   resize: vertical;
-  min-height: 140px;
+  min-height: 110px;
 }
 
 /* Alerts */
 .alert {
-  border-radius: 10px;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
   border: none;
 }
 
@@ -224,19 +300,19 @@ textarea.form-control {
 }
 
 .alert-success {
-  background: #f0fff4;
-  color: #276749;
+  background: #fff9ef;
+  color: #8a4b10;
 }
 
 /* Bouton candidature */
 .btn-apply {
-  background: linear-gradient(135deg, #4e73df, #224abe);
+  background: linear-gradient(135deg, #c26a17, #8a4b10);
   color: #fff;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 1rem;
-  padding: 0.85rem;
+  font-size: 0.85rem;
+  padding: 0.62rem;
   transition: opacity 0.2s, transform 0.1s;
 }
 

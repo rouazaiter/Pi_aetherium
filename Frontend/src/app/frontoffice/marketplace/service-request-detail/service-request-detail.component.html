@@ -40,6 +40,22 @@
     </div>
     <p class="app-message">{{ app.message }}</p>
 
+    <div class="meeting-card" *ngIf="getMeetingReservation(app.id) as meeting">
+      <div class="meeting-head">
+        <strong>Meeting request</strong>
+        <span class="meeting-status" [ngClass]="'meeting-' + meeting.status.toLowerCase()">{{ meeting.status }}</span>
+      </div>
+      <p class="meeting-source">Method: {{ meeting.source === 'CALENDLY' ? 'Calendly' : 'Available slots' }}</p>
+      <p class="meeting-slot">Requested slot: {{ meeting.slot }}</p>
+      <p class="meeting-slot" *ngIf="meeting.calendlyEventUrl">
+        Event link: <a [href]="meeting.calendlyEventUrl" target="_blank" rel="noopener noreferrer">Open event</a>
+      </p>
+      <div class="meeting-actions" *ngIf="meeting.status === 'PENDING'">
+        <button class="btn-accept" (click)="confirmMeeting(app.id)">Confirm meeting</button>
+        <button class="btn-reject" (click)="declineMeeting(app.id)">Decline</button>
+      </div>
+    </div>
+
     <!-- Actions only if request is OPEN and application is PENDING -->
     <div class="app-actions"
          *ngIf="serviceRequest.status === 'OPEN' && app.status === 'PENDING'">

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
 import { CurrentUserService } from '../../../core/auth/current-user.service';
+import { MeetingSchedulerService } from '../../../core/services/meeting-scheduler.service';
 
 @Component({
   selector: 'app-service-request-form',
@@ -12,6 +13,9 @@ import { CurrentUserService } from '../../../core/auth/current-user.service';
 export class ServiceRequestFormComponent implements OnInit {
   form!: FormGroup;
   selectedFile: File | null = null;
+  existingFileUrl = '';
+  slotInput = '';
+  selectedSlots: string[] = [];
   loading = false;
   error = '';
   success = '';
@@ -24,7 +28,8 @@ export class ServiceRequestFormComponent implements OnInit {
     private srService: ServiceRequestService,
     private route: ActivatedRoute,
     private router: Router,
-    private currentUserService: CurrentUserService
+    private currentUserService: CurrentUserService,
+    private meetingSchedulerService: MeetingSchedulerService
   ) {}
 
   ngOnInit(): void {
@@ -33,8 +38,9 @@ export class ServiceRequestFormComponent implements OnInit {
 
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', Validators.maxLength(2000)],
-      expiringDate: [null]
+      description: ['', [Validators.required, Validators.maxLength(2000)]],
+      expiringDate: [null, Validators.required],
+      calendlyLink: ['', [Validators.required, Validators.maxLength(300), Validators.pattern(/^https?:\/\/.+/i)]]
     });
 
     this.requestId = this.route.snapshot.params['id'];
@@ -45,7 +51,18 @@ export class ServiceRequestFormComponent implements OnInit {
           this.form.patchValue({
             name: sr.name,
             description: sr.description,
-            expiringDate: sr.expiringDate ? sr.expiringDate.substring(0, 16) : null
+            expiringDate: sr.expiringDate ? sr.expiringDate.substring(0, 16) : null,
+            calendlyLink: ''
+          });
+          this.existingFileUrl = sr.files || '';
+
+          this.meetingSchedulerService.getConfig(sr.id).subscribe({
+            next: (schedulingConfig) => {
+              this.selectedSlots = (schedulingConfig.availableSlots ?? []).slice();
+              this.form.patchValue({
+                calendlyLink: schedulingConfig.calendlyLink ?? ''
+              });
+            }
           });
         }
       });
@@ -59,6 +76,17 @@ export class ServiceRequestFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.invalid) return;
+
+    if (!this.selectedFile && !this.existingFileUrl) {
+      this.error = 'Please upload a file. This field is required.';
+      return;
+    }
+
+    if (this.selectedSlots.length === 0) {
+      this.error = 'Please add at least one available meeting slot from the calendar.';
+      return;
+    }
+
     this.loading = true;
     this.error = '';
     this.success = '';
@@ -72,22 +100,66 @@ export class ServiceRequestFormComponent implements OnInit {
       const formatted = d.toISOString().replace('Z', '');
       formData.append('expiringDate', formatted);
     }
-    if (this.selectedFile) formData.append('file', this.selectedFile);
+    if (this.selectedFile) {
+      formData.append('file', this.selectedFile);
+    }
 
     const request$ = this.isEdit
       ? this.srService.update(this.requestId!, this.currentUserId, formData)
       : this.srService.create(this.currentUserId, formData);
 
     request$.subscribe({
-      next: () => {
-        this.success = this.isEdit ? 'Request updated.' : 'Request published successfully.';
-        this.loading = false;
-        setTimeout(() => this.router.navigate(['/marketplace']), 1500);
+      next: (savedRequest) => {
+        const targetRequestId = this.isEdit ? this.requestId! : savedRequest.id;
+        this.meetingSchedulerService.saveConfig(
+          targetRequestId,
+          this.currentUserId,
+          this.form.value.calendlyLink || '',
+          this.selectedSlots
+        ).subscribe({
+          next: () => {
+            this.success = this.isEdit ? 'Request updated.' : 'Request published successfully.';
+            this.loading = false;
+            this.router.navigate(['/marketplace']);
+          },
+          error: (err) => {
+            this.error = err?.error?.message || 'Request saved, but meeting configuration failed.';
+            this.loading = false;
+          }
+        });
       },
       error: (err) => {
         this.error = err?.error?.message || 'An error occurred.';
         this.loading = false;
       }
     });
+  }
+
+  addSlotFromCalendar(): void {
+    const rawSlot = (this.slotInput || '').trim();
+    if (!rawSlot) {
+      return;
+    }
+
+    const normalized = this.normalizeSlot(rawSlot);
+    if (!this.selectedSlots.includes(normalized)) {
+      this.selectedSlots = [...this.selectedSlots, normalized].sort((a, b) => a.localeCompare(b));
+    }
+
+    this.slotInput = '';
+  }
+
+  onSlotInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.slotInput = input.value ?? '';
+  }
+
+  removeSlot(slot: string): void {
+    this.selectedSlots = this.selectedSlots.filter(item => item !== slot);
+  }
+
+  private normalizeSlot(rawSlot: string): string {
+    // Keep a consistent human-readable format while preserving local date/time.
+    return rawSlot.replace('T', ' ');
   }
 }

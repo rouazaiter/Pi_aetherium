@@ -1,105 +1,105 @@
-<section class="section courses" id="courses">
-  <div class="container">
-
-    <!-- Header -->
-    <div class="row mb-4">
-      <div class="col-lg-8">
-        <div class="section-heading">
-          <h6>Marketplace</h6>
-          <h2>Service Requests</h2>
-        </div>
+<section class="marketplace-page" id="marketplace">
+  <div class="container marketplace-container">
+    <div class="marketplace-hero">
+      <div>
+        <p class="hero-kicker">Marketplace</p>
+        <h1 class="hero-title">Find The Right Professional Service</h1>
+        <p class="hero-subtitle">Post requests, review applications, and collaborate faster.</p>
       </div>
-      <div class="col-lg-4 align-self-center text-end">
-        <div class="main-button">
-          <a routerLink="new">+ New Request</a>
-        </div>
-      </div>
+      <a routerLink="new" class="btn-primary-solid">Post a Request</a>
     </div>
 
-    <!-- Loading / Error -->
+    <section class="insights-grid">
+      <article class="insight-card" *ngIf="popularServices.length > 0">
+        <h3>Most Popular Services</h3>
+        <ul>
+          <li *ngFor="let service of popularServices">
+            <span>{{ service.name }}</span>
+            <strong>{{ service.count }}</strong>
+          </li>
+        </ul>
+      </article>
+
+      <article class="insight-card" *ngIf="topApplicantOfWeek || topCreatorOfWeek">
+        <h3>Top Performers This Week</h3>
+        <div class="top-user" *ngIf="topApplicantOfWeek">
+          <span class="label">Top Applicant</span>
+          <strong>{{ topApplicantOfWeek.username }}</strong>
+          <small>Score: {{ topApplicantOfWeek.score }} • Success: {{ topApplicantOfWeek.successRate }}%</small>
+        </div>
+        <div class="top-user" *ngIf="topCreatorOfWeek">
+          <span class="label">Top Creator</span>
+          <strong>{{ topCreatorOfWeek.username }}</strong>
+          <small>Score: {{ topCreatorOfWeek.score }} • Success: {{ topCreatorOfWeek.successRate }}%</small>
+        </div>
+      </article>
+    </section>
+
     <div *ngIf="loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
     </div>
-    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+    <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
 
-    <!-- My Requests -->
-    <div *ngIf="myRequests.length > 0">
-      <h4 class="mb-4" style="color: #f35525;">My Requests</h4>
-      <div class="row event_box mb-5">
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
-             *ngFor="let req of myRequests">
-          <div class="events_item">
-            <div class="thumb request-visual">
-              <span class="category mb-2">{{ req.status }}</span>
-            </div>
-            <div class="down-content">
-              <span class="author">{{ req.creator.username }}</span>
-              <h4>{{ req.name }}</h4>
-              <p class="mt-2" style="font-size:13px; color:#666;">{{ req.description }}</p>
-              <p *ngIf="req.expiringDate" style="font-size:12px; color:#aaa;">
-                Expires on {{ req.expiringDate | date:'dd/MM/yyyy' }}
-              </p>
-              <div class="d-flex gap-2 mt-3">
-                <a [routerLink]="['my', req.id]" class="main-button" style="font-size:13px; padding: 8px 16px;">Applications</a>
-                <a [routerLink]="['edit', req.id]" style="font-size:13px; padding: 8px 16px; border:1px solid #f35525; color:#f35525; border-radius:5px;">Edit</a>
-              </div>
-            </div>
+    <section *ngIf="myRequests.length > 0" class="request-section">
+      <div class="section-head">
+        <h2>My Requests</h2>
+        <span>{{ myRequests.length }} total</span>
+      </div>
+
+      <div class="request-grid">
+        <article class="request-card" *ngFor="let req of myRequests">
+          <div class="request-top-row">
+            <span class="status-pill" [ngClass]="'status-' + req.status.toLowerCase()">{{ req.status }}</span>
+            <span class="request-owner">{{ req.creator.username }}</span>
           </div>
+
+          <h3>{{ req.name }}</h3>
+          <p class="request-description">{{ req.description || 'No description provided.' }}</p>
+
+          <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>
+
+          <div class="request-actions">
+            <a [routerLink]="['my', req.id]" class="btn-soft">Applications</a>
+            <a [routerLink]="['edit', req.id]" class="btn-outline-soft">Edit</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section *ngIf="otherRequests.length > 0" class="request-section">
+      <div class="section-head">
+        <h2>Available Requests</h2>
+        <div class="chip-filters">
+          <button type="button" [class.active]="activeFilter === 'All'" (click)="filterBy('All')">All</button>
+          <button type="button" [class.active]="activeFilter === 'OPEN'" (click)="filterBy('OPEN')">Open</button>
+          <button type="button" [class.active]="activeFilter === 'CLOSED'" (click)="filterBy('CLOSED')">Closed / Expired</button>
         </div>
       </div>
-    </div>
 
-    <!-- Available Requests -->
-    <div *ngIf="otherRequests.length > 0">
-      <h4 class="mb-4" style="color: #f35525;">Available Requests</h4>
-
-      <!-- Filters -->
-      <ul class="event_filter mb-4">
-        <li><a [class.is_active]="activeFilter === 'All'" (click)="filterBy('All')" href="javascript:void(0)">All</a></li>
-        <li><a [class.is_active]="activeFilter === 'OPEN'" (click)="filterBy('OPEN')" href="javascript:void(0)">OPEN</a></li>
-        <li><a [class.is_active]="activeFilter === 'CLOSED'" (click)="filterBy('CLOSED')" href="javascript:void(0)">Expired</a></li>
-      </ul>
-
-      <div class="row event_box">
-        <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
-             *ngFor="let req of filteredRequests">
-          <div class="events_item">
-            <div class="thumb request-visual">
-              <span class="category mb-2">{{ req.status }}</span>
-            </div>
-            <div class="down-content">
-              <span class="author">{{ req.creator.username }}</span>
-              <h4>{{ req.name }}</h4>
-              <p class="mt-2" style="font-size:13px; color:#666;">{{ req.description }}</p>
-              <p *ngIf="req.expiringDate" style="font-size:12px; color:#aaa;">
-                Expires on {{ req.expiringDate | date:'dd/MM/yyyy' }}
-              </p>
-              <div class="mt-3">
-                <a *ngIf="req.status === 'OPEN'"
-                   [routerLink]="['apply', req.id]"
-                   class="main-button"
-                   style="font-size:13px; padding: 8px 16px;">
-                  Apply
-                </a>
-                <span *ngIf="req.status !== 'OPEN'"
-                      style="font-size:12px; color:#aaa; font-style:italic;">
-                  {{ req.status === 'CLOSED' ? 'Filled' : 'Expired' }}
-                </span>
-              </div>
-            </div>
+      <div class="request-grid">
+        <article class="request-card" *ngFor="let req of filteredRequests">
+          <div class="request-top-row">
+            <span class="status-pill" [ngClass]="'status-' + req.status.toLowerCase()">{{ req.status }}</span>
+            <span class="request-owner">{{ req.creator.username }}</span>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Empty state -->
-    <div *ngIf="myRequests.length === 0 && otherRequests.length === 0 && !loading"
-         class="text-center py-5">
-      <h5 style="color:#aaa;">No service requests yet.</h5>
-      <div class="main-button d-inline-block mt-3">
-        <a routerLink="new">Create the first request</a>
-      </div>
-    </div>
+          <h3>{{ req.name }}</h3>
+          <p class="request-description">{{ req.description || 'No description provided.' }}</p>
 
+          <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>
+
+          <div class="request-actions">
+            <a *ngIf="req.status === 'OPEN'" [routerLink]="['apply', req.id]" class="btn-soft">Apply</a>
+            <span *ngIf="req.status !== 'OPEN'" class="request-closed-note">{{ req.status === 'CLOSED' ? 'Request filled' : 'Request expired' }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div *ngIf="myRequests.length === 0 && otherRequests.length === 0 && !loading" class="empty-state">
+      <h3>No service requests yet</h3>
+      <p>Start by creating the first request for your project.</p>
+      <a routerLink="new" class="btn-primary-solid">Create First Request</a>
+    </div>
   </div>
 </section>

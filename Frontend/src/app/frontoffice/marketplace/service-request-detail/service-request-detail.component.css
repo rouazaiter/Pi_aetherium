@@ -1,0 +1,243 @@
+.detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: #f5f7fa;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.8rem;
+  color: #2f4a62;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  color: #1f3447;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.6rem;
+}
+
+.detail-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #1f2d3d;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #445668;
+  line-height: 1.55;
+  margin-bottom: 0.55rem;
+}
+
+.meta {
+  font-size: 0.78rem;
+  color: #6d7f92;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.meta a {
+  color: #8a4b10;
+  text-decoration: none;
+}
+
+.meta a:hover {
+  text-decoration: underline;
+}
+
+h3 {
+  font-size: 1.02rem;
+  margin: 0.9rem 0 0.55rem;
+  color: #1f2d3d;
+}
+
+.status-badge,
+.app-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.18rem 0.52rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-open {
+  background: #fff4e5;
+  color: #a8550a;
+}
+
+.status-closed,
+.status-rejected {
+  background: #ffe3e6;
+  color: #b4233a;
+}
+
+.status-pending,
+.status-in_progress {
+  background: #fff1d8;
+  color: #9a6007;
+}
+
+.status-accepted {
+  background: #f6eadb;
+  color: #8a4b10;
+}
+
+.application-card {
+  background: #fff;
+  border: 1px solid #e3eaf2;
+  border-radius: 10px;
+  padding: 0.8rem;
+  margin-bottom: 0.65rem;
+}
+
+.app-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.app-header strong {
+  font-size: 0.86rem;
+  color: #1f2d3d;
+}
+
+.app-date {
+  font-size: 0.72rem;
+  color: #728396;
+}
+
+.app-message {
+  margin: 0.55rem 0 0;
+  color: #445668;
+  font-size: 0.82rem;
+  line-height: 1.48;
+}
+
+.meeting-card {
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #f0d7b9;
+  background: #fff9ef;
+  border-radius: 8px;
+}
+
+.meeting-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meeting-head strong {
+  font-size: 0.78rem;
+  color: #2a2f36;
+}
+
+.meeting-slot {
+  font-size: 0.75rem;
+  color: #525f6d;
+  margin: 0.35rem 0 0;
+}
+
+.meeting-source {
+  margin: 0.35rem 0 0;
+  font-size: 0.74rem;
+  color: #7a6a58;
+}
+
+.meeting-slot a {
+  color: #8a4b10;
+  text-decoration: none;
+}
+
+.meeting-slot a:hover {
+  text-decoration: underline;
+}
+
+.meeting-status {
+  border-radius: 999px;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.meeting-pending {
+  background: #fff1d8;
+  color: #9a6007;
+}
+
+.meeting-confirmed {
+  background: #f6eadb;
+  color: #8a4b10;
+}
+
+.meeting-declined {
+  background: #ffe3e6;
+  color: #b4233a;
+}
+
+.meeting-actions {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+}
+
+.app-actions {
+  margin-top: 0.62rem;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.btn-accept,
+.btn-reject {
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.62rem;
+  border: none;
+}
+
+.btn-accept {
+  background: #b45309;
+  color: #fff;
+}
+
+.btn-accept:hover {
+  background: #92400e;
+}
+
+.btn-reject {
+  background: #fee2e2;
+  color: #9f1d1d;
+}
+
+.error,
+.empty {
+  font-size: 0.82rem;
+  color: #6d7f92;
+}
+
+@media (max-width: 768px) {
+  .detail-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-header {
+    grid-template-columns: 1fr;
+  }
+}

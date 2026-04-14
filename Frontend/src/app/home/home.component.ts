@@ -29,17 +29,8 @@ export class HomeComponent implements OnInit {
     // Preloader
     $('#js-preloader').addClass('loaded');
 
-    // Sticky header on scroll
-    $(window).off('scroll.header').on('scroll.header', function () {
-      const scroll = $(window).scrollTop();
-      const box = $('.header-text').height() || 400;
-      const header = $('header').height() || 80;
-      if (scroll >= box - header) {
-        $('header').addClass('background-header');
-      } else {
-        $('header').removeClass('background-header');
-      }
-    });
+    // Keep header fixed and styled on all pages.
+    $('header').addClass('background-header');
 
     // Mobile menu trigger
     $('.menu-trigger').off('click').on('click', function (this: HTMLElement) {

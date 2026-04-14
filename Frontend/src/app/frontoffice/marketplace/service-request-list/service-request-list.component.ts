@@ -2,6 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
 import { ServiceRequest } from '../../../core/models/service-request.model';
 import { CurrentUserService } from '../../../core/auth/current-user.service';
+import { LeaderboardService } from '../../../core/services/leaderboard.service';
+import { LeaderboardEntry } from '../../../core/models/leaderboard.model';
+import { catchError, forkJoin, of } from 'rxjs';
+
+interface PopularServiceStat {
+  name: string;
+  count: number;
+}
 
 @Component({
   selector: 'app-service-request-list',
@@ -16,10 +24,14 @@ export class ServiceRequestListComponent implements OnInit {
   loading = false;
   error = '';
   currentUserId = 1;
+  popularServices: PopularServiceStat[] = [];
+  topApplicantOfWeek?: LeaderboardEntry;
+  topCreatorOfWeek?: LeaderboardEntry;
 
   constructor(
     private srService: ServiceRequestService,
-    private currentUserService: CurrentUserService
+    private currentUserService: CurrentUserService,
+    private leaderboardService: LeaderboardService
   ) {}
 
   ngOnInit(): void {
@@ -28,6 +40,7 @@ export class ServiceRequestListComponent implements OnInit {
       this.currentUserId = user.id;
       this.load();
     });
+    this.loadWeeklyHighlights();
     this.load();
   }
 
@@ -38,6 +51,7 @@ export class ServiceRequestListComponent implements OnInit {
         this.myRequests = data.filter(r => r.creator.id === this.currentUserId);
         this.otherRequests = data.filter(r => r.creator.id !== this.currentUserId);
         this.filteredRequests = this.otherRequests;
+        this.popularServices = this.buildPopularServices(data);
         this.loading = false;
       },
       error: () => {
@@ -56,5 +70,41 @@ export class ServiceRequestListComponent implements OnInit {
     } else {
       this.filteredRequests = this.otherRequests.filter(r => r.status === status);
     }
+  }
+
+  private loadWeeklyHighlights(): void {
+    forkJoin({
+      applicants: this.leaderboardService.getApplicants(7, 1).pipe(catchError(() => of({ entries: [] } as any))),
+      creators: this.leaderboardService.getCreators(7, 1).pipe(catchError(() => of({ entries: [] } as any)))
+    }).subscribe(({ applicants, creators }) => {
+      this.topApplicantOfWeek = applicants.entries?.[0];
+      this.topCreatorOfWeek = creators.entries?.[0];
+    });
+  }
+
+  private buildPopularServices(requests: ServiceRequest[]): PopularServiceStat[] {
+    const categories = [
+      { name: 'Web Development', keywords: ['web', 'website', 'frontend', 'backend', 'fullstack', 'angular', 'react'] },
+      { name: 'Mobile Development', keywords: ['mobile', 'android', 'ios', 'flutter', 'react native'] },
+      { name: 'Design & UI/UX', keywords: ['design', 'ui', 'ux', 'figma', 'prototype', 'branding'] },
+      { name: 'Data & AI', keywords: ['data', 'ai', 'ml', 'analytics', 'dashboard', 'python'] },
+      { name: 'Marketing & SEO', keywords: ['seo', 'marketing', 'ads', 'content', 'social'] }
+    ];
+
+    const counters = categories.map(category => ({ name: category.name, count: 0 }));
+
+    for (const request of requests) {
+      const source = `${request.name} ${request.description || ''}`.toLowerCase();
+      categories.forEach((category, index) => {
+        if (category.keywords.some(keyword => source.includes(keyword))) {
+          counters[index].count += 1;
+        }
+      });
+    }
+
+    return counters
+      .filter(item => item.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4);
   }
 }

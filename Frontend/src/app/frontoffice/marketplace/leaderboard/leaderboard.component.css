@@ -1,3 +1,10 @@
+#leaderboard.leaderboard-page {
+  margin-top: 0;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  min-height: auto;
+}
+
 .section-heading h6 {
   font-size: 0.72rem;
   margin-bottom: 0.2rem;
@@ -37,6 +44,63 @@
   padding: 0.35rem 0.5rem;
   background: #fff;
   font-size: 0.8rem;
+}
+
+.score-explainer {
+  background: #fffaf4;
+  border: 1px solid #efe4d7;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.score-explainer h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: #2d3743;
+}
+
+.score-explainer .formula {
+  margin: 0;
+  font-weight: 700;
+  color: #1f2a36;
+  font-size: 0.88rem;
+}
+
+.score-explainer .muted {
+  margin: 0.35rem 0 0;
+  color: #67635c;
+  font-size: 0.8rem;
+}
+
+.explainer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.75rem;
+}
+
+.explainer-grid article {
+  background: #ffffff;
+  border: 1px solid #eee1d1;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.explainer-grid h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: #2f3640;
+}
+
+.explainer-grid ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #54504a;
+  font-size: 0.78rem;
+}
+
+.explainer-grid li + li {
+  margin-top: 0.25rem;
 }
 
 .leaderboard-table {
@@ -80,5 +144,9 @@
   .leaderboard-controls label,
   .leaderboard-controls select {
     width: 100%;
+  }
+
+  .explainer-grid {
+    grid-template-columns: 1fr;
   }
 }

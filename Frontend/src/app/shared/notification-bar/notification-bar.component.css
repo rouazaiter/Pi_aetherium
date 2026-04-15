@@ -161,6 +161,19 @@
   }
 }
 
+@media (max-width: 1280px) {
+  .nav-notification-toggle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .notification-count {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.68rem;
+  }
+}
+
 @media (max-width: 768px) {
   .nav-notification-dropdown {
     width: min(92vw, 330px);

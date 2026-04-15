@@ -1,9 +1,8 @@
-<section class="section courses" id="leaderboard">
+<section class="leaderboard-page" id="leaderboard">
   <div class="container">
     <div class="row mb-4">
       <div class="col-lg-8">
         <div class="section-heading">
-          <h6>Competition</h6>
           <h2>Advanced Leaderboard</h2>
         </div>
       </div>
@@ -41,6 +40,38 @@
       </label>
     </div>
 
+    <section class="score-explainer mb-4">
+      <h3>How Score Is Calculated</h3>
+      <p class="formula">Final Score = 0.85 x Real Score + 0.15 x AI Quality</p>
+      <p class="muted">Real performance remains the primary ranking factor. AI quality improves ranking precision without dominating business outcomes.</p>
+
+      <div class="explainer-grid">
+        <article>
+          <h4>Real Score (85%)</h4>
+          <ul *ngIf="leaderboardType === 'APPLICANTS'">
+            <li>Success rate on applications.</li>
+            <li>Rejection rate penalty.</li>
+            <li>Engagement volume normalization.</li>
+          </ul>
+          <ul *ngIf="leaderboardType === 'CREATORS'">
+            <li>Request closure rate.</li>
+            <li>Expiry rate penalty.</li>
+            <li>Request attractiveness and activity volume.</li>
+          </ul>
+        </article>
+
+        <article>
+          <h4>AI Quality (15%)</h4>
+          <ul>
+            <li>Relevance: 40%.</li>
+            <li>Clarity: 30%.</li>
+            <li>Structure: 20%.</li>
+            <li>Professionalism: 10%.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
     <div *ngIf="loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
     </div>
@@ -54,6 +85,8 @@
           <th>#</th>
           <th>User</th>
           <th>Score</th>
+          <th>Real Score</th>
+          <th>AI Quality</th>
           <th>Success</th>
           <th>Total</th>
           <th>Pending</th>
@@ -68,7 +101,9 @@
             <strong>{{ entry.username }}</strong>
             <div class="small text-muted">{{ entry.email }}</div>
           </td>
-          <td>{{ entry.score }}</td>
+          <td>{{ entry.score | number:'1.0-2' }}</td>
+          <td>{{ entry.realScore | number:'1.0-2' }}</td>
+          <td>{{ entry.aiQualityScore | number:'1.0-2' }}</td>
           <td>
             {{ entry.successCount }}
             <span class="small text-muted">({{ entry.successRate }}%)</span>

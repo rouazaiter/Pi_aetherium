@@ -9,6 +9,8 @@ export interface LeaderboardEntry {
   pendingCount: number;
   failedCount: number;
   successRate: number;
+  realScore: number;
+  aiQualityScore: number;
   score: number;
   rank: number;
   badge: string;

@@ -83,27 +83,25 @@ export class ServiceRequestListComponent implements OnInit {
   }
 
   private buildPopularServices(requests: ServiceRequest[]): PopularServiceStat[] {
-    const categories = [
-      { name: 'Web Development', keywords: ['web', 'website', 'frontend', 'backend', 'fullstack', 'angular', 'react'] },
-      { name: 'Mobile Development', keywords: ['mobile', 'android', 'ios', 'flutter', 'react native'] },
-      { name: 'Design & UI/UX', keywords: ['design', 'ui', 'ux', 'figma', 'prototype', 'branding'] },
-      { name: 'Data & AI', keywords: ['data', 'ai', 'ml', 'analytics', 'dashboard', 'python'] },
-      { name: 'Marketing & SEO', keywords: ['seo', 'marketing', 'ads', 'content', 'social'] }
-    ];
-
-    const counters = categories.map(category => ({ name: category.name, count: 0 }));
+    const counts = new Map<string, PopularServiceStat>();
 
     for (const request of requests) {
-      const source = `${request.name} ${request.description || ''}`.toLowerCase();
-      categories.forEach((category, index) => {
-        if (category.keywords.some(keyword => source.includes(keyword))) {
-          counters[index].count += 1;
-        }
-      });
+      const displayName = (request.name || '').trim();
+      if (!displayName) {
+        continue;
+      }
+
+      const key = displayName.toLowerCase();
+      const existing = counts.get(key);
+
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counts.set(key, { name: displayName, count: 1 });
+      }
     }
 
-    return counters
-      .filter(item => item.count > 0)
+    return Array.from(counts.values())
       .sort((a, b) => b.count - a.count)
       .slice(0, 4);
   }

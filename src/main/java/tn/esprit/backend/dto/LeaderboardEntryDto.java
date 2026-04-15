@@ -20,6 +20,8 @@ public class LeaderboardEntryDto {
     private int pendingCount;
     private int failedCount;
     private double successRate;
+    private double realScore;
+    private double aiQualityScore;
     private double score;
     private int rank;
     private String badge;

@@ -67,15 +67,12 @@ export class ApplyFormComponent implements OnInit {
             this.availableSlots = schedulingConfig.availableSlots ?? [];
 
             if (this.calendlyLink) {
+              this.form.patchValue({ meetingMode: 'CALENDLY' });
               this.calendlyEmbedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
                 this.buildCalendlyEmbedUrl(this.calendlyLink)
               );
-            }
-
-            if (this.availableSlots.length > 0) {
+            } else if (this.availableSlots.length > 0) {
               this.form.patchValue({ meetingMode: 'SLOTS' });
-            } else if (this.calendlyLink) {
-              this.form.patchValue({ meetingMode: 'CALENDLY' });
             }
           }
         });
@@ -108,8 +105,9 @@ export class ApplyFormComponent implements OnInit {
           return;
         }
 
-        const slot = mode === 'SLOTS' ? this.form.value.meetingSlot : this.form.value.calendlySelectionNote;
-        const eventUrl = mode === 'CALENDLY' ? this.form.value.calendlyEventUrl : undefined;
+        const calendlyEventUrl = (this.form.value.calendlyEventUrl ?? '').trim();
+        const slot = mode === 'SLOTS' ? this.form.value.meetingSlot : calendlyEventUrl;
+        const eventUrl = mode === 'CALENDLY' ? calendlyEventUrl : undefined;
 
         this.meetingSchedulerService.reserveSlot(application.id, this.currentUserId, mode, slot, eventUrl).subscribe({
           next: () => {
@@ -170,13 +168,8 @@ export class ApplyFormComponent implements OnInit {
       return false;
     }
 
-    if (this.form.value.hasCalendlyAccount !== 'YES') {
-      this.error = 'Create your Calendly account first, then come back and confirm you are ready.';
-      return false;
-    }
-
-    if (!this.form.value.calendlySelectionNote?.trim()) {
-      this.error = 'After picking a date in Calendly, add the selected date/time note.';
+    if (!this.form.value.calendlyEventUrl?.trim()) {
+      this.error = 'Please paste your Calendly event link.';
       return false;
     }
 

@@ -38,7 +38,7 @@
 
     <hr class="divider" />
 
-    <div class="meeting-options" *ngIf="hasSchedulingOptions()">
+    <div class="meeting-options" *ngIf="hasSchedulingOptions()" [formGroup]="form">
       <h4>Schedule a meeting</h4>
       <p class="meeting-note">Choose one method before submitting your application.</p>
 
@@ -94,7 +94,7 @@
           </div>
 
           <div class="mt-2">
-            <label for="calendlyEventUrl" class="form-label fw-semibold mb-1">Calendly event link (optional)</label>
+            <label for="calendlyEventUrl" class="form-label fw-semibold mb-1">Calendly event link <span class="text-danger">*</span></label>
             <input
               id="calendlyEventUrl"
               type="url"

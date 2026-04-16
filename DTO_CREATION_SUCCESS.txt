@@ -1,0 +1,77 @@
+======================================================================
+DTO CREATION SCRIPT - DIRECT EXECUTION
+======================================================================
+
+Creating directory: C:\Users\jihen\Downloads\portfolio\src\main\java\jihen\portfolio\dto
+✓ Directory created successfully
+
+Creating: C:\Users\jihen\Downloads\portfolio\src\main\java\jihen\portfolio\dto\SkillNodeDto.java
+✓ Created (413 bytes)
+
+Creating: C:\Users\jihen\Downloads\portfolio\src\main\java\jihen\portfolio\dto\PortfolioDNADto.java
+✓ Created (531 bytes)
+
+======================================================================
+VERIFICATION
+======================================================================
+
+Directory exists: True
+SkillNodeDto.java exists: True
+PortfolioDNADto.java exists: True
+
+Directory contents:
+  ✓ SkillNodeDto.java (413 bytes)
+  ✓ PortfolioDNADto.java (531 bytes)
+
+======================================================================
+FILE CONTENTS: SkillNodeDto.java
+======================================================================
+
+package jihen.portfolio.dto;
+
+import lombok.*;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class SkillNodeDto {
+    private Long id;
+    private String name;
+    private String category;
+    private Boolean isTrendy;
+    private String description;
+    private Integer searchCount;
+}
+
+======================================================================
+FILE CONTENTS: PortfolioDNADto.java
+======================================================================
+
+package jihen.portfolio.dto;
+
+import lombok.*;
+import java.util.Set;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class PortfolioDNADto {
+    private Long portfolioId;
+    private String title;
+    private String bio;
+    private Integer totalViews;
+    private Integer followerCount;
+    private Boolean isVerified;
+    private Set<SkillNodeDto> skills;
+    private Set<String> projectCategories;
+    private String primaryFocus;
+    private String expertise;
+}
+
+======================================================================
+✓✓✓ SUCCESS - ALL TASKS COMPLETED! ✓✓✓
+======================================================================

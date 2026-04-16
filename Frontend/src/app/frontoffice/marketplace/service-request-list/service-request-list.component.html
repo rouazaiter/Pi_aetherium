@@ -54,6 +54,7 @@
           </div>
 
           <h3>{{ req.name }}</h3>
+          <p class="request-meta">Category: {{ req.category }}</p>
           <p class="request-description">{{ req.description || 'No description provided.' }}</p>
 
           <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>
@@ -84,6 +85,7 @@
           </div>
 
           <h3>{{ req.name }}</h3>
+          <p class="request-meta">Category: {{ req.category }}</p>
           <p class="request-description">{{ req.description || 'No description provided.' }}</p>
 
           <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>

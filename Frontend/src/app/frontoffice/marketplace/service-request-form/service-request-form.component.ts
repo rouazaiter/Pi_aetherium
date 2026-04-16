@@ -11,6 +11,14 @@ import { MeetingSchedulerService } from '../../../core/services/meeting-schedule
   styleUrls: ['./service-request-form.component.css']
 })
 export class ServiceRequestFormComponent implements OnInit {
+  readonly categories = [
+    'Software Development',
+    'Networks and Systems',
+    'Cybersecurity',
+    'Data / Artificial Intelligence',
+    'Cloud Computing'
+  ];
+
   form!: FormGroup;
   selectedFile: File | null = null;
   existingFileUrl = '';
@@ -21,7 +29,7 @@ export class ServiceRequestFormComponent implements OnInit {
   success = '';
   isEdit = false;
   requestId?: number;
-  currentUserId = 1;
+  currentUserId = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -33,11 +41,16 @@ export class ServiceRequestFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUserId = this.currentUserService.currentUser.id;
-    this.currentUserService.currentUser$.subscribe(user => this.currentUserId = user.id);
+    this.currentUserService.currentUser$.subscribe(user => {
+      if (user.id <= 0) {
+        return;
+      }
+      this.currentUserId = user.id;
+    });
 
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
+      category: ['', Validators.required],
       description: ['', [Validators.required, Validators.maxLength(2000)]],
       expiringDate: [null, Validators.required],
       calendlyLink: ['', [Validators.required, Validators.maxLength(300), Validators.pattern(/^https?:\/\/.+/i)]]
@@ -50,6 +63,7 @@ export class ServiceRequestFormComponent implements OnInit {
         next: (sr) => {
           this.form.patchValue({
             name: sr.name,
+            category: sr.category,
             description: sr.description,
             expiringDate: sr.expiringDate ? sr.expiringDate.substring(0, 16) : null,
             calendlyLink: ''
@@ -87,12 +101,17 @@ export class ServiceRequestFormComponent implements OnInit {
       return;
     }
 
+    if (!this.validateExpirationAgainstSlots()) {
+      return;
+    }
+
     this.loading = true;
     this.error = '';
     this.success = '';
 
     const formData = new FormData();
     formData.append('name', this.form.value.name);
+    formData.append('category', this.form.value.category);
     if (this.form.value.description) formData.append('description', this.form.value.description);
     if (this.form.value.expiringDate) {
       // Spring @DateTimeFormat(iso = DATE_TIME) attend "yyyy-MM-ddTHH:mm:ss"
@@ -161,5 +180,34 @@ export class ServiceRequestFormComponent implements OnInit {
   private normalizeSlot(rawSlot: string): string {
     // Keep a consistent human-readable format while preserving local date/time.
     return rawSlot.replace('T', ' ');
+  }
+
+  private validateExpirationAgainstSlots(): boolean {
+    const expiringDateRaw = this.form.value.expiringDate;
+    if (!expiringDateRaw) {
+      this.error = 'Expiration date is required.';
+      return false;
+    }
+
+    const expirationDate = new Date(expiringDateRaw);
+    if (Number.isNaN(expirationDate.getTime())) {
+      this.error = 'Invalid expiration date.';
+      return false;
+    }
+
+    for (const slot of this.selectedSlots) {
+      const slotDate = new Date(slot.replace(' ', 'T'));
+      if (Number.isNaN(slotDate.getTime())) {
+        this.error = `Invalid slot format: ${slot}`;
+        return false;
+      }
+
+      if (expirationDate <= slotDate) {
+        this.error = 'Expiration date must be later than all selected slots.';
+        return false;
+      }
+    }
+
+    return true;
   }
 }

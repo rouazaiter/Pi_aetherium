@@ -1,31 +1,38 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 
-export interface TestUser {
+export interface CurrentSessionUser {
   id: number;
   username: string;
   email: string;
 }
 
-const STORAGE_KEY = 'skillhub.test.currentUserId';
+const STORAGE_KEY = 'skillhub.currentUserId';
 
 @Injectable({ providedIn: 'root' })
 export class CurrentUserService {
-  readonly testUsers: TestUser[] = [
-    { id: 1, username: 'client.demo', email: 'client.demo@skillhub.test' },
-    { id: 2, username: 'freelancer.demo', email: 'freelancer.demo@skillhub.test' }
-  ];
+  private readonly usersSubject = new BehaviorSubject<CurrentSessionUser[]>([]);
+  readonly users$ = this.usersSubject.asObservable();
 
-  private readonly currentUserSubject = new BehaviorSubject<TestUser>(this.resolveInitialUser());
+  private readonly currentUserSubject = new BehaviorSubject<CurrentSessionUser>({
+    id: 0,
+    username: 'loading...',
+    email: ''
+  });
 
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
-  get currentUser(): TestUser {
+  get currentUser(): CurrentSessionUser {
     return this.currentUserSubject.value;
   }
 
+  constructor(private http: HttpClient) {
+    this.loadUsers();
+  }
+
   switchUser(userId: number): void {
-    const nextUser = this.testUsers.find(user => user.id === userId);
+    const nextUser = this.usersSubject.value.find(user => user.id === userId);
     if (!nextUser) {
       return;
     }
@@ -34,14 +41,27 @@ export class CurrentUserService {
     this.currentUserSubject.next(nextUser);
   }
 
-  private resolveInitialUser(): TestUser {
-    const storedId = Number(sessionStorage.getItem(STORAGE_KEY));
-    const storedUser = this.testUsers.find(user => user.id === storedId);
-    if (storedUser) {
-      return storedUser;
-    }
+  private loadUsers(): void {
+    this.http.get<CurrentSessionUser[]>('/skillhub/api/users?limit=2').subscribe({
+      next: (users) => {
+        const availableUsers = (users ?? []).filter(user => !!user?.id);
+        this.usersSubject.next(availableUsers);
 
-    sessionStorage.setItem(STORAGE_KEY, String(this.testUsers[0].id));
-    return this.testUsers[0];
+        if (availableUsers.length === 0) {
+          this.currentUserSubject.next({ id: 0, username: 'No user', email: '' });
+          return;
+        }
+
+        const storedId = Number(sessionStorage.getItem(STORAGE_KEY));
+        const selected = availableUsers.find(user => user.id === storedId) ?? availableUsers[0];
+
+        sessionStorage.setItem(STORAGE_KEY, String(selected.id));
+        this.currentUserSubject.next(selected);
+      },
+      error: () => {
+        this.usersSubject.next([]);
+        this.currentUserSubject.next({ id: 0, username: 'No user', email: '' });
+      }
+    });
   }
 }

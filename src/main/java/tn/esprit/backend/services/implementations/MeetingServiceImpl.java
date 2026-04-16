@@ -16,6 +16,8 @@ import tn.esprit.backend.repositories.MeetingReservationRepository;
 import tn.esprit.backend.repositories.ServiceRequestRepository;
 import tn.esprit.backend.services.interfaces.MeetingService;
 
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +28,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MeetingServiceImpl implements MeetingService {
+
+    private static final List<DateTimeFormatter> SLOT_FORMATTERS = List.of(
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    );
 
     private final MeetingConfigRepository meetingConfigRepository;
     private final MeetingReservationRepository meetingReservationRepository;
@@ -47,6 +55,8 @@ public class MeetingServiceImpl implements MeetingService {
         if (normalizedSlots.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one available meeting slot is required");
         }
+
+        ensureExpiringDateAfterAllSlots(serviceRequest, normalizedSlots);
 
         MeetingConfig config = meetingConfigRepository.findByServiceRequest(serviceRequest)
                 .orElseGet(() -> MeetingConfig.builder().serviceRequest(serviceRequest).build());
@@ -260,6 +270,40 @@ public class MeetingServiceImpl implements MeetingService {
                 .filter(item -> item != null && !item.isBlank())
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    private void ensureExpiringDateAfterAllSlots(ServiceRequest serviceRequest, List<String> slots) {
+        LocalDateTime expiringDate = serviceRequest.getExpiringDate();
+        if (expiringDate == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Service request expiration date is required before configuring meeting slots");
+        }
+
+        for (String rawSlot : slots) {
+            LocalDateTime slotDateTime = parseSlotDateTime(rawSlot);
+            if (!expiringDate.isAfter(slotDateTime)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Expiration date must be greater than every available slot");
+            }
+        }
+    }
+
+    private LocalDateTime parseSlotDateTime(String rawSlot) {
+        String slot = normalize(rawSlot);
+        if (slot == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid slot date format");
+        }
+
+        for (DateTimeFormatter formatter : SLOT_FORMATTERS) {
+            try {
+                return LocalDateTime.parse(slot, formatter);
+            } catch (DateTimeParseException ignored) {
+                // Try next formatter.
+            }
+        }
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid slot date format. Expected ISO date-time, e.g. 2026-04-20T14:30");
     }
 
     private String normalize(String value) {

@@ -13,18 +13,20 @@
             <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
             <li><a routerLink="/marketplace" routerLinkActive="active">Marketplace</a></li>
             <li><a routerLink="/marketplace/leaderboard" routerLinkActive="active">Leaderboard</a></li>
-            <li><a routerLink="/marketplace/new" routerLinkActive="active">Post a Request</a></li>
+            <li class="mobile-post-request-link"><a routerLink="/marketplace/new" routerLinkActive="active">Post a Request</a></li>
             <li><a href="#contact">Contact</a></li>
             <li class="nav-notification-slot">
               <app-notification-bar></app-notification-bar>
             </li>
-            <li class="session-switch" *ngIf="currentUser$ | async as currentUser">
+            <li class="session-switch" *ngIf="(currentUser$ | async) as currentUser">
               <span>Session</span>
               <select [value]="currentUser.id" (change)="onUserChange($any($event.target).value)">
-                <option *ngFor="let user of users" [value]="user.id">{{ user.username }} (ID {{ user.id }})</option>
+                <option *ngFor="let user of (users$ | async) || []" [value]="user.id">{{ user.username }} (ID {{ user.id }})</option>
               </select>
             </li>
           </ul>
+
+          <a routerLink="/marketplace/new" class="post-request-cta" routerLinkActive="active">Post a Request</a>
 
           <a class="menu-trigger">
             <span>Menu</span>

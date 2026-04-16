@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import tn.esprit.backend.entities.ServiceRequest;
+import tn.esprit.backend.entities.ServiceRequestCategory;
 import tn.esprit.backend.entities.ServiceRequestStatus;
 import tn.esprit.backend.entities.User;
 import tn.esprit.backend.repositories.ServiceRequestRepository;
@@ -31,6 +32,11 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
 
         LocalDateTime now = LocalDateTime.now();
         serviceRequest.setId(null);
+
+        if (serviceRequest.getCategory() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Service request category is required");
+        }
+
         serviceRequest.setCreator(creator);
         serviceRequest.setStatus(ServiceRequestStatus.OPEN);
         serviceRequest.setCreatedAt(now);
@@ -76,6 +82,9 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
         }
         if (payload.getDescription() != null) {
             serviceRequest.setDescription(payload.getDescription());
+        }
+        if (payload.getCategory() != null) {
+            serviceRequest.setCategory(payload.getCategory());
         }
         if (payload.getFiles() != null) {
             serviceRequest.setFiles(payload.getFiles());

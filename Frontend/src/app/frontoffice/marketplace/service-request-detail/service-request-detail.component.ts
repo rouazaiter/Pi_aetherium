@@ -18,7 +18,7 @@ export class ServiceRequestDetailComponent implements OnInit {
   applications: Application[] = [];
   loading = false;
   error = '';
-  currentUserId = 1;
+  currentUserId = 0;
   meetingByApplication: Record<number, MeetingReservation> = {};
 
   constructor(
@@ -31,26 +31,31 @@ export class ServiceRequestDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUserId = this.currentUserService.currentUser.id;
-    this.currentUserService.currentUser$.subscribe(user => this.currentUserId = user.id);
-
     const id = Number(this.route.snapshot.params['id']);
-    this.loading = true;
 
-    this.srService.getById(id).subscribe({
-      next: (sr) => {
-        // If this is not my request, redirect
-        if (sr.creator.id !== this.currentUserId) {
-          this.router.navigate(['/marketplace']);
-          return;
-        }
-        this.serviceRequest = sr;
-        this.loadApplications(id);
-      },
-      error: () => {
-        this.error = 'Request not found.';
-        this.loading = false;
+    this.currentUserService.currentUser$.subscribe(user => {
+      if (user.id <= 0) {
+        return;
       }
+
+      this.currentUserId = user.id;
+      this.loading = true;
+
+      this.srService.getById(id).subscribe({
+        next: (sr) => {
+          // If this is not my request, redirect
+          if (sr.creator.id !== this.currentUserId) {
+            this.router.navigate(['/marketplace']);
+            return;
+          }
+          this.serviceRequest = sr;
+          this.loadApplications(id);
+        },
+        error: () => {
+          this.error = 'Request not found.';
+          this.loading = false;
+        }
+      });
     });
   }
 

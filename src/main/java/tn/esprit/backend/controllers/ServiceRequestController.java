@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import tn.esprit.backend.entities.ServiceRequestCategory;
 import tn.esprit.backend.entities.ServiceRequest;
 import tn.esprit.backend.entities.ServiceRequestStatus;
 import tn.esprit.backend.services.interfaces.FileStorageService;
@@ -43,12 +45,14 @@ public class ServiceRequestController {
     public ResponseEntity<ServiceRequest> createServiceRequestMultipart(
             @PathVariable("creator-id") Long creatorId,
             @RequestParam String name,
+            @RequestParam String category,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime expiringDate,
             @RequestPart(required = false) MultipartFile file
     ) {
         ServiceRequest sr = new ServiceRequest();
         sr.setName(name);
+        sr.setCategory(parseCategory(category));
         sr.setDescription(description);
         sr.setExpiringDate(expiringDate);
 
@@ -113,6 +117,7 @@ public class ServiceRequestController {
             @PathVariable Long id,
             @PathVariable("requester-id") Long requesterId,
             @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime expiringDate,
             @RequestPart(required = false) MultipartFile file
@@ -121,6 +126,9 @@ public class ServiceRequestController {
 
         if (name != null) {
             payload.setName(name);
+        }
+        if (category != null) {
+            payload.setCategory(parseCategory(category));
         }
         if (description != null) {
             payload.setDescription(description);
@@ -147,6 +155,14 @@ public class ServiceRequestController {
     ) {
         serviceRequestService.deleteServiceRequest(id, requesterId);
         return ResponseEntity.noContent().build();
+    }
+
+    private ServiceRequestCategory parseCategory(String rawCategory) {
+        try {
+            return ServiceRequestCategory.fromValue(rawCategory);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
     }
 
     /**

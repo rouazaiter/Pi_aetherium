@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CurrentUserService, TestUser } from '../../core/auth/current-user.service';
+import { CurrentUserService } from '../../core/auth/current-user.service';
 
 declare var $: any;
 
@@ -9,11 +9,11 @@ declare var $: any;
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent {
-  users: TestUser[];
+  users$;
   currentUser$;
 
   constructor(private currentUserService: CurrentUserService) {
-    this.users = this.currentUserService.testUsers;
+    this.users$ = this.currentUserService.users$;
     this.currentUser$ = this.currentUserService.currentUser$;
   }
 

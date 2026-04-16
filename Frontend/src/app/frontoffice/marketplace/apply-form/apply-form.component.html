@@ -22,6 +22,10 @@
           {{ serviceRequest.creator.username }}
         </span>
         <span class="meta-item">
+          <i class="fa fa-tag"></i>
+          {{ serviceRequest.category }}
+        </span>
+        <span class="meta-item">
           <i class="fa fa-calendar-alt"></i>
           {{ serviceRequest.createdAt | date:'dd/MM/yyyy' }}
         </span>
@@ -40,14 +44,9 @@
 
     <div class="meeting-options" *ngIf="hasSchedulingOptions()" [formGroup]="form">
       <h4>Schedule a meeting</h4>
-      <p class="meeting-note">Choose one method before submitting your application.</p>
+      <p class="meeting-note">Choose one of the slots selected by the request creator.</p>
 
-      <div class="meeting-mode-switch" *ngIf="availableSlots.length > 0 && calendlyLink">
-        <button type="button" [class.active]="isMeetingMode('SLOTS')" (click)="setMeetingMode('SLOTS')">Use available slots</button>
-        <button type="button" [class.active]="isMeetingMode('CALENDLY')" (click)="setMeetingMode('CALENDLY')">Use Calendly</button>
-      </div>
-
-      <div *ngIf="availableSlots.length > 0 && (!calendlyLink || isMeetingMode('SLOTS'))" class="mt-3">
+      <div class="mt-3">
         <label for="meetingSlot" class="form-label fw-semibold mb-1">
           <i class="fa fa-clock me-1 text-primary"></i>
           Preferred meeting slot <span class="text-danger">*</span>
@@ -56,54 +55,7 @@
           <option value="">Select a slot</option>
           <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
         </select>
-        <div class="form-text text-muted">The creator will confirm your selected slot.</div>
-      </div>
-
-      <div *ngIf="calendlyLink && (!availableSlots.length || isMeetingMode('CALENDLY'))" class="calendly-flow mt-3">
-        <label class="form-label fw-semibold mb-1">Do you already have a Calendly account?</label>
-        <div class="account-choice-row">
-          <button type="button" [class.active]="form.value.hasCalendlyAccount === 'YES'" (click)="setCalendlyAccountReady(true)">Yes, I have one</button>
-          <button type="button" [class.active]="form.value.hasCalendlyAccount === 'NO'" (click)="setCalendlyAccountReady(false)">No, I need to create one</button>
-        </div>
-
-        <div class="create-account-box" *ngIf="form.value.hasCalendlyAccount === 'NO'">
-          <p>Create your account first, then return to this page and continue scheduling.</p>
-          <a class="btn btn-outline-secondary btn-sm" href="https://calendly.com/signup" target="_blank" rel="noopener noreferrer">
-            <i class="fa fa-user-plus me-1"></i> Create Calendly account
-          </a>
-        </div>
-
-        <div *ngIf="form.value.hasCalendlyAccount === 'YES'" class="calendly-embed-wrap">
-          <iframe
-            *ngIf="calendlyEmbedUrl"
-            class="calendly-frame"
-            [src]="calendlyEmbedUrl"
-            title="Calendly scheduler"
-            loading="lazy">
-          </iframe>
-
-          <div class="mt-3">
-            <label for="calendlySelectionNote" class="form-label fw-semibold mb-1">Selected date/time note <span class="text-danger">*</span></label>
-            <input
-              id="calendlySelectionNote"
-              type="text"
-              class="form-control"
-              formControlName="calendlySelectionNote"
-              placeholder="Example: Tuesday, Apr 22 at 11:00"
-            />
-          </div>
-
-          <div class="mt-2">
-            <label for="calendlyEventUrl" class="form-label fw-semibold mb-1">Calendly event link <span class="text-danger">*</span></label>
-            <input
-              id="calendlyEventUrl"
-              type="url"
-              class="form-control"
-              formControlName="calendlyEventUrl"
-              placeholder="https://calendly.com/events/..."
-            />
-          </div>
-        </div>
+        <div class="form-text text-muted">Reminder: you must have a Calendly account.</div>
       </div>
     </div>
 

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
 import { ApplicationService } from '../../../core/services/application.service';
 import { ServiceRequest } from '../../../core/models/service-request.model';
@@ -20,16 +19,13 @@ export class ApplyFormComponent implements OnInit {
   error = '';
   success = '';
   alreadyApplied = false;
-  currentUserId = 1;
-  calendlyLink = '';
+  currentUserId = 0;
   availableSlots: string[] = [];
-  calendlyEmbedUrl?: SafeResourceUrl;
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private sanitizer: DomSanitizer,
     private srService: ServiceRequestService,
     private appService: ApplicationService,
     private currentUserService: CurrentUserService,
@@ -37,52 +33,43 @@ export class ApplyFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUserId = this.currentUserService.currentUser.id;
-    this.currentUserService.currentUser$.subscribe(user => this.currentUserId = user.id);
-
     const id = Number(this.route.snapshot.params['id']);
 
     this.form = this.fb.group({
       message: ['', [Validators.required, Validators.maxLength(2000)]],
-      meetingMode: [''],
-      hasCalendlyAccount: [''],
-      meetingSlot: [''],
-      calendlySelectionNote: ['', Validators.maxLength(500)],
-      calendlyEventUrl: ['', Validators.maxLength(500)]
+      meetingSlot: ['', Validators.required]
     });
 
-    // Load the request
-    this.srService.getById(id).subscribe({
-      next: (sr) => {
-        // If this is my own request, do not allow applying
-        if (sr.creator.id === this.currentUserId) {
-          this.router.navigate(['/marketplace']);
-          return;
-        }
-        this.serviceRequest = sr;
+    this.currentUserService.currentUser$.subscribe(user => {
+      if (user.id <= 0) {
+        return;
+      }
 
-        this.meetingSchedulerService.getConfig(sr.id).subscribe({
-          next: (schedulingConfig) => {
-            this.calendlyLink = schedulingConfig.calendlyLink ?? '';
-            this.availableSlots = schedulingConfig.availableSlots ?? [];
+      this.currentUserId = user.id;
 
-            if (this.calendlyLink) {
-              this.form.patchValue({ meetingMode: 'CALENDLY' });
-              this.calendlyEmbedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-                this.buildCalendlyEmbedUrl(this.calendlyLink)
-              );
-            } else if (this.availableSlots.length > 0) {
-              this.form.patchValue({ meetingMode: 'SLOTS' });
-            }
+      // Load the request
+      this.srService.getById(id).subscribe({
+        next: (sr) => {
+          // If this is my own request, do not allow applying
+          if (sr.creator.id === this.currentUserId) {
+            this.router.navigate(['/marketplace']);
+            return;
           }
-        });
+          this.serviceRequest = sr;
 
-        // Check whether user already applied
-        this.appService.hasApplied(id, this.currentUserId).subscribe({
-          next: (res) => this.alreadyApplied = res.hasApplied
-        });
-      },
-      error: () => this.router.navigate(['/marketplace'])
+          this.meetingSchedulerService.getConfig(sr.id).subscribe({
+            next: (schedulingConfig) => {
+              this.availableSlots = schedulingConfig.availableSlots ?? [];
+            }
+          });
+
+          // Check whether user already applied
+          this.appService.hasApplied(id, this.currentUserId).subscribe({
+            next: (res) => this.alreadyApplied = res.hasApplied
+          });
+        },
+        error: () => this.router.navigate(['/marketplace'])
+      });
     });
   }
 
@@ -97,19 +84,12 @@ export class ApplyFormComponent implements OnInit {
 
     this.appService.apply(this.currentUserId, this.serviceRequest.id, this.form.value.message).subscribe({
       next: (application) => {
-        const mode = this.form.value.meetingMode;
-        if (!this.hasSchedulingOptions()) {
-          this.success = 'Application submitted successfully.';
-          this.alreadyApplied = true;
-          this.loading = false;
-          return;
-        }
-
-        const calendlyEventUrl = (this.form.value.calendlyEventUrl ?? '').trim();
-        const slot = mode === 'SLOTS' ? this.form.value.meetingSlot : calendlyEventUrl;
-        const eventUrl = mode === 'CALENDLY' ? calendlyEventUrl : undefined;
-
-        this.meetingSchedulerService.reserveSlot(application.id, this.currentUserId, mode, slot, eventUrl).subscribe({
+        this.meetingSchedulerService.reserveSlot(
+          application.id,
+          this.currentUserId,
+          'SLOTS',
+          this.form.value.meetingSlot
+        ).subscribe({
           next: () => {
             this.success = 'Application submitted successfully.';
             this.alreadyApplied = true;
@@ -129,56 +109,20 @@ export class ApplyFormComponent implements OnInit {
   }
 
   hasSchedulingOptions(): boolean {
-    return this.availableSlots.length > 0 || !!this.calendlyLink;
-  }
-
-  isMeetingMode(mode: 'SLOTS' | 'CALENDLY'): boolean {
-    return this.form.value.meetingMode === mode;
-  }
-
-  setMeetingMode(mode: 'SLOTS' | 'CALENDLY'): void {
-    this.form.patchValue({ meetingMode: mode });
-  }
-
-  setCalendlyAccountReady(isReady: boolean): void {
-    this.form.patchValue({ hasCalendlyAccount: isReady ? 'YES' : 'NO' });
+    return this.availableSlots.length > 0;
   }
 
   private validateMeetingChoice(): boolean {
-    if (!this.hasSchedulingOptions()) {
-      return true;
-    }
-
-    const mode = this.form.value.meetingMode;
-    if (!mode) {
-      this.error = 'Please choose a meeting method.';
+    if (!this.availableSlots.length) {
+      this.error = 'No available slots are configured for this request yet.';
       return false;
     }
 
-    if (mode === 'SLOTS') {
-      if (!this.form.value.meetingSlot) {
-        this.error = 'Please choose one available meeting slot.';
-        return false;
-      }
-      return true;
-    }
-
-    if (!this.calendlyLink) {
-      this.error = 'Calendly is not configured for this request.';
-      return false;
-    }
-
-    if (!this.form.value.calendlyEventUrl?.trim()) {
-      this.error = 'Please paste your Calendly event link.';
+    if (!this.form.value.meetingSlot) {
+      this.error = 'Please choose one available meeting slot.';
       return false;
     }
 
     return true;
-  }
-
-  private buildCalendlyEmbedUrl(rawUrl: string): string {
-    const cleanUrl = rawUrl.trim();
-    const separator = cleanUrl.includes('?') ? '&' : '?';
-    return `${cleanUrl}${separator}hide_landing_page_details=1&hide_gdpr_banner=1`;
   }
 }

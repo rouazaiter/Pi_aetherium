@@ -23,7 +23,7 @@ export class ServiceRequestListComponent implements OnInit {
   activeFilter: string = 'All';
   loading = false;
   error = '';
-  currentUserId = 1;
+  currentUserId = 0;
   popularServices: PopularServiceStat[] = [];
   topApplicantOfWeek?: LeaderboardEntry;
   topCreatorOfWeek?: LeaderboardEntry;
@@ -35,13 +35,14 @@ export class ServiceRequestListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUserId = this.currentUserService.currentUser.id;
     this.currentUserService.currentUser$.subscribe(user => {
+      if (user.id <= 0) {
+        return;
+      }
       this.currentUserId = user.id;
       this.load();
     });
     this.loadWeeklyHighlights();
-    this.load();
   }
 
   load(): void {

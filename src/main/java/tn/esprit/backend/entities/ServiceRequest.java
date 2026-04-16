@@ -29,6 +29,10 @@ public class ServiceRequest {
     @Column(nullable = false)
     private ServiceRequestStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 80)
+    private ServiceRequestCategory category;
+
     @Column(length = 500)
     private String files;  // Chemin ou URL des fichiers joints
 

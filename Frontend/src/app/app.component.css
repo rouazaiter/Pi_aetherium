@@ -2,8 +2,47 @@
 	padding-top: 110px;
 }
 
+.post-request-fab {
+	position: fixed;
+	right: 1.15rem;
+	bottom: 1.15rem;
+	z-index: 1200;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.72rem 1rem;
+	border-radius: 999px;
+	background: #7a6ad8;
+	color: #fff;
+	font-weight: 600;
+	font-size: 0.86rem;
+	line-height: 1;
+	box-shadow: 0 8px 24px rgba(29, 25, 61, 0.28);
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.post-request-fab:hover,
+.post-request-fab:focus-visible {
+	color: #fff;
+	background: #6d5dca;
+	transform: translateY(-1px);
+	box-shadow: 0 12px 30px rgba(29, 25, 61, 0.35);
+}
+
+.post-request-fab:active {
+	transform: translateY(1px);
+}
+
 @media (max-width: 991px) {
 	.app-content {
 		padding-top: 90px;
+	}
+
+	.post-request-fab {
+		right: 0.85rem;
+		bottom: 0.85rem;
+		padding: 0.66rem 0.9rem;
+		font-size: 0.82rem;
 	}
 }

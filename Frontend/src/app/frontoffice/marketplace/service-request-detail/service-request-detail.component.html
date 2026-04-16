@@ -12,6 +12,7 @@
   <p class="description">{{ serviceRequest.description }}</p>
 
   <div class="meta">
+    <span>Category: {{ serviceRequest.category }}</span>
     <span>Created on {{ serviceRequest.createdAt | date:'dd/MM/yyyy' }}</span>
     <span *ngIf="serviceRequest.expiringDate">
       · Expires on {{ serviceRequest.expiringDate | date:'dd/MM/yyyy' }}

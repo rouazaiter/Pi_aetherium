@@ -14,6 +14,10 @@ export class NotificationRealtimeService implements OnDestroy {
 
   constructor(private currentUserService: CurrentUserService) {
     this.userSub = this.currentUserService.currentUser$.subscribe(user => {
+      if (user.id <= 0) {
+        this.disconnect();
+        return;
+      }
       this.connectForUser(user.id);
     });
   }

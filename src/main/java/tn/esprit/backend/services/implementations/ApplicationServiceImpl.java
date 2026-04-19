@@ -129,6 +129,22 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional
+    public Application updateApplicationMessage(Long applicationId, Long applicantId, String message) {
+        if (message == null || message.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
+        }
+
+        Application application = fetchApplication(applicationId);
+        if (!application.getApplicant().getId().equals(applicantId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only application owner can update message");
+        }
+
+        application.setMessage(message.trim());
+        return applicationRepository.save(application);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public boolean hasUserApplied(Long serviceRequestId, Long applicantId) {
         ServiceRequest serviceRequest = fetchServiceRequest(serviceRequestId);

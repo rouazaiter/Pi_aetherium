@@ -12,5 +12,6 @@ public interface ApplicationService {
     List<Application> getApplicationsByUser(Long applicantId);
     List<Application> getApplicationsByServiceRequestAndStatus(Long serviceRequestId, ApplicationStatus status, Long requesterId);
     Application updateApplicationStatus(Long applicationId, Long requesterId, ApplicationStatus status);
+    Application updateApplicationMessage(Long applicationId, Long applicantId, String message);
     boolean hasUserApplied(Long serviceRequestId, Long applicantId);
 }

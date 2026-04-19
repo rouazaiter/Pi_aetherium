@@ -6,6 +6,8 @@ import { ApplicationService } from '../../../core/services/application.service';
 import { ServiceRequest } from '../../../core/models/service-request.model';
 import { CurrentUserService } from '../../../core/auth/current-user.service';
 import { MeetingSchedulerService } from '../../../core/services/meeting-scheduler.service';
+import { AiCoachService } from '../../../core/services/ai-coach.service';
+import { AiCoachPreviewResponse } from '../../../core/models/ai-coach.model';
 
 @Component({
   selector: 'app-apply-form',
@@ -21,6 +23,10 @@ export class ApplyFormComponent implements OnInit {
   alreadyApplied = false;
   currentUserId = 0;
   availableSlots: string[] = [];
+  aiLoading = false;
+  aiError = '';
+  aiPreview?: AiCoachPreviewResponse;
+  aiOriginalText = '';
 
   constructor(
     private fb: FormBuilder,
@@ -29,7 +35,8 @@ export class ApplyFormComponent implements OnInit {
     private srService: ServiceRequestService,
     private appService: ApplicationService,
     private currentUserService: CurrentUserService,
-    private meetingSchedulerService: MeetingSchedulerService
+    private meetingSchedulerService: MeetingSchedulerService,
+    private aiCoachService: AiCoachService
   ) {}
 
   ngOnInit(): void {
@@ -37,7 +44,8 @@ export class ApplyFormComponent implements OnInit {
 
     this.form = this.fb.group({
       message: ['', [Validators.required, Validators.maxLength(2000)]],
-      meetingSlot: ['', Validators.required]
+      meetingSlot: ['', Validators.required],
+      calendlyEventUrl: ['', [Validators.required, Validators.maxLength(500), Validators.pattern(/^https?:\/\/.+/i)]]
     });
 
     this.currentUserService.currentUser$.subscribe(user => {
@@ -88,7 +96,8 @@ export class ApplyFormComponent implements OnInit {
           application.id,
           this.currentUserId,
           'SLOTS',
-          this.form.value.meetingSlot
+          this.form.value.meetingSlot,
+          this.form.value.calendlyEventUrl
         ).subscribe({
           next: () => {
             this.success = 'Application submitted successfully.';
@@ -108,6 +117,56 @@ export class ApplyFormComponent implements OnInit {
     });
   }
 
+  onImproveWithAi(): void {
+    this.aiError = '';
+    this.aiPreview = undefined;
+
+    if (!this.serviceRequest) {
+      return;
+    }
+
+    const currentMessage = (this.form.get('message')?.value || '').trim();
+    if (!currentMessage) {
+      this.aiError = 'Please write your message first, then use AI improvement.';
+      this.form.get('message')?.markAsTouched();
+      return;
+    }
+
+    this.aiLoading = true;
+
+    this.aiCoachService.preview({
+      serviceRequestId: this.serviceRequest.id,
+      originalText: currentMessage,
+      tone: 'professionnel',
+      language: 'fr'
+    }).subscribe({
+      next: (preview) => {
+        this.aiOriginalText = currentMessage;
+        this.aiPreview = preview;
+        this.aiLoading = false;
+      },
+      error: (err) => {
+        this.aiError = err?.error?.message || 'AI improvement is currently unavailable.';
+        this.aiLoading = false;
+      }
+    });
+  }
+
+  applyAiSuggestion(): void {
+    if (!this.aiPreview) {
+      return;
+    }
+    this.form.patchValue({ message: this.aiPreview.improvedText });
+    this.form.get('message')?.markAsDirty();
+    this.form.get('message')?.markAsTouched();
+  }
+
+  clearAiPreview(): void {
+    this.aiPreview = undefined;
+    this.aiOriginalText = '';
+    this.aiError = '';
+  }
+
   hasSchedulingOptions(): boolean {
     return this.availableSlots.length > 0;
   }
@@ -120,6 +179,11 @@ export class ApplyFormComponent implements OnInit {
 
     if (!this.form.value.meetingSlot) {
       this.error = 'Please choose one available meeting slot.';
+      return false;
+    }
+
+    if (!this.form.value.calendlyEventUrl?.trim()) {
+      this.error = 'Please provide your Calendly link.';
       return false;
     }
 

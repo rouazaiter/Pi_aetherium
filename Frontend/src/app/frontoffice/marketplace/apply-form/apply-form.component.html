@@ -57,6 +57,20 @@
         </select>
         <div class="form-text text-muted">Reminder: you must have a Calendly account.</div>
       </div>
+
+      <div class="mt-3">
+        <label for="calendlyEventUrl" class="form-label fw-semibold mb-1">
+          Your Calendly link <span class="text-danger">*</span>
+        </label>
+        <input
+          id="calendlyEventUrl"
+          type="url"
+          class="form-control"
+          formControlName="calendlyEventUrl"
+          placeholder="https://calendly.com/your-name"
+        />
+        <div class="form-text text-muted">This link will be included in the meeting notification.</div>
+      </div>
     </div>
 
     <!-- Already applied -->
@@ -92,10 +106,22 @@
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
         <div class="mb-4">
-          <label for="message" class="form-label fw-semibold">
-            <i class="fa fa-comment-alt me-1 text-primary"></i>
-            Cover message <span class="text-danger">*</span>
-          </label>
+          <div class="d-flex justify-content-between align-items-center gap-2 mb-1 flex-wrap">
+            <label for="message" class="form-label fw-semibold mb-0">
+              <i class="fa fa-comment-alt me-1 text-primary"></i>
+              Cover message <span class="text-danger">*</span>
+            </label>
+            <button
+              type="button"
+              class="btn btn-ai"
+              [disabled]="aiLoading || loading"
+              (click)="onImproveWithAi()"
+            >
+              <span *ngIf="aiLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <i *ngIf="!aiLoading" class="fa fa-magic me-2"></i>
+              {{ aiLoading ? 'Improving...' : 'Improve with AI' }}
+            </button>
+          </div>
           <textarea
             id="message"
             class="form-control"
@@ -106,6 +132,60 @@
           ></textarea>
           <div class="invalid-feedback">Cover message is required.</div>
           <div class="form-text text-muted">{{ form.get('message')?.value?.length || 0 }} / 2000 characters</div>
+        </div>
+
+        <div *ngIf="aiError" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+          <i class="fa fa-exclamation-circle"></i> {{ aiError }}
+        </div>
+
+        <div *ngIf="aiPreview" class="ai-preview-card mb-4">
+          <div class="ai-preview-header">
+            <h5 class="mb-0">AI Comparison</h5>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="ai-score-badge">Relevance: {{ aiPreview.relevanceScore }}/100</span>
+              <span class="ai-score-badge">Clarity: {{ aiPreview.clarityScore }}/100</span>
+              <span class="ai-source-badge" [class.fallback]="!aiPreview.generatedByAi">
+                {{ aiPreview.generatedByAi ? 'AI provider' : 'Local fallback' }}
+              </span>
+            </div>
+          </div>
+
+          <p class="ai-summary mb-3">{{ aiPreview.changesSummary }}</p>
+
+          <div class="ai-compare-grid">
+            <div>
+              <h6 class="ai-panel-title">Before</h6>
+              <div class="ai-panel-content">{{ aiOriginalText }}</div>
+            </div>
+            <div>
+              <h6 class="ai-panel-title">After</h6>
+              <div class="ai-panel-content improved">{{ aiPreview.improvedText }}</div>
+            </div>
+          </div>
+
+          <div class="ai-list-grid" *ngIf="aiPreview.missingPoints.length || aiPreview.suggestions.length">
+            <div *ngIf="aiPreview.missingPoints.length">
+              <h6 class="ai-panel-title">Missing Points</h6>
+              <ul class="ai-list mb-0">
+                <li *ngFor="let point of aiPreview.missingPoints">{{ point }}</li>
+              </ul>
+            </div>
+            <div *ngIf="aiPreview.suggestions.length">
+              <h6 class="ai-panel-title">Suggestions</h6>
+              <ul class="ai-list mb-0">
+                <li *ngFor="let tip of aiPreview.suggestions">{{ tip }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 flex-wrap mt-3">
+            <button type="button" class="btn btn-ai-apply" (click)="applyAiSuggestion()">
+              <i class="fa fa-check me-2"></i>Use improved text
+            </button>
+            <button type="button" class="btn btn-ai-clear" (click)="clearAiPreview()">
+              <i class="fa fa-times me-2"></i>Close comparison
+            </button>
+          </div>
         </div>
 
         <!-- Alerts -->

@@ -138,7 +138,7 @@ export class ApplyFormComponent implements OnInit {
       serviceRequestId: this.serviceRequest.id,
       originalText: currentMessage,
       tone: 'professionnel',
-      language: 'fr'
+      language: 'en'
     }).subscribe({
       next: (preview) => {
         this.aiOriginalText = currentMessage;

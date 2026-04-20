@@ -20,8 +20,16 @@
       </p>
 
       <article class="notification-item" *ngFor="let notification of notifications">
-        <span class="arrival-pill">New</span>
+        <div class="notification-top-row">
+          <span class="arrival-pill">New</span>
+          <span class="priority-pill" [ngClass]="'priority-' + (notification.priority || 'LOW').toLowerCase()">
+            {{ notification.priority || 'LOW' }}
+          </span>
+        </div>
         <p>{{ notification.message }}</p>
+        <small class="suggested-action" *ngIf="notification.suggestedAction">
+          Suggested action: {{ notification.suggestedAction }}
+        </small>
         <small>{{ notification.type }} • {{ notification.createdAt | date:'short' }}</small>
       </article>
     </div>

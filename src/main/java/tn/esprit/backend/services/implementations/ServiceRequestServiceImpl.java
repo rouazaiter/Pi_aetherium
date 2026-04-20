@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import tn.esprit.backend.dto.NotificationPriority;
 import tn.esprit.backend.entities.ServiceRequest;
 import tn.esprit.backend.entities.ServiceRequestCategory;
 import tn.esprit.backend.entities.ServiceRequestStatus;
@@ -23,6 +24,7 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
 
     private final ServiceRequestRepository serviceRequestRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -41,7 +43,26 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
         serviceRequest.setStatus(ServiceRequestStatus.OPEN);
         serviceRequest.setCreatedAt(now);
         serviceRequest.setUpdatedAt(now);
-        return serviceRequestRepository.save(serviceRequest);
+        ServiceRequest saved = serviceRequestRepository.save(serviceRequest);
+
+        List<Long> recipients = userRepository.findAll().stream()
+            .map(User::getId)
+            .filter(id -> !id.equals(creatorId))
+            .toList();
+
+        notificationService.notifyUsersWithAssistant(
+            recipients,
+            "NEW_SERVICE_REQUEST",
+            "New service request available: " + saved.getName() + ".",
+            creator.getUsername(),
+            saved.getName(),
+            NotificationPriority.LOW,
+            "Open request details",
+            saved.getId(),
+            null
+        );
+
+        return saved;
     }
 
     @Override

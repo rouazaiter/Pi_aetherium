@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import tn.esprit.backend.dto.NotificationDto;
+import tn.esprit.backend.dto.NotificationPriority;
 import tn.esprit.backend.entities.Application;
 import tn.esprit.backend.entities.ApplicationStatus;
 import tn.esprit.backend.entities.ServiceRequest;
@@ -57,15 +58,16 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application saved = applicationRepository.save(application);
 
         Long creatorId = serviceRequest.getCreator().getId();
-        notificationService.notifyUser(
-                creatorId,
-                new NotificationDto(
-                        "NEW_APPLICATION",
-                "New application on your request " + serviceRequest.getName(),
-                        serviceRequest.getId(),
-                        saved.getId(),
-                        LocalDateTime.now()
-                )
+    notificationService.notifyUserWithAssistant(
+        creatorId,
+        "NEW_APPLICATION",
+        "New application received for your request: " + serviceRequest.getName() + ".",
+        applicant.getUsername(),
+        serviceRequest.getName(),
+        NotificationPriority.MEDIUM,
+        "Review application",
+        serviceRequest.getId(),
+        saved.getId()
         );
 
         return saved;
@@ -125,6 +127,29 @@ public class ApplicationServiceImpl implements ApplicationService {
             serviceRequest.setUpdatedAt(LocalDateTime.now());
             serviceRequestRepository.save(serviceRequest);
         }
+
+        if (status == ApplicationStatus.ACCEPTED || status == ApplicationStatus.REJECTED) {
+            String type = status == ApplicationStatus.ACCEPTED ? "APPLICATION_ACCEPTED" : "APPLICATION_REJECTED";
+            String fallbackMessage = status == ApplicationStatus.ACCEPTED
+                ? "Your application for " + serviceRequest.getName() + " was accepted."
+                : "Your application for " + serviceRequest.getName() + " was rejected.";
+            String fallbackAction = status == ApplicationStatus.ACCEPTED
+                ? "Prepare next steps"
+                : "Improve profile and apply again";
+
+            notificationService.notifyUserWithAssistant(
+                application.getApplicant().getId(),
+                type,
+                fallbackMessage,
+                serviceRequest.getCreator().getUsername(),
+                serviceRequest.getName(),
+                NotificationPriority.HIGH,
+                fallbackAction,
+                serviceRequest.getId(),
+                application.getId()
+            );
+        }
+
         return saved;
     }
 

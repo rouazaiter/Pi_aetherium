@@ -36,7 +36,7 @@ public class AiCoachServiceImpl implements AiCoachService {
     @Value("${ai.coach.base-url:https://api.openai.com/v1/chat/completions}")
     private String aiBaseUrl;
 
-    @Value("${ai.coach.model:gpt-4o-mini}")
+    @Value("${ai.coach.model:gpt-4.1-mini}")
     private String aiModel;
 
     @Value("${ai.coach.api-key:}")
@@ -77,11 +77,14 @@ public class AiCoachServiceImpl implements AiCoachService {
         String safeLanguage = normalizeLanguage(language);
 
         String systemPrompt = """
-                Tu es un coach de candidature. Tu dois ameliorer le texte du candidat pour une offre donnee.
+                Tu es un coach de candidature expert.
+                Tu dois transformer un texte brut en un message de candidature plus convaincant, plus clair, plus professionnel et plus adapte a l'offre.
                 Regles strictes:
                 - Ne jamais inventer une experience, un diplome, une certification, ni une competence non prouvee.
                 - Conserver les faits et le sens d'origine.
-                - Rendre le texte plus clair, professionnel et pertinent par rapport a l'offre.
+                - Produire une reformulation plus naturelle, plus fluide et plus mature que la phrase source.
+                - Si le texte est tres court, l'enrichir avec des formulations professionnelles, sans ajouter de fausses informations.
+                - Favoriser 2 a 4 phrases courtes et percutantes plutot qu'une seule phrase brute.
                 - Si une information manque, proposer une suggestion dans missingPoints, sans inventer.
                 - Repondre strictement en JSON valide, sans markdown, sans texte hors JSON.
 
@@ -119,7 +122,7 @@ public class AiCoachServiceImpl implements AiCoachService {
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("model", aiModel);
-        payload.put("temperature", 0.3);
+        payload.put("temperature", 0.45);
 
         List<Map<String, String>> messages = List.of(
                 Map.of("role", "system", "content", systemPrompt),
@@ -185,7 +188,7 @@ public class AiCoachServiceImpl implements AiCoachService {
     }
 
     private AiCoachPreviewResponse localFallbackPreview(String originalText, ServiceRequest request, String language) {
-        String improved = improveTextLightly(originalText);
+        String improved = improveTextLightly(originalText, request, language);
         int relevance = localRelevanceScore(improved, request);
         int clarity = localClarityScore(improved);
 
@@ -274,16 +277,229 @@ public class AiCoachServiceImpl implements AiCoachService {
         return clampScore(lengthScore + punctuationBonus + structureBonus);
     }
 
-    private String improveTextLightly(String text) {
+    private String improveTextLightly(String text, ServiceRequest request, String language) {
         String cleaned = safeText(text).replaceAll("\\s+", " ").trim();
         if (cleaned.isBlank()) {
             return cleaned;
         }
-        String sentence = Character.toUpperCase(cleaned.charAt(0)) + cleaned.substring(1);
-        if (!sentence.endsWith(".") && !sentence.endsWith("!") && !sentence.endsWith("?")) {
-            sentence = sentence + ".";
+
+        String normalized = normalizeSpelling(cleaned);
+        String lowered = normalized.toLowerCase(Locale.ROOT);
+
+        String offerName = safeText(request.getName()).trim();
+        String roleFragment = offerName.isBlank() ? "the opportunity" : offerName;
+
+        if (language != null && language.equalsIgnoreCase("en")) {
+            if (lowered.contains("i can help you") || lowered.contains("i can help")) {
+                return buildEnglishRewrite(normalized, roleFragment, request);
+            }
+            if (lowered.contains("i have experience") || lowered.contains("i have an experience")) {
+                return buildEnglishRewrite(normalized, roleFragment, request);
+            }
+            return buildEnglishRewrite(normalized, roleFragment, request);
         }
-        return sentence;
+
+        return buildFrenchRewrite(normalized, roleFragment, request);
+    }
+
+    private String normalizeSpelling(String text) {
+        String value = safeText(text).replaceAll("\\s+", " ").trim();
+        value = value.replaceAll("(?i)\\bweb develop+pment\\b", "web development");
+        value = value.replaceAll("(?i)\\bdevelop+pment\\b", "development");
+        value = value.replaceAll("(?i)\\bmanag+ement\\b", "management");
+        value = value.replaceAll("(?i)\\bexpereince\\b", "experience");
+        value = value.replaceAll("(?i)\\bproffesional\\b", "professional");
+        value = value.replaceAll("(?i)\\bcommmunication\\b", "communication");
+        value = value.replaceAll("(?i)\\bweb develpment\\b", "web development");
+        value = value.replaceAll("(?i)\\bdeveloppment\\b", "development");
+        value = value.replaceAll("(?i)\\bhelpp?\\b", "help");
+        value = value.replaceAll("(?i)\\bplataform\\b", "platform");
+        return value;
+    }
+
+    private String buildEnglishRewrite(String text, String roleFragment, ServiceRequest request) {
+        String clean = text.replaceAll("[\\s]+", " ").trim();
+        String experiencePhrase = extractExperiencePhrase(clean, true);
+        String skillPhrase = extractSkillPhrase(clean, true);
+
+        StringBuilder result = new StringBuilder();
+        result.append("I am confident I can contribute to ").append(roleFragment).append(" with a professional and proactive approach.");
+        if (!experiencePhrase.isBlank()) {
+            result.append(' ').append(experiencePhrase);
+        } else {
+            result.append(" I have hands-on experience delivering clean, reliable digital work.");
+        }
+
+        if (!skillPhrase.isBlank()) {
+            result.append(' ').append(skillPhrase);
+        } else {
+            result.append(" I am comfortable working on practical tasks, collaborating with teams, and adapting quickly to project needs.");
+        }
+
+        result.append(' ').append(buildEnglishClosing(request));
+        return capitalizeSentences(result.toString());
+    }
+
+    private String buildFrenchRewrite(String text, String roleFragment, ServiceRequest request) {
+        String clean = text.replaceAll("[\\s]+", " ").trim();
+        String experiencePhrase = extractExperiencePhrase(clean, false);
+        String skillPhrase = extractSkillPhrase(clean, false);
+
+        StringBuilder result = new StringBuilder();
+        result.append("Je souhaite mettre mes competences au service de ").append(roleFragment).append(" avec une approche serieuse, claire et orientee resultat.");
+        if (!experiencePhrase.isBlank()) {
+            result.append(' ').append(experiencePhrase);
+        } else {
+            result.append(" Je dispose d'une base solide pour contribuer efficacement aux besoins du poste.");
+        }
+
+        if (!skillPhrase.isBlank()) {
+            result.append(' ').append(skillPhrase);
+        } else {
+            result.append(" Je suis capable de m'adapter rapidement, de travailler avec rigueur et de collaborer efficacement.");
+        }
+
+        result.append(' ').append(buildFrenchClosing(request));
+        return capitalizeSentences(result.toString());
+    }
+
+    private String extractExperiencePhrase(String text, boolean english) {
+        String lowered = text.toLowerCase(Locale.ROOT);
+        if (lowered.contains("web development")) {
+            return english
+                    ? "I have experience in web development and can contribute to building clean, functional, and user-friendly solutions."
+                    : "J'ai de l'experience en developpement web et je peux contribuer a la creation de solutions propres, fonctionnelles et utiles."
+        ;
+        }
+        if (lowered.contains("development")) {
+            return english
+                    ? "I have experience in development and I am used to turning requirements into practical results."
+                    : "J'ai de l'experience en developpement et j'ai l'habitude de transformer des besoins en resultats concrets."
+        ;
+        }
+        if (lowered.contains("project")) {
+            return english
+                    ? "I can bring a practical mindset and a strong focus on project delivery."
+                    : "Je peux apporter une approche concrete et un vrai sens de la livraison de projet."
+        ;
+        }
+        return "";
+    }
+
+    private String extractSkillPhrase(String text, boolean english) {
+        String lowered = text.toLowerCase(Locale.ROOT);
+        if (lowered.contains("frontend") || lowered.contains("front-end")) {
+            return english
+                    ? "I am comfortable contributing on the front end and adapting the message to business goals."
+                    : "Je suis a l'aise pour contribuer cote front-end et adapter mon travail aux objectifs du besoin."
+        ;
+        }
+        if (lowered.contains("backend") || lowered.contains("back-end")) {
+            return english
+                    ? "I also pay attention to structure, reliability, and maintainable implementation."
+                    : "Je fais aussi attention a la structure, a la fiabilite et a la maintenabilite."
+        ;
+        }
+        if (lowered.contains("team") || lowered.contains("collabor")) {
+            return english
+                    ? "I work well in collaborative environments and communicate clearly."
+                    : "Je travaille bien en equipe et je communique clairement."
+        ;
+        }
+        return "";
+    }
+
+    private String buildEnglishClosing(ServiceRequest request) {
+        String offerName = safeText(request.getName()).trim();
+        if (offerName.isBlank()) {
+            return "I would be glad to discuss how my background can support your needs.";
+        }
+        return "I would be glad to discuss how my background can support " + offerName + ".";
+    }
+
+    private String buildFrenchClosing(ServiceRequest request) {
+        String offerName = safeText(request.getName()).trim();
+        if (offerName.isBlank()) {
+            return "Je serais ravi d'echanger sur la maniere dont mon profil peut repondre a vos besoins.";
+        }
+        return "Je serais ravi d'echanger sur la maniere dont mon profil peut repondre a " + offerName + ".";
+    }
+
+    private String cleanupFragment(String fragment) {
+        String value = safeText(fragment).trim();
+        if (value.isBlank()) {
+            return value;
+        }
+
+        value = value.replaceAll("\\s+", " ");
+        value = value.replaceAll("\\s+([,.;:!?])", "$1");
+        value = value.replaceAll("([,.;:!?])(\\S)", "$1 $2");
+        value = value.replaceAll("(?i)\\bi\\b", "I");
+        value = value.replaceAll("(?i)\\bi'm\\b", "I'm");
+        value = value.replaceAll("(?i)\\bcan't\\b", "cannot");
+        value = value.replaceAll("(?i)\\bdon't\\b", "do not");
+        value = value.replaceAll("(?i)\\bwon't\\b", "will not");
+        value = value.replaceAll("(?i)\\bweb develop+pment\\b", "web development");
+        value = value.replaceAll("(?i)\\bdevelop+pment\\b", "development");
+        value = value.replaceAll("(?i)\\bplatfom\\b", "platform");
+        value = value.replaceAll("(?i)\\bexpereince\\b", "experience");
+        value = value.replaceAll("(?i)\\bsucces\\b", "success");
+        value = value.replaceAll("(?i)\\bhelping you\\b", "helping clients");
+
+        if (!value.isEmpty()) {
+            value = Character.toUpperCase(value.charAt(0)) + value.substring(1);
+        }
+        if (!value.endsWith(".") && !value.endsWith("!") && !value.endsWith("?")) {
+            value = value + ".";
+        }
+        return value;
+    }
+
+    private String capitalizeSentences(String text) {
+        String normalized = safeText(text).replaceAll("\\s+", " ").trim();
+        if (normalized.isBlank()) {
+            return normalized;
+        }
+
+        StringBuilder result = new StringBuilder();
+        boolean capitalizeNext = true;
+        for (int i = 0; i < normalized.length(); i++) {
+            char current = normalized.charAt(i);
+            if (capitalizeNext && Character.isLetter(current)) {
+                result.append(Character.toUpperCase(current));
+                capitalizeNext = false;
+            } else {
+                result.append(current);
+            }
+
+            if (current == '.' || current == '!' || current == '?') {
+                capitalizeNext = true;
+            }
+        }
+        return result.toString().replaceAll("\\s+", " ").trim();
+    }
+
+    private String buildOfferSignal(ServiceRequest request, String language) {
+        String offerName = safeText(request.getName()).trim();
+        String category = request.getCategory() == null ? "" : request.getCategory().name().toLowerCase(Locale.ROOT).replace('_', ' ');
+
+        if (language != null && language.equalsIgnoreCase("en")) {
+            if (!offerName.isBlank()) {
+                return "I am aligning this message with the role: " + offerName + ".";
+            }
+            if (!category.isBlank()) {
+                return "I am aligning this message with the category: " + category + ".";
+            }
+            return "I am aligning this message with the opportunity.";
+        }
+
+        if (!offerName.isBlank()) {
+            return "Je rends ce message plus pertinent pour l'offre: " + offerName + ".";
+        }
+        if (!category.isBlank()) {
+            return "Je rends ce message plus pertinent pour la categorie: " + category + ".";
+        }
+        return "Je rends ce message plus pertinent pour l'offre.";
     }
 
     private String extractJsonObject(String content) {

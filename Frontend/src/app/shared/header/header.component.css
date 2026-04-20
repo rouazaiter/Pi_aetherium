@@ -31,13 +31,29 @@
 .nav-notification-slot {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0 0.35rem;
   white-space: nowrap;
   flex-shrink: 0;
+  margin-left: 0.25rem;
 }
 
 .header-area .main-nav ul.nav {
+  display: flex;
   flex-wrap: nowrap;
+  align-items: center;
+}
+
+.header-area .main-nav .nav li.nav-notification-slot,
+.header-area .main-nav .nav li.session-switch {
+  height: auto;
+  line-height: normal;
+}
+
+.background-header .main-nav .nav li.nav-notification-slot,
+.background-header .main-nav .nav li.session-switch {
+  height: 80px;
+  display: flex;
   align-items: center;
 }
 
@@ -103,6 +119,8 @@
   .session-switch {
     color: #1e3551;
     padding: 0.3rem 0;
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .session-switch select {
@@ -113,6 +131,9 @@
 
   .nav-notification-slot {
     padding: 0.3rem 0;
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 

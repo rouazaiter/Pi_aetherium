@@ -40,5 +40,15 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/friends/friends.component').then((m) => m.FriendsComponent),
   },
+
+
+  {
+  path: 'drive',
+  canActivate: [authGuard], // recommandé (comme profile, friends)
+  loadComponent: () =>
+    import('./pages/drive/drive.component').then((m) => m.DriveComponent),
+},
+
+
   { path: '**', redirectTo: '' },
 ];

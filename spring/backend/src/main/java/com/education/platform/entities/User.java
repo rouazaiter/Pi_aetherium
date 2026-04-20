@@ -92,4 +92,8 @@ public class User {
     )
     @Builder.Default
     private Set<User> friends = new HashSet<>();
+
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private PrivateDrive privateDrive;
 }

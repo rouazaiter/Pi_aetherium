@@ -1,0 +1,219 @@
+<div class="container-fluid">
+<br>
+  <!-- 📌 PAGE TITLE -->
+  <!-- <div class="page-title-box">
+    <h4 class="page-title">My Private Drive</h4>
+  </div> -->
+  <div class="text-center">
+    <h1 class="fw-bold" style="color:#7a6ad8; letter-spacing:1px;">
+    My Private Drive
+  </h1></div>
+  <br><br><br>
+
+  <!-- 📊 STATS (SCHOLAR STYLE CLEAN) -->
+<!-- 📊 STATS CLEAN DASHBOARD -->
+<div class="container mb-4">
+
+  <div class="row g-3">
+
+    <!-- USED -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card border-0 shadow-lg stat-card">
+
+        <div class="card-body text-center">
+
+          <h6 class="text-muted mb-2">Used Storage</h6>
+
+          <h3 class="mb-2 text-danger fw-bold">
+            {{ used | number:'1.1-2' }} GB
+          </h3>
+
+          <div class="progress" style="height: 6px;">
+            <div class="progress-bar bg-danger"
+                 [style.width.%]="(used / total) * 100">
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TOTAL -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card border-0 shadow-lg stat-card">
+
+        <div class="card-body text-center">
+
+          <h6 class="text-muted mb-2">Total Storage</h6>
+
+          <h3 class="mb-2 text-primary fw-bold">
+            {{ total }} GB
+          </h3>
+
+          <small class="text-muted">Quota plan</small>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- USAGE -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card border-0 shadow-lg stat-card">
+
+        <div class="card-body text-center">
+
+          <h6 class="text-muted mb-2">Usage</h6>
+
+          <h3 class="mb-2 text-success fw-bold">
+            {{ (used / total) * 100 | number:'1.0-0' }}%
+          </h3>
+
+          <div class="progress" style="height: 6px;">
+            <div class="progress-bar bg-success"
+                 [style.width.%]="(used / total) * 100">
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- ⬆️ UPLOAD CARD (CLEAN) -->
+  <div class="section" >
+
+    <div class="container" >
+
+      <div class="card border-0 shadow-sm" >
+
+        <div class="card-body " >
+
+          <h5 class="mb-3">Upload File</h5>
+
+          <input type="file"
+                 class="form-control"
+                 (change)="onFileSelected($event)">
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 📂 FILES GRID -->
+  <div class="section mt-4">
+    <div class="text-center my-5">
+
+  <h1 class="fw-bold" style="color:#7a6ad8; letter-spacing:1px;">
+    Mon espace fichiers
+  </h1>
+
+  <div style="width:80px; height:3px; background:#7a6ad8; margin:10px auto; border-radius:10px;"></div>
+
+  <p class="text-muted">
+    Upload, télécharge et organise tes ressources
+  </p>
+
+</div>
+
+
+
+    <div class="container">
+
+      <div class="row">
+
+        <!-- 📦 FILE CARD -->
+        <div class="col-lg-4 col-md-6 mb-4"
+             *ngFor="let file of files">
+
+          <div class="card border-0 shadow-sm h-100">
+
+            <!-- 🎬 PREVIEW -->
+            <div style="height: 180px; overflow: hidden;">
+
+              <video *ngIf="file.type === 'video/mp4'"
+                     class="w-100 h-100"
+                     style="object-fit: cover;"
+                     controls>
+                <source [src]="fileService.getFileUrl(file.id)" type="video/mp4">
+              </video>
+
+              <img *ngIf="file.type !== 'video/mp4'"
+                   src="assets/images/file-default.jpg"
+                   class="w-100 h-100"
+                   style="object-fit: cover;">
+
+            </div>
+
+            <!-- 📄 CONTENT -->
+            <div class="card-body">
+
+              <h6 class="mb-2">
+                📄 {{ file.name }}
+              </h6>
+
+              <small class="text-muted d-block mb-3">
+                {{ file.size / (1024*1024) | number:'1.1-2' }} MB • {{ file.type }}
+              </small>
+
+              <!-- ⚙️ ACTIONS -->
+              <div class="d-flex gap-2">
+
+<button class="btn btn-sm btn-success flex-fill"
+        (click)="download(file)">
+  Download
+</button>
+
+                <button class="btn btn-sm btn-warning flex-fill"
+                        (click)="rename(file)">
+                  Rename
+                </button>
+
+                <button class="btn btn-sm btn-danger flex-fill"
+                        (click)="delete(file.id)">
+                  Delete
+                </button>
+
+                <button class="btn btn-sm btn-info flex-fill"
+        (click)="summarize(file)">
+  AI Summary
+</button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div *ngIf="summaryText" class="card border-0 shadow-sm mt-3">
+
+  <div class="card-body">
+
+    <h5>🧠 Résumé de la session</h5>
+
+    <p class="text-muted">
+      {{ summaryText }}
+    </p>
+
+  </div>
+
+</div>

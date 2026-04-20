@@ -18,15 +18,22 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
+
+import com.education.platform.entities.PrivateDrive;
+import com.education.platform.repositories.PrivateDriveRepository;
+
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PrivateDriveRepository privateDriveRepository;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,PrivateDriveRepository privateDriveRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.privateDriveRepository = privateDriveRepository;
+
     }
 
     @Override
@@ -64,6 +71,8 @@ public class UserServiceImpl implements UserService {
                 .build();
         user.setProfile(profile);
         return userRepository.save(user);
+
+
     }
 
     @Override
@@ -140,6 +149,19 @@ public class UserServiceImpl implements UserService {
                 .user(user)
                 .build();
         user.setProfile(profile);
+
+        // ✅ SAVE USER FIRST
+        User savedUser = userRepository.save(user);
+
+// ✅ CREATE DRIVE AFTER USER EXISTS
+        PrivateDrive drive = new PrivateDrive();
+        drive.setUser(savedUser);
+        drive.setTotalVolume(50L * 1024 * 1024 * 1024);
+        drive.setUsedVolume(0L);
+
+        privateDriveRepository.save(drive);
+
+
         return userRepository.save(user);
     }
 

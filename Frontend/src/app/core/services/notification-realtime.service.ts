@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Client, IMessage } from '@stomp/stompjs';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CurrentUserService } from '../auth/current-user.service';
@@ -8,17 +9,25 @@ import { RealtimeNotification } from '../models/notification.model';
 export class NotificationRealtimeService implements OnDestroy {
   private stompClient: Client | null = null;
   private userSub: Subscription;
+  private activeUserId: number | null = null;
 
   private readonly notificationsSubject = new BehaviorSubject<RealtimeNotification[]>([]);
   readonly notifications$ = this.notificationsSubject.asObservable();
 
-  constructor(private currentUserService: CurrentUserService) {
+  constructor(
+    private currentUserService: CurrentUserService,
+    private http: HttpClient
+  ) {
     this.userSub = this.currentUserService.currentUser$.subscribe(user => {
       if (user.id <= 0) {
+        this.activeUserId = null;
+        this.notificationsSubject.next([]);
         this.disconnect();
         return;
       }
-      this.connectForUser(user.id);
+
+      this.activeUserId = user.id;
+      this.loadHistory(user.id);
     });
   }
 
@@ -29,6 +38,26 @@ export class NotificationRealtimeService implements OnDestroy {
   ngOnDestroy(): void {
     this.userSub.unsubscribe();
     this.disconnect();
+  }
+
+  private loadHistory(userId: number): void {
+    this.http.get<RealtimeNotification[]>(`/skillhub/api/notifications/user/${userId}?limit=30`).subscribe({
+      next: (history) => {
+        if (this.activeUserId !== userId) {
+          return;
+        }
+
+        this.notificationsSubject.next(this.normalizeNotifications(history ?? []));
+        void this.connectForUser(userId);
+      },
+      error: () => {
+        if (this.activeUserId !== userId) {
+          return;
+        }
+
+        void this.connectForUser(userId);
+      }
+    });
   }
 
   private async connectForUser(userId: number): Promise<void> {
@@ -61,6 +90,40 @@ export class NotificationRealtimeService implements OnDestroy {
   private handleIncomingMessage(rawBody: string): void {
     const parsed = JSON.parse(rawBody) as RealtimeNotification;
     const current = this.notificationsSubject.value;
-    this.notificationsSubject.next([parsed, ...current].slice(0, 30));
+    this.notificationsSubject.next(this.normalizeNotifications([parsed, ...current]));
+  }
+
+  private normalizeNotifications(notifications: RealtimeNotification[]): RealtimeNotification[] {
+    const seen = new Set<string>();
+    const ordered = [...notifications].sort((a, b) => {
+      const left = new Date(a.createdAt || 0).getTime();
+      const right = new Date(b.createdAt || 0).getTime();
+      return right - left;
+    });
+
+    const deduped: RealtimeNotification[] = [];
+
+    for (const notification of ordered) {
+      const key = [
+        notification.type,
+        notification.message,
+        notification.createdAt,
+        notification.serviceRequestId ?? '',
+        notification.applicationId ?? ''
+      ].join('|');
+
+      if (seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+      deduped.push(notification);
+
+      if (deduped.length >= 30) {
+        break;
+      }
+    }
+
+    return deduped;
   }
 }

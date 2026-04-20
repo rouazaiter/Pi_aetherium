@@ -16,6 +16,7 @@ import java.util.List;
 @Builder
 public class LeaderboardResponseDto {
     private String type;
+    private String category;
     private int days;
     private int limit;
     private LocalDateTime generatedAt;

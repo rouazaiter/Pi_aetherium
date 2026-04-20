@@ -21,6 +21,13 @@
       </label>
 
       <label>
+        Category
+        <select [value]="category" (change)="onCategoryChange($any($event.target).value)">
+          <option *ngFor="let item of categories" [value]="item.value">{{ item.label }}</option>
+        </select>
+      </label>
+
+      <label>
         Period
         <select [value]="days" (change)="onDaysChange($any($event.target).value)">
           <option [value]="7">Last 7 days</option>

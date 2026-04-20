@@ -7,6 +7,114 @@
   max-width: 1160px;
 }
 
+.marketplace-shell {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.marketplace-sidebar {
+  position: sticky;
+  top: 84px;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.marketplace-main {
+  min-width: 0;
+}
+
+.sidebar-block {
+  background: #fff;
+  border: 1px solid #e7ddd0;
+  border-radius: 14px;
+  padding: 0.95rem;
+}
+
+.sidebar-brand {
+  background: linear-gradient(135deg, #2f2418 0%, #5a4027 100%);
+  color: #fff;
+  border-color: #2f2418;
+}
+
+.sidebar-brand h2 {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.sidebar-brand p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.sidebar-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.sidebar-block-head span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7b5a3b;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 0.45rem 0.7rem;
+  margin-bottom: 0.35rem;
+  border-radius: 10px;
+  color: #2e4156;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #f8fafc;
+  border: 1px solid #e4ebf3;
+}
+
+.sidebar-link:hover {
+  color: #8a4b10;
+  border-color: #d7c0a1;
+  background: #fff8f0;
+}
+
+.sidebar-notifications .nav-notifications {
+  width: 100%;
+}
+
+.sidebar-notifications .nav-notification-toggle {
+  width: 100%;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef4f9 100%);
+  color: #1f3551;
+  border-color: #d7e0ea;
+}
+
+.sidebar-notifications .nav-notification-dropdown {
+  position: relative;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0.6rem;
+  box-shadow: none;
+}
+
+.top-user.compact {
+  margin-bottom: 0.35rem;
+}
+
+.top-user.compact small {
+  font-size: 0.7rem;
+}
+
 .marketplace-hero {
   background: linear-gradient(115deg, #3b3026 0%, #4a3a2d 52%, #6a4b31 100%);
   border-radius: 16px;
@@ -317,6 +425,36 @@
   margin-top: 1rem;
   text-align: center;
   padding: 1.5rem 1rem;
+}
+
+@media (max-width: 1100px) {
+  .marketplace-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .marketplace-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .marketplace-page {
+    padding-top: 0.25rem;
+  }
+
+  .marketplace-hero {
+    padding: 1.2rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .request-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .empty-state h3 {

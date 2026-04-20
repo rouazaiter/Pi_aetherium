@@ -8,15 +8,16 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { FooterComponent } from './shared/footer/footer.component';
 import { HomeComponent } from './home/home.component';
-import { NotificationBarComponent } from './shared/notification-bar/notification-bar.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
-  declarations: [AppComponent, HeaderComponent, FooterComponent, HomeComponent, NotificationBarComponent],
+  declarations: [AppComponent, HeaderComponent, FooterComponent, HomeComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
     RouterModule,
-    AppRoutingModule
+    AppRoutingModule,
+    SharedModule
   ],
   providers: [],
   bootstrap: [AppComponent]

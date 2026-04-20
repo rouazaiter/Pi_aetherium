@@ -8,6 +8,7 @@ import tn.esprit.backend.dto.LeaderboardResponseDto;
 import tn.esprit.backend.entities.Application;
 import tn.esprit.backend.entities.ApplicationStatus;
 import tn.esprit.backend.entities.ServiceRequest;
+import tn.esprit.backend.entities.ServiceRequestCategory;
 import tn.esprit.backend.entities.ServiceRequestStatus;
 import tn.esprit.backend.entities.User;
 import tn.esprit.backend.repositories.ApplicationRepository;
@@ -48,7 +49,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     @Override
     @Transactional(readOnly = true)
-    public LeaderboardResponseDto getApplicantsLeaderboard(int days, int limit) {
+    public LeaderboardResponseDto getApplicantsLeaderboard(int days, int limit, ServiceRequestCategory category) {
         int safeDays = sanitizeDays(days);
         int safeLimit = sanitizeLimit(limit);
 
@@ -57,6 +58,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
         Map<Long, ApplicantAgg> byUser = new HashMap<>();
         for (Application app : applications) {
+            if (category != null && !matchesCategory(app.getServiceRequest(), category)) {
+                continue;
+            }
+
             User user = app.getApplicant();
             if (user == null || user.getId() == null) {
                 continue;
@@ -108,6 +113,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
         return LeaderboardResponseDto.builder()
                 .type("APPLICANTS")
+                .category(category == null ? null : category.getLabel())
                 .days(safeDays)
                 .limit(safeLimit)
                 .generatedAt(LocalDateTime.now())
@@ -117,13 +123,19 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     @Override
     @Transactional(readOnly = true)
-    public LeaderboardResponseDto getCreatorsLeaderboard(int days, int limit) {
+    public LeaderboardResponseDto getCreatorsLeaderboard(int days, int limit, ServiceRequestCategory category) {
         int safeDays = sanitizeDays(days);
         int safeLimit = sanitizeLimit(limit);
 
         LocalDateTime from = LocalDateTime.now().minusDays(safeDays);
         List<ServiceRequest> requests = serviceRequestRepository.findByCreatedAtGreaterThanEqual(from);
         List<Application> applications = applicationRepository.findByAppliedAtGreaterThanEqual(from);
+
+        if (category != null) {
+            requests = requests.stream()
+                    .filter(request -> matchesCategory(request, category))
+                    .collect(Collectors.toList());
+        }
 
         Map<Long, ServiceRequest> requestById = requests.stream()
             .filter(r -> r.getId() != null)
@@ -151,6 +163,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         for (Application app : applications) {
             ServiceRequest linkedRequest = app.getServiceRequest();
             if (linkedRequest == null || linkedRequest.getId() == null) {
+                continue;
+            }
+
+            if (category != null && !matchesCategory(linkedRequest, category)) {
                 continue;
             }
 
@@ -202,6 +218,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
         return LeaderboardResponseDto.builder()
                 .type("CREATORS")
+                .category(category == null ? null : category.getLabel())
                 .days(safeDays)
                 .limit(safeLimit)
                 .generatedAt(LocalDateTime.now())
@@ -254,6 +271,10 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     private double round2(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+
+    private boolean matchesCategory(ServiceRequest request, ServiceRequestCategory category) {
+        return request != null && request.getCategory() == category;
     }
 
     private double computeApplicantRealScore(int success, int failed, int total) {

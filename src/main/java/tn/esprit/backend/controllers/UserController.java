@@ -19,13 +19,16 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping
-    public List<UserSummaryResponse> getUsers(@RequestParam(defaultValue = "2") int limit) {
-        int safeLimit = Math.max(1, Math.min(limit, 50));
-
-        return userRepository.findAll().stream()
+    public List<UserSummaryResponse> getUsers(@RequestParam(required = false) Integer limit) {
+        var stream = userRepository.findAll().stream()
                 .sorted(Comparator.comparingLong(user -> user.getId() == null ? Long.MAX_VALUE : user.getId()))
-                .limit(safeLimit)
-                .map(user -> new UserSummaryResponse(user.getId(), user.getUsername(), user.getEmail()))
-                .toList();
+                .map(user -> new UserSummaryResponse(user.getId(), user.getUsername(), user.getEmail()));
+
+        if (limit != null) {
+            int safeLimit = Math.max(1, Math.min(limit, 50));
+            return stream.limit(safeLimit).toList();
+        }
+
+        return stream.toList();
     }
 }

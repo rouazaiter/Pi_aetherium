@@ -7,6 +7,7 @@ import { ServiceRequestFormComponent } from './service-request-form/service-requ
 import { ServiceRequestDetailComponent } from './service-request-detail/service-request-detail.component';
 import { ApplyFormComponent } from './apply-form/apply-form.component';
 import { LeaderboardComponent } from './leaderboard/leaderboard.component';
+import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { LeaderboardComponent } from './leaderboard/leaderboard.component';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MarketplaceRoutingModule
+    MarketplaceRoutingModule,
+    SharedModule
   ]
 })
 export class MarketplaceModule {}

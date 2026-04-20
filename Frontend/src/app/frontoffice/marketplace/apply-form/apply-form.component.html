@@ -42,6 +42,46 @@
 
     <hr class="divider" />
 
+    <section class="recommendation-panel" *ngIf="recommendationsLoading || recommendationsError || recommendedRequests.length > 0">
+      <div class="recommendation-header">
+        <div>
+          <h4>Recommended requests</h4>
+          <p>Ranked from the leaderboard activity in {{ serviceRequest.category }}.</p>
+        </div>
+      </div>
+
+      <div *ngIf="recommendationsLoading" class="recommendation-state">
+        Loading recommendations...
+      </div>
+
+      <div *ngIf="recommendationsError" class="alert alert-warning recommendation-alert" role="alert">
+        {{ recommendationsError }}
+      </div>
+
+      <div class="recommendation-list" *ngIf="!recommendationsLoading && recommendedRequests.length > 0">
+        <article class="recommendation-card" *ngFor="let request of recommendedRequests; trackBy: trackByRequestId">
+          <div class="recommendation-top">
+            <span class="status-badge status-{{ request.status.toLowerCase() }}">{{ request.status }}</span>
+            <span class="recommendation-score">Score {{ request.recommendationScore | number:'1.0-2' }}</span>
+          </div>
+
+          <h5>{{ request.name }}</h5>
+          <p>{{ request.description || 'No description provided.' }}</p>
+
+          <div class="recommendation-meta">
+            <span>{{ request.creator.username }}</span>
+            <span>{{ request.recommendationReason }}</span>
+          </div>
+
+          <a [routerLink]="['/marketplace', 'apply', request.id]" class="recommendation-link">Open request</a>
+        </article>
+      </div>
+
+      <div *ngIf="!recommendationsLoading && !recommendationsError && recommendedRequests.length === 0" class="recommendation-state">
+        No strong recommendation found for this category.
+      </div>
+    </section>
+
     <div class="meeting-options" *ngIf="hasSchedulingOptions()" [formGroup]="form">
       <h4>Schedule a meeting</h4>
       <p class="meeting-note">Choose one of the slots selected by the request creator.</p>

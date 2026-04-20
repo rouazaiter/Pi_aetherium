@@ -42,7 +42,7 @@ export class CurrentUserService {
   }
 
   private loadUsers(): void {
-    this.http.get<CurrentSessionUser[]>('/skillhub/api/users?limit=2').subscribe({
+    this.http.get<CurrentSessionUser[]>('/skillhub/api/users').subscribe({
       next: (users) => {
         const availableUsers = (users ?? []).filter(user => !!user?.id);
         this.usersSubject.next(availableUsers);

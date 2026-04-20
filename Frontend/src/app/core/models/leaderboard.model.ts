@@ -1,5 +1,12 @@
 export type LeaderboardType = 'APPLICANTS' | 'CREATORS';
 
+export type LeaderboardCategory =
+  | 'Software Development'
+  | 'Networks and Systems'
+  | 'Cybersecurity'
+  | 'Data / Artificial Intelligence'
+  | 'Cloud Computing';
+
 export interface LeaderboardEntry {
   userId: number;
   username: string;
@@ -18,6 +25,7 @@ export interface LeaderboardEntry {
 
 export interface LeaderboardResponse {
   type: LeaderboardType;
+  category?: LeaderboardCategory | null;
   days: number;
   limit: number;
   generatedAt: string;

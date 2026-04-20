@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LeaderboardEntry, LeaderboardType } from '../../../core/models/leaderboard.model';
+import { LeaderboardCategory, LeaderboardEntry, LeaderboardType } from '../../../core/models/leaderboard.model';
 import { LeaderboardService } from '../../../core/services/leaderboard.service';
 
 @Component({
@@ -9,8 +9,18 @@ import { LeaderboardService } from '../../../core/services/leaderboard.service';
 })
 export class LeaderboardComponent implements OnInit {
   leaderboardType: LeaderboardType = 'APPLICANTS';
+  category: LeaderboardCategory | 'ALL' = 'ALL';
   days = 30;
   limit = 20;
+
+  readonly categories: Array<{ label: string; value: LeaderboardCategory | 'ALL' }> = [
+    { label: 'All categories', value: 'ALL' },
+    { label: 'Software Development', value: 'Software Development' },
+    { label: 'Networks and Systems', value: 'Networks and Systems' },
+    { label: 'Cybersecurity', value: 'Cybersecurity' },
+    { label: 'Data / Artificial Intelligence', value: 'Data / Artificial Intelligence' },
+    { label: 'Cloud Computing', value: 'Cloud Computing' }
+  ];
 
   loading = false;
   error = '';
@@ -27,9 +37,11 @@ export class LeaderboardComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
+    const category = this.category === 'ALL' ? undefined : this.category;
+
     const req = this.leaderboardType === 'APPLICANTS'
-      ? this.leaderboardService.getApplicants(this.days, this.limit)
-      : this.leaderboardService.getCreators(this.days, this.limit);
+      ? this.leaderboardService.getApplicants(this.days, this.limit, category)
+      : this.leaderboardService.getCreators(this.days, this.limit, category);
 
     req.subscribe({
       next: (res) => {
@@ -56,6 +68,11 @@ export class LeaderboardComponent implements OnInit {
 
   onLimitChange(value: string): void {
     this.limit = Number(value) || 20;
+    this.load();
+  }
+
+  onCategoryChange(value: string): void {
+    this.category = value as LeaderboardCategory | 'ALL';
     this.load();
   }
 }

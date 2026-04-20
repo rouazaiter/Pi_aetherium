@@ -8,6 +8,18 @@ import { CurrentUserService } from '../../../core/auth/current-user.service';
 import { MeetingSchedulerService } from '../../../core/services/meeting-scheduler.service';
 import { AiCoachService } from '../../../core/services/ai-coach.service';
 import { AiCoachPreviewResponse } from '../../../core/models/ai-coach.model';
+import { catchError, forkJoin, of } from 'rxjs';
+import { LeaderboardService } from '../../../core/services/leaderboard.service';
+
+interface RecommendedServiceRequest extends ServiceRequest {
+  recommendationScore: number;
+  recommendationReason: string;
+}
+
+const RECOMMENDATION_STOP_WORDS = new Set([
+  'a', 'an', 'the', 'and', 'or', 'for', 'to', 'in', 'on', 'of', 'with', 'at', 'by', 'from', 'is', 'are', 'be',
+  'de', 'la', 'le', 'les', 'des', 'du', 'un', 'une', 'et', 'ou', 'pour', 'dans', 'sur', 'avec', 'par', 'est', 'sont'
+]);
 
 @Component({
   selector: 'app-apply-form',
@@ -27,6 +39,9 @@ export class ApplyFormComponent implements OnInit {
   aiError = '';
   aiPreview?: AiCoachPreviewResponse;
   aiOriginalText = '';
+  recommendationsLoading = false;
+  recommendationsError = '';
+  recommendedRequests: RecommendedServiceRequest[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -36,7 +51,8 @@ export class ApplyFormComponent implements OnInit {
     private appService: ApplicationService,
     private currentUserService: CurrentUserService,
     private meetingSchedulerService: MeetingSchedulerService,
-    private aiCoachService: AiCoachService
+    private aiCoachService: AiCoachService,
+    private leaderboardService: LeaderboardService
   ) {}
 
   ngOnInit(): void {
@@ -64,6 +80,7 @@ export class ApplyFormComponent implements OnInit {
             return;
           }
           this.serviceRequest = sr;
+          this.loadRecommendations(sr);
 
           this.meetingSchedulerService.getConfig(sr.id).subscribe({
             next: (schedulingConfig) => {
@@ -167,8 +184,115 @@ export class ApplyFormComponent implements OnInit {
     this.aiError = '';
   }
 
+  trackByRequestId(_: number, request: RecommendedServiceRequest): number {
+    return request.id;
+  }
+
   hasSchedulingOptions(): boolean {
     return this.availableSlots.length > 0;
+  }
+
+  private loadRecommendations(currentRequest: ServiceRequest): void {
+    this.recommendationsLoading = true;
+    this.recommendationsError = '';
+
+    forkJoin({
+      requests: this.srService.getAll().pipe(catchError(() => of([] as ServiceRequest[]))),
+      creators: this.leaderboardService.getCreators(90, 50, currentRequest.category).pipe(
+        catchError(() => of({ entries: [] } as any))
+      )
+    }).subscribe({
+      next: ({ requests, creators }) => {
+        const creatorEntries = creators.entries ?? [];
+        const topScore = creatorEntries.reduce((highest: number, entry: { score: number }) => Math.max(highest, entry.score || 0), 0);
+        const creatorScoreById = new Map<number, { score: number; rank: number }>();
+
+        for (const entry of creatorEntries) {
+          creatorScoreById.set(entry.userId, { score: entry.score, rank: entry.rank });
+        }
+
+        this.recommendedRequests = requests
+          .filter(request => request.id !== currentRequest.id)
+          .filter(request => request.status === 'OPEN')
+          .filter(request => request.category === currentRequest.category)
+          .filter(request => request.creator?.id !== this.currentUserId)
+          .map(request => {
+            const creatorStats = creatorScoreById.get(request.creator?.id ?? -1);
+            const creatorScore = creatorStats && topScore > 0 ? creatorStats.score / topScore : 0;
+            const contentScore = this.computeContentSimilarity(currentRequest, request);
+            const recencyScore = this.computeRecencyScore(request.createdAt);
+            const recommendationScore = this.round2((creatorScore * 0.55) + (contentScore * 0.3) + (recencyScore * 0.15));
+
+            const reasonParts: string[] = [];
+            if (creatorStats) {
+              reasonParts.push(`creator ranked #${creatorStats.rank}`);
+            }
+            if (contentScore >= 0.35) {
+              reasonParts.push('strong content overlap');
+            }
+            if (recencyScore >= 0.6) {
+              reasonParts.push('recent posting');
+            }
+
+            return {
+              ...request,
+              recommendationScore,
+              recommendationReason: reasonParts.length > 0 ? reasonParts.join(' • ') : 'same category match'
+            };
+          })
+          .sort((a, b) => b.recommendationScore - a.recommendationScore)
+          .slice(0, 3);
+
+        this.recommendationsLoading = false;
+      },
+      error: () => {
+        this.recommendationsError = 'Recommendations are temporarily unavailable.';
+        this.recommendationsLoading = false;
+      }
+    });
+  }
+
+  private computeContentSimilarity(source: ServiceRequest, target: ServiceRequest): number {
+    const sourceTokens = this.extractKeywords(`${source.name} ${source.description || ''}`);
+    const targetTokens = this.extractKeywords(`${target.name} ${target.description || ''}`);
+
+    if (!sourceTokens.length || !targetTokens.length) {
+      return 0;
+    }
+
+    const targetSet = new Set(targetTokens);
+    let intersection = 0;
+
+    for (const token of sourceTokens) {
+      if (targetSet.has(token)) {
+        intersection++;
+      }
+    }
+
+    const union = new Set([...sourceTokens, ...targetTokens]).size;
+    return union === 0 ? 0 : intersection / union;
+  }
+
+  private computeRecencyScore(createdAt: string): number {
+    const createdDate = new Date(createdAt).getTime();
+    if (Number.isNaN(createdDate)) {
+      return 0;
+    }
+
+    const ageInDays = (Date.now() - createdDate) / (1000 * 60 * 60 * 24);
+    return Math.max(0, 1 - Math.min(ageInDays, 90) / 90);
+  }
+
+  private extractKeywords(text: string): string[] {
+    return (text || '')
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .map(token => token.trim())
+      .filter(token => token.length > 2 && !RECOMMENDATION_STOP_WORDS.has(token));
+  }
+
+  private round2(value: number): number {
+    return Math.round(value * 100) / 100;
   }
 
   private validateMeetingChoice(): boolean {

@@ -89,7 +89,7 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<ServiceRequestResponse> getAllServiceRequests(Long viewerId) {
-        return serviceRequestRepository.findVisibleForUser(viewerId).stream().map(this::toResponse).toList();
+        return serviceRequestRepository.findAllByOrderByCreatedAtDesc().stream().map(this::toResponse).toList();
     }
 
     @Override

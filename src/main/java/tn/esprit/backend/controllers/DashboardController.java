@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tn.esprit.backend.dto.DashboardCategoryCountDto;
 import tn.esprit.backend.dto.DashboardCategoryStatsDto;
 import tn.esprit.backend.dto.DashboardEventDto;
 import tn.esprit.backend.services.interfaces.DashboardService;
@@ -26,5 +27,10 @@ public class DashboardController {
     @GetMapping("/categories")
     public ResponseEntity<List<DashboardCategoryStatsDto>> getCategoryStats() {
         return ResponseEntity.ok(dashboardService.getCategoryStats());
+    }
+
+    @GetMapping("/categories/counts")
+    public ResponseEntity<List<DashboardCategoryCountDto>> getCategoryCounts() {
+        return ResponseEntity.ok(dashboardService.getCategoryCounts());
     }
 }

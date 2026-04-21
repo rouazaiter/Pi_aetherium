@@ -19,6 +19,7 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
     List<ServiceRequest> findByStatus(ServiceRequestStatus status);
     List<ServiceRequest> findByStatusAndExpiringDateAfter(ServiceRequestStatus status, LocalDateTime now);
     List<ServiceRequest> findByCreatedAtGreaterThanEqual(LocalDateTime createdAt);
+    List<ServiceRequest> findAllByOrderByCreatedAtDesc();
 
     @Query("SELECT sr FROM ServiceRequest sr WHERE sr.creator.id = :viewerId OR sr.status = tn.esprit.backend.entities.ServiceRequestStatus.OPEN ORDER BY sr.createdAt DESC")
     List<ServiceRequest> findVisibleForUser(@Param("viewerId") Long viewerId);

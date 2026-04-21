@@ -2,9 +2,11 @@ package tn.esprit.backend.services.implementations;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tn.esprit.backend.dto.DashboardCategoryCountDto;
 import tn.esprit.backend.dto.DashboardCategoryStatsDto;
 import tn.esprit.backend.dto.DashboardEventDto;
 import tn.esprit.backend.dto.DashboardEventProjection;
+import tn.esprit.backend.entities.ServiceRequest;
 import tn.esprit.backend.repositories.ServiceRequestRepository;
 import tn.esprit.backend.services.interfaces.DashboardService;
 
@@ -42,7 +44,7 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         List<Map.Entry<String, CategoryAccumulator>> entries = new ArrayList<>(grouped.entrySet());
-        entries.sort(Map.Entry.comparingByKey(Comparator.nullsLast(String::compareToIgnoreCase)));
+        entries.sort(Map.Entry.comparingByKey(String.CASE_INSENSITIVE_ORDER));
 
         return entries.stream()
                 .map(entry -> new DashboardCategoryStatsDto(
@@ -51,6 +53,21 @@ public class DashboardServiceImpl implements DashboardService {
                         entry.getValue().totalParticipants,
                         entry.getValue().totalAmount
                 ))
+                .toList();
+        }
+
+    @Override
+    public List<DashboardCategoryCountDto> getCategoryCounts() {
+        Map<String, Long> counts = new LinkedHashMap<>();
+
+        for (ServiceRequest request : serviceRequestRepository.findAll()) {
+            String key = request.getCategory() == null ? "Uncategorized" : request.getCategory().name();
+            counts.put(key, counts.getOrDefault(key, 0L) + 1L);
+        }
+
+        return counts.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey(String.CASE_INSENSITIVE_ORDER))
+                .map(entry -> new DashboardCategoryCountDto(entry.getKey(), entry.getValue()))
                 .toList();
     }
 

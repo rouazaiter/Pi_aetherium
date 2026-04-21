@@ -19,4 +19,11 @@ public interface FileService {
 
     // ========================= SUMMARIZE =========================
     String summarizeFile(Long fileId);
+
+    String processVideo(Long fileId);
+
+
+    Long startAiSummary(Long fileId);
+
+    List<File> searchFiles(Long userId, String keyword);
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class FileService {
@@ -44,4 +45,34 @@ summarize(fileId: number) {
     {}
   );
 }
+
+aiSummary(fileId: number) {
+  return this.http.post<any>(
+    `${this.api}/ai-summary/${fileId}`,
+    {}
+  );
+}
+
+
+startAiSummary(fileId: number) {
+  return this.http.post<number>(
+    `http://localhost:8081/api/files/ai-summary/${fileId}`,
+    {}
+  );
+}
+
+getAiSummaryStatus(jobId: number) {
+  return this.http.get<any>(
+    `http://localhost:8081/api/files/ai-summary/status/${jobId}`
+  );
+}
+
+
+searchFiles(userId: number, keyword: string) {
+  return this.http.get<any[]>(
+    `http://localhost:8081/api/files/search?userId=${userId}&keyword=${keyword}`
+  );
+}
+
+
 }

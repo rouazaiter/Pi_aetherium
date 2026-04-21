@@ -1,14 +1,16 @@
 package com.education.platform.services.implementations;
 
+import com.education.platform.entities.AiJob;
 import com.education.platform.entities.File;
 import com.education.platform.entities.PrivateDrive;
+import com.education.platform.repositories.AiJobRepository;
 import com.education.platform.repositories.FileRepository;
 import com.education.platform.repositories.PrivateDriveRepository;
 import com.education.platform.services.interfaces.FileService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +32,11 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private PrivateDriveRepository driveRepository;
+    @Autowired
+    private AiService aiService;
 
+    @Autowired
+    private AiJobRepository jobRepository;
     // ========================= UPLOAD =========================
     @Override
     public File uploadFile(MultipartFile file, Long userId) {
@@ -141,10 +147,106 @@ public class FileServiceImpl implements FileService {
     // ========================= SUMMARIZE =========================
     @Override
     public String summarizeFile(Long fileId) {
+        return processVideo(fileId);
+    }
+
+
+    private String extractAudio(String videoPath) {
+
+        String audioPath = videoPath + ".mp3";
+
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "ffmpeg",
+                    "-i", videoPath,
+                    "-q:a", "0",
+                    "-map", "a",
+                    audioPath
+            );
+
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            process.waitFor();
+
+            return audioPath;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Audio extraction failed");
+        }
+    }
+
+
+    @Override
+    public String processVideo(Long fileId) {
 
         File file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("File not found"));
 
-        return "Résumé automatique de la vidéo : introduction, concepts clés, conclusion...";
+        // 👉 ici on simule contenu fichier
+        String content = "File name: " + file.getName()
+                + ". Type: " + file.getType()
+                + ". This file belongs to a learning platform project.";
+
+        return aiService.analyzeFile(content);
     }
+
+
+
+
+
+    @Override
+    public Long startAiSummary(Long fileId) {
+
+        AiJob job = new AiJob();
+        job.setFileId(fileId);
+        job.setStatus("PENDING");
+        job.setCreatedAt(LocalDateTime.now());
+
+        job = jobRepository.save(job);
+
+        // 🔥 lancer traitement async
+        processAsync(job.getId(), fileId);
+
+        return job.getId();
+    }
+
+    @Async
+    public void processAsync(Long jobId, Long fileId) {
+
+        AiJob job = jobRepository.findById(jobId).get();
+        job.setStatus("PROCESSING");
+        jobRepository.save(job);
+
+        try {
+            String result = processVideo(fileId); // ton code existant
+
+            job.setResult(result);
+            job.setStatus("DONE");
+
+        } catch (Exception e) {
+            job.setStatus("ERROR");
+            job.setResult("Failed: " + e.getMessage());
+        }
+
+        jobRepository.save(job);
+    }
+
+    @Override
+    public List<File> searchFiles(Long userId, String keyword) {
+
+        System.out.println("USER ID = " + userId);
+        System.out.println("KEYWORD = " + keyword);
+
+        PrivateDrive drive = driveRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Drive not found"));
+
+        List<File> result = fileRepository.findByDrive_IdAndNameContainingIgnoreCase(
+                drive.getId(), keyword
+        );
+
+        System.out.println("RESULT SIZE = " + result.size());
+
+        return result;
+    }
+
 }

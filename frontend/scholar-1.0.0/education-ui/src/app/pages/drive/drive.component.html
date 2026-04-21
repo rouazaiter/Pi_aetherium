@@ -1,219 +1,198 @@
-<div class="container-fluid">
-<br>
-  <!-- 📌 PAGE TITLE -->
-  <!-- <div class="page-title-box">
-    <h4 class="page-title">My Private Drive</h4>
-  </div> -->
-  <div class="text-center">
-    <h1 class="fw-bold" style="color:#7a6ad8; letter-spacing:1px;">
-    My Private Drive
-  </h1></div>
-  <br><br><br>
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #f8f9ff 0%, #f0ebff 100%); min-height: 100vh;">
 
-  <!-- 📊 STATS (SCHOLAR STYLE CLEAN) -->
-<!-- 📊 STATS CLEAN DASHBOARD -->
-<div class="container mb-4">
-
-  <div class="row g-3">
-
-    <!-- USED -->
-    <div class="col-lg-4 col-md-6">
-      <div class="card border-0 shadow-lg stat-card">
-
-        <div class="card-body text-center">
-
-          <h6 class="text-muted mb-2">Used Storage</h6>
-
-          <h3 class="mb-2 text-danger fw-bold">
-            {{ used | number:'1.1-2' }} GB
-          </h3>
-
-          <div class="progress" style="height: 6px;">
-            <div class="progress-bar bg-danger"
-                 [style.width.%]="(used / total) * 100">
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TOTAL -->
-    <div class="col-lg-4 col-md-6">
-      <div class="card border-0 shadow-lg stat-card">
-
-        <div class="card-body text-center">
-
-          <h6 class="text-muted mb-2">Total Storage</h6>
-
-          <h3 class="mb-2 text-primary fw-bold">
-            {{ total }} GB
-          </h3>
-
-          <small class="text-muted">Quota plan</small>
-
-        </div>
-
-      </div>
-    </div>
-
-    <!-- USAGE -->
-    <div class="col-lg-4 col-md-6">
-      <div class="card border-0 shadow-lg stat-card">
-
-        <div class="card-body text-center">
-
-          <h6 class="text-muted mb-2">Usage</h6>
-
-          <h3 class="mb-2 text-success fw-bold">
-            {{ (used / total) * 100 | number:'1.0-0' }}%
-          </h3>
-
-          <div class="progress" style="height: 6px;">
-            <div class="progress-bar bg-success"
-                 [style.width.%]="(used / total) * 100">
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
+  <!-- PAGE TITLE -->
+  <div class="text-center mb-5">
+    <h1 class="display-4 fw-bold" style="color: #7a6ad8; letter-spacing: -1px;">
+      My Private Drive
+    </h1>
+    <div style="width: 90px; height: 4px; background: linear-gradient(to right, #7a6ad8, #a78bfa); margin: 12px auto; border-radius: 50px;"></div>
+    <p class="text-muted fs-5">Your secure personal cloud space</p>
   </div>
 
-</div>
+  <!-- STATS SECTION -->
+  <div class="container mb-5">
+    <div class="row g-4">
 
-  <!-- ⬆️ UPLOAD CARD (CLEAN) -->
-  <div class="section" >
-
-    <div class="container" >
-
-      <div class="card border-0 shadow-sm" >
-
-        <div class="card-body " >
-
-          <h5 class="mb-3">Upload File</h5>
-
-          <input type="file"
-                 class="form-control"
-                 (change)="onFileSelected($event)">
-
+      <!-- Used Storage -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-lg h-100 overflow-hidden" style="background: white; border-radius: 20px;">
+          <div class="card-body p-4 text-center">
+            <div class="d-flex justify-content-center mb-3">
+              <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">Used</span>
+            </div>
+            <h2 class="fw-bold text-danger mb-1">{{ used | number:'1.1-2' }} GB</h2>
+            <p class="text-muted mb-3">Used Storage</p>
+            
+            <div class="progress" style="height: 8px; border-radius: 50px;">
+              <div class="progress-bar bg-danger" 
+                   [style.width.%]="(used / total) * 100"
+                   style="border-radius: 50px;"></div>
+            </div>
+          </div>
         </div>
+      </div>
 
+      <!-- Total Storage -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-lg h-100 overflow-hidden" style="background: white; border-radius: 20px;">
+          <div class="card-body p-4 text-center">
+            <div class="d-flex justify-content-center mb-3">
+              <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">Total</span>
+            </div>
+            <h2 class="fw-bold text-primary mb-1">{{ total }} GB</h2>
+            <p class="text-muted mb-3">Your Plan</p>
+            
+            <div class="mt-4">
+              <i class="bi bi-cloud-check fs-1 text-primary opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-lg h-100 overflow-hidden" style="background: white; border-radius: 20px;">
+          <div class="card-body p-4 text-center">
+            <div class="d-flex justify-content-center mb-3">
+              <span class="badge bg-success fs-6 px-3 py-2 rounded-pill">Usage</span>
+            </div>
+            <h2 class="fw-bold text-success mb-1">
+              {{ (used / total) * 100 | number:'1.0-0' }}%
+            </h2>
+            <p class="text-muted mb-3">Space Used</p>
+
+            <div class="progress" style="height: 8px; border-radius: 50px;">
+              <div class="progress-bar bg-success" 
+                   [style.width.%]="(used / total) * 100"
+                   style="border-radius: 50px;"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
-
   </div>
 
-  <!-- 📂 FILES GRID -->
-  <div class="section mt-4">
-    <div class="text-center my-5">
+  <!-- UPLOAD SECTION -->
+  <div class="container mb-5">
+    <div class="card border-0 shadow-lg" style="border-radius: 20px; background: white;">
+      <div class="card-body p-5 text-center">
+        <h4 class="mb-4 fw-semibold text-dark">Upload New File</h4>
+        
+        <div class="upload-area border border-dashed border-3 rounded-4 p-5 mb-3"
+             style="border-color: #7a6ad8 !important; transition: all 0.3s;">
+          <i class="bi bi-cloud-arrow-up fs-1 text-muted mb-3 d-block"></i>
+          <input type="file" class="form-control form-control-lg" 
+                 (change)="onFileSelected($event)" 
+                 style="max-width: 420px; margin: 0 auto;">
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <h1 class="fw-bold" style="color:#7a6ad8; letter-spacing:1px;">
-    Mon espace fichiers
-  </h1>
+  <!-- FILES SECTION -->
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold" style="color: #7a6ad8;">My Files</h2>
+        <p class="text-muted mb-0">Upload, organize and manage your resources</p>
+      </div>
 
-  <div style="width:80px; height:3px; background:#7a6ad8; margin:10px auto; border-radius:10px;"></div>
+      <!-- Search -->
+      <div class="col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" 
+                 class="form-control border-start-0 ps-0"
+                 [(ngModel)]="keyword"
+                 (input)="onSearch()"
+                 placeholder="Search files...">
+        </div>
+      </div>
+    </div>
 
-  <p class="text-muted">
-    Upload, télécharge et organise tes ressources
-  </p>
-
-</div>
-
-
-
-    <div class="container">
-
-      <div class="row">
-
-        <!-- 📦 FILE CARD -->
-        <div class="col-lg-4 col-md-6 mb-4"
-             *ngFor="let file of files">
-
-          <div class="card border-0 shadow-sm h-100">
-
-            <!-- 🎬 PREVIEW -->
-            <div style="height: 180px; overflow: hidden;">
-
-              <video *ngIf="file.type === 'video/mp4'"
-                     class="w-100 h-100"
-                     style="object-fit: cover;"
-                     controls>
-                <source [src]="fileService.getFileUrl(file.id)" type="video/mp4">
-              </video>
-
-              <img *ngIf="file.type !== 'video/mp4'"
-                   src="assets/images/file-default.jpg"
+    <!-- Files Grid -->
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6 col-sm-12" *ngFor="let file of files">
+        <div class="card border-0 shadow-sm h-100 file-card" 
+             style="border-radius: 18px; overflow: hidden; transition: all 0.3s ease;">
+          
+          <!-- Preview -->
+          <div style="height: 200px; position: relative; overflow: hidden;">
+            <video *ngIf="file.type === 'video/mp4'"
                    class="w-100 h-100"
-                   style="object-fit: cover;">
+                   style="object-fit: cover;"
+                   controls>
+              <source [src]="fileService.getFileUrl(file.id)" type="video/mp4">
+            </video>
 
+            <img *ngIf="file.type !== 'video/mp4'"
+                 src="assets/images/file-default.jpg"
+                 class="w-100 h-100"
+                 style="object-fit: cover; filter: brightness(0.95);">
+            
+            <!-- Overlay Icon -->
+            <div class="position-absolute top-0 start-0 p-3">
+              <span class="badge bg-dark bg-opacity-75 fs-6">
+                {{ file.type.split('/')[1] || 'file' | uppercase }}
+              </span>
             </div>
-
-            <!-- 📄 CONTENT -->
-            <div class="card-body">
-
-              <h6 class="mb-2">
-                📄 {{ file.name }}
-              </h6>
-
-              <small class="text-muted d-block mb-3">
-                {{ file.size / (1024*1024) | number:'1.1-2' }} MB • {{ file.type }}
-              </small>
-
-              <!-- ⚙️ ACTIONS -->
-              <div class="d-flex gap-2">
-
-<button class="btn btn-sm btn-success flex-fill"
-        (click)="download(file)">
-  Download
-</button>
-
-                <button class="btn btn-sm btn-warning flex-fill"
-                        (click)="rename(file)">
-                  Rename
-                </button>
-
-                <button class="btn btn-sm btn-danger flex-fill"
-                        (click)="delete(file.id)">
-                  Delete
-                </button>
-
-                <button class="btn btn-sm btn-info flex-fill"
-        (click)="summarize(file)">
-  AI Summary
-</button>
-
-              </div>
-
-            </div>
-
           </div>
 
+          <!-- Card Body -->
+          <div class="card-body p-4">
+            <h6 class="fw-semibold mb-2 text-truncate">{{ file.name }}</h6>
+            
+            <small class="text-muted d-block mb-4">
+              {{ file.size / (1024*1024) | number:'1.1-2' }} MB • 
+              {{ file.type }}
+            </small>
+
+            <!-- Actions -->
+            <div class="d-grid grid-cols-2 gap-2">
+              <button class="btn btn-success btn-sm" (click)="download(file)">
+                <i class="bi bi-download me-1"></i> Download
+              </button>
+              <button class="btn btn-warning btn-sm" (click)="rename(file)">
+                <i class="bi bi-pencil me-1"></i> Rename
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="delete(file.id)">
+                <i class="bi bi-trash me-1"></i> Delete
+              </button>
+              <button class="btn btn-info btn-sm text-white" 
+                      (click)="summarize(file)"
+                      [disabled]="isLoading">
+                <i class="bi bi-magic me-1"></i> AI Summary
+              </button>
+            </div>
+          </div>
         </div>
-
       </div>
-
     </div>
-
   </div>
 
-</div>
+  <!-- Loading & Summary -->
+  <div *ngIf="isLoading" class="container mt-5">
+    <div class="alert alert-info shadow-sm text-center py-4">
+      <div class="spinner-border text-primary me-3" role="status"></div>
+      ⏳ Generating AI summary...
+    </div>
+  </div>
 
-
-<div *ngIf="summaryText" class="card border-0 shadow-sm mt-3">
-
-  <div class="card-body">
-
-    <h5>🧠 Résumé de la session</h5>
-
-    <p class="text-muted">
-      {{ summaryText }}
-    </p>
-
+  <div *ngIf="summaryText" class="container mt-5">
+    <div class="card border-0 shadow-lg" style="border-radius: 20px;">
+      <div class="card-body p-5">
+        <h5 class="fw-bold mb-4 d-flex align-items-center">
+          <i class="bi bi-brain me-3 text-info"></i> 
+          AI Summary
+        </h5>
+        <div class="p-4 bg-light rounded-3">
+          <p class="lead mb-0" style="line-height: 1.7;">{{ summaryText }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>

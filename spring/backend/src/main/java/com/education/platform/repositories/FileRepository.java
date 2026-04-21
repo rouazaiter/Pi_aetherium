@@ -8,4 +8,7 @@ import java.util.List;
 @Repository
 public interface FileRepository extends JpaRepository<File, Long> {
     List<File> findByDriveId(Long driveId);
+    List<File> findByNameContainingIgnoreCase(String name);
+    List<File> findByDrive_IdAndNameContainingIgnoreCase(Long driveId, String keyword);
+
 }

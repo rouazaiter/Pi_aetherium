@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FileService } from '../../core/services/file.service';
 import { CommonModule } from '@angular/common';
 import { FileModel } from '../../core/models/file.model';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-drive',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,FormsModule],
+
   templateUrl: './drive.component.html',
   styleUrls: ['./drive.component.scss']
 })
@@ -76,16 +78,78 @@ files: FileModel[] = [];
     window.URL.revokeObjectURL(url);
   });
 }
+// summaryText: string = '';
+// selectedFileId: number | null = null;
+// summarize(file: any) {
+
+//   this.selectedFileId = file.id;
+
+//   this.fileService.summarize(file.id).subscribe(res => {
+
+//     this.summaryText = res.summary;
+
+//   });
+// }
+
+
 summaryText: string = '';
-selectedFileId: number | null = null;
+isLoading = false;
+
 summarize(file: any) {
 
-  this.selectedFileId = file.id;
+  this.isLoading = true;
+  this.summaryText = '';
 
-  this.fileService.summarize(file.id).subscribe(res => {
+  // 1. start job
+  this.fileService.startAiSummary(file.id).subscribe(jobId => {
 
-    this.summaryText = res.summary;
+    this.jobId = jobId;
+
+    // 2. polling
+    this.interval = setInterval(() => {
+
+      this.fileService.getAiSummaryStatus(jobId).subscribe(res => {
+
+        if (res.status === 'DONE') {
+
+          this.summaryText = res.result;
+          this.isLoading = false;
+
+          clearInterval(this.interval);
+        }
+
+        if (res.status === 'ERROR') {
+
+          this.summaryText = "Erreur AI";
+          this.isLoading = false;
+
+          clearInterval(this.interval);
+        }
+
+      });
+
+    }, 2000); // check every 2 sec
 
   });
+
 }
+
+jobId: number | null = null;
+
+interval: any;
+
+keyword: string = '';
+
+onSearch() {
+  this.fileService.searchFiles(this.userId, this.keyword)
+    .subscribe({
+      next: (data) => {
+        this.files = data;
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+}
+
 }

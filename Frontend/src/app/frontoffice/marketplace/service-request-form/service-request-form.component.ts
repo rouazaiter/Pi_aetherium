@@ -149,15 +149,9 @@ export class ServiceRequestFormComponent implements OnInit {
               return;
             }
 
-            this.srService.createCheckoutSession(targetRequestId, this.currentUserId).subscribe({
-              next: (checkout) => {
-                window.location.href = checkout.checkoutUrl;
-              },
-              error: (err) => {
-                this.error = err?.error?.message || 'Request saved, but checkout session creation failed.';
-                this.loading = false;
-              }
-            });
+            this.success = 'Request published successfully.';
+            this.loading = false;
+            this.router.navigate(['/marketplace']);
           },
           error: (err) => {
             this.error = err?.error?.message || 'Request saved, but meeting configuration failed.';

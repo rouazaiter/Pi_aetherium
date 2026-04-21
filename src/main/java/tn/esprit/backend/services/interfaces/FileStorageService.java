@@ -6,17 +6,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface FileStorageService {
     /**
-     * Stocke le fichier sur disque et retourne le nom de fichier stocké (sans chemin).
+     * Store the file on disk and return the stored file name (without path).
      */
     String store(MultipartFile file);
 
     /**
-     * Charge le fichier stocké sur disque.
+     * Load the file stored on disk.
      */
     Resource load(String storedFileName);
 
     /**
-     * Déduit le type MIME à partir de l'extension.
+     * Infer the MIME type from the file extension.
      */
     MediaType getContentType(String storedFileName);
 }

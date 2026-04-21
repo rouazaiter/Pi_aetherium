@@ -56,6 +56,12 @@
   text-decoration: underline;
 }
 
+.detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0.75rem 0 0.1rem;
+}
+
 h3 {
   font-size: 1.02rem;
   margin: 0.9rem 0 0.55rem;
@@ -223,6 +229,22 @@ h3 {
 .btn-reject {
   background: #fee2e2;
   color: #9f1d1d;
+}
+
+.btn-danger-soft {
+  border: 1px solid #efb4b4;
+  color: #9f1d1d;
+  background: #fff5f5;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.62rem;
+}
+
+.btn-danger-soft:hover {
+  color: #7f1d1d;
+  border-color: #e58b8b;
+  background: #ffe8e8;
 }
 
 .error,

@@ -77,18 +77,18 @@ public class AiCoachServiceImpl implements AiCoachService {
         String safeLanguage = normalizeLanguage(language);
 
         String systemPrompt = """
-                Tu es un coach de candidature expert.
-                Tu dois transformer un texte brut en un message de candidature plus convaincant, plus clair, plus professionnel et plus adapte a l'offre.
-                Regles strictes:
-                - Ne jamais inventer une experience, un diplome, une certification, ni une competence non prouvee.
-                - Conserver les faits et le sens d'origine.
-                - Produire une reformulation plus naturelle, plus fluide et plus mature que la phrase source.
-                - Si le texte est tres court, l'enrichir avec des formulations professionnelles, sans ajouter de fausses informations.
-                - Favoriser 2 a 4 phrases courtes et percutantes plutot qu'une seule phrase brute.
-                - Si une information manque, proposer une suggestion dans missingPoints, sans inventer.
-                - Repondre strictement en JSON valide, sans markdown, sans texte hors JSON.
+            You are an expert application coach.
+            Your task is to transform a raw draft into a more convincing, clearer, more professional application message tailored to the opportunity.
+            Strict rules:
+            - Never invent experience, a degree, a certification, or an unverified skill.
+            - Preserve the original facts and meaning.
+            - Rewrite the text so it sounds more natural, fluent, and mature than the source.
+            - If the text is very short, expand it with professional phrasing without adding false information.
+            - Prefer 2 to 4 short, impactful sentences instead of one rough sentence.
+            - If information is missing, add a suggestion in missingPoints without inventing anything.
+            - Reply strictly with valid JSON only, with no markdown and no text outside JSON.
 
-                Schema JSON attendu:
+            Expected JSON schema:
                 {
                   "improvedText": "string",
                   "relevanceScore": 0,
@@ -100,16 +100,16 @@ public class AiCoachServiceImpl implements AiCoachService {
                 """;
 
         String userPrompt = """
-                Contexte offre:
-                - Titre: %s
-                - Description: %s
-                - Categorie: %s
+            Opportunity context:
+            - Title: %s
+            - Description: %s
+            - Category: %s
 
-                Parametres:
-                - Ton: %s
-                - Langue: %s
+            Parameters:
+            - Tone: %s
+            - Language: %s
 
-                Texte candidat:
+            Candidate text:
                 %s
                 """.formatted(
                 safeText(request.getName()),
@@ -183,7 +183,7 @@ public class AiCoachServiceImpl implements AiCoachService {
                     true
             );
         } catch (Exception ex) {
-            return localFallbackPreview(originalText, request, "fr");
+            return localFallbackPreview(originalText, request, "en");
         }
     }
 
@@ -194,12 +194,8 @@ public class AiCoachServiceImpl implements AiCoachService {
 
         List<String> missingPoints = buildMissingPoints(improved, request);
         List<String> suggestions = new ArrayList<>();
-        suggestions.add(language != null && language.equalsIgnoreCase("en")
-                ? "Add one measurable outcome (number, percentage, time saved)."
-                : "Ajoute un resultat mesurable (nombre, pourcentage, temps gagne).");
-        suggestions.add(language != null && language.equalsIgnoreCase("en")
-                ? "Mention one concrete skill used in a real project."
-                : "Mentionne une competence appliquee dans un projet reel.");
+        suggestions.add("Add one measurable outcome (number, percentage, or time saved).");
+        suggestions.add("Mention one concrete skill used in a real project.");
 
         return new AiCoachPreviewResponse(
                 improved,
@@ -207,9 +203,7 @@ public class AiCoachServiceImpl implements AiCoachService {
                 clarity,
                 missingPoints,
                 suggestions,
-                language != null && language.equalsIgnoreCase("en")
-                        ? "Text improved locally for clarity and better alignment with the offer."
-                        : "Texte ameliore localement pour plus de clarte et un meilleur alignement avec l'offre.",
+                "Text improved locally for clarity and better alignment with the opportunity.",
                 false
         );
     }
@@ -227,13 +221,13 @@ public class AiCoachServiceImpl implements AiCoachService {
 
         long missingCount = keywords.stream().filter(k -> !lower.contains(k)).count();
         if (missingCount >= 5) {
-            result.add("Ton texte reprend peu les mots-cles de l'offre. Ajoute les competences les plus attendues.");
+            result.add("Your text uses few keywords from the opportunity. Add the most expected skills.");
         }
         if (!lower.matches(".*\\d+.*")) {
-            result.add("Ajoute au moins un resultat chiffre pour renforcer l'impact.");
+            result.add("Add at least one measurable result to strengthen the impact.");
         }
         if (result.isEmpty()) {
-            result.add("Ton texte est globalement coherent avec l'offre. Tu peux ajouter un exemple concret de realisation.");
+            result.add("Your text is broadly aligned with the opportunity. You can add one concrete example of achievement.");
         }
         return result;
     }
@@ -289,17 +283,13 @@ public class AiCoachServiceImpl implements AiCoachService {
         String offerName = safeText(request.getName()).trim();
         String roleFragment = offerName.isBlank() ? "the opportunity" : offerName;
 
-        if (language != null && language.equalsIgnoreCase("en")) {
-            if (lowered.contains("i can help you") || lowered.contains("i can help")) {
-                return buildEnglishRewrite(normalized, roleFragment, request);
-            }
-            if (lowered.contains("i have experience") || lowered.contains("i have an experience")) {
-                return buildEnglishRewrite(normalized, roleFragment, request);
-            }
+        if (lowered.contains("i can help you") || lowered.contains("i can help")) {
             return buildEnglishRewrite(normalized, roleFragment, request);
         }
-
-        return buildFrenchRewrite(normalized, roleFragment, request);
+        if (lowered.contains("i have experience") || lowered.contains("i have an experience")) {
+            return buildEnglishRewrite(normalized, roleFragment, request);
+        }
+        return buildEnglishRewrite(normalized, roleFragment, request);
     }
 
     private String normalizeSpelling(String text) {
@@ -346,17 +336,17 @@ public class AiCoachServiceImpl implements AiCoachService {
         String skillPhrase = extractSkillPhrase(clean, false);
 
         StringBuilder result = new StringBuilder();
-        result.append("Je souhaite mettre mes competences au service de ").append(roleFragment).append(" avec une approche serieuse, claire et orientee resultat.");
+        result.append("I want to put my skills to work for ").append(roleFragment).append(" with a serious, clear, and results-oriented approach.");
         if (!experiencePhrase.isBlank()) {
             result.append(' ').append(experiencePhrase);
         } else {
-            result.append(" Je dispose d'une base solide pour contribuer efficacement aux besoins du poste.");
+            result.append(" I have a solid foundation to contribute effectively to the role's needs.");
         }
 
         if (!skillPhrase.isBlank()) {
             result.append(' ').append(skillPhrase);
         } else {
-            result.append(" Je suis capable de m'adapter rapidement, de travailler avec rigueur et de collaborer efficacement.");
+            result.append(" I can adapt quickly, work with discipline, and collaborate effectively.");
         }
 
         result.append(' ').append(buildFrenchClosing(request));
@@ -368,19 +358,19 @@ public class AiCoachServiceImpl implements AiCoachService {
         if (lowered.contains("web development")) {
             return english
                     ? "I have experience in web development and can contribute to building clean, functional, and user-friendly solutions."
-                    : "J'ai de l'experience en developpement web et je peux contribuer a la creation de solutions propres, fonctionnelles et utiles."
+                    : "I have experience in web development and can contribute to building clean, functional, and user-friendly solutions."
         ;
         }
         if (lowered.contains("development")) {
             return english
                     ? "I have experience in development and I am used to turning requirements into practical results."
-                    : "J'ai de l'experience en developpement et j'ai l'habitude de transformer des besoins en resultats concrets."
+                    : "I have experience in development and I am used to turning requirements into practical results."
         ;
         }
         if (lowered.contains("project")) {
             return english
                     ? "I can bring a practical mindset and a strong focus on project delivery."
-                    : "Je peux apporter une approche concrete et un vrai sens de la livraison de projet."
+                    : "I can bring a practical mindset and a strong focus on project delivery."
         ;
         }
         return "";
@@ -391,19 +381,19 @@ public class AiCoachServiceImpl implements AiCoachService {
         if (lowered.contains("frontend") || lowered.contains("front-end")) {
             return english
                     ? "I am comfortable contributing on the front end and adapting the message to business goals."
-                    : "Je suis a l'aise pour contribuer cote front-end et adapter mon travail aux objectifs du besoin."
+                    : "I am comfortable contributing on the front end and adapting the message to business goals."
         ;
         }
         if (lowered.contains("backend") || lowered.contains("back-end")) {
             return english
                     ? "I also pay attention to structure, reliability, and maintainable implementation."
-                    : "Je fais aussi attention a la structure, a la fiabilite et a la maintenabilite."
+                    : "I also pay attention to structure, reliability, and maintainable implementation."
         ;
         }
         if (lowered.contains("team") || lowered.contains("collabor")) {
             return english
                     ? "I work well in collaborative environments and communicate clearly."
-                    : "Je travaille bien en equipe et je communique clairement."
+                    : "I work well in collaborative environments and communicate clearly."
         ;
         }
         return "";
@@ -420,9 +410,9 @@ public class AiCoachServiceImpl implements AiCoachService {
     private String buildFrenchClosing(ServiceRequest request) {
         String offerName = safeText(request.getName()).trim();
         if (offerName.isBlank()) {
-            return "Je serais ravi d'echanger sur la maniere dont mon profil peut repondre a vos besoins.";
+            return "I would be happy to discuss how my profile can meet your needs.";
         }
-        return "Je serais ravi d'echanger sur la maniere dont mon profil peut repondre a " + offerName + ".";
+        return "I would be happy to discuss how my profile can meet " + offerName + ".";
     }
 
     private String cleanupFragment(String fragment) {
@@ -483,23 +473,13 @@ public class AiCoachServiceImpl implements AiCoachService {
         String offerName = safeText(request.getName()).trim();
         String category = request.getCategory() == null ? "" : request.getCategory().name().toLowerCase(Locale.ROOT).replace('_', ' ');
 
-        if (language != null && language.equalsIgnoreCase("en")) {
-            if (!offerName.isBlank()) {
-                return "I am aligning this message with the role: " + offerName + ".";
-            }
-            if (!category.isBlank()) {
-                return "I am aligning this message with the category: " + category + ".";
-            }
-            return "I am aligning this message with the opportunity.";
-        }
-
         if (!offerName.isBlank()) {
-            return "Je rends ce message plus pertinent pour l'offre: " + offerName + ".";
+            return "I am aligning this message with the role: " + offerName + ".";
         }
         if (!category.isBlank()) {
-            return "Je rends ce message plus pertinent pour la categorie: " + category + ".";
+            return "I am aligning this message with the category: " + category + ".";
         }
-        return "Je rends ce message plus pertinent pour l'offre.";
+        return "I am aligning this message with the opportunity.";
     }
 
     private String extractJsonObject(String content) {
@@ -522,14 +502,14 @@ public class AiCoachServiceImpl implements AiCoachService {
 
     private String normalizeTone(String tone) {
         if (tone == null || tone.isBlank()) {
-            return "professionnel";
+            return "professional";
         }
         return tone.trim();
     }
 
     private String normalizeLanguage(String language) {
         if (language == null || language.isBlank()) {
-            return "fr";
+            return "en";
         }
         return language.trim().toLowerCase(Locale.ROOT);
     }

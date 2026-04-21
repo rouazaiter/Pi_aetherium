@@ -171,7 +171,7 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
         if (serviceRequest.getCreator() != null && serviceRequest.getCreator().getId().equals(viewerId)) {
             return serviceRequest;
         }
-        // Les demandes non publiques sont visibles seulement par le créateur
+        // Non-public requests are visible only to the creator
         if (serviceRequest.getStatus() == ServiceRequestStatus.OPEN) {
             return serviceRequest;
         }

@@ -24,7 +24,7 @@ public class ApplicationController {
     private final PaymentService paymentService;
 
     /**
-     * Postuler a une demande de service.
+     * Apply to a service request.
      */
     @PostMapping("/add-application/{applicant-id}/{service-request-id}")
     public ResponseEntity<Application> createApplication(
@@ -37,7 +37,7 @@ public class ApplicationController {
     }
 
     /**
-     * Recuperer une candidature par son id.
+     * Retrieve an application by its id.
      */
     @GetMapping("/retrieve-application/{id}")
     public ResponseEntity<Application> getApplicationById(@PathVariable Long id) {
@@ -45,7 +45,7 @@ public class ApplicationController {
     }
 
     /**
-     * Recuperer les candidatures d'un utilisateur.
+     * Retrieve all applications for a user.
      */
     @GetMapping("/retrieve-by-user/{applicantId}")
     public ResponseEntity<List<Application>> getApplicationsByUser(@PathVariable Long applicantId) {
@@ -53,7 +53,7 @@ public class ApplicationController {
     }
 
     /**
-     * Recuperer les candidatures d'une demande (createur uniquement).
+     * Retrieve the applications for a request (creator only).
      */
     @GetMapping("/retrieve-by-service-request/{serviceRequestId}/{requester-id}")
     public ResponseEntity<List<Application>> getApplicationsByServiceRequest(
@@ -64,7 +64,7 @@ public class ApplicationController {
     }
 
     /**
-     * Recuperer les candidatures d'une demande filtrees par statut (createur uniquement).
+     * Retrieve the applications for a request filtered by status (creator only).
      */
     @GetMapping("/retrieve-by-service-request-status/{serviceRequestId}/{status}/{requester-id}")
     public ResponseEntity<List<Application>> getApplicationsByServiceRequestAndStatus(
@@ -76,7 +76,7 @@ public class ApplicationController {
     }
 
     /**
-     * Changer le statut d'une candidature (createur de la demande uniquement).
+     * Change an application status (request creator only).
      */
     @PatchMapping("/modify-status/{applicationId}/{requester-id}/{status}")
     public ResponseEntity<Application> updateApplicationStatus(
@@ -88,7 +88,7 @@ public class ApplicationController {
     }
 
     /**
-     * Verifier si un utilisateur a deja postule a une demande.
+     * Check whether a user already applied to a request.
      */
     @GetMapping("/has-applied/{serviceRequestId}/{applicantId}")
     public ResponseEntity<Map<String, Boolean>> hasApplied(
@@ -100,17 +100,17 @@ public class ApplicationController {
     }
 
     /**
-     * Accepter une candidature et créer une session Stripe Checkout pour le paiement.
+     * Accept an application and create a Stripe Checkout session for payment.
      */
     @PostMapping("/accept-and-checkout/{applicationId}/{requester-id}")
     public ResponseEntity<CheckoutSessionResponse> acceptAndCreateCheckout(
             @PathVariable Long applicationId,
             @PathVariable("requester-id") Long requesterId
     ) {
-        // Accepter l'application
+        // Accept the application
         applicationService.updateApplicationStatus(applicationId, requesterId, ApplicationStatus.ACCEPTED);
         
-        // Créer la session Stripe Checkout
+        // Create the Stripe Checkout session
         return ResponseEntity.ok(paymentService.createCheckoutSessionForApplication(applicationId, requesterId));
     }
 }

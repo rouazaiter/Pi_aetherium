@@ -154,7 +154,7 @@ export class ApplyFormComponent implements OnInit {
     this.aiCoachService.preview({
       serviceRequestId: this.serviceRequest.id,
       originalText: currentMessage,
-      tone: 'professionnel',
+      tone: 'professional',
       language: 'en'
     }).subscribe({
       next: (preview) => {

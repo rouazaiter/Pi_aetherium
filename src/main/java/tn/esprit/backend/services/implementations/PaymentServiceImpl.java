@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import tn.esprit.backend.dto.CheckoutSessionResponse;
+import tn.esprit.backend.entities.ApplicationStatus;
 import tn.esprit.backend.entities.Application;
 import tn.esprit.backend.entities.PaymentStatus;
 import tn.esprit.backend.entities.ServiceRequest;
@@ -97,8 +98,7 @@ public class PaymentServiceImpl implements PaymentService {
         ServiceRequest serviceRequest = serviceRequestRepository.findById(serviceRequestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ServiceRequest not found: " + serviceRequestId));
 
-        // Paiement du ServiceRequest n'existe plus, cette méthode est maintenant obsolète
-        // mais on la garde pour compatibilité si besoin
+        // ServiceRequest payment is no longer used; the method remains for compatibility.
     }
 
     @Override
@@ -108,6 +108,10 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found: " + applicationId));
 
         ServiceRequest serviceRequest = application.getServiceRequest();
+
+        if (application.getStatus() != ApplicationStatus.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Application must be accepted before payment");
+        }
 
         if (!serviceRequest.getCreator().getId().equals(requesterId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the service request creator can accept this application");
@@ -175,7 +179,7 @@ public class PaymentServiceImpl implements PaymentService {
         application.setStripeCheckoutSessionId(session.getId());
         applicationRepository.save(application);
 
-        // Notifier l'applicant que le paiement a été reçu
+        // Notify the applicant that payment was received
         notificationService.notifyUsersWithAssistant(
                 java.util.List.of(application.getApplicant().getId()),
                 "PAYMENT_RECEIVED",

@@ -100,13 +100,13 @@
               <p class="request-meta">Category: {{ req.category }}</p>
               <p class="request-meta">Price: {{ req.price | currency:'USD':'symbol':'1.2-2' }}</p>
               <p class="request-description">{{ req.description || 'No description provided.' }}</p>
-              <p class="request-meta">Payment: {{ req.paymentStatus }}</p>
 
               <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>
 
               <div class="request-actions">
                 <a [routerLink]="['my', req.id]" class="btn-soft">Applications</a>
                 <a [routerLink]="['edit', req.id]" class="btn-outline-soft">Edit</a>
+                <button type="button" class="btn-danger-soft" (click)="deleteRequest(req)">Delete</button>
               </div>
             </article>
           </div>
@@ -133,7 +133,6 @@
               <p class="request-meta">Category: {{ req.category }}</p>
               <p class="request-meta">Price: {{ req.price | currency:'USD':'symbol':'1.2-2' }}</p>
               <p class="request-description">{{ req.description || 'No description provided.' }}</p>
-              <p class="request-meta">Payment: {{ req.paymentStatus }}</p>
 
               <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>
 

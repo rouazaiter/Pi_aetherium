@@ -36,13 +36,13 @@ public class Application {
     @Column(nullable = false)
     private LocalDateTime appliedAt;
 
-    // Relation N-1 avec ServiceRequest (la demande a laquelle on postule)
+    // Many-to-one relation with ServiceRequest (the request being applied to)
     @ManyToOne
     @JoinColumn(name = "service_request_id", nullable = false)
     @JsonIgnore
     private ServiceRequest serviceRequest;
 
-    // Relation N-1 avec User (le candidat)
+    // Many-to-one relation with User (the applicant)
     @ManyToOne
     @JoinColumn(name = "applicant_id", nullable = false)
     private User applicant;

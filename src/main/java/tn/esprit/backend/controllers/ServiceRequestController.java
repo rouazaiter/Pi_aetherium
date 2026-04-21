@@ -26,7 +26,7 @@ public class ServiceRequestController {
     private final ServiceRequestService serviceRequestService;
 
     /**
-     * Publier une nouvelle demande de service.
+     * Publish a new service request.
      */
     @PostMapping("/addservice/{creator-id}")
     public ResponseEntity<ServiceRequestResponse> createServiceRequest(
@@ -37,7 +37,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Variante "vrai upload" (multipart/form-data) pour joindre un fichier PDF/Word/PNG.
+     * Multipart upload variant for attaching a PDF/Word/PNG file.
      */
     @PostMapping(value = "/addservice/{creator-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ServiceRequestResponse> createServiceRequestMultipart(
@@ -50,7 +50,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Recuperer toutes les demandes de service.
+     * Retrieve all service requests.
      */
     @GetMapping("/requests")
     public ResponseEntity<List<ServiceRequestResponse>> getAllServiceRequests(@RequestParam Long viewerId) {
@@ -58,7 +58,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Recuperer une demande de service par son id.
+     * Retrieve a service request by id.
      */
     @GetMapping("/request/{id}")
     public ResponseEntity<ServiceRequestResponse> getServiceRequestById(@PathVariable Long id, @RequestParam Long viewerId) {
@@ -66,7 +66,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Recuperer les demandes de service par statut.
+     * Retrieve service requests by status.
      */
     @GetMapping("/requestbystatus/{status}")
     public ResponseEntity<List<ServiceRequestResponse>> getServiceRequestsByStatus(@PathVariable ServiceRequestStatus status, @RequestParam Long viewerId) {
@@ -74,7 +74,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Recuperer les demandes creees par un utilisateur.
+     * Retrieve the requests created by a user.
      */
     @GetMapping("/requestbyuser/{userId}")
     public ResponseEntity<List<ServiceRequestResponse>> getServiceRequestsByUser(@PathVariable Long userId) {
@@ -82,7 +82,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Mettre a jour une demande de service (createur uniquement).
+     * Update a service request (creator only).
      */
     @PutMapping("/modifyrequest/{id}/{requester-id}")
     public ResponseEntity<ServiceRequestResponse> updateServiceRequest(
@@ -94,7 +94,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Variante upload "multipart/form-data" pour modifier une demande (optionnellement avec un nouveau fichier).
+     * Multipart upload variant for updating a request with an optional new file.
      */
     @PutMapping(value = "/modifyrequest/{id}/{requester-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ServiceRequestResponse> updateServiceRequestMultipart(
@@ -107,7 +107,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Supprimer une demande de service (createur uniquement).
+     * Delete a service request (creator only).
      */
     @DeleteMapping("/removerequest/{id}/{requester-id}")
     public ResponseEntity<Void> deleteServiceRequest(
@@ -119,7 +119,7 @@ public class ServiceRequestController {
     }
 
     /**
-     * Executer manuellement la verification des demandes expirees.
+     * Manually trigger the expired requests check.
      */
     @PostMapping("/expired")
     public ResponseEntity<Map<String, Integer>> checkExpiredRequests() {

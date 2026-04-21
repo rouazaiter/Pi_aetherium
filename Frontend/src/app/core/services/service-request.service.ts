@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  CheckoutSessionResponse,
   ServiceRequest,
   ServiceRequestPayload,
   ServiceRequestStatus
@@ -11,7 +10,6 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ServiceRequestService {
   private base = '/skillhub/api/service-requests';
-  private paymentsBase = '/skillhub/api/payments';
 
   constructor(private http: HttpClient) {}
 
@@ -43,13 +41,6 @@ export class ServiceRequestService {
 
   update(id: number, requesterId: number, formData: FormData): Observable<ServiceRequest> {
     return this.http.put<ServiceRequest>(`${this.base}/modifyrequest/${id}/${requesterId}`, formData);
-  }
-
-  createCheckoutSession(serviceRequestId: number, requesterId: number): Observable<CheckoutSessionResponse> {
-    return this.http.post<CheckoutSessionResponse>(
-      `${this.paymentsBase}/checkout/${serviceRequestId}/${requesterId}`,
-      {}
-    );
   }
 
   delete(id: number, requesterId: number): Observable<void> {

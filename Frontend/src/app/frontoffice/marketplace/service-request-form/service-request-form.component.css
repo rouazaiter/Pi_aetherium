@@ -1,11 +1,12 @@
 .form-page-wrapper {
-  height: calc(100vh - 130px);
+  min-height: calc(100vh - 130px);
+  height: auto;
   background: linear-gradient(135deg, #f7f5f2 0%, #fafafa 100%);
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: center;
-  padding: 0.5rem;
-  overflow: hidden;
+  padding: 0.75rem 0.5rem 1.25rem;
+  overflow: visible;
 }
 
 .form-card {
@@ -14,7 +15,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   width: 100%;
   max-width: 1100px;
-  height: 100%;
+  height: auto;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -61,7 +62,7 @@
 
 .form-card-body.compact {
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .form-label {
@@ -76,6 +77,17 @@
   padding: 0.45rem 0.65rem;
   font-size: 0.8rem;
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.form-control[type="number"]::-webkit-outer-spin-button,
+.form-control[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .form-control:focus {
@@ -238,7 +250,6 @@ textarea.form-control {
 
 @media (max-width: 992px) {
   .form-page-wrapper {
-    height: auto;
     min-height: calc(100vh - 130px);
     overflow: visible;
   }

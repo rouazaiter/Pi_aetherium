@@ -123,6 +123,24 @@ export class ServiceRequestDetailComponent implements OnInit {
     });
   }
 
+  deleteRequest(): void {
+    if (!this.serviceRequest) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete request "${this.serviceRequest.name}"? This action cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.srService.delete(this.serviceRequest.id, this.currentUserId).subscribe({
+      next: () => this.router.navigate(['/marketplace']),
+      error: () => {
+        this.error = 'Error deleting request.';
+      }
+    });
+  }
+
   private reloadMeetingReservations(): void {
     if (this.applications.length === 0) {
       this.meetingByApplication = {};

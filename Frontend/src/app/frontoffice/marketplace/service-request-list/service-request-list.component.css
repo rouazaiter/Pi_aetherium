@@ -412,6 +412,23 @@
   border-color: #97a9bc;
 }
 
+.btn-danger-soft {
+  border: 1px solid #efb4b4;
+  color: #9f1d1d;
+  background: #fff5f5;
+  text-decoration: none;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  padding: 0.35rem 0.62rem;
+  font-weight: 600;
+}
+
+.btn-danger-soft:hover {
+  color: #7f1d1d;
+  border-color: #e58b8b;
+  background: #ffe8e8;
+}
+
 .request-closed-note {
   color: #7a8797;
   font-size: 0.74rem;

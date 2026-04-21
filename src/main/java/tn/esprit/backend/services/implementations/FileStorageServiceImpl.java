@@ -51,8 +51,8 @@ public class FileStorageServiceImpl implements FileStorageService {
                     "Unauthorized extension: " + ext);
         }
 
-        // Vérification légère côté serveur: le content-type peut être spoofé,
-        // mais on le garde comme garde-fou supplémentaire.
+        // Lightweight server-side check: content-type can be spoofed,
+        // but we keep it as an extra safeguard.
         String contentType = file.getContentType();
         if (contentType != null && !ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,

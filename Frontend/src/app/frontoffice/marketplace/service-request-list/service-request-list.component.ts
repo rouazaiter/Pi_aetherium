@@ -51,7 +51,7 @@ export class ServiceRequestListComponent implements OnInit {
       next: (data) => {
         this.myRequests = data.filter(r => r.creator.id === this.currentUserId);
         this.otherRequests = data.filter(r => r.creator.id !== this.currentUserId);
-        this.filteredRequests = this.otherRequests;
+        this.filterBy(this.activeFilter);
         this.popularServices = this.buildPopularServices(data);
         this.loading = false;
       },
@@ -71,6 +71,20 @@ export class ServiceRequestListComponent implements OnInit {
     } else {
       this.filteredRequests = this.otherRequests.filter(r => r.status === status);
     }
+  }
+
+  deleteRequest(request: ServiceRequest): void {
+    const confirmed = window.confirm(`Delete request "${request.name}"? This action cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.srService.delete(request.id, this.currentUserId).subscribe({
+      next: () => this.load(),
+      error: () => {
+        this.error = 'Error deleting request.';
+      }
+    });
   }
 
   private loadWeeklyHighlights(): void {

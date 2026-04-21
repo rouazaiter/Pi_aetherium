@@ -35,7 +35,7 @@ public class ServiceRequest {
     private ServiceRequestCategory category;
 
     @Column(length = 500)
-    private String files;  // Chemin ou URL des fichiers joints
+    private String files;  // Path or URL of attached files
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
@@ -49,12 +49,12 @@ public class ServiceRequest {
 
     // ========== RELATIONS ==========
 
-    // Relation N-1 avec User (le créateur de la demande)
+    // Many-to-one relation with User (the request creator)
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
-    // Relation 1-N avec Application (candidatures reçues)
+    // One-to-many relation with Application (received applications)
     @OneToMany(mappedBy = "serviceRequest", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Application> applications = new ArrayList<>();

@@ -32,12 +32,12 @@ public class Profile {
 
     // ========== RELATIONS ==========
 
-    // Relation 1-1 avec User (côté propriétaire)
+    // One-to-one relation with User (owner side)
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
-    // Relation 1-1 avec Address
+    // One-to-one relation with Address
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address address;

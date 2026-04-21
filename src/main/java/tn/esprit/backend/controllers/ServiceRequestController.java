@@ -5,14 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import tn.esprit.backend.entities.ServiceRequestCategory;
-import tn.esprit.backend.entities.ServiceRequest;
+import tn.esprit.backend.dto.CreateServiceRequestRequest;
+import tn.esprit.backend.dto.ServiceRequestResponse;
+import tn.esprit.backend.dto.UpdateServiceRequestRequest;
 import tn.esprit.backend.entities.ServiceRequestStatus;
-import tn.esprit.backend.services.interfaces.FileStorageService;
 import tn.esprit.backend.services.interfaces.ServiceRequestService;
 
 import java.util.List;
@@ -25,75 +24,60 @@ import java.time.LocalDateTime;
 public class ServiceRequestController {
 
     private final ServiceRequestService serviceRequestService;
-    private final FileStorageService fileStorageService;
 
     /**
      * Publier une nouvelle demande de service.
      */
     @PostMapping("/addservice/{creator-id}")
-    public ResponseEntity<ServiceRequest> createServiceRequest(
+    public ResponseEntity<ServiceRequestResponse> createServiceRequest(
             @PathVariable("creator-id") Long creatorId,
-            @Valid @RequestBody ServiceRequest serviceRequest
+            @Valid @RequestBody CreateServiceRequestRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(serviceRequestService.createServiceRequest(creatorId, serviceRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(serviceRequestService.createServiceRequest(creatorId, request, null));
     }
 
     /**
      * Variante "vrai upload" (multipart/form-data) pour joindre un fichier PDF/Word/PNG.
      */
     @PostMapping(value = "/addservice/{creator-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ServiceRequest> createServiceRequestMultipart(
+    public ResponseEntity<ServiceRequestResponse> createServiceRequestMultipart(
             @PathVariable("creator-id") Long creatorId,
-            @RequestParam String name,
-            @RequestParam String category,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime expiringDate,
+            @Valid @RequestPart("payload") CreateServiceRequestRequest request,
             @RequestPart(required = false) MultipartFile file
     ) {
-        ServiceRequest sr = new ServiceRequest();
-        sr.setName(name);
-        sr.setCategory(parseCategory(category));
-        sr.setDescription(description);
-        sr.setExpiringDate(expiringDate);
-
-        if (file != null && !file.isEmpty()) {
-            String storedFileName = fileStorageService.store(file);
-            sr.setFiles("/api/service-requests/files/" + storedFileName);
-        }
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(serviceRequestService.createServiceRequest(creatorId, sr));
+                .body(serviceRequestService.createServiceRequest(creatorId, request, file));
     }
 
     /**
      * Recuperer toutes les demandes de service.
      */
     @GetMapping("/requests")
-    public ResponseEntity<List<ServiceRequest>> getAllServiceRequests() {
-        return ResponseEntity.ok(serviceRequestService.getAllServiceRequests());
+    public ResponseEntity<List<ServiceRequestResponse>> getAllServiceRequests(@RequestParam Long viewerId) {
+        return ResponseEntity.ok(serviceRequestService.getAllServiceRequests(viewerId));
     }
 
     /**
      * Recuperer une demande de service par son id.
      */
     @GetMapping("/request/{id}")
-    public ResponseEntity<ServiceRequest> getServiceRequestById(@PathVariable Long id) {
-        return ResponseEntity.ok(serviceRequestService.getServiceRequestById(id));
+    public ResponseEntity<ServiceRequestResponse> getServiceRequestById(@PathVariable Long id, @RequestParam Long viewerId) {
+        return ResponseEntity.ok(serviceRequestService.getServiceRequestById(id, viewerId));
     }
 
     /**
      * Recuperer les demandes de service par statut.
      */
     @GetMapping("/requestbystatus/{status}")
-    public ResponseEntity<List<ServiceRequest>> getServiceRequestsByStatus(@PathVariable ServiceRequestStatus status) {
-        return ResponseEntity.ok(serviceRequestService.getServiceRequestsByStatus(status));
+    public ResponseEntity<List<ServiceRequestResponse>> getServiceRequestsByStatus(@PathVariable ServiceRequestStatus status, @RequestParam Long viewerId) {
+        return ResponseEntity.ok(serviceRequestService.getServiceRequestsByStatus(viewerId, status));
     }
 
     /**
      * Recuperer les demandes creees par un utilisateur.
      */
     @GetMapping("/requestbyuser/{userId}")
-    public ResponseEntity<List<ServiceRequest>> getServiceRequestsByUser(@PathVariable Long userId) {
+    public ResponseEntity<List<ServiceRequestResponse>> getServiceRequestsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(serviceRequestService.getServiceRequestsByUser(userId));
     }
 
@@ -101,48 +85,25 @@ public class ServiceRequestController {
      * Mettre a jour une demande de service (createur uniquement).
      */
     @PutMapping("/modifyrequest/{id}/{requester-id}")
-    public ResponseEntity<ServiceRequest> updateServiceRequest(
+    public ResponseEntity<ServiceRequestResponse> updateServiceRequest(
             @PathVariable Long id,
             @PathVariable("requester-id") Long requesterId,
-            @RequestBody ServiceRequest serviceRequest
+            @Valid @RequestBody UpdateServiceRequestRequest request
     ) {
-        return ResponseEntity.ok(serviceRequestService.updateServiceRequest(id, requesterId, serviceRequest));
+        return ResponseEntity.ok(serviceRequestService.updateServiceRequest(id, requesterId, request, null));
     }
 
     /**
      * Variante upload "multipart/form-data" pour modifier une demande (optionnellement avec un nouveau fichier).
      */
     @PutMapping(value = "/modifyrequest/{id}/{requester-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ServiceRequest> updateServiceRequestMultipart(
+    public ResponseEntity<ServiceRequestResponse> updateServiceRequestMultipart(
             @PathVariable Long id,
             @PathVariable("requester-id") Long requesterId,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime expiringDate,
+            @Valid @RequestPart("payload") UpdateServiceRequestRequest request,
             @RequestPart(required = false) MultipartFile file
     ) {
-        ServiceRequest payload = new ServiceRequest();
-
-        if (name != null) {
-            payload.setName(name);
-        }
-        if (category != null) {
-            payload.setCategory(parseCategory(category));
-        }
-        if (description != null) {
-            payload.setDescription(description);
-        }
-        if (expiringDate != null) {
-            payload.setExpiringDate(expiringDate);
-        }
-
-        if (file != null && !file.isEmpty()) {
-            String storedFileName = fileStorageService.store(file);
-            payload.setFiles("/api/service-requests/files/" + storedFileName);
-        }
-
-        return ResponseEntity.ok(serviceRequestService.updateServiceRequest(id, requesterId, payload));
+        return ResponseEntity.ok(serviceRequestService.updateServiceRequest(id, requesterId, request, file));
     }
 
     /**
@@ -155,14 +116,6 @@ public class ServiceRequestController {
     ) {
         serviceRequestService.deleteServiceRequest(id, requesterId);
         return ResponseEntity.noContent().build();
-    }
-
-    private ServiceRequestCategory parseCategory(String rawCategory) {
-        try {
-            return ServiceRequestCategory.fromValue(rawCategory);
-        } catch (IllegalArgumentException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
-        }
     }
 
     /**

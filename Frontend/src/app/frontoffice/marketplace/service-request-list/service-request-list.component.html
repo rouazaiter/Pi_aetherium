@@ -98,7 +98,9 @@
 
               <h3>{{ req.name }}</h3>
               <p class="request-meta">Category: {{ req.category }}</p>
+              <p class="request-meta">Price: {{ req.price | currency:'USD':'symbol':'1.2-2' }}</p>
               <p class="request-description">{{ req.description || 'No description provided.' }}</p>
+              <p class="request-meta">Payment: {{ req.paymentStatus }}</p>
 
               <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>
 
@@ -129,7 +131,9 @@
 
               <h3>{{ req.name }}</h3>
               <p class="request-meta">Category: {{ req.category }}</p>
+              <p class="request-meta">Price: {{ req.price | currency:'USD':'symbol':'1.2-2' }}</p>
               <p class="request-description">{{ req.description || 'No description provided.' }}</p>
+              <p class="request-meta">Payment: {{ req.paymentStatus }}</p>
 
               <p class="request-meta" *ngIf="req.expiringDate">Expires on {{ req.expiringDate | date:'MMM dd, yyyy' }}</p>
 

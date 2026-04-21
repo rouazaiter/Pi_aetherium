@@ -6,9 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.backend.dto.CreateApplicationRequest;
+import tn.esprit.backend.dto.CheckoutSessionResponse;
 import tn.esprit.backend.entities.Application;
 import tn.esprit.backend.entities.ApplicationStatus;
 import tn.esprit.backend.services.interfaces.ApplicationService;
+import tn.esprit.backend.services.interfaces.PaymentService;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import java.util.Map;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final PaymentService paymentService;
 
     /**
      * Postuler a une demande de service.
@@ -94,5 +97,20 @@ public class ApplicationController {
     ) {
         boolean result = applicationService.hasUserApplied(serviceRequestId, applicantId);
         return ResponseEntity.ok(Map.of("hasApplied", result));
+    }
+
+    /**
+     * Accepter une candidature et créer une session Stripe Checkout pour le paiement.
+     */
+    @PostMapping("/accept-and-checkout/{applicationId}/{requester-id}")
+    public ResponseEntity<CheckoutSessionResponse> acceptAndCreateCheckout(
+            @PathVariable Long applicationId,
+            @PathVariable("requester-id") Long requesterId
+    ) {
+        // Accepter l'application
+        applicationService.updateApplicationStatus(applicationId, requesterId, ApplicationStatus.ACCEPTED);
+        
+        // Créer la session Stripe Checkout
+        return ResponseEntity.ok(paymentService.createCheckoutSessionForApplication(applicationId, requesterId));
     }
 }

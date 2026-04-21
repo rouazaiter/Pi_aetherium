@@ -72,7 +72,7 @@ export class ApplyFormComponent implements OnInit {
       this.currentUserId = user.id;
 
       // Load the request
-      this.srService.getById(id).subscribe({
+      this.srService.getById(id, this.currentUserId).subscribe({
         next: (sr) => {
           // If this is my own request, do not allow applying
           if (sr.creator.id === this.currentUserId) {
@@ -197,7 +197,7 @@ export class ApplyFormComponent implements OnInit {
     this.recommendationsError = '';
 
     forkJoin({
-      requests: this.srService.getAll().pipe(catchError(() => of([] as ServiceRequest[]))),
+      requests: this.srService.getAll(this.currentUserId).pipe(catchError(() => of([] as ServiceRequest[]))),
       creators: this.leaderboardService.getCreators(90, 50, currentRequest.category).pipe(
         catchError(() => of({ entries: [] } as any))
       )

@@ -47,7 +47,7 @@ export class ServiceRequestListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.srService.getAll().subscribe({
+    this.srService.getAll(this.currentUserId).subscribe({
       next: (data) => {
         this.myRequests = data.filter(r => r.creator.id === this.currentUserId);
         this.otherRequests = data.filter(r => r.creator.id !== this.currentUserId);

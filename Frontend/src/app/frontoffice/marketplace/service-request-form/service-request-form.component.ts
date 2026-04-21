@@ -52,6 +52,7 @@ export class ServiceRequestFormComponent implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(100)]],
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.maxLength(2000)]],
+      price: [null, [Validators.required, Validators.min(1)]],
       expiringDate: [null, Validators.required],
       calendlyLink: ['', [Validators.required, Validators.maxLength(300), Validators.pattern(/^https?:\/\/.+/i)]]
     });
@@ -59,12 +60,13 @@ export class ServiceRequestFormComponent implements OnInit {
     this.requestId = this.route.snapshot.params['id'];
     if (this.requestId) {
       this.isEdit = true;
-      this.srService.getById(this.requestId).subscribe({
+      this.srService.getById(this.requestId, this.currentUserId).subscribe({
         next: (sr) => {
           this.form.patchValue({
             name: sr.name,
             category: sr.category,
             description: sr.description,
+            price: sr.price,
             expiringDate: sr.expiringDate ? sr.expiringDate.substring(0, 16) : null,
             calendlyLink: ''
           });
@@ -110,15 +112,18 @@ export class ServiceRequestFormComponent implements OnInit {
     this.success = '';
 
     const formData = new FormData();
-    formData.append('name', this.form.value.name);
-    formData.append('category', this.form.value.category);
-    if (this.form.value.description) formData.append('description', this.form.value.description);
-    if (this.form.value.expiringDate) {
-      // Spring @DateTimeFormat(iso = DATE_TIME) attend "yyyy-MM-ddTHH:mm:ss"
-      const d = new Date(this.form.value.expiringDate);
-      const formatted = d.toISOString().replace('Z', '');
-      formData.append('expiringDate', formatted);
-    }
+    const d = new Date(this.form.value.expiringDate);
+    const formatted = d.toISOString().replace('Z', '');
+
+    const payload = {
+      name: this.form.value.name,
+      category: this.form.value.category,
+      description: this.form.value.description,
+      expiringDate: formatted,
+      price: Number(this.form.value.price)
+    };
+
+    formData.append('payload', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
     if (this.selectedFile) {
       formData.append('file', this.selectedFile);
     }
@@ -137,9 +142,22 @@ export class ServiceRequestFormComponent implements OnInit {
           this.selectedSlots
         ).subscribe({
           next: () => {
-            this.success = this.isEdit ? 'Request updated.' : 'Request published successfully.';
-            this.loading = false;
-            this.router.navigate(['/marketplace']);
+            if (this.isEdit) {
+              this.success = 'Request updated.';
+              this.loading = false;
+              this.router.navigate(['/marketplace']);
+              return;
+            }
+
+            this.srService.createCheckoutSession(targetRequestId, this.currentUserId).subscribe({
+              next: (checkout) => {
+                window.location.href = checkout.checkoutUrl;
+              },
+              error: (err) => {
+                this.error = err?.error?.message || 'Request saved, but checkout session creation failed.';
+                this.loading = false;
+              }
+            });
           },
           error: (err) => {
             this.error = err?.error?.message || 'Request saved, but meeting configuration failed.';

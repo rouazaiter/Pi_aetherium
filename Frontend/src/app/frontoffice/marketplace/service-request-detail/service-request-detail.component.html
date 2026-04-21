@@ -20,6 +20,9 @@
     <span *ngIf="serviceRequest.files">
       · <a [href]="serviceRequest.files" target="_blank">View attached file</a>
     </span>
+    <span class="price-tag">
+      💰 <strong>{{ serviceRequest.price | currency:'USD':'symbol':'1.2-2' }}</strong>
+    </span>
   </div>
 
   <hr />
@@ -60,7 +63,7 @@
     <!-- Actions only if request is OPEN and application is PENDING -->
     <div class="app-actions"
          *ngIf="serviceRequest.status === 'OPEN' && app.status === 'PENDING'">
-      <button class="btn-accept" (click)="updateStatus(app.id, 'ACCEPTED')">Accept</button>
+      <button class="btn-accept" (click)="acceptAndPay(app.id)">Accept & Pay ({{ serviceRequest.price | currency:'USD':'symbol':'1.2-2' }})</button>
       <button class="btn-reject" (click)="updateStatus(app.id, 'REJECTED')">Reject</button>
     </div>
   </div>

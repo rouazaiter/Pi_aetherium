@@ -1,24 +1,36 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ServiceRequest, ServiceRequestStatus } from '../models/service-request.model';
+import {
+  CheckoutSessionResponse,
+  ServiceRequest,
+  ServiceRequestPayload,
+  ServiceRequestStatus
+} from '../models/service-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class ServiceRequestService {
   private base = '/skillhub/api/service-requests';
+  private paymentsBase = '/skillhub/api/payments';
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<ServiceRequest[]> {
-    return this.http.get<ServiceRequest[]>(`${this.base}/requests`);
+  getAll(viewerId: number): Observable<ServiceRequest[]> {
+    return this.http.get<ServiceRequest[]>(`${this.base}/requests`, {
+      params: new HttpParams().set('viewerId', viewerId)
+    });
   }
 
-  getById(id: number): Observable<ServiceRequest> {
-    return this.http.get<ServiceRequest>(`${this.base}/request/${id}`);
+  getById(id: number, viewerId: number): Observable<ServiceRequest> {
+    return this.http.get<ServiceRequest>(`${this.base}/request/${id}`, {
+      params: new HttpParams().set('viewerId', viewerId)
+    });
   }
 
-  getByStatus(status: ServiceRequestStatus): Observable<ServiceRequest[]> {
-    return this.http.get<ServiceRequest[]>(`${this.base}/requestbystatus/${status}`);
+  getByStatus(status: ServiceRequestStatus, viewerId: number): Observable<ServiceRequest[]> {
+    return this.http.get<ServiceRequest[]>(`${this.base}/requestbystatus/${status}`, {
+      params: new HttpParams().set('viewerId', viewerId)
+    });
   }
 
   getByUser(userId: number): Observable<ServiceRequest[]> {
@@ -31,6 +43,13 @@ export class ServiceRequestService {
 
   update(id: number, requesterId: number, formData: FormData): Observable<ServiceRequest> {
     return this.http.put<ServiceRequest>(`${this.base}/modifyrequest/${id}/${requesterId}`, formData);
+  }
+
+  createCheckoutSession(serviceRequestId: number, requesterId: number): Observable<CheckoutSessionResponse> {
+    return this.http.post<CheckoutSessionResponse>(
+      `${this.paymentsBase}/checkout/${serviceRequestId}/${requesterId}`,
+      {}
+    );
   }
 
   delete(id: number, requesterId: number): Observable<void> {

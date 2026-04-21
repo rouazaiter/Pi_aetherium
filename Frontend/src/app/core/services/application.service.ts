@@ -48,4 +48,11 @@ export class ApplicationService {
       `${this.base}/has-applied/${serviceRequestId}/${applicantId}`
     );
   }
+
+  acceptAndCheckout(applicationId: number, requesterId: number): Observable<{sessionId: string; checkoutUrl: string}> {
+    return this.http.post<{sessionId: string; checkoutUrl: string}>(
+      `${this.base}/accept-and-checkout/${applicationId}/${requesterId}`,
+      {}
+    );
+  }
 }

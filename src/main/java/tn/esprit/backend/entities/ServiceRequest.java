@@ -3,6 +3,7 @@ package tn.esprit.backend.entities;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,9 @@ public class ServiceRequest {
 
     @Column(length = 500)
     private String files;  // Chemin ou URL des fichiers joints
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

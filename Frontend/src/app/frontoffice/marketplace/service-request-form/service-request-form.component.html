@@ -36,6 +36,21 @@
           </div>
 
           <div class="field-block">
+            <label for="price" class="form-label fw-semibold">Price <span class="text-danger">*</span></label>
+            <input
+              id="price"
+              type="number"
+              min="1"
+              step="0.01"
+              class="form-control"
+              [class.is-invalid]="form.get('price')?.invalid && form.get('price')?.touched"
+              formControlName="price"
+              placeholder="Ex: 120.00"
+            />
+            <div class="invalid-feedback">Price is required and must be greater than 0.</div>
+          </div>
+
+          <div class="field-block">
             <label for="expiringDate" class="form-label fw-semibold">Expiration Date <span class="text-danger">*</span></label>
             <input
               id="expiringDate"

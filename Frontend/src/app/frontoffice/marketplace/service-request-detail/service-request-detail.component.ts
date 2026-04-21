@@ -41,7 +41,7 @@ export class ServiceRequestDetailComponent implements OnInit {
       this.currentUserId = user.id;
       this.loading = true;
 
-      this.srService.getById(id).subscribe({
+      this.srService.getById(id, this.currentUserId).subscribe({
         next: (sr) => {
           // If this is not my request, redirect
           if (sr.creator.id !== this.currentUserId) {
@@ -80,10 +80,20 @@ export class ServiceRequestDetailComponent implements OnInit {
         if (app) app.status = status;
         // If accepted, reload the request (its status becomes CLOSED)
         if (status === 'ACCEPTED') {
-          this.srService.getById(this.serviceRequest!.id).subscribe(sr => this.serviceRequest = sr);
+          this.srService.getById(this.serviceRequest!.id, this.currentUserId).subscribe(sr => this.serviceRequest = sr);
         }
       },
       error: (err) => this.error = err?.error?.message || 'Error.'
+    });
+  }
+
+  acceptAndPay(appId: number): void {
+    this.appService.acceptAndCheckout(appId, this.currentUserId).subscribe({
+      next: (checkout) => {
+        // Redirect to Stripe Checkout
+        window.location.href = checkout.checkoutUrl;
+      },
+      error: (err) => this.error = err?.error?.message || 'Error creating payment session.'
     });
   }
 

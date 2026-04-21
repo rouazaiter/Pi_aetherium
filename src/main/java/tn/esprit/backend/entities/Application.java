@@ -25,6 +25,14 @@ public class Application {
     @Column(nullable = false)
     private ApplicationStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PaymentStatus paymentStatus;
+
+    @JsonIgnore
+    @Column(length = 255)
+    private String stripeCheckoutSessionId;
+
     @Column(nullable = false)
     private LocalDateTime appliedAt;
 
@@ -43,6 +51,9 @@ public class Application {
     protected void onCreate() {
         if (status == null) {
             status = ApplicationStatus.PENDING;
+        }
+        if (paymentStatus == null) {
+            paymentStatus = PaymentStatus.PENDING;
         }
         if (appliedAt == null) {
             appliedAt = LocalDateTime.now();

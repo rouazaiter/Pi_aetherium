@@ -5,14 +5,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import tn.esprit.backend.dto.CreateServiceRequestRequest;
+import tn.esprit.backend.dto.ServiceRequestResponse;
+import tn.esprit.backend.dto.UpdateServiceRequestRequest;
 import tn.esprit.backend.dto.NotificationPriority;
+import tn.esprit.backend.dto.UserSummaryResponse;
+import tn.esprit.backend.entities.PaymentStatus;
 import tn.esprit.backend.entities.ServiceRequest;
 import tn.esprit.backend.entities.ServiceRequestCategory;
 import tn.esprit.backend.entities.ServiceRequestStatus;
 import tn.esprit.backend.entities.User;
 import tn.esprit.backend.repositories.ServiceRequestRepository;
 import tn.esprit.backend.repositories.UserRepository;
+import tn.esprit.backend.services.interfaces.FileStorageService;
 import tn.esprit.backend.services.interfaces.ServiceRequestService;
 
 import java.time.LocalDateTime;
@@ -25,18 +32,26 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final FileStorageService fileStorageService;
 
     @Override
     @Transactional
-    public ServiceRequest createServiceRequest(Long creatorId, ServiceRequest serviceRequest) {
+    public ServiceRequestResponse createServiceRequest(Long creatorId, CreateServiceRequestRequest request, MultipartFile file) {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + creatorId));
 
         LocalDateTime now = LocalDateTime.now();
-        serviceRequest.setId(null);
 
-        if (serviceRequest.getCategory() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Service request category is required");
+        ServiceRequest serviceRequest = new ServiceRequest();
+        serviceRequest.setName(request.name());
+        serviceRequest.setCategory(request.category());
+        serviceRequest.setDescription(request.description());
+        serviceRequest.setExpiringDate(request.expiringDate());
+        serviceRequest.setPrice(request.price());
+
+        if (file != null && !file.isEmpty()) {
+            String storedFileName = fileStorageService.store(file);
+            serviceRequest.setFiles("/api/service-requests/files/" + storedFileName);
         }
 
         serviceRequest.setCreator(creator);
@@ -62,59 +77,66 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
             null
         );
 
-        return saved;
+        return toResponse(saved);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ServiceRequest getServiceRequestById(Long id) {
-        return fetchServiceRequest(id);
+    public ServiceRequestResponse getServiceRequestById(Long id, Long viewerId) {
+        return toResponse(fetchVisibleServiceRequest(id, viewerId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ServiceRequest> getAllServiceRequests() {
-        return serviceRequestRepository.findAll();
+    public List<ServiceRequestResponse> getAllServiceRequests(Long viewerId) {
+        return serviceRequestRepository.findVisibleForUser(viewerId).stream().map(this::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ServiceRequest> getServiceRequestsByStatus(ServiceRequestStatus status) {
-        return serviceRequestRepository.findByStatus(status);
+    public List<ServiceRequestResponse> getServiceRequestsByStatus(Long viewerId, ServiceRequestStatus status) {
+        return serviceRequestRepository.findVisibleForUser(viewerId).stream()
+                .filter(request -> request.getStatus() == status)
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ServiceRequest> getServiceRequestsByUser(Long userId) {
+    public List<ServiceRequestResponse> getServiceRequestsByUser(Long userId) {
         User creator = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + userId));
-        return serviceRequestRepository.findByCreator(creator);
+        return serviceRequestRepository.findByCreator(creator).stream().map(this::toResponse).toList();
     }
 
     @Override
     @Transactional
-    public ServiceRequest updateServiceRequest(Long id, Long requesterId, ServiceRequest payload) {
+    public ServiceRequestResponse updateServiceRequest(Long id, Long requesterId, UpdateServiceRequestRequest payload, MultipartFile file) {
         ServiceRequest serviceRequest = fetchServiceRequest(id);
         ensureCreator(serviceRequest, requesterId);
         ensureUpdatable(serviceRequest);
 
-        if (payload.getName() != null && !payload.getName().isBlank()) {
-            serviceRequest.setName(payload.getName());
+        if (payload.name() != null && !payload.name().isBlank()) {
+            serviceRequest.setName(payload.name());
         }
-        if (payload.getDescription() != null) {
-            serviceRequest.setDescription(payload.getDescription());
+        if (payload.description() != null) {
+            serviceRequest.setDescription(payload.description());
         }
-        if (payload.getCategory() != null) {
-            serviceRequest.setCategory(payload.getCategory());
+        if (payload.category() != null) {
+            serviceRequest.setCategory(payload.category());
         }
-        if (payload.getFiles() != null) {
-            serviceRequest.setFiles(payload.getFiles());
+        if (payload.price() != null) {
+            serviceRequest.setPrice(payload.price());
         }
-        if (payload.getExpiringDate() != null) {
-            serviceRequest.setExpiringDate(payload.getExpiringDate());
+        if (payload.expiringDate() != null) {
+            serviceRequest.setExpiringDate(payload.expiringDate());
+        }
+        if (file != null && !file.isEmpty()) {
+            String storedFileName = fileStorageService.store(file);
+            serviceRequest.setFiles("/api/service-requests/files/" + storedFileName);
         }
         serviceRequest.setUpdatedAt(LocalDateTime.now());
-        return serviceRequestRepository.save(serviceRequest);
+        return toResponse(serviceRequestRepository.save(serviceRequest));
     }
 
     @Override
@@ -144,6 +166,18 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ServiceRequest not found: " + id));
     }
 
+    private ServiceRequest fetchVisibleServiceRequest(Long id, Long viewerId) {
+        ServiceRequest serviceRequest = fetchServiceRequest(id);
+        if (serviceRequest.getCreator() != null && serviceRequest.getCreator().getId().equals(viewerId)) {
+            return serviceRequest;
+        }
+        // Les demandes non publiques sont visibles seulement par le créateur
+        if (serviceRequest.getStatus() == ServiceRequestStatus.OPEN) {
+            return serviceRequest;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ServiceRequest not found: " + id);
+    }
+
     private void ensureCreator(ServiceRequest serviceRequest, Long requesterId) {
         if (!serviceRequest.getCreator().getId().equals(requesterId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only service request creator can perform this action");
@@ -154,6 +188,26 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
         if (serviceRequest.getStatus() != ServiceRequestStatus.OPEN) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only OPEN service requests can be updated");
         }
+    }
+
+    private ServiceRequestResponse toResponse(ServiceRequest serviceRequest) {
+        return new ServiceRequestResponse(
+                serviceRequest.getId(),
+                serviceRequest.getName(),
+                serviceRequest.getCategory(),
+                serviceRequest.getDescription(),
+                serviceRequest.getStatus(),
+                serviceRequest.getPrice(),
+                serviceRequest.getFiles(),
+                serviceRequest.getCreatedAt(),
+                serviceRequest.getUpdatedAt(),
+                serviceRequest.getExpiringDate(),
+                toUserSummary(serviceRequest.getCreator())
+        );
+    }
+
+    private UserSummaryResponse toUserSummary(User creator) {
+        return new UserSummaryResponse(creator.getId(), creator.getUsername(), creator.getEmail());
     }
 
 }

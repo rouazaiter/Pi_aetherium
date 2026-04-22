@@ -7,7 +7,8 @@ export interface SocialLoginRequest {
 
 export type Role = 'user' | 'admin';
 
-export type SubscriptionPlan = 'FREE' | 'STANDARD' | 'PREMIUM';
+export type SubscriptionPlan = 'STANDARD' | 'PREMIUM';
+export type SubscriptionStatus = 'ACTIVE' | 'CANCELLED' | 'EXPIRED';
 
 export interface AuthResponse {
   token: string;
@@ -62,20 +63,27 @@ export interface ProfileUpdateRequest {
 export interface SubscriptionRequest {
   subscriptionPlan: SubscriptionPlan;
   dateOfSubscription?: string | null;
-  expirationDate: string;
+  expirationDate?: string | null;
   billingDate?: string | null;
+  autoRenew?: boolean | null;
 }
 
 export interface SubscriptionResponse {
   id: number;
   dateOfSubscription: string | null;
   subscriptionPlan: SubscriptionPlan;
+  status: SubscriptionStatus;
   expirationDate: string | null;
   billingDate: string | null;
+  autoRenew: boolean;
 }
 
-export interface AddFriendRequest {
-  username: string;
+export interface SubscriptionPlanResponse {
+  plan: SubscriptionPlan;
+  monthlyPrice: number;
+  durationDays: number;
+  trialDays: number;
+  features: string[];
 }
 
 export interface FriendResponse {
@@ -83,6 +91,26 @@ export interface FriendResponse {
   username: string;
   firstName: string | null;
   lastName: string | null;
+}
+
+export type FriendRelation = 'NONE' | 'FRIEND' | 'REQUEST_SENT' | 'REQUEST_RECEIVED';
+
+export interface FriendSearchResponse {
+  id: number;
+  username: string;
+  firstName: string | null;
+  lastName: string | null;
+  relation: FriendRelation;
+}
+
+export type FriendRequestStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
+
+export interface FriendRequestResponse {
+  id: number;
+  sender: FriendResponse;
+  receiver: FriendResponse;
+  status: FriendRequestStatus;
+  createdAt: string;
 }
 
 export interface ApiErrorBody {

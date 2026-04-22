@@ -1,87 +1,120 @@
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { SubscriptionPlan, SubscriptionResponse } from '../../core/models/api.models';
+import type {
+  SubscriptionPlan,
+  SubscriptionPlanResponse,
+  SubscriptionResponse,
+} from '../../core/models/api.models';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { messageFromHttpError } from '../../core/util/http-error';
+
+type PlanUiConfig = {
+  label: string;
+  storage: string;
+  highlighted: boolean;
+  description: string[];
+};
 
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CurrencyPipe, DatePipe],
   templateUrl: './subscriptions.component.html',
   styleUrl: './subscriptions.component.scss',
 })
 export class SubscriptionsComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
   private readonly api = inject(SubscriptionService);
 
-  readonly plans: { value: SubscriptionPlan; label: string }[] = [
-    { value: 'FREE', label: 'Gratuit' },
-    { value: 'STANDARD', label: 'Standard' },
-    { value: 'PREMIUM', label: 'Premium' },
-  ];
+  private readonly uiConfig: Record<SubscriptionPlan, PlanUiConfig> = {
+    STANDARD: {
+      label: 'Standard',
+      storage: '1 Tb',
+      highlighted: false,
+      description: [
+        'Session securisee avec enregistrement en cas de probleme',
+        'Exercices pratiques pour mieux comprendre',
+        'Supervision apres la session et contact avec un expert',
+      ],
+    },
+    PREMIUM: {
+      label: 'Premium',
+      storage: 'Unlimited',
+      highlighted: true,
+      description: [
+        'Tout ce qui est inclus dans Standard',
+        'Telechargement de la session pour la revoir a tout moment',
+      ],
+    },
+  };
 
-  readonly createForm = this.fb.nonNullable.group({
-    subscriptionPlan: this.fb.nonNullable.control<SubscriptionPlan>('FREE', Validators.required),
-    dateOfSubscription: [''],
-    expirationDate: ['', Validators.required],
-    billingDate: [''],
-  });
-
+  plans: SubscriptionPlanResponse[] = [];
   list: SubscriptionResponse[] = [];
+  current: SubscriptionResponse | null = null;
+
+  plansError = '';
   loadError = '';
-  createError = '';
-  loading = false;
-  creating = false;
+  actionError = '';
+  loadingPlans = false;
+  loadingList = false;
+  buyingPlan: SubscriptionPlan | null = null;
 
   ngOnInit(): void {
+    this.loadPlans();
     this.refresh();
   }
 
+  loadPlans(): void {
+    this.loadingPlans = true;
+    this.plansError = '';
+    this.api.listPlans().subscribe({
+      next: (rows) => {
+        this.loadingPlans = false;
+        this.plans = rows.filter((p) => p.plan === 'STANDARD' || p.plan === 'PREMIUM');
+      },
+      error: (err) => {
+        this.loadingPlans = false;
+        this.plansError = messageFromHttpError(err, 'Impossible de charger les offres.');
+      },
+    });
+  }
+
   refresh(): void {
-    this.loading = true;
+    this.loadingList = true;
     this.loadError = '';
     this.api.listMine().subscribe({
       next: (rows) => {
-        this.loading = false;
+        this.loadingList = false;
         this.list = rows;
+        this.current = rows.find((s) => s.status === 'ACTIVE') ?? null;
       },
       error: (err) => {
-        this.loading = false;
+        this.loadingList = false;
         this.loadError = messageFromHttpError(err, 'Impossible de charger les abonnements.');
       },
     });
   }
 
-  create(): void {
-    this.createError = '';
-    if (this.createForm.invalid) {
-      this.createForm.markAllAsTouched();
-      return;
-    }
-    const v = this.createForm.getRawValue();
-    this.creating = true;
+  buy(plan: SubscriptionPlan): void {
+    this.actionError = '';
+    this.buyingPlan = plan;
     this.api
       .create({
-        subscriptionPlan: v.subscriptionPlan,
-        dateOfSubscription: v.dateOfSubscription || null,
-        expirationDate: v.expirationDate,
-        billingDate: v.billingDate || null,
+        subscriptionPlan: plan,
+        autoRenew: true,
       })
       .subscribe({
         next: () => {
-          this.creating = false;
-          this.createForm.patchValue({
-            dateOfSubscription: '',
-            expirationDate: '',
-            billingDate: '',
-          });
+          this.buyingPlan = null;
           this.refresh();
         },
         error: (err) => {
-          this.creating = false;
-          this.createError = messageFromHttpError(err, 'Création impossible.');
+          this.buyingPlan = null;
+          this.actionError = messageFromHttpError(err, 'Creation impossible.');
         },
       });
+  }
+
+  getPlanUi(plan: SubscriptionPlan): PlanUiConfig {
+    return this.uiConfig[plan];
   }
 }

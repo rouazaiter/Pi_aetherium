@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import type { AddFriendRequest, FriendResponse } from '../models/api.models';
+import type { FriendRequestResponse, FriendResponse, FriendSearchResponse } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class FriendService {
@@ -12,8 +12,26 @@ export class FriendService {
     return this.http.get<FriendResponse[]>(`${environment.apiUrl}/api/friends`);
   }
 
-  add(body: AddFriendRequest): Observable<FriendResponse> {
-    return this.http.post<FriendResponse>(`${environment.apiUrl}/api/friends`, body);
+  search(query: string): Observable<FriendSearchResponse[]> {
+    return this.http.get<FriendSearchResponse[]>(`${environment.apiUrl}/api/friends/search`, {
+      params: { query },
+    });
+  }
+
+  listIncomingRequests(): Observable<FriendRequestResponse[]> {
+    return this.http.get<FriendRequestResponse[]>(`${environment.apiUrl}/api/friends/requests/incoming`);
+  }
+
+  sendRequest(userId: number): Observable<FriendRequestResponse> {
+    return this.http.post<FriendRequestResponse>(`${environment.apiUrl}/api/friends/requests`, { userId });
+  }
+
+  acceptRequest(requestId: number): Observable<FriendResponse> {
+    return this.http.post<FriendResponse>(`${environment.apiUrl}/api/friends/requests/${requestId}/accept`, {});
+  }
+
+  declineRequest(requestId: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/friends/requests/${requestId}/decline`, {});
   }
 
   remove(friendId: number): Observable<void> {

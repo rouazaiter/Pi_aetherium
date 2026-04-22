@@ -16,8 +16,9 @@ public class SubscriptionRequest {
 
     private LocalDate dateOfSubscription;
 
-    @NotNull(message = "Date d'expiration requise")
     private LocalDate expirationDate;
 
     private LocalDate billingDate;
+
+    private Boolean autoRenew;
 }

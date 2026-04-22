@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Room Session - Travolo</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" crossorigin="anonymous">
+  <script id="tailwind-config">
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            error: '#ba1a1a',
+            'surface-container-highest': '#e2e2e2',
+            'on-secondary-fixed-variant': '#3e4080',
+            'surface-container-lowest': '#ffffff',
+            'surface-container-low': '#f3f3f3',
+            'primary': '#2d349f',
+            'tertiary-fixed-dim': '#c7c6c6',
+            'on-primary-fixed': '#00026c',
+            'error-container': '#ffdad6',
+            'secondary': '#56589a',
+            'on-tertiary': '#ffffff',
+            'outline': '#767684',
+            'on-tertiary-fixed-variant': '#464747',
+            'tertiary-fixed': '#e4e2e2',
+            'on-tertiary-fixed': '#1b1c1c',
+            'outline-variant': '#c6c5d5',
+            'on-background': '#1a1c1c',
+            'secondary-fixed': '#e1e0ff',
+            'background': '#f9f9f9',
+            'inverse-surface': '#2f3131',
+            'on-secondary-container': '#424485',
+            'inverse-on-surface': '#f1f1f1',
+            'surface-container-high': '#e8e8e8',
+            'on-primary-fixed-variant': '#3139a4',
+            'surface-bright': '#f9f9f9',
+            'surface-dim': '#dadada',
+            'tertiary-container': '#5a5a5a',
+            'tertiary': '#424343',
+            'surface-container': '#eeeeee',
+            'on-secondary-fixed': '#101053',
+            'primary-fixed': '#e0e0ff',
+            'on-secondary': '#ffffff',
+            'on-surface-variant': '#454653',
+            'on-tertiary-container': '#d3d1d1',
+            'on-primary': '#ffffff',
+            'on-error-container': '#93000a',
+            'secondary-container': '#b3b5fe',
+            'primary-fixed-dim': '#bec2ff',
+            'surface-tint': '#4a53bd',
+            'inverse-primary': '#bec2ff',
+            'surface-variant': '#e2e2e2',
+            'on-surface': '#1a1c1c',
+            'on-primary-container': '#ccceff',
+            'on-error': '#ffffff',
+            'surface': '#f9f9f9',
+            'secondary-fixed-dim': '#c0c1ff',
+            'primary-container': '#464eb8'
+          },
+          fontSize: {
+            'h2': ['20px', { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '600' }],
+            'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+            'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+            'label-md': ['14px', { lineHeight: '20px', fontWeight: '600' }],
+            'h3': ['18px', { lineHeight: '24px', fontWeight: '600' }]
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    window.global = window;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/lib/stomp.min.js"></script>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

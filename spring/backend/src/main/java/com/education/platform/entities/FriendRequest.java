@@ -17,43 +17,34 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
-@Table(name = "Subscription")
+@Table(name = "FriendRequest")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Subscription {
+public class FriendRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "date_ofsubscription", nullable = false)
-    private LocalDate dateOfSubscription;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "subscription_plan", nullable = false, length = 32)
-    private SubscriptionPlan subscriptionPlan;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 32)
-    private SubscriptionStatus status;
-
-    @Column(name = "expirtation_date", nullable = false)
-    private LocalDate expirationDate;
-
-    @Column(name = "billing_date", nullable = false)
-    private LocalDate billingDate;
-
-    @Column(name = "auto_renew")
-    private Boolean autoRenew;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiver;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 32)
+    private FriendRequestStatus status;
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 }

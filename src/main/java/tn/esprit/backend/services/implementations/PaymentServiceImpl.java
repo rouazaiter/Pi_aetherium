@@ -98,7 +98,24 @@ public class PaymentServiceImpl implements PaymentService {
         ServiceRequest serviceRequest = serviceRequestRepository.findById(serviceRequestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ServiceRequest not found: " + serviceRequestId));
 
-        // ServiceRequest payment is no longer used; the method remains for compatibility.
+        if (serviceRequest.getPaymentStatus() == PaymentStatus.PAID) {
+            return;
+        }
+
+        serviceRequest.setPaymentStatus(PaymentStatus.PAID);
+        serviceRequestRepository.save(serviceRequest);
+
+        notificationService.notifyUsersWithAssistant(
+                java.util.List.of(serviceRequest.getCreator().getId()),
+                "PAYMENT_RECEIVED",
+                "Payment received for your service request: " + serviceRequest.getName(),
+                serviceRequest.getCreator().getUsername(),
+                serviceRequest.getName(),
+                tn.esprit.backend.dto.NotificationPriority.HIGH,
+                "View request",
+                serviceRequest.getId(),
+                null
+        );
     }
 
     @Override

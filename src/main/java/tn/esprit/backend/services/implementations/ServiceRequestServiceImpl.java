@@ -12,7 +12,6 @@ import tn.esprit.backend.dto.ServiceRequestResponse;
 import tn.esprit.backend.dto.UpdateServiceRequestRequest;
 import tn.esprit.backend.dto.NotificationPriority;
 import tn.esprit.backend.dto.UserSummaryResponse;
-import tn.esprit.backend.entities.PaymentStatus;
 import tn.esprit.backend.entities.ServiceRequest;
 import tn.esprit.backend.entities.ServiceRequestCategory;
 import tn.esprit.backend.entities.ServiceRequestStatus;
@@ -85,7 +84,8 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
     public ServiceRequestResponse getServiceRequestById(Long id, Long viewerId) {
         return toResponse(fetchVisibleServiceRequest(id, viewerId));
     }
-
+ 
+    //list dashboard 
     @Override
     @Transactional(readOnly = true)
     public List<ServiceRequestResponse> getAllServiceRequests(Long viewerId) {
@@ -197,6 +197,7 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
                 serviceRequest.getCategory(),
                 serviceRequest.getDescription(),
                 serviceRequest.getStatus(),
+                serviceRequest.getPaymentStatus(),
                 serviceRequest.getPrice(),
                 serviceRequest.getFiles(),
                 serviceRequest.getCreatedAt(),

@@ -44,6 +44,7 @@ public class AiCoachServiceImpl implements AiCoachService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    //fail openAi 
     @Override
     @Transactional(readOnly = true)
     public AiCoachPreviewResponse preview(AiCoachPreviewRequest request) {
@@ -271,6 +272,7 @@ public class AiCoachServiceImpl implements AiCoachService {
         return clampScore(lengthScore + punctuationBonus + structureBonus);
     }
 
+    // improve lightly without external AI, just basic cleanup and some templated phrasing to enhance professionalism and clarity, while preserving the original meaning and facts.
     private String improveTextLightly(String text, ServiceRequest request, String language) {
         String cleaned = safeText(text).replaceAll("\\s+", " ").trim();
         if (cleaned.isBlank()) {

@@ -40,6 +40,10 @@ public class ServiceRequest {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private PaymentStatus paymentStatus;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -67,6 +71,9 @@ public class ServiceRequest {
         }
         if (createdAt == null) {
             createdAt = now;
+        }
+        if (paymentStatus == null) {
+            paymentStatus = PaymentStatus.PENDING;
         }
         updatedAt = now;
     }

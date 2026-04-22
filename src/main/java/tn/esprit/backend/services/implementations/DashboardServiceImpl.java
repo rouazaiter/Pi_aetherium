@@ -55,7 +55,7 @@ public class DashboardServiceImpl implements DashboardService {
                 ))
                 .toList();
         }
-
+// dashboard category count
     @Override
     public List<DashboardCategoryCountDto> getCategoryCounts() {
         Map<String, Long> counts = new LinkedHashMap<>();

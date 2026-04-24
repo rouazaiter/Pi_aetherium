@@ -1,0 +1,5 @@
+[33m4b3e6f4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mMarketplaceRouaZaiter[m[33m)[m Remove hardcoded Stripe secrets and keep env-based Stripe config
+[33m1e6b9ba[m Add category counts endpoint and DTO for dashboard statistics
+[33mada7e7a[m price correction, payment correction flux, language correction from french to english ,  form template,
+[33m98a923a[m -service request payment part done
+[33m39ba0b1[m -new interface for recommended service requests, recommendations with reasons,, leaderboard category parameters, notification bar, user notifications, fetch recent notifications for users.

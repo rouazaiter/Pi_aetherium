@@ -1,0 +1,754 @@
+<section class="cv-builder-page">
+  <div class="cv-builder-page__inner">
+    <header class="cv-builder-header">
+      <div>
+        <p class="cv-builder-header__eyebrow">CV Builder</p>
+        <h1>CV Builder</h1>
+        <p class="cv-builder-header__subtitle">Create, improve, and download an ATS-ready CV from your portfolio.</p>
+      </div>
+
+      <div class="cv-builder-header__actions">
+        <button type="button" class="cv-btn cv-btn--soft" [disabled]="generatingDraft" (click)="generateDraft()">
+          {{ generatingDraft ? 'Generating...' : 'Generate CV' }}
+        </button>
+        <button type="button" class="cv-btn cv-btn--soft" [disabled]="!canCreateJobMatchedCv" (click)="openJobMatchModal()">
+          Create Job-Matched CV
+        </button>
+        <button type="button" class="cv-btn cv-btn--primary" [disabled]="!canSaveDraft" (click)="saveDraft()">
+          {{ savingDraft ? 'Saving...' : 'Save Draft' }}
+        </button>
+        <button type="button" class="cv-btn cv-btn--ghost" [disabled]="!canDownloadPdf" (click)="downloadPdf()">
+          Download PDF
+        </button>
+      </div>
+    </header>
+
+    @if (loadingWorkspace) {
+      <section class="cv-state-card">
+        <p>Loading your CV workspace...</p>
+      </section>
+    } @else if (workspaceError) {
+      <section class="cv-state-card cv-state-card--error">
+        <p>{{ workspaceError }}</p>
+      </section>
+    } @else if (!hasDraft) {
+      <section class="cv-empty-card">
+        <div>
+          <h2>No CV draft yet</h2>
+          <p>Generate a CV from your portfolio to start editing, improving, and downloading a polished version.</p>
+        </div>
+        <button type="button" class="cv-btn cv-btn--primary" [disabled]="generatingDraft" (click)="generateDraft()">
+          {{ generatingDraft ? 'Generating...' : 'Generate CV from portfolio' }}
+        </button>
+      </section>
+    } @else {
+      <section class="cv-builder-toolbar">
+        <div class="cv-template-selector">
+          <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'ATS_MINIMAL'" (click)="selectTemplate('ATS_MINIMAL')">
+            ATS Minimal
+          </button>
+          <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'MODERN'" (click)="selectTemplate('MODERN')">
+            Modern
+          </button>
+          <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'ELEGANT'" (click)="selectTemplate('ELEGANT')">
+            Elegant
+          </button>
+          <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'CREATIVE'" (click)="selectTemplate('CREATIVE')">
+            Creative
+          </button>
+        </div>
+
+        @if (saveMessage) {
+          <p class="cv-builder-toolbar__message cv-builder-toolbar__message--success">{{ saveMessage }}</p>
+        }
+        @if (saveError) {
+          <p class="cv-builder-toolbar__message cv-builder-toolbar__message--error">{{ saveError }}</p>
+        }
+      </section>
+
+      <section class="cv-ai-bar">
+        <div class="cv-ai-bar__intro">
+          <span class="cv-ai-bar__badge">AI</span>
+          <div>
+            <h2>AI CV Assistant</h2>
+            <p>Improve your summary, projects, and CV wording.</p>
+          </div>
+        </div>
+
+        <div class="cv-ai-bar__quick-actions">
+          <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">Improve summary</button>
+          <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">Make it professional</button>
+          <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('SHORT', 'SHORT')">Shorten summary</button>
+          <button type="button" class="cv-ai-pill" [disabled]="visibleProjects.length === 0" (click)="requestProjectImprove(visibleProjects[0].id)">Rewrite projects</button>
+          <button type="button" class="cv-ai-pill" (click)="sendAssistantPrompt('Check my CV readiness and tell me what to improve.')">Check CV readiness</button>
+        </div>
+
+        <div class="cv-ai-chat">
+          @for (message of assistantMessages; track trackByIndex($index)) {
+            <article class="cv-ai-chat__message" [class.cv-ai-chat__message--user]="message.role === 'user'">
+              <p>{{ message.content }}</p>
+              @if (message.suggestedActions?.length) {
+                <div class="cv-ai-chat__actions">
+                  @for (action of message.suggestedActions ?? []; track action) {
+                    <span>{{ action }}</span>
+                  }
+                </div>
+              }
+            </article>
+          }
+
+          @if (pendingChatMessage) {
+            <article class="cv-ai-chat__message cv-ai-chat__message--user">
+              <p>{{ pendingChatMessage }}</p>
+            </article>
+          }
+
+          @if (chatLoading) {
+            <article class="cv-ai-chat__message cv-ai-chat__message--thinking">
+              <p>AI is analyzing your CV...</p>
+            </article>
+          }
+        </div>
+
+        @if (chatTimeoutMessage) {
+          <div class="cv-ai-bar__state">
+            <p>{{ chatTimeoutMessage }}</p>
+            <div class="cv-ai-bar__state-actions">
+              <button type="button" class="cv-btn cv-btn--soft" (click)="cancelAssistantChat()">Cancel</button>
+              <button type="button" class="cv-btn cv-btn--ghost" (click)="retryAssistantChat()">Retry</button>
+            </div>
+          </div>
+        }
+
+        @if (chatError || aiActionError) {
+          <p class="cv-ai-bar__error">{{ chatError || aiActionError }}</p>
+          @if (chatError && pendingChatMessage) {
+            <div class="cv-ai-bar__state-actions">
+              <button type="button" class="cv-btn cv-btn--soft" (click)="retryAssistantChat()">Retry</button>
+            </div>
+          }
+        }
+
+        <form class="cv-ai-bar__composer" (ngSubmit)="submitAssistantChat()">
+          <input type="text" name="cvAssistantMessage" [(ngModel)]="chatInput" placeholder="Ask for CV advice..." [disabled]="chatLoading" />
+          <div class="cv-ai-bar__composer-actions">
+            @if (chatLoading) {
+              <button type="button" class="cv-btn cv-btn--soft" (click)="cancelAssistantChat()">Cancel</button>
+            }
+            <button type="submit" class="cv-btn cv-btn--primary" [disabled]="chatLoading || !(pendingChatMessage.trim() || chatInput.trim())">Send</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="cv-builder-layout">
+        <div class="cv-editor-column">
+          <article class="cv-editor-card">
+            <button type="button" class="cv-accordion" (click)="toggleSection('PROFILE')">
+              <span>Profile</span>
+              <span>{{ sectionOpen.PROFILE ? '−' : '+' }}</span>
+            </button>
+            @if (sectionOpen.PROFILE) {
+              <div class="cv-editor-grid">
+                <label>
+                  <span>Full name</span>
+                  <input type="text" [(ngModel)]="profile.fullName" name="fullName" />
+                </label>
+                <label>
+                  <span>Headline</span>
+                  <input type="text" [(ngModel)]="profile.headline" name="headline" />
+                </label>
+                <label>
+                  <span>Email</span>
+                  <input type="email" [(ngModel)]="profile.email" name="email" />
+                </label>
+                <label>
+                  <span>Phone</span>
+                  <input type="text" [(ngModel)]="profile.phone" name="phone" />
+                </label>
+                <label>
+                  <span>Location</span>
+                  <input type="text" [(ngModel)]="profile.location" name="location" />
+                </label>
+                <label>
+                  <span>GitHub</span>
+                  <input type="url" [(ngModel)]="profile.githubUrl" name="githubUrl" />
+                </label>
+                <label>
+                  <span>LinkedIn</span>
+                  <input type="url" [(ngModel)]="profile.linkedinUrl" name="linkedinUrl" />
+                </label>
+              </div>
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <button type="button" class="cv-accordion" (click)="toggleSection('SUMMARY')">
+              <span>Summary</span>
+              <span>{{ sectionOpen.SUMMARY ? '−' : '+' }}</span>
+            </button>
+            @if (sectionOpen.SUMMARY) {
+              <div class="cv-field-stack">
+                <label>
+                  <span>Professional summary</span>
+                  <div class="cv-inline-ai">
+                    <textarea rows="6" [(ngModel)]="profile.summary" name="summary"></textarea>
+                    <button type="button" class="cv-inline-ai__btn" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">
+                      Improve with AI
+                    </button>
+                  </div>
+                </label>
+
+                @if (currentSuggestion(); as suggestion) {
+                  @if (suggestion.target.kind === 'summary') {
+                  <div class="cv-suggestion-card">
+                    <div class="cv-suggestion-card__col">
+                      <h3>Current text</h3>
+                      <p>{{ suggestion.original }}</p>
+                    </div>
+                    <div class="cv-suggestion-card__col">
+                      <h3>AI suggestion</h3>
+                      @if (suggestion.loading) {
+                        <p>Generating suggestion...</p>
+                      } @else if (suggestion.error) {
+                        <p class="cv-suggestion-card__error">{{ suggestion.error }}</p>
+                      } @else {
+                        <p>{{ suggestion.suggestion }}</p>
+                      }
+                    </div>
+                    <div class="cv-suggestion-card__actions">
+                      <button type="button" class="cv-btn cv-btn--primary" [disabled]="suggestion.loading || !suggestion.suggestion" (click)="applySuggestion()">Apply</button>
+                      <button type="button" class="cv-btn cv-btn--soft" (click)="cancelSuggestion()">Cancel</button>
+                    </div>
+                  </div>
+                  }
+                }
+              </div>
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <button type="button" class="cv-accordion" (click)="toggleSection('SKILLS')">
+              <span>Skills</span>
+              <span>{{ sectionOpen.SKILLS ? '−' : '+' }}</span>
+            </button>
+            @if (sectionOpen.SKILLS) {
+              @if (skillGroups.length > 0) {
+                <div class="cv-skill-groups">
+                  @for (group of skillGroups; track trackBySkillGroup($index, group)) {
+                    <section class="cv-skill-group">
+                      <h3>{{ group.category }}</h3>
+                      <div class="cv-skill-group__chips">
+                        @for (skill of group.skills; track trackBySkill($index, skill)) {
+                          <span>{{ skill.name }}</span>
+                        }
+                      </div>
+                    </section>
+                  }
+                </div>
+              } @else {
+                <p class="cv-empty-note">No skills available yet.</p>
+              }
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <button type="button" class="cv-accordion" (click)="toggleSection('PROJECTS')">
+              <span>Projects</span>
+              <span>{{ sectionOpen.PROJECTS ? '−' : '+' }}</span>
+            </button>
+            @if (sectionOpen.PROJECTS) {
+              @if (projects.length > 0) {
+                <div class="cv-project-list">
+                  @for (project of projects; track trackByProject($index, project)) {
+                    <article class="cv-project-editor">
+                      <div class="cv-project-editor__head">
+                        <div>
+                          <h3>{{ project.title }}</h3>
+                          @if (project.collectionName) {
+                            <p>{{ project.collectionName }}</p>
+                          }
+                        </div>
+                        <label class="cv-toggle">
+                          <input type="checkbox" [(ngModel)]="project.visible" [name]="'project-visible-' + project.id" />
+                          <span>Visible</span>
+                        </label>
+                      </div>
+
+                      <label>
+                        <span>Title</span>
+                        <input type="text" [(ngModel)]="project.title" [name]="'project-title-' + project.id" />
+                      </label>
+
+                      <label>
+                        <span>Description</span>
+                        <textarea rows="4" [(ngModel)]="project.description" [name]="'project-description-' + project.id"></textarea>
+                      </label>
+
+                      @if (projectHasMissingDescription(project)) {
+                        <p class="cv-warning-note">This project needs a description to look good in your CV.</p>
+                      }
+
+                      <div class="cv-project-editor__actions">
+                        <label class="cv-project-editor__url">
+                          <span>Project URL</span>
+                          <input type="url" [(ngModel)]="project.projectUrl" [name]="'project-url-' + project.id" />
+                        </label>
+                        <button type="button" class="cv-btn cv-btn--soft" [disabled]="projectHasMissingDescription(project)" (click)="requestProjectImprove(project.id)">
+                          Write better CV description
+                        </button>
+                      </div>
+
+                      @if (project.skills.length > 0) {
+                        <div class="cv-skill-group__chips">
+                          @for (skill of project.skills; track trackBySkill($index, skill)) {
+                            <span>{{ skill.name }}</span>
+                          }
+                        </div>
+                      }
+
+                      @if (currentSuggestion(); as suggestion) {
+                        @if (isProjectSuggestion(project.id)) {
+                        <div class="cv-suggestion-card">
+                          <div class="cv-suggestion-card__col">
+                            <h3>Current text</h3>
+                            <p>{{ suggestion.original }}</p>
+                          </div>
+                          <div class="cv-suggestion-card__col">
+                            <h3>AI suggestion</h3>
+                            @if (suggestion.loading) {
+                              <p>Generating suggestion...</p>
+                            } @else if (suggestion.error) {
+                              <p class="cv-suggestion-card__error">{{ suggestion.error }}</p>
+                            } @else {
+                              <p>{{ suggestion.suggestion }}</p>
+                            }
+                          </div>
+                          <div class="cv-suggestion-card__actions">
+                            <button type="button" class="cv-btn cv-btn--primary" [disabled]="suggestion.loading || !suggestion.suggestion" (click)="applySuggestion()">Apply</button>
+                            <button type="button" class="cv-btn cv-btn--soft" (click)="cancelSuggestion()">Cancel</button>
+                          </div>
+                        </div>
+                        }
+                      }
+                    </article>
+                  }
+                </div>
+              } @else {
+                <p class="cv-empty-note">No portfolio projects are available yet.</p>
+              }
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <button type="button" class="cv-accordion" (click)="toggleSection('EXPERIENCE')">
+              <span>Experience</span>
+              <span>{{ sectionOpen.EXPERIENCE ? '−' : '+' }}</span>
+            </button>
+            @if (sectionOpen.EXPERIENCE) {
+              <div class="cv-repeat-list">
+                @for (item of experience; track trackByIndex($index)) {
+                  <article class="cv-repeat-card">
+                    <div class="cv-repeat-card__head">
+                      <h3>Experience {{ $index + 1 }}</h3>
+                      <button type="button" class="cv-text-btn" (click)="removeExperience($index)">Remove</button>
+                    </div>
+                    <div class="cv-editor-grid">
+                      <label><span>Company</span><input type="text" [(ngModel)]="item.company" [name]="'experience-company-' + $index" /></label>
+                      <label><span>Role</span><input type="text" [(ngModel)]="item.role" [name]="'experience-role-' + $index" /></label>
+                      <label><span>Location</span><input type="text" [(ngModel)]="item.location" [name]="'experience-location-' + $index" /></label>
+                      <label><span>Start date</span><input type="date" [(ngModel)]="item.startDate" [name]="'experience-start-' + $index" /></label>
+                      <label><span>End date</span><input type="date" [(ngModel)]="item.endDate" [name]="'experience-end-' + $index" [disabled]="item.current" /></label>
+                      <label class="cv-checkbox"><input type="checkbox" [(ngModel)]="item.current" [name]="'experience-current-' + $index" /><span>Current role</span></label>
+                    </div>
+                    <label><span>Summary</span><textarea rows="4" [(ngModel)]="item.summary" [name]="'experience-summary-' + $index"></textarea></label>
+                  </article>
+                }
+              </div>
+              <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addExperience()">Add experience</button>
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <button type="button" class="cv-accordion" (click)="toggleSection('EDUCATION')">
+              <span>Education</span>
+              <span>{{ sectionOpen.EDUCATION ? '−' : '+' }}</span>
+            </button>
+            @if (sectionOpen.EDUCATION) {
+              <div class="cv-repeat-list">
+                @for (item of education; track trackByIndex($index)) {
+                  <article class="cv-repeat-card">
+                    <div class="cv-repeat-card__head">
+                      <h3>Education {{ $index + 1 }}</h3>
+                      <button type="button" class="cv-text-btn" (click)="removeEducation($index)">Remove</button>
+                    </div>
+                    <div class="cv-editor-grid">
+                      <label><span>School</span><input type="text" [(ngModel)]="item.school" [name]="'education-school-' + $index" /></label>
+                      <label><span>Degree</span><input type="text" [(ngModel)]="item.degree" [name]="'education-degree-' + $index" /></label>
+                      <label><span>Field of study</span><input type="text" [(ngModel)]="item.fieldOfStudy" [name]="'education-field-' + $index" /></label>
+                      <label><span>Location</span><input type="text" [(ngModel)]="item.location" [name]="'education-location-' + $index" /></label>
+                      <label><span>Start date</span><input type="date" [(ngModel)]="item.startDate" [name]="'education-start-' + $index" /></label>
+                      <label><span>End date</span><input type="date" [(ngModel)]="item.endDate" [name]="'education-end-' + $index" [disabled]="item.current" /></label>
+                      <label class="cv-checkbox"><input type="checkbox" [(ngModel)]="item.current" [name]="'education-current-' + $index" /><span>Current study</span></label>
+                    </div>
+                    <label><span>Description</span><textarea rows="4" [(ngModel)]="item.description" [name]="'education-description-' + $index"></textarea></label>
+                  </article>
+                }
+              </div>
+              <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addEducation()">Add education</button>
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <button type="button" class="cv-accordion" (click)="toggleSection('LANGUAGES')">
+              <span>Languages</span>
+              <span>{{ sectionOpen.LANGUAGES ? '−' : '+' }}</span>
+            </button>
+            @if (sectionOpen.LANGUAGES) {
+              <div class="cv-repeat-list">
+                @for (item of languages; track trackByIndex($index)) {
+                  <article class="cv-repeat-card cv-repeat-card--compact">
+                    <div class="cv-repeat-card__head">
+                      <h3>Language {{ $index + 1 }}</h3>
+                      <button type="button" class="cv-text-btn" (click)="removeLanguage($index)">Remove</button>
+                    </div>
+                    <div class="cv-editor-grid">
+                      <label><span>Name</span><input type="text" [(ngModel)]="item.name" [name]="'language-name-' + $index" /></label>
+                      <label><span>Proficiency</span><input type="text" [(ngModel)]="item.proficiency" [name]="'language-proficiency-' + $index" /></label>
+                    </div>
+                  </article>
+                }
+              </div>
+              <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addLanguage()">Add language</button>
+            }
+          </article>
+        </div>
+
+        <aside class="cv-preview-column">
+          <div class="cv-preview-frame">
+            <div class="cv-preview-frame__label">
+              <span>Live Preview</span>
+              <strong>{{ previewTemplateLabel }}</strong>
+            </div>
+
+            <article class="cv-preview-paper" [attr.data-theme]="selectedTemplate" id="cv-preview-paper">
+              <header class="cv-paper-header">
+                <h1>{{ profile.fullName || 'Your Name' }}</h1>
+                @if (profile.headline) {
+                  <p class="cv-paper-header__headline">{{ profile.headline }}</p>
+                }
+                <div class="cv-paper-header__meta">
+                  @if (profile.email) {
+                    <span>{{ profile.email }}</span>
+                  }
+                  @if (profile.phone) {
+                    <span>{{ profile.phone }}</span>
+                  }
+                  @if (profile.location) {
+                    <span>{{ profile.location }}</span>
+                  }
+                  @if (profile.githubUrl) {
+                    <span>{{ profile.githubUrl }}</span>
+                  }
+                  @if (profile.linkedinUrl) {
+                    <span>{{ profile.linkedinUrl }}</span>
+                  }
+                </div>
+              </header>
+
+              @if (hasPreviewSummary) {
+                <section class="cv-paper-section">
+                  <h2>Summary</h2>
+                  <p>{{ profile.summary }}</p>
+                </section>
+              }
+
+              @if (skillGroups.length > 0) {
+                <section class="cv-paper-section">
+                  <h2>Skills</h2>
+                  <div class="cv-paper-skill-groups">
+                    @for (group of skillGroups; track trackBySkillGroup($index, group)) {
+                      <article>
+                        <h3>{{ group.category }}</h3>
+                        <p>{{ skillNames(group.skills) }}</p>
+                      </article>
+                    }
+                  </div>
+                </section>
+              }
+
+              <section class="cv-paper-section">
+                <h2>Projects</h2>
+                @if (visibleProjects.length > 0) {
+                  <div class="cv-paper-projects">
+                    @for (project of visibleProjects; track trackByProject($index, project)) {
+                      <article>
+                        <div class="cv-paper-section__title-row">
+                          <h3>{{ project.title || 'Untitled Project' }}</h3>
+                          @if (project.projectUrl) {
+                            <a [href]="project.projectUrl" target="_blank" rel="noreferrer">Project link</a>
+                          }
+                        </div>
+                        @if (projectHasMissingDescription(project)) {
+                          <p class="cv-paper-warning">Project description missing</p>
+                        } @else {
+                          <p>{{ project.description }}</p>
+                        }
+                        @if (project.skills.length > 0) {
+                          <p class="cv-paper-muted">{{ skillNamesWithDots(project.skills) }}</p>
+                        }
+                      </article>
+                    }
+                  </div>
+                } @else {
+                  <p class="cv-paper-empty">No visible projects selected for this CV.</p>
+                }
+              </section>
+
+              @if (experience.length > 0) {
+                <section class="cv-paper-section">
+                  <h2>Experience</h2>
+                  <div class="cv-paper-repeat-list">
+                    @for (item of experience; track trackByIndex($index)) {
+                      @if (item.company || item.role || item.summary) {
+                        <article>
+                          <div class="cv-paper-section__title-row">
+                            <h3>{{ item.role || 'Role' }}</h3>
+                            <span>{{ item.company }}</span>
+                          </div>
+                          <p class="cv-paper-muted">
+                            {{ item.location }}
+                            @if (item.startDate || item.endDate || item.current) {
+                              <span> • {{ item.startDate || 'Start' }} - {{ item.current ? 'Present' : (item.endDate || 'End') }}</span>
+                            }
+                          </p>
+                          @if (item.summary) {
+                            <p>{{ item.summary }}</p>
+                          }
+                        </article>
+                      }
+                    }
+                  </div>
+                </section>
+              }
+
+              @if (education.length > 0) {
+                <section class="cv-paper-section">
+                  <h2>Education</h2>
+                  <div class="cv-paper-repeat-list">
+                    @for (item of education; track trackByIndex($index)) {
+                      @if (item.school || item.degree || item.description) {
+                        <article>
+                          <div class="cv-paper-section__title-row">
+                            <h3>{{ item.school || 'School' }}</h3>
+                            <span>{{ item.degree }}</span>
+                          </div>
+                          <p class="cv-paper-muted">
+                            {{ item.fieldOfStudy }}
+                            @if (item.location) {
+                              <span> • {{ item.location }}</span>
+                            }
+                          </p>
+                          @if (item.description) {
+                            <p>{{ item.description }}</p>
+                          }
+                        </article>
+                      }
+                    }
+                  </div>
+                </section>
+              }
+
+              @if (languages.length > 0) {
+                <section class="cv-paper-section">
+                  <h2>Languages</h2>
+                  <div class="cv-paper-language-list">
+                    @for (item of languages; track trackByIndex($index)) {
+                      @if (item.name || item.proficiency) {
+                        <span>{{ item.name }} @if (item.proficiency) { <strong>({{ item.proficiency }})</strong> }</span>
+                      }
+                    }
+                  </div>
+                </section>
+              }
+            </article>
+          </div>
+        </aside>
+      </section>
+    }
+  </div>
+</section>
+
+@if (jobMatchModalOpen) {
+  <div class="cv-modal-backdrop" (click)="closeJobMatchModal()">
+    <section class="cv-modal" (click)="$event.stopPropagation()">
+      <header class="cv-modal__header">
+        <div>
+          <p class="cv-modal__eyebrow">Job-Matched CV</p>
+          <h2>Create a CV for a specific job</h2>
+          <p>Paste a job offer and AI will tailor your CV with relevant ATS keywords.</p>
+        </div>
+        <button type="button" class="cv-modal__close" aria-label="Close" [disabled]="jobMatchSubmitting || jobMatchApplying" (click)="closeJobMatchModal()">
+          ×
+        </button>
+      </header>
+
+      <div class="cv-modal__body">
+        <div class="cv-editor-grid cv-editor-grid--modal">
+          <label>
+            <span>Target job title</span>
+            <input type="text" [(ngModel)]="jobMatchForm.targetJobTitle" name="jobMatchTargetJobTitle" [disabled]="jobMatchSubmitting || jobMatchApplying" />
+          </label>
+
+          <label>
+            <span>Tone</span>
+            <select [(ngModel)]="jobMatchForm.tone" name="jobMatchTone" [disabled]="jobMatchSubmitting || jobMatchApplying">
+              @for (tone of jobMatchToneOptions; track tone) {
+                <option [ngValue]="tone">{{ tone }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <label class="cv-field-stack">
+          <span>Job description</span>
+          <textarea
+            rows="8"
+            [(ngModel)]="jobMatchForm.jobDescription"
+            name="jobMatchJobDescription"
+            [disabled]="jobMatchSubmitting || jobMatchApplying"
+            placeholder="Paste the full job offer here..."></textarea>
+        </label>
+
+        @if (jobMatchSubmitting) {
+          <section class="cv-job-match-state">
+            <p>Analyzing job post and tailoring your CV...</p>
+          </section>
+        }
+
+        @if (jobMatchError) {
+          <p class="cv-ai-bar__error">{{ jobMatchError }}</p>
+        }
+
+        @if (jobMatchResult; as result) {
+          <div class="cv-job-match-results">
+            <section class="cv-job-match-card">
+              <div class="cv-job-match-card__head">
+                <h3>Keyword match</h3>
+                @if (result.targetJobTitle) {
+                  <span class="cv-keyword-chip cv-keyword-chip--soft">{{ result.targetJobTitle }}</span>
+                }
+              </div>
+
+              <div class="cv-job-match-keywords">
+                <div>
+                  <h4>Extracted keywords</h4>
+                  <div class="cv-keyword-list">
+                    @for (keyword of result.extractedKeywords ?? []; track keyword) {
+                      <span class="cv-keyword-chip">{{ keyword }}</span>
+                    }
+                    @if ((result.extractedKeywords ?? []).length === 0) {
+                      <p class="cv-empty-note">No keywords were extracted.</p>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <h4>Matching keywords</h4>
+                  <div class="cv-keyword-list">
+                    @for (keyword of result.matchingKeywords ?? []; track keyword) {
+                      <span class="cv-keyword-chip cv-keyword-chip--success">{{ keyword }}</span>
+                    }
+                    @if ((result.matchingKeywords ?? []).length === 0) {
+                      <p class="cv-empty-note">No current matches yet.</p>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <h4>Missing keywords</h4>
+                  <div class="cv-keyword-list">
+                    @for (keyword of result.missingKeywords ?? []; track keyword) {
+                      <span class="cv-keyword-chip cv-keyword-chip--warning">{{ keyword }}</span>
+                    }
+                    @if ((result.missingKeywords ?? []).length === 0) {
+                      <p class="cv-empty-note">No important keywords are missing.</p>
+                    }
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="cv-job-match-card">
+              <h3>Improved summary</h3>
+              @if (result.improvedSummary) {
+                <p>{{ result.improvedSummary }}</p>
+              } @else {
+                <p class="cv-empty-note">No summary suggestion was returned.</p>
+              }
+            </section>
+
+            <section class="cv-job-match-card">
+              <h3>Improved project descriptions</h3>
+              @if ((result.improvedProjects ?? []).length > 0) {
+                <div class="cv-job-match-projects">
+                  @for (project of result.improvedProjects ?? []; track project.projectId) {
+                    <article class="cv-job-match-project">
+                      <div class="cv-job-match-project__title">
+                        <strong>
+                          {{ projectTitleById(project.projectId) }}
+                        </strong>
+                      </div>
+                      <div class="cv-job-match-project__grid">
+                        <div class="cv-job-match-project__copy">
+                          <h4>Original description</h4>
+                          <p>{{ project.originalDescription || 'No original description available.' }}</p>
+                        </div>
+                        <div class="cv-job-match-project__copy">
+                          <h4>Improved description</h4>
+                          <p>{{ project.improvedDescription || 'No improved description returned.' }}</p>
+                        </div>
+                      </div>
+                    </article>
+                  }
+                </div>
+              } @else {
+                <p class="cv-empty-note">No project description suggestions were returned.</p>
+              }
+            </section>
+
+            <section class="cv-job-match-card">
+              <h3>Recommendations</h3>
+              @if ((result.recommendations ?? []).length > 0) {
+                <ul class="cv-job-match-list">
+                  @for (recommendation of result.recommendations ?? []; track recommendation) {
+                    <li>{{ recommendation }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="cv-empty-note">No extra recommendations were returned.</p>
+              }
+            </section>
+          </div>
+        }
+      </div>
+
+      <footer class="cv-modal__actions">
+        @if (hasJobMatchResult) {
+          <button type="button" class="cv-btn cv-btn--primary" [disabled]="jobMatchApplying" (click)="applyJobMatchChanges()">
+            {{ jobMatchApplying ? 'Applying...' : 'Apply to CV' }}
+          </button>
+          <button type="button" class="cv-btn cv-btn--soft" [disabled]="jobMatchSubmitting || jobMatchApplying" (click)="retryJobMatch()">
+            Try again
+          </button>
+        } @else {
+          <button type="button" class="cv-btn cv-btn--primary" [disabled]="!canSubmitJobMatch" (click)="submitJobMatch()">
+            {{ jobMatchSubmitting ? 'Analyzing...' : 'Generate Match' }}
+          </button>
+        }
+        <button type="button" class="cv-btn cv-btn--ghost" [disabled]="jobMatchSubmitting || jobMatchApplying" (click)="closeJobMatchModal()">
+          Cancel
+        </button>
+      </footer>
+    </section>
+  </div>
+}

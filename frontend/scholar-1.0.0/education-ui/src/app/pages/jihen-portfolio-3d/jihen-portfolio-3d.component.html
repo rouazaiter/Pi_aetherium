@@ -1,0 +1,139 @@
+<section class="jihen-3d-page">
+  <div class="jihen-3d-shell">
+    <header class="jihen-3d-toolbar">
+      <button type="button" class="jihen-3d-toolbar__back" (click)="backToPortfolio()">Back to Portfolio</button>
+
+      <nav class="jihen-3d-toolbar__nav" aria-label="3D portfolio sections">
+        @for (section of sections; track section.key) {
+          <button
+            type="button"
+            class="jihen-3d-toolbar__tab"
+            [class.jihen-3d-toolbar__tab--active]="activeSection === section.key"
+            (click)="selectSection(section.key)">
+            {{ section.label }}
+          </button>
+        }
+      </nav>
+    </header>
+
+    @if (loading) {
+      <section class="jihen-3d-state">
+        <p>Loading 3D portfolio...</p>
+      </section>
+    } @else if (errorMessage) {
+      <section class="jihen-3d-state jihen-3d-state--error">
+        <p>{{ errorMessage }}</p>
+      </section>
+    } @else if (detail) {
+      <section
+        class="jihen-3d-stage"
+        (mousemove)="onSceneMove($event)"
+        (mouseleave)="resetScene()">
+        <div
+          class="jihen-3d-scene"
+          [style.transform]="'rotateX(' + sceneRotateX + 'deg) rotateY(' + sceneRotateY + 'deg) translateZ(' + sceneDepth + 'px)'">
+          <article class="jihen-3d-panel jihen-3d-panel--hero" [class.jihen-3d-panel--active]="activeSection === 'hero'">
+            <div class="jihen-3d-panel__glow"></div>
+            <div class="jihen-3d-hero">
+              <div class="jihen-3d-avatar">
+                @if (profileImage()) {
+                  <img [src]="profileImage()" [alt]="displayName()" />
+                } @else {
+                  <span>{{ initials() }}</span>
+                }
+              </div>
+
+              <div class="jihen-3d-hero__copy">
+                <span class="jihen-3d-kicker">Interactive 3D Portfolio</span>
+                <h1>{{ displayName() }}</h1>
+                <p>{{ headline() }}</p>
+                <small>{{ locationText() }}</small>
+              </div>
+            </div>
+          </article>
+
+          <article class="jihen-3d-panel jihen-3d-panel--about" [class.jihen-3d-panel--active]="activeSection === 'about'">
+            <div class="jihen-3d-panel__content">
+              <h2>About</h2>
+              <p>{{ aboutText() }}</p>
+              <div class="jihen-3d-chip-row">
+                @for (group of groupedSkills.slice(0, 3); track group.category) {
+                  <span class="jihen-3d-chip">{{ group.category }}</span>
+                }
+              </div>
+            </div>
+          </article>
+
+          <article class="jihen-3d-panel jihen-3d-panel--projects" [class.jihen-3d-panel--active]="activeSection === 'projects'">
+            <div class="jihen-3d-panel__content">
+              <h2>Projects</h2>
+              <div class="jihen-3d-project-grid">
+                @for (project of topProjects(); track project.projectId) {
+                  <div class="jihen-3d-project">
+                    <div class="jihen-3d-project__media">
+                      @if (projectVideo(project)) {
+                        <video [src]="projectVideo(project)" autoplay muted loop playsinline></video>
+                      } @else if (projectImage(project)) {
+                        <img [src]="projectImage(project)" [alt]="project.title || 'Project preview'" />
+                      } @else {
+                        <div class="jihen-3d-project__placeholder">Preview</div>
+                      }
+                    </div>
+                    <strong>{{ project.title || 'Untitled project' }}</strong>
+                    <p>{{ project.description || 'No project description available.' }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+
+          <article class="jihen-3d-panel jihen-3d-panel--skills" [class.jihen-3d-panel--active]="activeSection === 'skills'">
+            <div class="jihen-3d-panel__content">
+              <h2>Skills</h2>
+              <div class="jihen-3d-skill-groups">
+                @for (group of groupedSkills.slice(0, 4); track group.category) {
+                  <section class="jihen-3d-skill-group">
+                    <h3>{{ group.category }}</h3>
+                    <div class="jihen-3d-chip-row">
+                      @for (skill of group.skills.slice(0, 6); track skill.id) {
+                        <span class="jihen-3d-chip">{{ skill.name }}</span>
+                      }
+                    </div>
+                  </section>
+                }
+              </div>
+            </div>
+          </article>
+
+          <article class="jihen-3d-panel jihen-3d-panel--contact" [class.jihen-3d-panel--active]="activeSection === 'contact'">
+            <div class="jihen-3d-panel__content">
+              <h2>Contact</h2>
+              <div class="jihen-3d-contact">
+                @if (githubUrl()) {
+                  <a [href]="githubUrl()" target="_blank" rel="noopener">GitHub</a>
+                }
+                @if (linkedinUrl()) {
+                  <a [href]="linkedinUrl()" target="_blank" rel="noopener">LinkedIn</a>
+                }
+                @if (emailHref()) {
+                  <a [href]="emailHref()">Email</a>
+                }
+              </div>
+
+              @if (topCollections().length > 0) {
+                <div class="jihen-3d-collections">
+                  @for (collection of topCollections(); track collection.collectionId) {
+                    <div class="jihen-3d-collection">
+                      <strong>{{ collection.name || collection.title || 'Collection' }}</strong>
+                      <span>{{ collection.projectCount ?? 0 }} projects</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </article>
+        </div>
+      </section>
+    }
+  </div>
+</section>

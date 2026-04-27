@@ -1,0 +1,13 @@
+package com.education.platform.dto.cv;
+
+public enum CvAiImproveTopic {
+    PROFILE_SUMMARY,
+    PROJECT_TITLE,
+    PROJECT_DESCRIPTION,
+    EXPERIENCE_SUMMARY,
+    EXPERIENCE_BULLET,
+    EDUCATION_DESCRIPTION,
+    SKILLS_SUMMARY,
+    CV_HEADLINE,
+    PORTFOLIO_BIO
+}

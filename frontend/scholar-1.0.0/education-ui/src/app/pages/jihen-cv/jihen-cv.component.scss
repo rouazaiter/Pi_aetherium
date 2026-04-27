@@ -1,0 +1,857 @@
+:host {
+  display: block;
+}
+
+.cv-builder-page {
+  min-height: 100vh;
+  padding: 1.5rem 1rem 3rem;
+  background:
+    radial-gradient(circle at top left, rgba(124, 92, 255, 0.12), transparent 24rem),
+    linear-gradient(180deg, #fbfaff 0%, #f6f3ff 100%);
+  color: #121a46;
+}
+
+.cv-builder-page__inner {
+  max-width: 92rem;
+  margin: 0 auto;
+}
+
+.cv-builder-header,
+.cv-builder-toolbar,
+.cv-ai-bar,
+.cv-editor-card,
+.cv-preview-frame,
+.cv-empty-card,
+.cv-state-card {
+  background: #fff;
+  border: 1px solid #e7defe;
+  border-radius: 1.75rem;
+  box-shadow: 0 18px 40px rgba(124, 92, 255, 0.06);
+}
+
+.cv-builder-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.cv-builder-header__eyebrow {
+  margin: 0;
+  color: #7c5cff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cv-builder-header h1,
+.cv-empty-card h2,
+.cv-ai-bar h2,
+.cv-accordion,
+.cv-preview-frame__label strong,
+.cv-paper-header h1,
+.cv-paper-section h2,
+.cv-paper-section h3 {
+  margin: 0;
+}
+
+.cv-builder-header h1 {
+  margin-top: 0.4rem;
+  font-size: clamp(2rem, 5vw, 2.9rem);
+}
+
+.cv-builder-header__subtitle {
+  margin: 0.45rem 0 0;
+  color: #667196;
+}
+
+.cv-builder-header__actions,
+.cv-template-selector,
+.cv-ai-bar__quick-actions,
+.cv-builder-layout,
+.cv-editor-grid,
+.cv-project-editor__actions,
+.cv-paper-header__meta,
+.cv-paper-language-list,
+.cv-skill-group__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cv-btn,
+.cv-template-chip,
+.cv-ai-pill,
+.cv-inline-ai__btn,
+.cv-text-btn {
+  border: 0;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.cv-btn:hover,
+.cv-template-chip:hover,
+.cv-ai-pill:hover,
+.cv-inline-ai__btn:hover,
+.cv-text-btn:hover {
+  transform: translateY(-1px);
+}
+
+.cv-btn {
+  padding: 0.9rem 1.15rem;
+  border-radius: 1rem;
+  font-weight: 700;
+}
+
+.cv-btn--primary {
+  background: linear-gradient(135deg, #7c5cff 0%, #6f4df6 100%);
+  color: #fff;
+}
+
+.cv-btn--soft {
+  background: rgba(124, 92, 255, 0.08);
+  color: #6f4df6;
+  border: 1px solid #e7defe;
+}
+
+.cv-btn--ghost {
+  background: #fff;
+  color: #121a46;
+  border: 1px solid #e7defe;
+}
+
+.cv-btn:disabled,
+.cv-template-chip:disabled,
+.cv-ai-pill:disabled,
+.cv-inline-ai__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+.cv-builder-toolbar {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+}
+
+.cv-template-chip {
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e7defe;
+  color: #6f4df6;
+  font-weight: 700;
+}
+
+.cv-template-chip--active {
+  background: rgba(124, 92, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(124, 92, 255, 0.16);
+}
+
+.cv-builder-toolbar__message {
+  margin: 0.75rem 0 0;
+  font-weight: 600;
+}
+
+.cv-builder-toolbar__message--success {
+  color: #1f8b49;
+}
+
+.cv-builder-toolbar__message--error,
+.cv-ai-bar__error,
+.cv-warning-note,
+.cv-suggestion-card__error {
+  color: #d94b4b;
+}
+
+.cv-ai-bar,
+.cv-empty-card,
+.cv-state-card {
+  margin-top: 1rem;
+  padding: 1.25rem;
+}
+
+.cv-ai-bar__intro {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.cv-ai-bar__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #7c5cff 0%, #6f4df6 100%);
+  color: #fff;
+  font-weight: 800;
+}
+
+.cv-ai-bar p,
+.cv-empty-card p,
+.cv-state-card p,
+.cv-empty-note,
+.cv-paper-section p,
+.cv-paper-muted,
+.cv-paper-empty,
+.cv-paper-warning {
+  margin: 0;
+  color: #667196;
+  line-height: 1.65;
+}
+
+.cv-ai-bar__quick-actions {
+  margin-top: 1rem;
+}
+
+.cv-ai-pill {
+  padding: 0.72rem 0.95rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e7defe;
+  color: #6f4df6;
+  font-weight: 700;
+}
+
+.cv-ai-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.cv-ai-chat__message {
+  max-width: 38rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.2rem;
+  background: #faf8ff;
+  border: 1px solid #eee7ff;
+}
+
+.cv-ai-chat__message--user {
+  align-self: end;
+  background: rgba(124, 92, 255, 0.12);
+}
+
+.cv-ai-chat__message--thinking {
+  border-style: dashed;
+}
+
+.cv-ai-chat__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.cv-ai-chat__actions span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.08);
+  color: #6f4df6;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.cv-ai-bar__composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.cv-ai-bar__composer-actions,
+.cv-ai-bar__state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cv-ai-bar__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  background: rgba(124, 92, 255, 0.06);
+  border: 1px solid #e7defe;
+}
+
+.cv-ai-bar__composer input,
+.cv-editor-card input,
+.cv-editor-card textarea,
+.cv-editor-card select,
+.cv-modal input,
+.cv-modal textarea,
+.cv-modal select {
+  width: 100%;
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e7defe;
+  border-radius: 1rem;
+  background: #fff;
+  color: #121a46;
+  outline: none;
+}
+
+.cv-ai-bar__composer input:focus,
+.cv-editor-card input:focus,
+.cv-editor-card textarea:focus,
+.cv-editor-card select:focus,
+.cv-modal input:focus,
+.cv-modal textarea:focus,
+.cv-modal select:focus {
+  border-color: rgba(124, 92, 255, 0.4);
+  box-shadow: 0 0 0 0.25rem rgba(124, 92, 255, 0.1);
+}
+
+.cv-builder-layout {
+  align-items: start;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: nowrap;
+}
+
+.cv-editor-column {
+  flex: 1 1 52%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cv-preview-column {
+  flex: 1 1 48%;
+  min-width: 0;
+}
+
+.cv-editor-card,
+.cv-preview-frame,
+.cv-empty-card,
+.cv-state-card {
+  padding: 1.2rem;
+}
+
+.cv-accordion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  background: transparent;
+  color: #121a46;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.cv-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.cv-editor-card label,
+.cv-field-stack,
+.cv-repeat-list,
+.cv-project-list,
+.cv-skill-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cv-editor-card label span,
+.cv-repeat-card h3,
+.cv-project-editor h3,
+.cv-paper-header__headline {
+  color: #121a46;
+}
+
+.cv-editor-card label span {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.cv-inline-ai {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cv-inline-ai__btn {
+  align-self: flex-start;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.08);
+  color: #6f4df6;
+  font-weight: 700;
+}
+
+.cv-suggestion-card,
+.cv-project-editor,
+.cv-repeat-card,
+.cv-skill-group {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1.2rem;
+  border: 1px solid #eee7ff;
+  background: #fcfbff;
+}
+
+.cv-suggestion-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.cv-suggestion-card__col h3,
+.cv-skill-group h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.cv-suggestion-card__actions,
+.cv-repeat-card__head,
+.cv-project-editor__head,
+.cv-toggle,
+.cv-paper-section__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cv-repeat-card__head,
+.cv-project-editor__head {
+  align-items: start;
+}
+
+.cv-text-btn {
+  padding: 0;
+  background: transparent;
+  color: #6f4df6;
+  font-weight: 700;
+}
+
+.cv-repeat-card--compact .cv-editor-grid {
+  margin-top: 0;
+}
+
+.cv-checkbox,
+.cv-toggle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #44507a;
+}
+
+.cv-project-editor__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.cv-project-editor__url {
+  margin: 0;
+}
+
+.cv-warning-note,
+.cv-empty-note {
+  margin-top: 0.25rem;
+}
+
+.cv-skill-group__chips span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: #f6f3ff;
+  border: 1px solid #e7defe;
+  color: #4a3fd1;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.cv-btn--wide {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.cv-preview-frame {
+  position: sticky;
+  top: 90px;
+}
+
+.cv-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(18, 26, 70, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.cv-modal {
+  width: min(60rem, 100%);
+  max-height: calc(100vh - 2.5rem);
+  overflow: auto;
+  padding: 1.35rem;
+  border: 1px solid #e7defe;
+  border-radius: 1.75rem;
+  background: linear-gradient(180deg, #fff 0%, #fcfbff 100%);
+  box-shadow: 0 24px 60px rgba(24, 21, 69, 0.18);
+}
+
+.cv-modal__header,
+.cv-modal__actions,
+.cv-job-match-card__head,
+.cv-job-match-project__title {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cv-modal__eyebrow {
+  margin: 0 0 0.4rem;
+  color: #7c5cff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cv-modal__header h2,
+.cv-job-match-card h3,
+.cv-job-match-card h4 {
+  margin: 0;
+}
+
+.cv-modal__header p {
+  margin: 0.45rem 0 0;
+  color: #667196;
+}
+
+.cv-modal__close {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid #e7defe;
+  border-radius: 999px;
+  background: #fff;
+  color: #6f4df6;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cv-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cv-editor-grid--modal {
+  margin-top: 0;
+}
+
+.cv-job-match-state,
+.cv-job-match-card {
+  padding: 1rem;
+  border: 1px solid #eee7ff;
+  border-radius: 1.25rem;
+  background: #fcfbff;
+}
+
+.cv-job-match-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cv-job-match-keywords,
+.cv-job-match-projects,
+.cv-job-match-project__grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.cv-job-match-keywords,
+.cv-job-match-project__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cv-keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.cv-keyword-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  background: #f6f3ff;
+  border: 1px solid #e7defe;
+  color: #4a3fd1;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.cv-keyword-chip--soft {
+  background: rgba(124, 92, 255, 0.08);
+}
+
+.cv-keyword-chip--success {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.24);
+  color: #1f8b49;
+}
+
+.cv-keyword-chip--warning {
+  background: rgba(255, 159, 28, 0.14);
+  border-color: rgba(255, 159, 28, 0.24);
+  color: #c66b00;
+}
+
+.cv-job-match-project {
+  padding: 1rem;
+  border: 1px solid #eee7ff;
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.cv-job-match-project__copy {
+  padding: 0.9rem;
+  border-radius: 0.9rem;
+  background: #faf8ff;
+  border: 1px solid #efe9ff;
+}
+
+.cv-job-match-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: #667196;
+}
+
+.cv-modal__actions {
+  margin-top: 1.2rem;
+}
+
+.cv-preview-frame__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  color: #667196;
+  font-size: 0.9rem;
+}
+
+.cv-preview-paper {
+  padding: 2rem;
+  border-radius: 1.5rem;
+  border: 1px solid #ede7ff;
+  background: #fff;
+  min-height: 72vh;
+}
+
+.cv-preview-paper[data-theme='MODERN'] {
+  background: linear-gradient(180deg, #ffffff 0%, #fbf9ff 100%);
+}
+
+.cv-preview-paper[data-theme='ELEGANT'] {
+  border-color: #ddd3fd;
+  box-shadow: inset 0 0 0 1px rgba(111, 77, 246, 0.06);
+}
+
+.cv-preview-paper[data-theme='CREATIVE'] {
+  background:
+    radial-gradient(circle at top right, rgba(124, 92, 255, 0.08), transparent 12rem),
+    #fff;
+}
+
+.cv-paper-header {
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid #ece6ff;
+}
+
+.cv-paper-header h1 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  letter-spacing: -0.04em;
+}
+
+.cv-paper-header__headline {
+  margin: 0.45rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.cv-paper-header__meta {
+  margin-top: 0.85rem;
+  color: #667196;
+  font-size: 0.9rem;
+}
+
+.cv-paper-section {
+  padding-top: 1.5rem;
+}
+
+.cv-paper-section h2 {
+  margin-bottom: 0.7rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cv-paper-section h3 {
+  font-size: 1rem;
+}
+
+.cv-paper-skill-groups,
+.cv-paper-projects,
+.cv-paper-repeat-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.cv-paper-muted {
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
+}
+
+.cv-paper-warning {
+  color: #d94b4b;
+  font-weight: 600;
+}
+
+.cv-paper-language-list {
+  gap: 0.85rem;
+}
+
+.cv-paper-language-list span {
+  color: #45517c;
+}
+
+.cv-empty-card,
+.cv-state-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cv-state-card--error {
+  border-color: rgba(217, 75, 75, 0.24);
+  background: rgba(255, 107, 99, 0.06);
+}
+
+@media (max-width: 1024px) {
+  .cv-builder-layout {
+    flex-direction: column;
+  }
+
+  .cv-preview-frame {
+    position: static;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .cv-builder-page {
+    padding: 1rem 0.75rem 2rem;
+  }
+
+  .cv-builder-header,
+  .cv-empty-card,
+  .cv-state-card,
+  .cv-builder-toolbar,
+  .cv-ai-bar,
+  .cv-editor-card,
+  .cv-preview-frame,
+  .cv-preview-paper {
+    padding: 1rem;
+    border-radius: 1.25rem;
+  }
+
+  .cv-builder-header,
+  .cv-empty-card,
+  .cv-state-card,
+  .cv-builder-header__actions,
+  .cv-ai-bar__composer,
+  .cv-ai-bar__composer-actions,
+  .cv-ai-bar__state,
+  .cv-ai-bar__state-actions,
+  .cv-project-editor__actions,
+  .cv-repeat-card__head,
+  .cv-project-editor__head,
+  .cv-paper-section__title-row,
+  .cv-modal__header,
+  .cv-modal__actions,
+  .cv-job-match-card__head,
+  .cv-job-match-project__title {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cv-editor-grid,
+  .cv-job-match-keywords,
+  .cv-job-match-project__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cv-ai-bar__composer {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .cv-modal {
+    padding: 1rem;
+    border-radius: 1.25rem;
+  }
+}
+
+@media print {
+  .cv-builder-header,
+  .cv-builder-toolbar,
+  .cv-ai-bar,
+  .cv-editor-column {
+    display: none !important;
+  }
+
+  .cv-builder-page {
+    padding: 0;
+    background: #fff;
+  }
+
+  .cv-builder-page__inner,
+  .cv-builder-layout,
+  .cv-preview-column,
+  .cv-preview-frame,
+  .cv-preview-paper {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: #fff;
+  }
+}

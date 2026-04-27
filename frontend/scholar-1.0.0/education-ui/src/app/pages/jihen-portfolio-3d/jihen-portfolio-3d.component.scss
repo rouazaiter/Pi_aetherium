@@ -1,0 +1,296 @@
+:host {
+  display: block;
+}
+
+.jihen-3d-page {
+  min-height: 100vh;
+  padding: 1rem;
+  background:
+    radial-gradient(circle at top left, rgba(124, 92, 255, 0.18), transparent 24rem),
+    radial-gradient(circle at bottom right, rgba(95, 67, 233, 0.18), transparent 24rem),
+    linear-gradient(180deg, #f8f5ff 0%, #f0ebff 100%);
+  color: #121a46;
+}
+
+.jihen-3d-shell {
+  max-width: 88rem;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.jihen-3d-toolbar,
+.jihen-3d-stage,
+.jihen-3d-state {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(232, 222, 254, 0.8);
+  border-radius: 1.6rem;
+  box-shadow: 0 20px 48px rgba(95, 67, 233, 0.1);
+  backdrop-filter: blur(18px);
+}
+
+.jihen-3d-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+}
+
+.jihen-3d-toolbar__back,
+.jihen-3d-toolbar__tab,
+.jihen-3d-contact a {
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.jihen-3d-toolbar__back,
+.jihen-3d-contact a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.05rem;
+  background: linear-gradient(135deg, #7c5cff 0%, #5f43e9 100%);
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 16px 32px rgba(95, 67, 233, 0.25);
+}
+
+.jihen-3d-toolbar__nav,
+.jihen-3d-chip-row,
+.jihen-3d-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.jihen-3d-toolbar__tab {
+  padding: 0.72rem 0.95rem;
+  background: #f4efff;
+  color: #5f43e9;
+  cursor: pointer;
+}
+
+.jihen-3d-toolbar__tab--active {
+  background: #5f43e9;
+  color: #fff;
+}
+
+.jihen-3d-state {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.jihen-3d-state--error {
+  color: #d94b4b;
+}
+
+.jihen-3d-stage {
+  min-height: 46rem;
+  padding: 1.5rem;
+  perspective: 1800px;
+  overflow: hidden;
+}
+
+.jihen-3d-scene {
+  position: relative;
+  height: 100%;
+  min-height: 43rem;
+  transform-style: preserve-3d;
+  transition: transform 220ms ease;
+}
+
+.jihen-3d-panel {
+  position: absolute;
+  width: min(30rem, 100%);
+  min-height: 22rem;
+  padding: 1.25rem;
+  border-radius: 1.6rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(247, 243, 255, 0.94));
+  border: 1px solid rgba(218, 204, 255, 0.9);
+  box-shadow: 0 26px 55px rgba(67, 47, 167, 0.14);
+  transform-style: preserve-3d;
+  transition:
+    transform 260ms ease,
+    box-shadow 260ms ease,
+    opacity 260ms ease;
+}
+
+.jihen-3d-panel--hero { transform: translate3d(3rem, 1rem, 4rem) rotateY(-10deg); }
+.jihen-3d-panel--about { transform: translate3d(31rem, 3rem, -2rem) rotateY(8deg) rotateX(1deg); }
+.jihen-3d-panel--projects { transform: translate3d(8rem, 20rem, 2rem) rotateY(-6deg); width: min(38rem, 100%); }
+.jihen-3d-panel--skills { transform: translate3d(49rem, 18rem, -4rem) rotateY(10deg); width: min(28rem, 100%); }
+.jihen-3d-panel--contact { transform: translate3d(58rem, 2rem, -6rem) rotateY(14deg); width: min(24rem, 100%); }
+
+.jihen-3d-panel--active {
+  box-shadow: 0 32px 70px rgba(67, 47, 167, 0.18);
+}
+
+.jihen-3d-panel__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at top right, rgba(124, 92, 255, 0.16), transparent 45%);
+  pointer-events: none;
+}
+
+.jihen-3d-hero,
+.jihen-3d-project,
+.jihen-3d-skill-group,
+.jihen-3d-collection {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.jihen-3d-hero {
+  align-content: center;
+  height: 100%;
+}
+
+.jihen-3d-avatar {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: rgba(124, 92, 255, 0.12);
+  color: #5f43e9;
+  font-size: 1.65rem;
+  font-weight: 800;
+  box-shadow: 0 18px 36px rgba(95, 67, 233, 0.18);
+}
+
+.jihen-3d-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.jihen-3d-kicker {
+  color: #6c4df6;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.jihen-3d-hero__copy h1,
+.jihen-3d-panel__content h2,
+.jihen-3d-skill-group h3,
+.jihen-3d-project strong,
+.jihen-3d-collection strong {
+  margin: 0;
+}
+
+.jihen-3d-hero__copy p,
+.jihen-3d-hero__copy small,
+.jihen-3d-panel__content p,
+.jihen-3d-project p,
+.jihen-3d-collection span {
+  margin: 0;
+  color: #687093;
+}
+
+.jihen-3d-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.72rem;
+  border-radius: 999px;
+  background: #f3eeff;
+  color: #5f43e9;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.jihen-3d-project-grid,
+.jihen-3d-skill-groups,
+.jihen-3d-collections {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.jihen-3d-project-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.jihen-3d-project {
+  padding: 0.9rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(230, 220, 255, 0.7);
+}
+
+.jihen-3d-project__media {
+  height: 9rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #efe7ff 0%, #d8cbff 100%);
+}
+
+.jihen-3d-project__media img,
+.jihen-3d-project__media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.jihen-3d-project__placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #6e7594;
+  font-weight: 700;
+}
+
+.jihen-3d-skill-group {
+  padding: 0.95rem;
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.jihen-3d-collection {
+  padding: 0.9rem;
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 1200px) {
+  .jihen-3d-stage {
+    min-height: auto;
+  }
+
+  .jihen-3d-scene {
+    min-height: auto;
+    display: grid;
+    gap: 1rem;
+    transform: none !important;
+  }
+
+  .jihen-3d-panel {
+    position: relative;
+    width: 100%;
+    min-height: auto;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .jihen-3d-page {
+    padding: 0.8rem;
+  }
+
+  .jihen-3d-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jihen-3d-project-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,424 @@
+<section class="explore-page">
+  <div class="explore-shell">
+    <aside class="explore-sidebar">
+      <section class="explore-panel explore-sidebar__panel">
+        <div class="explore-sidebar__header">
+          <div>
+            <h1>Explore</h1>
+            <p>Discover people and projects</p>
+          </div>
+          <span class="explore-sidebar__spark">+</span>
+        </div>
+
+        @if (filterError) {
+          <p class="explore-error">{{ filterError }}</p>
+        }
+
+        <div class="explore-filter-group">
+          <div class="explore-filter-head">
+            <h2>Developer Family</h2>
+            <button type="button" class="explore-link-btn" (click)="selectedFamily = ''">View all</button>
+          </div>
+
+          <div class="explore-family-grid">
+            @for (family of familyCards; track family.value || 'ALL') {
+              <button
+                type="button"
+                class="explore-family-card"
+                [class.explore-family-card--active]="selectedFamily === family.value"
+                (click)="selectFamily(family.value)">
+                <span class="explore-family-card__icon">{{ family.icon }}</span>
+                <span class="explore-family-card__label">{{ family.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="explore-filter-group">
+          <label class="explore-field">
+            <span>Skill Category</span>
+            <select [(ngModel)]="selectedCategory">
+              <option value="">All Categories</option>
+              @for (category of categories; track category.value) {
+                <option [value]="category.value">{{ category.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="explore-filter-group">
+          <label class="explore-field">
+            <span>Skills</span>
+            <input
+              #skillSearchInput
+              type="search"
+              [(ngModel)]="skillSearchTerm"
+              (ngModelChange)="onSkillSearchInput()"
+              placeholder="Search skills..." />
+          </label>
+
+          @if (loadingSkills) {
+            <p class="explore-note">Searching skills...</p>
+          }
+
+          @if (selectedSkills.length > 0) {
+            <div class="explore-chip-list">
+              @for (skill of selectedSkills; track skill.id) {
+                <button type="button" class="explore-chip explore-chip--selected" (click)="removeSkill(skill.id)">
+                  <span>{{ skill.name }}</span>
+                  <strong>x</strong>
+                </button>
+              }
+            </div>
+          }
+
+          @if (skillSuggestions.length > 0) {
+            <div class="explore-skill-suggestions">
+              @for (skill of skillSuggestions; track skill.id) {
+                <button type="button" class="explore-skill-suggestion" (click)="addSkill(skill)">
+                  <span>{{ skill.name }}</span>
+                  @if (skill.category) {
+                    <small>{{ skill.category }}</small>
+                  }
+                </button>
+              }
+            </div>
+          }
+
+          <button type="button" class="explore-link-btn explore-link-btn--spaced" (click)="focusSkillSearch(skillSearchInput)">Add more skills</button>
+        </div>
+
+        <div class="explore-filter-group">
+          <label class="explore-field">
+            <span>Search by Job Title</span>
+            <input type="text" [(ngModel)]="jobTitle" placeholder="e.g. Backend Developer, DevOps..." />
+          </label>
+        </div>
+
+        <div class="explore-filter-group">
+          <div class="explore-filter-head">
+            <h2>Visibility</h2>
+          </div>
+
+          <div class="explore-visibility-grid">
+            @for (option of visibilityOptions; track option.value) {
+              <button
+                type="button"
+                class="explore-visibility-card"
+                [class.explore-visibility-card--active]="selectedVisibility === option.value"
+                (click)="selectVisibility(option.value)">
+                <div class="explore-visibility-card__top">
+                  <span class="explore-visibility-card__icon">{{ option.icon }}</span>
+                  <span class="explore-visibility-card__check">{{ selectedVisibility === option.value ? 'OK' : '' }}</span>
+                </div>
+                <strong>{{ option.title }}</strong>
+                <small>{{ option.description }}</small>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="explore-sidebar__actions">
+          <button type="button" class="explore-primary-btn explore-primary-btn--full" (click)="applyFilters()">Apply Filters</button>
+          <button type="button" class="explore-link-btn" (click)="resetAll()">Reset all</button>
+        </div>
+      </section>
+    </aside>
+
+    <section class="explore-content">
+      <section class="explore-panel explore-search-panel">
+        <div class="explore-search-bar">
+          <label class="explore-search-input">
+            <span class="explore-search-input__icon">Q</span>
+            <input
+              type="search"
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearchQueryInput($event)"
+              (keyup.enter)="runMainSearch()"
+              placeholder="Search by job title, skill, keyword..." />
+          </label>
+
+          <button type="button" class="explore-primary-btn explore-primary-btn--search" (click)="runMainSearch()">Search</button>
+          <button type="button" class="explore-icon-btn" (click)="toggleMorePopularSearches()">+</button>
+        </div>
+
+        <div class="explore-popular-row">
+          <span>Popular searches:</span>
+          <div class="explore-popular-chips">
+            @for (chip of visiblePopularSearches; track chip) {
+              <button type="button" class="explore-chip" (click)="usePopularSearch(chip)">{{ chip }}</button>
+            }
+            <button type="button" class="explore-chip" (click)="toggleMorePopularSearches()">
+              {{ showMorePopularSearches ? 'Less' : 'More' }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="explore-results-panel">
+        <div class="explore-toolbar">
+          <div class="explore-tabs">
+            <button
+              type="button"
+              class="explore-tab"
+              [class.explore-tab--active]="activeTab === 'portfolios'"
+              (click)="setActiveTab('portfolios')">
+              Portfolios
+            </button>
+            <button
+              type="button"
+              class="explore-tab"
+              [class.explore-tab--active]="activeTab === 'projects'"
+              (click)="setActiveTab('projects')">
+              Projects
+            </button>
+            <button
+              type="button"
+              class="explore-tab"
+              [class.explore-tab--active]="activeTab === 'collections'"
+              (click)="setActiveTab('collections')">
+              Collections
+            </button>
+          </div>
+
+          <div class="explore-toolbar__controls">
+            <label class="explore-sort-field">
+              <span>Sort by:</span>
+              <select [(ngModel)]="selectedSort" (ngModelChange)="onSortChange()">
+                @for (option of sortOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <div class="explore-view-toggle">
+              <button
+                type="button"
+                class="explore-view-toggle__btn"
+                [class.explore-view-toggle__btn--active]="viewMode === 'grid'"
+                (click)="setViewMode('grid')">
+                Grid
+              </button>
+              <button
+                type="button"
+                class="explore-view-toggle__btn"
+                [class.explore-view-toggle__btn--active]="viewMode === 'list'"
+                (click)="setViewMode('list')">
+                List
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p class="explore-results-count">
+          {{ resultsCount }} {{ resultsLabel }} found
+        </p>
+
+        @if (portfolioHelperMessage && activeTab === 'portfolios' && portfolioResults.length < 3) {
+          <section class="explore-panel explore-helper">
+            <div>
+              <strong>{{ portfolioHelperMessage }}</strong>
+            </div>
+            <button type="button" class="explore-secondary-btn explore-secondary-btn--inline" (click)="setActiveTab('projects')">
+              View Projects
+            </button>
+          </section>
+        }
+
+        @if (resultsError) {
+          <section class="explore-panel explore-state">
+            <p class="explore-error">{{ resultsError }}</p>
+          </section>
+        } @else if (loadingResults) {
+          <section class="explore-panel explore-state">
+            <p>
+              {{
+                activeTab === 'portfolios'
+                  ? 'Finding matching portfolios...'
+                  : activeTab === 'collections'
+                    ? 'Finding matching collections...'
+                    : 'Finding matching projects...'
+              }}
+            </p>
+          </section>
+        } @else if (activeTab === 'portfolios') {
+          @if (portfolioResults.length > 0) {
+            <div class="explore-cards" [class.explore-cards--list]="viewMode === 'list'">
+              @for (card of portfolioResults; track card.portfolioId) {
+                <article
+                  class="explore-card explore-card--portfolio explore-card--interactive"
+                  [class.explore-card--list]="viewMode === 'list'"
+                  role="button"
+                  tabindex="0"
+                  (click)="openPortfolio(card)"
+                  (keydown)="onCardKeydown($event, 'portfolios', card)">
+                  <span class="explore-card__arrow" aria-hidden="true">></span>
+                  <div class="explore-card__head">
+                    <div class="explore-avatar">
+                      @if (card.profileImage) {
+                        <img [src]="card.profileImage" [alt]="card.displayName" />
+                      } @else {
+                        <span>{{ initials(card.displayName, card.ownerUsername) }}</span>
+                      }
+                    </div>
+
+                    <div class="explore-card__identity">
+                      <h3>{{ card.displayName }}</h3>
+                      <p>{{ portfolioHeading(card) }}</p>
+                      <small>{{ portfolioLocation(card) }}</small>
+                    </div>
+
+                    <span [class]="visibilityBadgeClass(card.visibility)">{{ visibilityBadge(card.visibility) }}</span>
+                  </div>
+
+                  <div class="explore-card__skills">
+                    @for (skill of portfolioSkills(card); track skill.id) {
+                      <span class="explore-skill-chip">{{ skill.name }}</span>
+                    }
+                    @if (portfolioExtraSkills(card) > 0) {
+                      <span class="explore-skill-chip explore-skill-chip--soft">+{{ portfolioExtraSkills(card) }}</span>
+                    }
+                  </div>
+
+                  <div class="explore-card__stats">
+                    <span>{{ card.projectCount }} Projects</span>
+                    @if (portfolioConnections(card); as connections) {
+                      <span>{{ connections }} Connections</span>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <section class="explore-panel explore-state">
+              <h3>No portfolios available yet.</h3>
+              <p>No matching portfolios found. Try removing a filter.</p>
+              <p>Check out projects instead.</p>
+              <button type="button" class="explore-secondary-btn explore-secondary-btn--inline" (click)="setActiveTab('projects')">
+                View Projects
+              </button>
+            </section>
+          }
+        } @else if (activeTab === 'projects') {
+          @if (projectResults.length > 0) {
+            <div class="explore-cards" [class.explore-cards--list]="viewMode === 'list'">
+              @for (card of projectResults; track card.projectId) {
+                <article
+                  class="explore-card explore-card--project explore-card--interactive"
+                  [class.explore-card--list]="viewMode === 'list'"
+                  role="button"
+                  tabindex="0"
+                  (click)="openProject(card)"
+                  (keydown)="onCardKeydown($event, 'projects', card)">
+                  <span class="explore-card__arrow" aria-hidden="true">></span>
+                  <div class="explore-project-cover">
+                    @if (card.mediaType === 'VIDEO' && card.mediaUrl) {
+                      <video [src]="card.mediaUrl" muted playsinline controls></video>
+                    } @else if (card.mediaUrl) {
+                      <img [src]="card.mediaUrl" [alt]="card.title || 'Project cover'" />
+                    } @else {
+                      <div class="explore-project-cover__placeholder">
+                        <span class="explore-project-cover__icon">PR</span>
+                        <strong>Project preview</strong>
+                      </div>
+                    }
+                    <span [class]="visibilityBadgeClass(card.visibility)">{{ visibilityBadge(card.visibility) }}</span>
+                  </div>
+
+                  <div class="explore-card__body-wrap">
+                    <div class="explore-card__identity">
+                      <h3>{{ card.title || 'Untitled project' }}</h3>
+                      <p>{{ card.description || 'No project description available.' }}</p>
+                      <small>{{ card.ownerDisplayName || card.ownerUsername }}</small>
+                    </div>
+
+                    <div class="explore-card__skills">
+                      @for (skill of projectSkills(card); track skill.id) {
+                        <span class="explore-skill-chip">{{ skill.name }}</span>
+                      }
+                    </div>
+
+                    <div class="explore-card__stats">
+                      @if (card.likes !== null && card.likes !== undefined) {
+                        <span>{{ card.likes }} Likes</span>
+                      }
+                      @if (card.views !== null && card.views !== undefined) {
+                        <span>{{ card.views }} Views</span>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <section class="explore-panel explore-state">
+              <p>No matching projects found. Try removing a filter.</p>
+            </section>
+          }
+        } @else {
+          @if (collectionResults.length > 0) {
+            <div class="explore-cards" [class.explore-cards--list]="viewMode === 'list'">
+              @for (card of collectionResults; track card.collectionId) {
+                <article
+                  class="explore-card explore-card--project explore-card--listable explore-card--interactive"
+                  [class.explore-card--list]="viewMode === 'list'"
+                  role="button"
+                  tabindex="0"
+                  (click)="openCollection(card)"
+                  (keydown)="onCardKeydown($event, 'collections', card)">
+                  <span class="explore-card__arrow" aria-hidden="true">></span>
+                  <div class="explore-project-cover">
+                    @if (card.mediaType === 'VIDEO' && card.mediaUrl) {
+                      <video [src]="card.mediaUrl" muted playsinline controls></video>
+                    } @else if (card.mediaUrl) {
+                      <img [src]="card.mediaUrl" [alt]="collectionName(card)" />
+                    } @else {
+                      <div class="explore-project-cover__placeholder">Collection preview</div>
+                    }
+                    <span [class]="visibilityBadgeClass(card.visibility)">{{ visibilityBadge(card.visibility) }}</span>
+                  </div>
+
+                  <div class="explore-card__body-wrap">
+                    <div class="explore-card__identity">
+                      <h3>{{ collectionName(card) }}</h3>
+                      <p>{{ card.description || 'No collection description available.' }}</p>
+                      <small>{{ collectionOwner(card) }}</small>
+                    </div>
+
+                    <div class="explore-card__skills">
+                      @for (skill of collectionSkills(card); track skill.id) {
+                        <span class="explore-skill-chip">{{ skill.name }}</span>
+                      }
+                    </div>
+
+                    <div class="explore-card__stats">
+                      <span>{{ card.projectCount ?? 0 }} Projects</span>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <section class="explore-panel explore-state">
+              <p>No matching collections found. Try removing a filter.</p>
+            </section>
+          }
+        }
+
+        <section class="explore-cta">
+          <div class="explore-cta__copy">
+            <div class="explore-cta__icon">GO</div>
+            <div>
+              <h2>Discover. Connect. Grow.</h2>
+              <p>
+                Explore talented developers and innovative projects. Get inspired, collaborate, and build your network.
+              </p>
+            </div>
+          </div>
+
+          <button type="button" class="explore-primary-btn" (click)="discoverPeople()">Discover People</button>
+        </section>
+      </section>
+    </section>
+  </div>
+</section>

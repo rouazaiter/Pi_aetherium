@@ -1,0 +1,411 @@
+<section class="portfolio-mentor">
+  <div class="portfolio-mentor__shell">
+    <aside class="mentor-sidebar">
+      <div class="mentor-sidebar__brand">
+        <span class="mentor-sidebar__brand-mark">S</span>
+        <div>
+          <strong>Scholar</strong>
+          <span>AI Workspace</span>
+        </div>
+      </div>
+
+      <nav class="mentor-sidebar__nav" aria-label="Portfolio Mentor navigation">
+        @for (item of sidebarItems; track item.label) {
+          <a
+            class="mentor-sidebar__item"
+            [routerLink]="item.route"
+            routerLinkActive="mentor-sidebar__item--active"
+            [routerLinkActiveOptions]="{ exact: item.exact ?? false }">
+            <span class="mentor-sidebar__icon" aria-hidden="true">
+              @switch (item.icon) {
+                @case ('home') {
+                  <svg viewBox="0 0 24 24"><path d="M12 4.5 4 11v8a1 1 0 0 0 1 1h4.5v-5h5v5H19a1 1 0 0 0 1-1v-8l-8-6.5Z" /></svg>
+                }
+                @case ('portfolio') {
+                  <svg viewBox="0 0 24 24"><path d="M5 7.5A2.5 2.5 0 0 1 7.5 5h9A2.5 2.5 0 0 1 19 7.5v9A2.5 2.5 0 0 1 16.5 19h-9A2.5 2.5 0 0 1 5 16.5v-9Zm3 1.5h8v1.8H8V9Zm0 4h8v1.8H8V13Z" /></svg>
+                }
+                @case ('projects') {
+                  <svg viewBox="0 0 24 24"><path d="m12 4 8 4-8 4-8-4 8-4Zm-8 7 8 4 8-4v4l-8 4-8-4v-4Zm0 7 8 4 8-4" /></svg>
+                }
+                @case ('cv') {
+                  <svg viewBox="0 0 24 24"><path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" /></svg>
+                }
+                @case ('mentor') {
+                  <svg viewBox="0 0 24 24"><path d="M12 3 4 7v6c0 5 3.4 7.8 8 8 4.6-.2 8-3 8-8V7l-8-4Zm-3 6.5a1.25 1.25 0 1 1 0 2.5a1.25 1.25 0 0 1 0-2.5Zm6 0a1.25 1.25 0 1 1 0 2.5a1.25 1.25 0 0 1 0-2.5ZM8.5 15h7a3.5 3.5 0 0 1-7 0Z" /></svg>
+                }
+                @case ('skills') {
+                  <svg viewBox="0 0 24 24"><path d="m12 3 2.1 2.3 3.1-.3.8 3 2.8 1.3-1.3 2.8 1.3 2.8-2.8 1.3-.8 3-3.1-.3L12 21l-2.1-2.3-3.1.3-.8-3-2.8-1.3 1.3-2.8-1.3-2.8 2.8-1.3.8-3 3.1.3L12 3Zm0 5.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7Z" /></svg>
+                }
+                @case ('analytics') {
+                  <svg viewBox="0 0 24 24"><path d="M5 19h14v2H3V5h2v14Zm3-3H6v-5h2v5Zm5 0h-2V7h2v9Zm5 0h-2v-7h2v7Z" /></svg>
+                }
+                @default {
+                  <svg viewBox="0 0 24 24"><path d="m12 3 1.9 2.1 2.8-.3.7 2.7 2.6 1.2-1.2 2.6 1.2 2.6-2.6 1.2-.7 2.7-2.8-.3L12 21l-1.9-2.1-2.8.3-.7-2.7-2.6-1.2 1.2-2.6-1.2-2.6 2.6-1.2.7-2.7 2.8.3L12 3Zm0 6a3 3 0 1 0 0 6a3 3 0 0 0 0-6Z" /></svg>
+                }
+              }
+            </span>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+
+      <div class="mentor-sidebar__help">
+        <span class="mentor-sidebar__help-badge">AI</span>
+        <h3>Need help building a stronger portfolio?</h3>
+        <p>Ask me anything. I’m here to help.</p>
+      </div>
+
+      <div class="mentor-sidebar__profile">
+        <span class="mentor-sidebar__avatar">{{ userName() ? userName().charAt(0).toUpperCase() : 'S' }}</span>
+        <div>
+          <strong>{{ userName() || 'Scholar user' }}</strong>
+          <span>View profile</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="mentor-content">
+      <header class="mentor-header">
+        <div>
+          <h1>{{ greeting() }}</h1>
+          <p>I’m your AI portfolio mentor. Ask me anything or get feedback to improve.</p>
+        </div>
+        <div class="mentor-header__chip">AI Mentor</div>
+      </header>
+
+      <section class="mentor-chat-card">
+        <div class="mentor-chat-card__intro">
+          <div class="mentor-avatar mentor-avatar--assistant">AI</div>
+          <div class="mentor-chat-card__welcome">
+            <p>{{ assistantWelcomeMessage() }}</p>
+          </div>
+        </div>
+
+        <div class="mentor-chat-card__quick-actions">
+          @for (prompt of quickPrompts; track trackByLabel($index, prompt)) {
+            <button type="button" class="mentor-quick-action" (click)="sendQuickPrompt(prompt)">
+              {{ prompt.label }}
+            </button>
+          }
+        </div>
+
+        <div class="mentor-chat-card__messages">
+          @if (chatMessages.length === 0) {
+            <div class="mentor-chat-card__empty">Try asking about missing proof, stronger positioning, or how to improve your portfolio story.</div>
+          } @else {
+            @for (message of chatMessages; track $index) {
+              <article class="mentor-message" [class.mentor-message--user]="message.role === 'user'">
+                @if (message.role === 'assistant') {
+                  <div class="mentor-avatar mentor-avatar--assistant mentor-avatar--small">AI</div>
+                }
+                <div class="mentor-message__bubble">
+                  @if (message.content) {
+                    <p>{{ message.content }}</p>
+                  }
+                  @if (message.notes?.length) {
+                    <ul class="mentor-message__notes">
+                      @for (note of message.notes ?? []; track note) {
+                        <li>{{ note }}</li>
+                      }
+                    </ul>
+                  }
+                  @if (message.rewrites?.length) {
+                    <div class="mentor-message__rewrites">
+                      <strong>Suggested rewrites</strong>
+                      <ul>
+                        @for (rewrite of message.rewrites ?? []; track rewrite) {
+                          <li>{{ rewrite }}</li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
+              </article>
+            }
+          }
+
+          @if (pendingChatMessage) {
+            <article class="mentor-message mentor-message--user">
+              <div class="mentor-message__bubble">
+                <p>{{ pendingChatMessage }}</p>
+              </div>
+            </article>
+          }
+
+          @if (chatSending) {
+            <article class="mentor-message">
+              <div class="mentor-avatar mentor-avatar--assistant mentor-avatar--small">AI</div>
+              <div class="mentor-message__bubble mentor-message__bubble--thinking">
+                <p>AI is analyzing your portfolio...</p>
+                <span class="mentor-message__dots" aria-hidden="true"></span>
+              </div>
+            </article>
+          }
+        </div>
+
+        @if (chatTimeoutMessage) {
+          <div class="mentor-inline-state mentor-inline-state--timeout">
+            <p>{{ chatTimeoutMessage }}</p>
+            <div class="mentor-inline-state__actions">
+              <button type="button" class="mentor-action-link" (click)="cancelChat()">Cancel</button>
+              <button type="button" class="mentor-action-link" (click)="retryChat()">Retry</button>
+            </div>
+          </div>
+        }
+
+        @if (chatError) {
+          <div class="mentor-inline-state mentor-inline-state--error">
+            <p>{{ chatError }}</p>
+            @if (pendingChatMessage) {
+              <div class="mentor-inline-state__actions">
+                <button type="button" class="mentor-action-link" (click)="retryChat()">Retry</button>
+              </div>
+            }
+          </div>
+        }
+
+        <form class="mentor-chat-card__composer" (ngSubmit)="submitChat()">
+          <input
+            type="text"
+            name="mentorMessage"
+            [(ngModel)]="chatInput"
+            placeholder="Ask anything about your portfolio..."
+            [disabled]="chatSending" />
+          <div class="mentor-chat-card__composer-actions">
+            @if (chatSending) {
+              <button type="button" class="mentor-action-link mentor-action-link--plain" (click)="cancelChat()">Cancel</button>
+            }
+            <button type="submit" class="mentor-send-btn" [disabled]="chatSending || !(pendingChatMessage.trim() || chatInput.trim())">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 20.4 4c.8-.34 1.56.42 1.22 1.22L14 22.6c-.34.8-1.5.7-1.7-.15l-1.55-6.54-6.54-1.55c-.86-.2-.96-1.36-.16-1.7Zm8.47 2.03 1.23 5.18 5.74-13.18-13.18 5.74 5.18 1.23 4.78-4.78 1.06 1.06-4.8 4.75Z" /></svg>
+            </button>
+          </div>
+        </form>
+        <p class="mentor-chat-card__hint">Try asking about skills to learn, project ideas, improving your bio, job readiness, and more.</p>
+      </section>
+
+      <section class="mentor-section">
+        <article class="mentor-soft-card mentor-insight-card">
+          <div class="mentor-section__row">
+            <div class="mentor-section__title-wrap">
+              <span class="mentor-section__icon mentor-section__icon--purple">✦</span>
+              <div>
+                <h2>AI Insight</h2>
+                <span class="mentor-pill mentor-pill--purple">New</span>
+              </div>
+            </div>
+          </div>
+
+          @if (summaryState.loading || strengthsState.loading || movesState.loading) {
+            <div class="mentor-soft-card__state">Building your latest AI summary...</div>
+          } @else {
+            @if (insightSummary(); as insight) {
+              <div class="mentor-insight-card__content">
+                @if (insight.intro) {
+                  <p>{{ insight.intro }}</p>
+                }
+                @if (insight.gaps) {
+                  <p>{{ insight.gaps }}</p>
+                }
+                @if (insight.nextStep) {
+                  <a class="mentor-inline-link" routerLink="/jihen-portfolio">{{ insight.nextStep }}</a>
+                }
+              </div>
+            } @else {
+              <div class="mentor-soft-card__state">Not enough AI insight data yet. Ask the mentor a question or add more portfolio details.</div>
+            }
+          }
+        </article>
+      </section>
+
+      <section class="mentor-section">
+        <article class="mentor-soft-card">
+          <div class="mentor-section__row">
+            <div class="mentor-section__title-wrap">
+              <span class="mentor-section__icon mentor-section__icon--green">✓</span>
+              <div class="mentor-section__title-line">
+                <h2>Your Strengths</h2>
+                <span class="mentor-pill mentor-pill--green">{{ strengthCount() }}</span>
+              </div>
+            </div>
+            <a class="mentor-action-link" routerLink="/jihen-portfolio">View details</a>
+          </div>
+
+          @if (strengthsState.loading) {
+            <div class="mentor-soft-card__state">Loading your strengths...</div>
+          } @else if (strengthsState.error) {
+            <div class="mentor-inline-state mentor-inline-state--error">
+              <p>{{ strengthsState.error }}</p>
+            </div>
+          } @else if (topStrengths().length > 0) {
+            <div class="mentor-triple-grid">
+              @for (item of topStrengths(); track trackByTitle($index, item)) {
+                <article class="mentor-compact-item mentor-compact-item--strength">
+                  <span class="mentor-item-mark mentor-item-mark--green">{{ insightItemIcon(item, true) }}</span>
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.description || item.category }}</p>
+                  <div class="mentor-compact-item__meta">
+                    @if (item.score > 0) {
+                      <span>{{ item.score }}/100</span>
+                    }
+                    @if (item.priority) {
+                      <span>{{ item.priority }}</span>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="mentor-soft-card__state">No strengths were returned yet.</div>
+          }
+        </article>
+      </section>
+
+      <section class="mentor-section">
+        <article class="mentor-soft-card">
+          <div class="mentor-section__row">
+            <div class="mentor-section__title-wrap">
+              <span class="mentor-section__icon mentor-section__icon--danger">!</span>
+              <div class="mentor-section__title-line">
+                <h2>Areas to Improve</h2>
+                <span class="mentor-pill mentor-pill--danger">{{ gapCount() }}</span>
+              </div>
+            </div>
+            <a class="mentor-action-link" routerLink="/jihen-portfolio">View details</a>
+          </div>
+
+          @if (strengthsState.loading) {
+            <div class="mentor-soft-card__state">Loading your gaps...</div>
+          } @else if (strengthsState.error) {
+            <div class="mentor-inline-state mentor-inline-state--error">
+              <p>{{ strengthsState.error }}</p>
+            </div>
+          } @else if (topGaps().length > 0) {
+            <div class="mentor-triple-grid">
+              @for (item of topGaps(); track trackByTitle($index, item)) {
+                <article class="mentor-compact-item mentor-compact-item--gap">
+                  <span class="mentor-item-mark mentor-item-mark--danger">{{ insightItemIcon(item, false) }}</span>
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.description || item.category }}</p>
+                  <div class="mentor-compact-item__meta">
+                    @if (item.score > 0) {
+                      <span>{{ item.score }}/100</span>
+                    }
+                    @if (item.priority) {
+                      <span>{{ item.priority }}</span>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="mentor-soft-card__state">No gaps were returned yet.</div>
+          }
+        </article>
+      </section>
+
+      <section class="mentor-section">
+        <article class="mentor-soft-card">
+          <div class="mentor-section__row">
+            <div class="mentor-section__title-wrap">
+              <span class="mentor-section__icon mentor-section__icon--purple">→</span>
+              <div class="mentor-section__title-line">
+                <h2>Next Best Moves</h2>
+                <span class="mentor-pill mentor-pill--purple">{{ moveCount() }}</span>
+              </div>
+            </div>
+            <a class="mentor-action-link" routerLink="/jihen-portfolio">View roadmap</a>
+          </div>
+
+          @if (movesState.loading) {
+            <div class="mentor-soft-card__state">Loading your roadmap...</div>
+          } @else if (movesState.error) {
+            <div class="mentor-inline-state mentor-inline-state--error">
+              <p>{{ movesState.error }}</p>
+            </div>
+          } @else if (topMoves().length > 0) {
+            <div class="mentor-checklist">
+              @for (move of topMoves(); track trackByTitle($index, move)) {
+                <article class="mentor-checklist__item">
+                  <span class="mentor-checklist__circle" aria-hidden="true"></span>
+                  <div class="mentor-checklist__body">
+                    <div class="mentor-checklist__top">
+                      <h3>{{ move.title }}</h3>
+                      <div class="mentor-checklist__badges">
+                        @if (move.category) {
+                          <span class="mentor-pill mentor-pill--neutral">{{ move.category }}</span>
+                        }
+                        @if (move.impact) {
+                          <span class="mentor-pill mentor-pill--purple-soft">{{ move.impact }}</span>
+                        }
+                        <span class="mentor-pill mentor-pill--neutral">Priority {{ move.priority }}</span>
+                      </div>
+                    </div>
+                    @if (move.description) {
+                      <p>{{ move.description }}</p>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="mentor-soft-card__state">No roadmap moves were returned yet.</div>
+          }
+        </article>
+      </section>
+
+      <section class="mentor-section">
+        <article class="mentor-soft-card mentor-coherence">
+          <div class="mentor-section__row">
+            <div class="mentor-section__title-wrap">
+              <div>
+                <h2>Portfolio Coherence</h2>
+              </div>
+            </div>
+          </div>
+
+          @if (coherenceState.loading) {
+            <div class="mentor-soft-card__state">Loading your coherence analysis...</div>
+          } @else if (coherenceState.error) {
+            <div class="mentor-inline-state mentor-inline-state--error">
+              <p>{{ coherenceState.error }}</p>
+            </div>
+          } @else if (coherenceState.data) {
+            <div class="mentor-coherence__layout">
+              <div class="mentor-coherence__summary">
+                <div class="mentor-coherence__score" [class.mentor-coherence__score--medium]="scoreTone(coherenceState.data.score) === 'medium'" [class.mentor-coherence__score--critical]="scoreTone(coherenceState.data.score) === 'critical'">
+                  <strong>{{ coherenceState.data.score }}</strong>
+                  <span>/100</span>
+                </div>
+                <div class="mentor-coherence__copy">
+                  <span class="mentor-pill" [class.mentor-pill--green]="scoreTone(coherenceState.data.score) === 'strong'" [class.mentor-pill--orange]="scoreTone(coherenceState.data.score) === 'medium'" [class.mentor-pill--danger]="scoreTone(coherenceState.data.score) === 'critical'">
+                    {{ coherenceState.data.status }}
+                  </span>
+                  <p>{{ coherenceState.data.explanation }}</p>
+                </div>
+              </div>
+
+              <div class="mentor-coherence__metrics">
+                @for (metric of coherenceState.data.metrics; track trackByTitle($index, metric)) {
+                  <article class="mentor-mini-metric">
+                    <h3>{{ metric.title }}</h3>
+                    <strong>{{ metric.score }}/100</strong>
+                    <div class="mentor-mini-metric__bar">
+                      <span [style.width.%]="metric.progress"></span>
+                    </div>
+                  </article>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="mentor-soft-card__state">Coherence analysis is not available yet.</div>
+          }
+        </article>
+      </section>
+
+      <div class="mentor-tip-bar">
+        <span class="mentor-tip-bar__dot">•</span>
+        <p>Tip: Ask follow-up questions for more specific advice tailored to your goals.</p>
+      </div>
+    </div>
+  </div>
+</section>

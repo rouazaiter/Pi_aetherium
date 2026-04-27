@@ -107,10 +107,11 @@ public class ApplicationController {
             @PathVariable Long applicationId,
             @PathVariable("requester-id") Long requesterId
     ) {
-        // Accept the application
-        applicationService.updateApplicationStatus(applicationId, requesterId, ApplicationStatus.ACCEPTED);
-        
-        // Create the Stripe Checkout session
+        Application application = applicationService.getApplicationById(applicationId);
+        if (application.getStatus() != ApplicationStatus.ACCEPTED) {
+            applicationService.updateApplicationStatus(applicationId, requesterId, ApplicationStatus.ACCEPTED);
+        }
+
         return ResponseEntity.ok(paymentService.createCheckoutSessionForApplication(applicationId, requesterId));
     }
 }

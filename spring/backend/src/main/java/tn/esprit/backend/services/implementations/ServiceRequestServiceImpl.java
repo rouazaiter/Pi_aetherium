@@ -41,6 +41,10 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
 
         LocalDateTime now = LocalDateTime.now();
 
+        if (request.expiringDate() == null || !request.expiringDate().isAfter(now)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expiration date must be after creation date");
+        }
+
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setName(request.name());
         serviceRequest.setCategory(request.category());
@@ -129,6 +133,9 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
             serviceRequest.setPrice(payload.price());
         }
         if (payload.expiringDate() != null) {
+            if (!payload.expiringDate().isAfter(serviceRequest.getCreatedAt())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expiration date must be after creation date");
+            }
             serviceRequest.setExpiringDate(payload.expiringDate());
         }
         if (file != null && !file.isEmpty()) {

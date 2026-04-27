@@ -62,8 +62,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl(frontendBaseUrl + "/marketplace?payment=success&requestId=" + serviceRequest.getId())
-                .setCancelUrl(frontendBaseUrl + "/marketplace?payment=cancel&requestId=" + serviceRequest.getId())
+                .setSuccessUrl(frontendBaseUrl + "/marketplace/my/" + serviceRequest.getId() + "?payment=success")
+                .setCancelUrl(frontendBaseUrl + "/marketplace/my/" + serviceRequest.getId() + "?payment=cancel")
                 .putMetadata("serviceRequestId", String.valueOf(serviceRequest.getId()))
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()

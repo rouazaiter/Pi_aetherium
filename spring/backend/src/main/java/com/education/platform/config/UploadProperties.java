@@ -11,4 +11,5 @@ public class UploadProperties {
 
     /** Répertoire local pour les photos de profil (relatif au répertoire de travail). */
     private String profilePicturesDir = "uploads/profile-pictures";
+    private String portfolioMediaDir = "uploads/portfolio-media";
 }

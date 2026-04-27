@@ -18,4 +18,6 @@ public class ProfileResponse {
     private String profilePicture;
     private Instant lastPasswordChanged;
     private String recuperationEmail;
+    private boolean twoFactorEnabled;
+    private boolean activeStatusVisible;
 }

@@ -1,4 +1,4 @@
-import {
+﻿import {
   AfterViewInit,
   Component,
   ElementRef,
@@ -34,16 +34,16 @@ declare global {
   selector: 'app-sign-in-providers',
   standalone: true,
   templateUrl: './sign-in-providers.component.html',
-  styleUrl: './sign-in-providers.component.scss',
+  styleUrl: './sign-in-providers.component\.css',
 })
 export class SignInProvidersComponent implements AfterViewInit, OnDestroy {
-  /** `signup` → libellé Google « Sign up » ; même API backend (création de compte si besoin). */
+  /** `signup` â†’ libellÃ© Google Â« Sign up Â» ; mÃªme API backend (crÃ©ation de compte si besoin). */
   @Input() intent: 'signin' | 'signup' = 'signin';
 
-  /** Sur l’inscription : masquer le bouton e-mail (le formulaire est déjà en dessous). */
+  /** Sur lâ€™inscription : masquer le bouton e-mail (le formulaire est dÃ©jÃ  en dessous). */
   @Input() oauthOnly = false;
 
-  /** Google puis Facebook empilés en pleine largeur (ex. page inscription type split). */
+  /** Google puis Facebook empilÃ©s en pleine largeur (ex. page inscription type split). */
   @Input() stacked = false;
 
   @ViewChild('googleHost') googleHost?: ElementRef<HTMLDivElement>;
@@ -128,7 +128,7 @@ export class SignInProvidersComponent implements AfterViewInit, OnDestroy {
           if (token) {
             this.sendSocial('FACEBOOK', token);
           } else {
-            this.errorMsg = 'Connexion Facebook annulée ou refusée.';
+            this.errorMsg = 'Connexion Facebook annulÃ©e ou refusÃ©e.';
           }
         });
       },
@@ -200,3 +200,4 @@ export class SignInProvidersComponent implements AfterViewInit, OnDestroy {
     });
   }
 }
+

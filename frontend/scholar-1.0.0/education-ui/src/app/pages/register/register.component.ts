@@ -1,4 +1,4 @@
-import { TitleCasePipe } from '@angular/common';
+﻿import { TitleCasePipe } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -20,7 +20,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, TitleCasePipe, SignInProvidersComponent],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss',
+  styleUrl: './register.component\.css',
   animations: [
     trigger('wizardPane', [
       transition(':enter', [
@@ -73,21 +73,21 @@ export class RegisterComponent {
   loading = false;
   showPassword = false;
   showConfirmPassword = false;
-  /** Affiche le formulaire e-mail (écran initial = OAuth uniquement, style Fiverr). */
+  /** Affiche le formulaire e-mail (Ã©cran initial = OAuth uniquement, style Fiverr). */
   showEmailForm = false;
 
-  /** Étapes du parcours e-mail (1–6). */
+  /** Ã‰tapes du parcours e-mail (1â€“6). */
   emailWizardStep = 1;
   readonly emailWizardTotalSteps = 6;
   readonly wizardStepIndices: readonly number[] = [1, 2, 3, 4, 5, 6];
 
   private readonly wizardStepLabels = [
-    'Votre identité',
+    'Votre identitÃ©',
     'Votre e-mail',
-    'Votre nom d’utilisateur',
-    'Sécurisez votre compte',
+    'Votre nom dâ€™utilisateur',
+    'SÃ©curisez votre compte',
     'Personnalisez votre profil',
-    'Presque terminé',
+    'Presque terminÃ©',
   ] as const;
 
   get wizardStepTitle(): string {
@@ -122,7 +122,7 @@ export class RegisterComponent {
       case 1:
         markTouched('firstName');
         if (this.form.controls.firstName.invalid) {
-          this.errorMsg = 'Indiquez votre prénom pour continuer.';
+          this.errorMsg = 'Indiquez votre prÃ©nom pour continuer.';
           return;
         }
         break;
@@ -137,7 +137,7 @@ export class RegisterComponent {
         markTouched('username');
         if (this.form.controls.username.invalid) {
           this.errorMsg =
-            'Choisissez un nom d’utilisateur (3–64 caractères : lettres, chiffres, . _ - uniquement).';
+            'Choisissez un nom dâ€™utilisateur (3â€“64 caractÃ¨res : lettres, chiffres, . _ - uniquement).';
           return;
         }
         break;
@@ -150,14 +150,14 @@ export class RegisterComponent {
           this.form.errors?.['passwordMismatch']
         ) {
           if (!this.form.controls.confirmPassword.value?.trim()) {
-            this.errorMsg = 'Renseignez aussi « Confirmer le mot de passe » (même mot de passe deux fois).';
+            this.errorMsg = 'Renseignez aussi Â« Confirmer le mot de passe Â» (mÃªme mot de passe deux fois).';
           } else if (this.form.errors?.['passwordMismatch']) {
-            this.errorMsg = 'Les deux mots de passe doivent être identiques.';
+            this.errorMsg = 'Les deux mots de passe doivent Ãªtre identiques.';
           } else if (this.form.controls.password.errors?.['passwordPolicy']) {
             this.errorMsg =
-              'Le mot de passe doit respecter toutes les règles listées : 8 caractères minimum, majuscule, minuscule, chiffre et symbole.';
+              'Le mot de passe doit respecter toutes les rÃ¨gles listÃ©es : 8 caractÃ¨res minimum, majuscule, minuscule, chiffre et symbole.';
           } else {
-            this.errorMsg = 'Vérifiez le mot de passe et sa confirmation.';
+            this.errorMsg = 'VÃ©rifiez le mot de passe et sa confirmation.';
           }
           return;
         }
@@ -167,9 +167,9 @@ export class RegisterComponent {
         this.form.updateValueAndValidity();
         if (this.form.controls.recuperationEmail.invalid || this.form.errors?.['recoverySameAsLogin']) {
           if (this.form.errors?.['recoverySameAsLogin']) {
-            this.errorMsg = 'L’e-mail de récupération doit être différent de l’e-mail de connexion.';
+            this.errorMsg = 'Lâ€™e-mail de rÃ©cupÃ©ration doit Ãªtre diffÃ©rent de lâ€™e-mail de connexion.';
           } else {
-            this.errorMsg = 'Corrigez le format de l’e-mail de récupération ou laissez le champ vide.';
+            this.errorMsg = 'Corrigez le format de lâ€™e-mail de rÃ©cupÃ©ration ou laissez le champ vide.';
           }
           return;
         }
@@ -211,7 +211,7 @@ export class RegisterComponent {
       return;
     }
     if (this.form.controls.companyWebsite.value?.trim()) {
-      this.errorMsg = 'Inscription impossible. Réessayez plus tard.';
+      this.errorMsg = 'Inscription impossible. RÃ©essayez plus tard.';
       return;
     }
     if (this.form.invalid) {
@@ -248,3 +248,4 @@ export class RegisterComponent {
     });
   }
 }
+

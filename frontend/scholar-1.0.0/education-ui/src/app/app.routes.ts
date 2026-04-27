@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
@@ -39,6 +40,22 @@ export const routes: Routes = [
     path: 'friends',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/friends/friends.component').then((m) => m.FriendsComponent),
+  },
+  {
+    path: 'social-hub',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/social-hub/social-hub.component').then((m) => m.SocialHubComponent),
+  },
+  {
+    path: 'reclamation',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/reclamation/reclamation.component').then((m) => m.ReclamationComponent),
+  },
+  {
+    path: 'admin/reclamations',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/admin-reclamations/admin-reclamations.component').then((m) => m.AdminReclamationsComponent),
   },
   { path: '**', redirectTo: '' },
 ];

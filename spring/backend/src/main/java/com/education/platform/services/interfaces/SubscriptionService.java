@@ -20,4 +20,6 @@ public interface SubscriptionService {
     SubscriptionResponse cancelForUser(User user, Long subscriptionId);
 
     SubscriptionResponse updateAutoRenew(User user, Long subscriptionId, boolean autoRenew);
+
+    byte[] generateInvoiceForUser(User user, Long subscriptionId);
 }

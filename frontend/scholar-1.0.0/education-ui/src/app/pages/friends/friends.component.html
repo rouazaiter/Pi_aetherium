@@ -1,216 +1,426 @@
-<div class="friends-shell container py-4">
-  <section class="hero-card mb-4">
-    <div class="hero-left">
-      <h6>Social Hub</h6>
-      <h2>Friends Network</h2>
-      <p>Decouvrez des profils, envoyez des invitations et creez votre cercle en temps reel.</p>
-    </div>
-    <div class="hero-stats">
-      <article>
-        <span>Total amis</span>
-        <strong>{{ list.length }}</strong>
-      </article>
-      <article>
-        <span>Demandes</span>
-        <strong>{{ pendingRequestsCount }}</strong>
-      </article>
-      <article>
-        <span>Resultats</span>
-        <strong>{{ filteredResults.length }}</strong>
-      </article>
-    </div>
-  </section>
-
-  @if (successMessage) {
-    <div class="alert alert-success fade-in">{{ successMessage }}</div>
-  }
-  @if (searchError) {
-    <div class="alert alert-danger">{{ searchError }}</div>
-  }
-  @if (requestError) {
-    <div class="alert alert-danger">{{ requestError }}</div>
-  }
-  @if (loadError) {
-    <div class="alert alert-danger">{{ loadError }}</div>
-  }
-
-  @if (popupVisible) {
-    <div class="request-popup-backdrop">
-      <div class="request-popup skillhub-popup shadow-lg">
-        <div class="skillhub-brand">
-          <div class="skillhub-logo">SH</div>
-          <div>
-            <p class="brand-overline">Skill Hub</p>
-            <h3>New Connection Request</h3>
-          </div>
+<div class="proconnect-shell">
+  <div class="pc-layout">
+    <aside class="pc-sidebar">
+      <div class="pc-userbox">
+        <div class="pc-avatar">{{ currentUserName.slice(0, 2).toUpperCase() }}</div>
+        <div>
+          <h4>{{ currentUserName }}</h4>
+          <p>{{ currentUserEmail }}</p>
         </div>
-
-        <div class="skillhub-orbits">
-          @for (profile of popupProfiles; track profile.username; let i = $index) {
-            <div class="orbit-avatar orbit-{{ i % 6 }}">
-              {{ initials(profile) }}
-            </div>
-          }
-          <div class="center-avatar">{{ incomingRequests.length > 0 ? initials(incomingRequests[0].sender) : 'SH' }}</div>
-        </div>
-
-        @if (incomingRequests.length > 0) {
-          <p class="invite-line">
-            <strong>{{ incomingRequests[0].sender.username }}</strong>
-            wants to join your Skill Hub network.
-          </p>
-          <div class="d-flex gap-2 justify-content-end">
-            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="decline(incomingRequests[0].id)" [disabled]="decliningId === incomingRequests[0].id">
-              Refuser
-            </button>
-            <button type="button" class="btn btn-sm text-white border-0 action-btn" (click)="accept(incomingRequests[0].id)" [disabled]="acceptingId === incomingRequests[0].id">
-              Accepter
-            </button>
-          </div>
-        } @else {
-          <p class="invite-line">
-            Your Skill Hub social panel is live. New invitations will appear here instantly.
-          </p>
-          <div class="d-flex justify-content-end">
-            <button type="button" class="btn btn-sm text-white border-0 action-btn" (click)="closePopup()">Continue</button>
-          </div>
-        }
-        <button type="button" class="btn-close request-popup-close" aria-label="Close" (click)="closePopup()"></button>
       </div>
-    </div>
-  }
+      <nav class="pc-sidemenu">
+        <a>Home</a>
+        <a [class.active]="currentTopTab === 'network'" (click)="topTab('network')">Network</a>
+        <a [class.active]="currentTopTab === 'messages'" (click)="topTab('messages')">Messages</a>
+        <a [class.active]="currentTopTab === 'invitations'" (click)="topTab('invitations')">Invitations</a>
+      </nav>
+    </aside>
 
-  <div class="view-switch mb-4">
-    <button type="button" [class.active]="activeView === 'discover'" (click)="setActiveView('discover')">Discover</button>
-    <button type="button" [class.active]="activeView === 'requests'" (click)="setActiveView('requests')">
-      Requests
-      @if (pendingRequestsCount > 0) {
-        <span>{{ pendingRequestsCount }}</span>
+    <main class="pc-main">
+      @if (successMessage) {
+        <div class="alert alert-success">{{ successMessage }}</div>
       }
-    </button>
-    <button type="button" [class.active]="activeView === 'friends'" (click)="setActiveView('friends')">Friends</button>
-  </div>
+      @if (searchError || requestError || loadError) {
+        <div class="alert alert-danger">{{ searchError || requestError || loadError }}</div>
+      }
 
-  @if (activeView === 'discover') {
-    <section class="card border-0 shadow-sm mb-4 main-card">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h3 class="h5 mb-0">Rechercher un compte</h3>
-          <span class="counter-badge">Live search</span>
-        </div>
-
-        <form [formGroup]="searchForm" (ngSubmit)="manualSearch()" class="search-row">
-          <input id="query" class="form-control search-input" formControlName="query" autocomplete="off" placeholder="Tapez un nom d'utilisateur..." />
-          <button class="btn search-btn text-white border-0" type="submit" [disabled]="searching">Rechercher</button>
-        </form>
-
-        @if (results.length > 0) {
-          <div class="filter-row mt-3">
-            <button type="button" [class.active]="relationFilter === 'ALL'" (click)="setRelationFilter('ALL')">Tous ({{ results.length }})</button>
-            <button type="button" [class.active]="relationFilter === 'NONE'" (click)="setRelationFilter('NONE')">Disponibles ({{ countByRelation('NONE') }})</button>
-            <button type="button" [class.active]="relationFilter === 'REQUEST_SENT'" (click)="setRelationFilter('REQUEST_SENT')">Envoyees ({{ countByRelation('REQUEST_SENT') }})</button>
-            <button type="button" [class.active]="relationFilter === 'REQUEST_RECEIVED'" (click)="setRelationFilter('REQUEST_RECEIVED')">Recues ({{ countByRelation('REQUEST_RECEIVED') }})</button>
-            <button type="button" [class.active]="relationFilter === 'FRIEND'" (click)="setRelationFilter('FRIEND')">Amis ({{ countByRelation('FRIEND') }})</button>
+      @if (currentTopTab === 'network') {
+        <section class="pc-section pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>✨ Suggested for You</h3>
           </div>
-        }
-
-        @if (searching) {
-          <div class="skeleton-grid mt-3">
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
+          <div class="pc-suggest-grid">
+            @for (r of filteredResults.slice(0, 4); track r.id) {
+              <article class="pc-suggest-card">
+                @if (profilePictureUrl(r.profilePicture)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(r.profilePicture)" [alt]="r.username" />
+                } @else {
+                  <div class="pc-card-avatar">{{ initials(r) }}</div>
+                }
+                <h4>{{ r.username }}</h4>
+                <p>{{ fullName(r) }}</p>
+                <button type="button" class="pc-btn-primary" [disabled]="requestingId === r.id || r.relation !== 'NONE'" (click)="sendRequest(r.id)">
+                  {{ r.relation === 'NONE' ? 'Connect' : relationLabel(r.relation) }}
+                </button>
+              </article>
+            }
           </div>
-        } @else if (filteredResults.length > 0) {
-          <div class="results-grid mt-3">
-            @for (r of filteredResults; track r.id) {
-              <article class="result-card hover-lift">
-                <div class="result-user">
-                  <div class="avatar">{{ initials(r) }}</div>
+        </section>
+
+        <section class="pc-section pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>🟢 My Connections</h3>
+            <div class="pc-toggle">
+              <button [class.active]="selectedNetworkSection === 'all'" (click)="setNetworkSection('all')">All</button>
+              <button [class.active]="selectedNetworkSection === 'online'" (click)="setNetworkSection('online')">Online</button>
+            </div>
+          </div>
+          <div class="pc-connection-list">
+            @for (f of visibleConnections; track f.id) {
+              <article class="pc-connection-item">
+                <div class="pc-conn-left">
+                  @if (profilePictureUrl(f.profilePicture)) {
+                    <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(f.profilePicture)" [alt]="f.username" />
+                  } @else {
+                    <div class="pc-card-avatar">{{ initials(f) }}</div>
+                  }
                   <div>
-                    <h4 class="result-username">{{ r.username }}</h4>
-                    <p class="result-name">{{ fullName(r) }}</p>
+                    <h4>
+                      {{ f.username }}
+                      @if (f.activeNow === true) {
+                        <span class="pc-online-dot"></span>
+                      }
+                    </h4>
+                    <p>{{ activityLabel(f) }}</p>
                   </div>
                 </div>
-                <span class="relation-pill" [class.friend]="r.relation === 'FRIEND'" [class.pending]="r.relation === 'REQUEST_SENT'" [class.received]="r.relation === 'REQUEST_RECEIVED'">
-                  {{ relationLabel(r.relation) }}
-                </span>
-                @if (r.relation === 'NONE') {
-                  <button type="button" class="btn btn-sm text-white border-0 action-btn" [disabled]="requestingId === r.id" (click)="sendRequest(r.id)">
-                    Envoyer une invitation
-                  </button>
-                } @else if (r.relation === 'REQUEST_RECEIVED') {
-                  <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="declineFromSearch(r.id)">Refuser</button>
-                    <button type="button" class="btn btn-sm text-white border-0 action-btn" (click)="acceptFromSearch(r.id)">Accepter</button>
+                <div class="pc-conn-actions">
+                  <button type="button" (click)="openChatWithFriend(f.id)">💬</button>
+                  <button type="button" (click)="openFriendProfile(f.id)">👁</button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      @if (currentTopTab === 'invitations') {
+        <section class="pc-section pc-section--invitations pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>📨 Received Invitations</h3>
+            <span class="pc-pill">{{ pendingRequestsCount }} new</span>
+          </div>
+          <p class="pc-section-subtitle">People who want to connect with you right now.</p>
+          <div class="pc-invite-grid">
+            @for (req of incomingRequests; track req.id) {
+              <article class="pc-invite-card pc-invite-card--incoming">
+                @if (profilePictureUrl(req.sender.profilePicture)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(req.sender.profilePicture)" [alt]="req.sender.username" />
+                } @else {
+                  <div class="pc-card-avatar">{{ initials(req.sender) }}</div>
+                }
+                <div class="pc-invite-main">
+                  <h4>{{ req.sender.username }}</h4>
+                  <p>{{ fullName(req.sender) }}</p>
+                  <small>{{ req.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+                <div class="pc-invite-actions">
+                  <button type="button" class="pc-btn-primary" [disabled]="acceptingId === req.id" (click)="accept(req.id)">✅ Accept</button>
+                  <button type="button" class="pc-btn-ghost" [disabled]="decliningId === req.id" (click)="decline(req.id)">❌ Decline</button>
+                </div>
+              </article>
+            }
+            @if (incomingRequests.length === 0) {
+              <article class="pc-empty-state">
+                <div class="pc-empty-state__icon">📩</div>
+                <h4>No pending invitations</h4>
+                <p>When someone sends you a request, it will appear here.</p>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="pc-section pc-section--invitations pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>🚀 Sent Requests</h3>
+          </div>
+          <p class="pc-section-subtitle">Requests waiting for acceptance from other users.</p>
+          <div class="pc-sent-list">
+            @for (req of sentRequests; track req.id) {
+              <article class="pc-sent-item pc-sent-item--rich">
+                @if (profilePictureUrl(req.profilePicture)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(req.profilePicture)" [alt]="req.username" />
+                } @else {
+                  <div class="pc-card-avatar">{{ initials(req) }}</div>
+                }
+                <div>
+                  <h4>{{ req.username }}</h4>
+                  <p>{{ fullName(req) }}</p>
+                </div>
+                <span class="pc-waiting">Pending</span>
+              </article>
+            }
+            @if (sentRequests.length === 0) {
+              <article class="pc-empty-state pc-empty-state--soft">
+                <div class="pc-empty-state__icon">✨</div>
+                <h4>No sent requests yet</h4>
+                <p>Go to Network and invite people to start growing your circle.</p>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      @if (currentTopTab === 'messages') {
+        <section class="pc-messages-layout pc-messages-layout--vivid">
+          <aside class="pc-chat-list">
+            <div class="pc-chat-list-head">
+              <h3>Messages</h3>
+              <button type="button" class="pc-chat-compose">✎</button>
+            </div>
+            <div class="pc-chat-filters">
+              <button class="active" type="button">Focused</button>
+              <button type="button">Other</button>
+            </div>
+            @if (conversations.length === 0) {
+              <p class="pc-empty-note">No conversation yet. Start by connecting with friends.</p>
+            }
+            @for (thread of conversations; track thread.id) {
+              <article class="pc-thread" [class.active]="selectedConversationId === thread.id" (click)="selectConversation(thread.id)">
+                @if (conversationPictureUrl(thread)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="conversationPictureUrl(thread)" [alt]="displayConversationName(thread)" />
+                } @else {
+                  <div class="pc-card-avatar">{{ displayConversationName(thread).slice(0, 2).toUpperCase() }}</div>
+                }
+                <div class="pc-thread-main">
+                  <h4>{{ displayConversationName(thread) }}</h4>
+                  <p>{{ thread.lastMessage || 'Start a conversation' }}</p>
+                </div>
+                <div class="pc-thread-meta">
+                  <small>{{ thread.lastMessageAt ? (thread.lastMessageAt | date: 'dd/MM HH:mm') : '' }}</small>
+                  @if (thread.unreadCount > 0 && !isConversationMuted(thread)) {
+                    <span>{{ thread.unreadCount }}</span>
+                  }
+                </div>
+              </article>
+            }
+          </aside>
+
+          <div class="pc-chat-window" [class.pc-chat-window--with-conversation]="!!selectedConversation">
+            @if (selectedConversation) {
+              <header class="pc-chat-window-head">
+                <div class="pc-chat-person">
+                  @if (conversationPictureUrl(selectedConversation)) {
+                    <img class="pc-card-avatar pc-card-avatar--image" [src]="conversationPictureUrl(selectedConversation)" [alt]="displayConversationName(selectedConversation)" />
+                  } @else {
+                    <div class="pc-card-avatar">{{ displayConversationName(selectedConversation).slice(0, 2).toUpperCase() }}</div>
+                  }
+                  <div>
+                    <h4>{{ displayConversationName(selectedConversation) }}</h4>
+                    <p>{{ selectedConversation.otherActiveNow ? 'Online' : 'Offline' }}</p>
+                  </div>
+                </div>
+              </header>
+              <div class="pc-chat-messages-shell">
+              <div class="pc-bubbles">
+                @for (bubble of currentMessages; track bubble.id) {
+                  <div class="pc-bubble-wrap" [class.me]="bubble.senderId === currentUserId">
+                    @if (bubble.replyToSnippet) {
+                      <div class="pc-reply-meta" [class.me]="bubble.senderId === currentUserId">
+                        ↩ {{ replyMetaText(bubble) }}
+                      </div>
+                    }
+                    @if (bubble.senderId !== currentUserId) {
+                      <div class="pc-bubble-avatar">
+                        {{ bubble.senderUsername.slice(0, 1).toUpperCase() }}
+                      </div>
+                    }
+                    @if (bubble.replyToSnippet) {
+                      <div class="pc-reply-quote" [class.me]="bubble.senderId === currentUserId">{{ bubble.replyToSnippet }}</div>
+                    }
+                    <div class="pc-bubble" [class.me]="bubble.senderId === currentUserId">
+                      @if (bubble.voiceUrl) {
+                        <audio class="pc-voice-player" controls [src]="messageVoiceUrl(bubble.voiceUrl)"></audio>
+                      } @else if (isGifMessage(bubble)) {
+                        <img class="pc-gif-message" [src]="gifUrlFromMessage(bubble)" alt="GIF message" />
+                      } @else {
+                        {{ bubble.content }}
+                      }
+                      @if (bubble.reactionEmoji) {
+                        <span class="pc-reaction-chip">{{ bubble.reactionEmoji }}</span>
+                      }
+                    </div>
+                    <div class="pc-bubble-actions">
+                      <button type="button" title="React" (click)="reactToMessage(bubble, '🙂')">🙂</button>
+                      <button type="button" title="Reply" (click)="setReplyTarget(bubble)">↩</button>
+                      <button type="button" title="Delete" (click)="toggleDeleteMenu(bubble)">⋮</button>
+                    </div>
+                    @if (deleteMenuMessageId === bubble.id) {
+                      <div class="pc-delete-menu">
+                        @if (canDeleteForEveryone(bubble)) {
+                          <button type="button" (click)="deleteMessage(bubble, 'EVERYONE')">Delete for everyone</button>
+                        }
+                        <button type="button" (click)="deleteMessage(bubble, 'ME')">Delete for you</button>
+                        <button type="button" class="pc-delete-menu__cancel" (click)="closeDeleteMenu()">Cancel</button>
+                      </div>
+                    }
+                    <small>{{ bubble.sentAt | date: 'HH:mm' }}</small>
                   </div>
                 }
-              </article>
-            }
-          </div>
-        } @else if (searchForm.controls.query.value.trim().length >= 2) {
-          <p class="text-muted mt-3 mb-0">Aucun compte trouve pour votre recherche.</p>
-        }
-      </div>
-    </section>
-  }
-
-  @if (activeView === 'requests') {
-    <section class="card border-0 shadow-sm mb-4 main-card">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3 class="h5 mb-0">Demandes recues</h3>
-          <span class="counter-badge">{{ incomingRequests.length }} en attente</span>
-        </div>
-        @if (loadingIncoming) {
-          <p class="text-muted mb-0">Chargement des demandes...</p>
-        } @else if (incomingRequests.length === 0) {
-          <p class="text-muted mb-0">Aucune demande en attente.</p>
-        } @else {
-          <div class="incoming-list">
-            @for (req of incomingRequests; track req.id) {
-              <article class="incoming-card hover-lift">
-                <div class="result-user">
-                  <div class="avatar">{{ initials(req.sender) }}</div>
-                  <div>
-                    <h4 class="result-username">{{ req.sender.username }}</h4>
-                    <p class="result-name">{{ req.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
-                  </div>
-                </div>
-                <div class="d-flex gap-2">
-                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="decline(req.id)" [disabled]="decliningId === req.id">Refuser</button>
-                  <button type="button" class="btn btn-sm text-white border-0 action-btn" (click)="accept(req.id)" [disabled]="acceptingId === req.id">Accepter</button>
-                </div>
-              </article>
-            }
-          </div>
-        }
-      </div>
-    </section>
-  }
-
-  @if (activeView === 'friends') {
-    <section>
-      <h3 class="h5 mb-3">Mes amis</h3>
-      @if (loading) {
-        <p class="text-muted">Chargement...</p>
-      } @else if (list.length === 0) {
-        <p class="text-muted">Aucun ami pour l'instant.</p>
-      } @else {
-        <div class="friends-grid">
-          @for (f of list; track f.id) {
-            <article class="friend-card hover-lift">
-              <div class="result-user">
-                <div class="avatar">{{ initials(f) }}</div>
-                <div>
-                  <h4 class="result-username">{{ f.username }}</h4>
-                  <p class="result-name">{{ fullName(f) }}</p>
-                </div>
               </div>
-              <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(f.id)">Retirer</button>
-            </article>
+                @if (gifPickerOpen) {
+                  <div class="pc-gif-picker" role="dialog" aria-label="Choose a GIF">
+                    <div class="pc-gif-picker__backdrop" (click)="closeGifPicker()"></div>
+                    <div class="pc-gif-picker__panel" (click)="$event.stopPropagation()">
+                      <div class="pc-gif-picker__head">
+                        <h4>GIF</h4>
+                        <button type="button" class="pc-gif-picker__close" (click)="closeGifPicker()">✕</button>
+                      </div>
+                      <p class="pc-gif-picker__esc-hint">Trending GIFs load from Giphy automatically. Type a word and tap Search to refine. Esc or outside closes.</p>
+                      <div class="pc-gif-picker__search">
+                        <input type="text" name="gifSearch" placeholder="Search Giphy (optional)…" [(ngModel)]="gifSearchQuery" (keyup.enter)="searchGifs()" />
+                        <button type="button" [disabled]="gifLoading" (click)="searchGifs()">{{ gifLoading ? '…' : 'Search' }}</button>
+                        <button type="button" class="pc-gif-picker__trending" [disabled]="gifLoading" (click)="loadGiphyTrending()">Trending</button>
+                      </div>
+                      @if (gifLoading && gifResults.length === 0) {
+                        <p class="pc-gif-picker__hint">Loading…</p>
+                      }
+                      @if (gifInfo) {
+                        <p class="pc-gif-picker__hint">{{ gifInfo }}</p>
+                      }
+                      @if (gifError) {
+                        <p class="pc-gif-picker__error">{{ gifError }}</p>
+                      }
+                      @if (!gifLoading && !gifError && gifResults.length === 0) {
+                        <p class="pc-gif-picker__hint">No GIFs yet. Try Search or Trending.</p>
+                      }
+                      <div class="pc-gif-picker__grid">
+                        @for (g of gifResults; track g.id) {
+                          <button type="button" class="pc-gif-picker__tile" (click)="selectGifFromPicker(g.url)">
+                            <img [src]="g.previewUrl" alt="" loading="lazy" />
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <footer class="pc-composer">
+                @if (replyingToMessage) {
+                  <div class="pc-composer-reply">
+                    Replying to: {{ replyingToMessage.content }}
+                    <button type="button" (click)="clearReplyTarget()">✕</button>
+                  </div>
+                }
+                <div class="pc-input-tools">
+                  <button
+                    type="button"
+                    class="pc-composer-icon pc-composer-icon--voice"
+                    title="Voice message"
+                    [class.pc-composer-icon--voice-active]="recordingVoice"
+                    (click)="toggleVoiceRecording()"
+                  >
+                    @if (recordingVoice) {
+                      <svg class="pc-composer-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor" />
+                      </svg>
+                    } @else {
+                      <svg class="pc-composer-icon__svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                        <path
+                          d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z"
+                          stroke="currentColor"
+                          stroke-width="1.85"
+                          stroke-linejoin="round"
+                        />
+                        <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v3M8 21h8" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" />
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="pc-composer-icon pc-composer-icon--gif"
+                    title="GIF"
+                    aria-label="Search and send a GIF"
+                    (click)="onGifButtonActivate($event)"
+                  >
+                    <span class="pc-composer-gif-text" aria-hidden="true">GIF</span>
+                  </button>
+                </div>
+                <input
+                  #composerInput
+                  class="pc-composer-input"
+                  name="composerMessage"
+                  type="text"
+                  [placeholder]="composerPlaceholder()"
+                  [(ngModel)]="messageDraft"
+                  (focus)="closeGifPicker()"
+                  (click)="$event.stopPropagation()"
+                  (keyup.enter)="sendCurrentMessage()"
+                />
+                <button type="button" class="pc-send-text" title="Send" [disabled]="sendingMessage || !messageDraft.trim()" (click)="sendCurrentMessage()">
+                  Send
+                </button>
+              </footer>
+            } @else {
+              <header class="pc-chat-window-head">
+                <h4>Select a conversation</h4>
+                <p>Choose a contact from the list</p>
+              </header>
+            }
+          </div>
+
+          @if (selectedConversation) {
+            <aside class="pc-chat-info">
+              @if (conversationPictureUrl(selectedConversation)) {
+                <img class="pc-card-avatar pc-card-avatar--image" [src]="conversationPictureUrl(selectedConversation)" [alt]="displayConversationName(selectedConversation)" />
+              } @else {
+                <div class="pc-card-avatar">{{ displayConversationName(selectedConversation).slice(0, 2).toUpperCase() }}</div>
+              }
+              <h4>{{ displayConversationName(selectedConversation) }}</h4>
+              <p>{{ fullNameFromConversation(selectedConversation) }}</p>
+              <div class="pc-chat-info-actions">
+                <button type="button" class="pc-btn-ghost" (click)="openSelectedConversationProfile()">Profile</button>
+                <button type="button" class="pc-btn-ghost" [class.pc-btn-ghost--danger]="isConversationMuted(selectedConversation)" (click)="toggleMuteSelectedConversation()">
+                  {{ isConversationMuted(selectedConversation) ? 'Unmute' : 'Mute' }}
+                </button>
+              </div>
+              <button type="button" class="pc-btn-ghost pc-ai-summary-btn" [disabled]="summarizingConversation" (click)="summarizeSelectedConversation()">
+                {{ summarizingConversation ? 'Generating summary...' : 'AI Summary (no voice)' }}
+              </button>
+              @if (conversationSummaryError) {
+                <div class="pc-summary-error">{{ conversationSummaryError }}</div>
+              }
+              @if (conversationSummary) {
+                <div class="pc-summary-card">
+                  <h5>Conversation Summary</h5>
+                  <p>{{ conversationSummary }}</p>
+                </div>
+              }
+              <div class="pc-chat-info-card">
+                <h5>Contact Info</h5>
+                <p>✉ {{ selectedConversation.otherUsername }}</p>
+                <p>🟢 {{ selectedConversation.otherActiveNow ? 'Online now' : 'Last seen recently' }}</p>
+                @if (isConversationMuted(selectedConversation)) {
+                  <p>🔕 Muted</p>
+                }
+              </div>
+            </aside>
           }
-        </div>
+        </section>
       }
-    </section>
-  }
+
+      @if (selectedFriendProfile) {
+        <div class="pc-profile-backdrop" (click)="closeFriendProfile()"></div>
+        <section class="pc-profile-modal">
+          <button type="button" class="pc-profile-close" (click)="closeFriendProfile()">✕</button>
+          @if (profileLoadError) {
+            <div class="pc-profile-inline-error">{{ profileLoadError }}</div>
+          }
+          @if (profilePictureUrl(selectedFriendProfile.profilePicture)) {
+            <img class="pc-profile-photo" [src]="profilePictureUrl(selectedFriendProfile.profilePicture)" [alt]="selectedFriendProfile.username" />
+          } @else {
+            <div class="pc-profile-photo pc-profile-photo--fallback">{{ initials(selectedFriendProfile) }}</div>
+          }
+          <h3>{{ profileDisplayName(selectedFriendProfile) }}</h3>
+          <p>&#64;{{ selectedFriendProfile.username }}</p>
+          <small>{{ activityLabel(selectedFriendProfile) }}</small>
+          <div class="pc-profile-about">
+            <h4>About</h4>
+            <p>{{ selectedFriendProfile.description || 'No description yet.' }}</p>
+          </div>
+          <div class="pc-profile-interests">
+            <h4>Interests</h4>
+            <div class="pc-interest-list">
+              @for (interest of selectedFriendProfile.interests; track interest) {
+                <span>{{ interest }}</span>
+              }
+              @if (selectedFriendProfile.interests.length === 0) {
+                <span>No interests yet</span>
+              }
+            </div>
+          </div>
+        </section>
+      }
+    </main>
+  </div>
 </div>

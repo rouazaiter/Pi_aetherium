@@ -1,85 +1,141 @@
-<div class="subscriptions-page container py-4">
-  <div class="section-heading mb-4 text-center">
-    <h6>Monthly subscription plan</h6>
-    <h2>Abonnement</h2>
-  </div>
+<div class="billing-page">
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Enterprise Account</h3>
+      <p>Admin Console</p>
+      <nav>
+        <a>Overview</a>
+        <a>Subscriptions</a>
+        <a>Usage</a>
+        <a class="active">Invoices</a>
+        <a>Payment Methods</a>
+      </nav>
+    </aside>
 
-  @if (actionError) {
-    <div class="alert alert-danger mb-4">{{ actionError }}</div>
-  }
+    <main class="content">
+      <div class="section-heading">
+        <h2>Billing & Subscription</h2>
+        <p>Manage your workspace plans, billing details, and payment history.</p>
+        <div class="heading-chips">
+          <span>Live billing</span>
+          <span>Secure payments</span>
+          <span>Usage insights</span>
+        </div>
+      </div>
 
-  @if (current) {
-    <div class="alert alert-success mb-4">
-      Plan actif: <strong>{{ current.subscriptionPlan }}</strong> -
-      Expire le {{ current.expirationDate | date: 'dd/MM/yyyy' }}.
-    </div>
-  }
-
-  @if (loadingPlans) {
-    <p class="text-muted text-center">Chargement des offres...</p>
-  } @else if (plansError) {
-    <div class="alert alert-danger">{{ plansError }}</div>
-  } @else {
-    <div class="plan-grid mb-5">
-      @for (plan of plans; track plan.plan) {
-        <article class="plan-card" [class.plan-card-highlight]="getPlanUi(plan.plan).highlighted">
-          <div class="price-pill">{{ plan.monthlyPrice | currency: 'USD':'symbol':'1.2-2' }}</div>
-          <h3 class="plan-name">{{ getPlanUi(plan.plan).label }}</h3>
-          <ul class="plan-features">
-            @for (feature of getPlanUi(plan.plan).description; track feature) {
-              <li>{{ feature }}</li>
-            }
-          </ul>
-          <div class="plan-storage">{{ getPlanUi(plan.plan).storage }}</div>
-          <button
-            class="buy-btn"
-            type="button"
-            (click)="buy(plan.plan)"
-            [disabled]="buyingPlan === plan.plan">
-            @if (buyingPlan === plan.plan) {
-              Achat...
-            } @else {
-              BUY
-            }
-          </button>
-        </article>
+      @if (actionError) {
+        <div class="alert alert-danger mb-3">{{ actionError }}</div>
       }
-    </div>
-  }
+      @if (plansError) {
+        <div class="alert alert-danger mb-3">{{ plansError }}</div>
+      }
+      @if (loadError) {
+        <div class="alert alert-danger mb-3">{{ loadError }}</div>
+      }
 
-  <h3 class="h5 mb-3">Historique des abonnements</h3>
-  @if (loadingList) {
-    <p class="text-muted">Chargement...</p>
-  } @else if (loadError) {
-    <div class="alert alert-danger">{{ loadError }}</div>
-  } @else if (list.length === 0) {
-    <p class="text-muted">Aucun abonnement pour l'instant.</p>
-  } @else {
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th>Plan</th>
-            <th>Statut</th>
-            <th>Souscription</th>
-            <th>Expiration</th>
-            <th>Facturation</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (s of list; track s.id) {
-            <tr>
-              <td>{{ s.subscriptionPlan }}</td>
-              <td>
-                <span class="badge rounded-pill text-bg-secondary">{{ s.status }}</span>
-              </td>
-              <td>{{ s.dateOfSubscription | date: 'dd/MM/yyyy' }}</td>
-              <td>{{ s.expirationDate | date: 'dd/MM/yyyy' }}</td>
-              <td>{{ s.billingDate | date: 'dd/MM/yyyy' }}</td>
-            </tr>
+      <section class="plans-grid">
+        @for (plan of plans; track plan.plan) {
+          <article class="plan-card" [class.plan-card--premium]="getPlanUi(plan.plan).highlighted">
+            @if (getPlanUi(plan.plan).highlighted) {
+              <div class="corner-ribbon">Recommended</div>
+            }
+            <div class="plan-head">
+              <div>
+                <div class="tier">{{ getPlanUi(plan.plan).tier }}</div>
+                <h4>{{ getPlanUi(plan.plan).label }}</h4>
+              </div>
+              <div class="price">
+                ${{ plan.monthlyPrice }}<span>/mo</span>
+              </div>
+            </div>
+            <ul>
+              @for (feature of getPlanUi(plan.plan).description; track feature) {
+                <li [class.muted]="feature === 'Advanced AI insights' && !getPlanUi(plan.plan).highlighted">● {{ feature }}</li>
+              }
+            </ul>
+            <button
+              type="button"
+              class="plan-action"
+              [class.plan-action--ghost]="current?.subscriptionPlan === plan.plan"
+              [disabled]="buyingPlan === plan.plan || current?.subscriptionPlan === plan.plan"
+              (click)="buy(plan.plan)">
+              @if (current?.subscriptionPlan === plan.plan) {
+                Current Plan
+              } @else if (buyingPlan === plan.plan) {
+                Processing...
+              } @else {
+                Upgrade Now
+              }
+            </button>
+          </article>
+        }
+      </section>
+
+      <section class="action-center-card">
+        <div class="action-center-head">
+          <h4>Action Center</h4>
+          <p>Dynamic recommendations to improve security, learning consistency, and growth.</p>
+        </div>
+        <div class="action-grid">
+          @for (card of actionCards; track card.title) {
+            <article class="action-item" [attr.data-tone]="card.tone">
+              <h5>{{ card.title }}</h5>
+              <p>{{ card.description }}</p>
+              <button type="button" (click)="onActionCardClick(card.action)">{{ card.cta }}</button>
+            </article>
           }
-        </tbody>
-      </table>
-    </div>
-  }
+        </div>
+      </section>
+
+      <section class="history-card">
+        <div class="history-head">
+          <h4>Subscription History</h4>
+          <div class="history-filter-wrap">
+            <span class="history-filter-label">Filter</span>
+            <select class="history-filter-select" [value]="planFilter" (change)="setPlanFilter($any($event.target).value)">
+              <option value="ALL">All</option>
+              <option value="STANDARD">Standard</option>
+              <option value="PREMIUM">Premium</option>
+            </select>
+          </div>
+        </div>
+        @if (loadingList) {
+          <p class="text-muted">Loading...</p>
+        } @else if (filteredHistory.length === 0) {
+          <p class="text-muted">No records yet.</p>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>DATE</th>
+                <th>PLAN</th>
+                <th>AMOUNT</th>
+                <th>STATUS</th>
+                <th>INVOICE</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of filteredHistory; track s.id) {
+                <tr>
+                  <td>{{ s.dateOfSubscription | date: 'MMM dd, yyyy' }}</td>
+                  <td>{{ planLabel(s.subscriptionPlan) }}</td>
+                  <td>${{ amountFor(s.subscriptionPlan) | number: '1.2-2' }}</td>
+                  <td><span class="status">{{ s.status }}</span></td>
+                  <td>
+                    <button class="invoice-btn" type="button" [disabled]="downloadingInvoiceId === s.id" (click)="downloadInvoice(s.id)">
+                      @if (downloadingInvoiceId === s.id) {
+                        Downloading...
+                      } @else {
+                        ⭳ Download
+                      }
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </section>
+    </main>
+  </div>
 </div>

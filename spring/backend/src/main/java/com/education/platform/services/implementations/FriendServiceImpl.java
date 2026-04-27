@@ -4,6 +4,7 @@ import com.education.platform.common.ApiException;
 import com.education.platform.dto.friend.FriendRequestResponse;
 import com.education.platform.dto.friend.FriendSearchResponse;
 import com.education.platform.dto.friend.FriendResponse;
+import com.education.platform.dto.friend.FriendProfileResponse;
 import com.education.platform.entities.FriendRequest;
 import com.education.platform.entities.FriendRequestStatus;
 import com.education.platform.entities.User;
@@ -16,11 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class FriendServiceImpl implements FriendService {
+    private static final Duration ACTIVE_WINDOW = Duration.ofMinutes(5);
 
     private final UserRepository userRepository;
     private final FriendRequestRepository friendRequestRepository;
@@ -37,7 +40,7 @@ public class FriendServiceImpl implements FriendService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
         return me.getFriends().stream()
                 .sorted(Comparator.comparing(User::getUsername, String.CASE_INSENSITIVE_ORDER))
-                .map(FriendServiceImpl::toResponse)
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -59,7 +62,31 @@ public class FriendServiceImpl implements FriendService {
                         .username(u.getUsername())
                         .firstName(u.getProfile() != null ? u.getProfile().getFirstName() : null)
                         .lastName(u.getProfile() != null ? u.getProfile().getLastName() : null)
+                        .profilePicture(u.getProfile() != null ? u.getProfile().getProfilePicture() : null)
                         .relation(resolveRelation(me, u))
+                        .activeNow(resolveActiveNow(u))
+                        .lastActiveAt(resolveLastActiveAt(u))
+                        .build())
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FriendSearchResponse> discoverUsers(User current) {
+        User me = userRepository.findById(current.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+        List<User> users = userRepository.findAllByOrderByUsernameAsc(PageRequest.of(0, 200));
+        return users.stream()
+                .filter(u -> !u.getId().equals(me.getId()))
+                .map(u -> FriendSearchResponse.builder()
+                        .id(u.getId())
+                        .username(u.getUsername())
+                        .firstName(u.getProfile() != null ? u.getProfile().getFirstName() : null)
+                        .lastName(u.getProfile() != null ? u.getProfile().getLastName() : null)
+                        .profilePicture(u.getProfile() != null ? u.getProfile().getProfilePicture() : null)
+                        .relation(resolveRelation(me, u))
+                        .activeNow(resolveActiveNow(u))
+                        .lastActiveAt(resolveLastActiveAt(u))
                         .build())
                 .toList();
     }
@@ -99,7 +126,7 @@ public class FriendServiceImpl implements FriendService {
     @Transactional(readOnly = true)
     public List<FriendRequestResponse> listIncomingRequests(User current) {
         return friendRequestRepository.findByReceiver_IdAndStatusOrderByCreatedAtDesc(current.getId(), FriendRequestStatus.PENDING).stream()
-                .map(FriendServiceImpl::toRequestResponse)
+                .map(this::toRequestResponse)
                 .toList();
     }
 
@@ -118,6 +145,33 @@ public class FriendServiceImpl implements FriendService {
         }
         request.setStatus(FriendRequestStatus.ACCEPTED);
         return toResponse(sender);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FriendProfileResponse getFriendProfile(User current, Long friendId) {
+        if (friendId == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant invalide");
+        }
+        User me = userRepository.findById(current.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+        if (!isFriend(me, friendId)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Profil visible uniquement pour vos amis");
+        }
+        var p = friend.getProfile();
+        return FriendProfileResponse.builder()
+                .id(friend.getId())
+                .username(friend.getUsername())
+                .firstName(p != null ? p.getFirstName() : null)
+                .lastName(p != null ? p.getLastName() : null)
+                .description(p != null ? p.getDescription() : null)
+                .interests(p != null ? p.getInterests() : List.of())
+                .profilePicture(p != null ? p.getProfilePicture() : null)
+                .activeNow(resolveActiveNow(friend))
+                .lastActiveAt(resolveLastActiveAt(friend))
+                .build();
     }
 
     @Override
@@ -175,17 +229,20 @@ public class FriendServiceImpl implements FriendService {
         return me.getFriends().stream().anyMatch(u -> u.getId().equals(otherUserId));
     }
 
-    private static FriendResponse toResponse(User u) {
+    private FriendResponse toResponse(User u) {
         var p = u.getProfile();
         return FriendResponse.builder()
                 .id(u.getId())
                 .username(u.getUsername())
                 .firstName(p != null ? p.getFirstName() : null)
                 .lastName(p != null ? p.getLastName() : null)
+                .profilePicture(p != null ? p.getProfilePicture() : null)
+                .activeNow(resolveActiveNow(u))
+                .lastActiveAt(resolveLastActiveAt(u))
                 .build();
     }
 
-    private static FriendRequestResponse toRequestResponse(FriendRequest request) {
+    private FriendRequestResponse toRequestResponse(FriendRequest request) {
         return FriendRequestResponse.builder()
                 .id(request.getId())
                 .sender(toResponse(request.getSender()))
@@ -193,5 +250,23 @@ public class FriendServiceImpl implements FriendService {
                 .status(request.getStatus())
                 .createdAt(request.getCreatedAt())
                 .build();
+    }
+
+    private Boolean resolveActiveNow(User candidate) {
+        if (candidate.getProfile() == null || !candidate.getProfile().isActiveStatusVisible()) {
+            return null;
+        }
+        Instant lastLogin = candidate.getLastLogin();
+        if (lastLogin == null) {
+            return false;
+        }
+        return lastLogin.isAfter(Instant.now().minus(ACTIVE_WINDOW));
+    }
+
+    private Instant resolveLastActiveAt(User candidate) {
+        if (candidate.getProfile() == null || !candidate.getProfile().isActiveStatusVisible()) {
+            return null;
+        }
+        return candidate.getLastLogin();
     }
 }

@@ -21,7 +21,7 @@
         </p>
         <div class="profile-verify__account">
           <span class="profile-verify__account-label">Compte</span>
-          <span class="profile-verify__account-value">{{ maskedEmail() }}</span>
+          <span class="profile-verify__account-value">{{ primaryEmail() || maskedEmail() }}</span>
         </div>
         @if (codeHint) {
           <p class="profile-verify__hint">{{ codeHint }}</p>
@@ -66,252 +66,194 @@
     </div>
   </div>
 } @else {
-  <div class="profile-page" @profileBackdrop>
-    <div class="profile-bg" aria-hidden="true">
-      <div class="profile-bg__blob profile-bg__blob--1"></div>
-      <div class="profile-bg__blob profile-bg__blob--2"></div>
-      <div class="profile-bg__blob profile-bg__blob--3"></div>
-      <div class="profile-bg__noise"></div>
-      <div class="profile-bg__grid"></div>
-    </div>
-
-    <div class="profile-page__inner container py-4 py-md-5">
+  <div class="profilehub-page">
       @if (loading) {
-        <div class="profile-skeleton" aria-busy="true" aria-label="Chargement du profil">
-          <div class="profile-skeleton__hero">
-            <div class="profile-skeleton__avatar"></div>
-            <div class="profile-skeleton__lines">
-              <div class="profile-skeleton__line profile-skeleton__line--lg"></div>
-              <div class="profile-skeleton__line profile-skeleton__line--sm"></div>
-            </div>
-          </div>
-          <div class="profile-skeleton__cards">
-            <div class="profile-skeleton__card">
-              <div class="profile-skeleton__line"></div>
-              <div class="profile-skeleton__line"></div>
-              <div class="profile-skeleton__line"></div>
-            </div>
-            <div class="profile-skeleton__card">
-              <div class="profile-skeleton__line"></div>
-              <div class="profile-skeleton__line"></div>
-            </div>
-          </div>
-        </div>
+      <div class="profilehub-loading">Loading profile...</div>
       } @else if (loadError) {
-        <div class="profile-error" @alertReveal>
-          <div class="profile-error__icon" aria-hidden="true">!</div>
-          <p class="profile-error__text">{{ loadError }}</p>
-        </div>
+      <div class="profilehub-error">{{ loadError }}</div>
       } @else {
-        <div @pageLayout>
-          <header class="profile-hero">
-            <div
-              class="profile-hero__flip-scene"
-              [class.profile-hero__flip-scene--open]="avatarPickerOpen()"
-            >
-              <div class="profile-hero__flip-inner">
-                <div class="profile-hero__flip-face profile-hero__flip-face--front">
-                  <button
-                    type="button"
-                    class="profile-hero__flip-trigger"
-                    (click)="toggleAvatarPicker()"
-                    [attr.aria-expanded]="avatarPickerOpen()"
-                    aria-controls="profile-avatar-picker-panel"
-                    id="profile-avatar-flip-btn"
-                  >
-                    <span class="profile-hero__avatar-wrap">
-                      <span class="profile-hero__ring" aria-hidden="true"></span>
+      @if (saveError) {
+        <div class="profilehub-error">{{ saveError }}</div>
+      }
+      @if (saveAck()) {
+        <div class="profilehub-success">Profile saved successfully.</div>
+      }
+      <form [formGroup]="form" (ngSubmit)="save()" class="profilehub-layout">
+        <aside class="profilehub-sidebar">
+          <div class="brand">ProfileHub</div>
+          <div class="user-mini-card">
+            <div class="user-mini-avatar-wrap">
                       @if (resolvedProfilePictureUrl() && !avatarBroken) {
-                        <img
-                          class="profile-hero__img"
-                          [src]="resolvedProfilePictureUrl()"
-                          alt=""
-                          (error)="avatarBroken = true"
-                        />
+                <img class="user-mini-avatar" [src]="resolvedProfilePictureUrl()" alt="" (error)="avatarBroken = true" />
                       } @else {
-                        <span class="profile-hero__initials">{{ initials() }}</span>
-                      }
-                    </span>
-                    <span class="profile-hero__flip-hint">Choisir un avatar</span>
-                  </button>
-                </div>
-                <div
-                  class="profile-hero__flip-face profile-hero__flip-face--back"
-                  id="profile-avatar-picker-panel"
-                  role="group"
-                  aria-labelledby="profile-avatar-picker-title"
-                >
-                  <p class="profile-hero__picker-title" id="profile-avatar-picker-title">Votre avatar SkillHub</p>
-                  @if (presetSaving) {
-                    <p class="profile-hero__picker-saving">Enregistrement…</p>
-                  }
-                  <div class="profile-hero__picker-grid">
-                    @for (av of presetAvatars; track av.id) {
-                      <button
-                        type="button"
-                        class="profile-hero__picker-cell"
-                        [class.profile-hero__picker-cell--active]="isPresetSelected(av.id)"
-                        [disabled]="presetSaving"
-                        (click)="selectPresetAvatar(av.id)"
-                        [attr.aria-label]="'Choisir ' + av.label"
-                        [attr.aria-pressed]="isPresetSelected(av.id)"
-                      >
-                        <img [src]="presetGridImgSrc(av.id)" alt="" (error)="onPresetGridImgError(av.id)" />
-                      </button>
-                    }
-                  </div>
-                  <button
-                    type="button"
-                    class="profile-hero__picker-close"
-                    (click)="closeAvatarPicker()"
-                    [disabled]="presetSaving"
-                  >
-                    Retour à la photo
-                  </button>
-                </div>
-              </div>
+                <div class="user-mini-avatar user-mini-avatar--fallback">{{ initials() }}</div>
+              }
+              @if (activeStatusVisible()) {
+                <span class="profile-presence-dot" aria-label="Active"></span>
+              }
             </div>
-            <div class="profile-hero__text">
-              <p class="profile-hero__kicker">Mon espace</p>
-              <h1 class="profile-hero__title">{{ displayName() }}</h1>
-              <p class="profile-hero__meta">Personnalisez votre présence sur SkillHub</p>
+            <div class="user-mini-name">{{ displayName() }}</div>
+            <div class="user-mini-plan">Professional Plan</div>
+          </div>
+          <nav class="menu">
+            <a class="menu-item active">Overview</a>
+            <a class="menu-item">Account Security</a>
+            <a class="menu-item">Privacy Settings</a>
+          </nav>
+        </aside>
+
+        <main class="profilehub-main">
+          <header class="main-top">
+            <div>
+              <h2>Your Personal Space</h2>
+              <p>Shape your profile, protect your account, and control your privacy in one elegant dashboard.</p>
             </div>
           </header>
 
-          @if (saveAck()) {
-            <div class="profile-toast" @alertReveal role="status">
-              <span class="profile-toast__check" aria-hidden="true">✓</span>
-              Modifications enregistrées
-            </div>
-          }
-
-          @if (saveError) {
-            <div class="profile-banner profile-banner--danger" @alertReveal>{{ saveError }}</div>
-          }
-
-          <form [formGroup]="form" (ngSubmit)="save()" class="profile-form">
-            <div class="profile-card profile-card--identity">
-              <div class="profile-card__head">
-                <span class="profile-card__icon" aria-hidden="true">◇</span>
-                <div>
-                  <h2 class="profile-card__title">Identité</h2>
-                  <p class="profile-card__subtitle">Comment vous présenter aux autres</p>
-                </div>
-              </div>
-              <div class="row g-3 g-lg-4">
-                <div class="col-md-6 profile-field">
-                  <label class="profile-label" for="fn">Prénom</label>
-                  <input id="fn" class="profile-input" formControlName="firstName" autocomplete="given-name" />
-                </div>
-                <div class="col-md-6 profile-field">
-                  <label class="profile-label" for="ln">Nom</label>
-                  <input id="ln" class="profile-input" formControlName="lastName" autocomplete="family-name" />
-                </div>
-                <div class="col-12 profile-field">
-                  <label class="profile-label">Photo de profil</label>
-                  <p class="profile-photo__hint">JPEG, PNG, WebP ou GIF — maximum 3 Mo. Vous pouvez aussi coller un lien vers une image.</p>
-                  @if (photoError) {
-                    <div class="profile-photo__error" @alertReveal>{{ photoError }}</div>
+          <section class="row-grid">
+            <div class="left-stack card">
+              <div class="avatar-panel">
+                <div class="big-avatar-wrap">
+                  @if (resolvedProfilePictureUrl() && !avatarBroken) {
+                    <img class="big-avatar" [src]="resolvedProfilePictureUrl()" alt="" (error)="avatarBroken = true" />
+                  } @else {
+                    <div class="big-avatar big-avatar--fallback">{{ initials() }}</div>
                   }
-                  <div class="profile-photo__row">
-                    <input
-                      #photoFileInput
-                      type="file"
-                      class="visually-hidden"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      (change)="onPhotoSelected($event)"
-                    />
-                    <button
-                      type="button"
-                      class="profile-photo__upload"
-                      [disabled]="photoUploading"
-                      (click)="photoFileInput.click()"
-                    >
-                      @if (photoUploading) {
-                        <span class="profile-btn__spinner profile-btn__spinner--dark" aria-hidden="true"></span>
-                        Envoi en cours…
-                      } @else {
-                        Choisir une photo
-                      }
-                    </button>
-                    @if (form.controls.profilePicture.value.trim()) {
-                      <span class="profile-photo__status">Photo enregistrée</span>
-                    }
-                  </div>
-                  <label class="profile-label profile-label--secondary mt-3" for="pic">Photo : URL ou avatar préréglé</label>
-                  <p class="profile-photo__hint profile-photo__hint--tight">
-                    Collez une adresse <code>https://…</code>, un chemin <code>/api/files/…</code>, ou laissez la valeur
-                    <code>skillhub-preset:1</code>…<code>:8</code> si vous avez choisi un avatar dans la grille ci-dessus (ce n’est pas une erreur).
-                  </p>
-                  <input
-                    id="pic"
-                    class="profile-input"
-                    formControlName="profilePicture"
-                    type="text"
-                    inputmode="url"
-                    autocomplete="off"
-                    spellcheck="false"
-                    placeholder="https://… ou skillhub-preset:1 … :8"
-                    (input)="avatarBroken = false; photoError = ''"
-                  />
+                  @if (activeStatusVisible()) {
+                    <span class="profile-presence-dot profile-presence-dot--lg" aria-label="Active"></span>
+                  }
                 </div>
               </div>
-            </div>
 
-            <div class="profile-card profile-card--about">
-              <div class="profile-card__head">
-                <span class="profile-card__icon" aria-hidden="true">✦</span>
-                <div>
-                  <h2 class="profile-card__title">À propos</h2>
-                  <p class="profile-card__subtitle">Vos centres d’intérêt et votre bio</p>
-                </div>
-              </div>
-              <div class="row g-3 g-lg-4">
-                <div class="col-12 profile-field">
-                  <label class="profile-label" for="int">Centres d’intérêt</label>
-                  <input
-                    id="int"
-                    class="profile-input"
-                    formControlName="interestsText"
-                    placeholder="Séparez par des virgules"
-                  />
-                </div>
-                <div class="col-12 profile-field">
-                  <label class="profile-label" for="desc">Description</label>
-                  <textarea id="desc" class="profile-input profile-input--area" rows="4" formControlName="description"></textarea>
-                </div>
-              </div>
-            </div>
-
-            <div class="profile-card profile-card--security">
-              <div class="profile-card__head">
-                <span class="profile-card__icon" aria-hidden="true">◎</span>
-                <div>
-                  <h2 class="profile-card__title">Sécurité & contact</h2>
-                  <p class="profile-card__subtitle">Récupération de compte</p>
-                </div>
-              </div>
-              <div class="row g-3 g-lg-4">
-                <div class="col-md-8 profile-field">
-                  <label class="profile-label" for="rec">E-mail de récupération</label>
-                  <input id="rec" class="profile-input" type="email" formControlName="recuperationEmail" autocomplete="email" />
-                </div>
-              </div>
-            </div>
-
-            <div class="profile-actions profile-field">
-              <button class="profile-save" type="submit" [disabled]="saving">
-                @if (saving) {
-                  <span class="profile-btn__spinner" aria-hidden="true"></span>
-                  Enregistrement…
-                } @else {
-                  Enregistrer le profil
-                }
+              <input #photoFileInput type="file" class="visually-hidden" accept="image/jpeg,image/png,image/webp,image/gif" (change)="onPhotoSelected($event)" />
+              <button type="button" class="secondary-btn" [disabled]="photoUploading" (click)="photoFileInput.click()">
+                @if (photoUploading) { Uploading... } @else { Upload Photo }
               </button>
+              <button type="button" class="secondary-btn ghost" (click)="toggleAvatarPicker()">Choose Avatar</button>
+
+              @if (avatarPickerOpen()) {
+                <div class="avatars-grid">
+                  @for (av of presetAvatars; track av.id) {
+                    <button type="button" class="avatar-choice" [class.selected]="isPresetSelected(av.id)" [disabled]="presetSaving" (click)="selectPresetAvatar(av.id)">
+                      <img [src]="presetGridImgSrc(av.id)" alt="" (error)="onPresetGridImgError(av.id)" />
+                    </button>
+                  }
+                </div>
+              }
+
+              <div class="premium-box">
+                <h4>Premium Status</h4>
+                <p>Your professional plan expires in 45 days.</p>
+              </div>
             </div>
+
+            <div class="right-stack">
+              <section class="card">
+                <h3>General Information</h3>
+                <div class="field-grid">
+                  <div class="field">
+                    <label>Full Name</label>
+                    <input class="profile-input" formControlName="firstName" placeholder="First name" />
+                  </div>
+                  <div class="field">
+                    <label>Last Name</label>
+                    <input class="profile-input" formControlName="lastName" placeholder="Last name" />
+                  </div>
+                  <div class="field full">
+                    <label>Bio / Description</label>
+                    <textarea class="profile-input profile-input--area" rows="4" formControlName="description"></textarea>
+                  </div>
+                  <div class="field full">
+                    <label>Skills / Interests</label>
+                    <input class="profile-input" formControlName="interestsText" placeholder="Product Design, UX, ..." />
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <h3>Account Security</h3>
+                <div class="field-grid">
+                  <div class="field">
+                    <label>Primary Email</label>
+                    <input class="profile-input" [value]="primaryEmail()" disabled />
+                    <div class="security-status">Email verified</div>
+              </div>
+                  <div class="field">
+                    <label>Recovery Email</label>
+                    <input class="profile-input" type="email" formControlName="recuperationEmail" placeholder="Recovery email" />
+                    <div class="security-caption">Used for account recovery in case of lockout.</div>
+                </div>
+                </div>
+                <div class="security-feature-row">
+                  <div class="security-feature-icon">🔐</div>
+                  <div class="security-feature-text">
+                    <h4>Two-Factor Authentication</h4>
+                    <p>Keep your account safer with an extra verification step at sign-in.</p>
+              </div>
+                  <button type="button" class="security-toggle" [class.security-toggle--on]="twoFactorEnabled()" [disabled]="twoFactorSaving" (click)="toggleTwoFactor()" [attr.aria-pressed]="twoFactorEnabled()">
+                    <span class="security-toggle__knob"></span>
+                  </button>
+                </div>
+                <div class="security-feature-row security-feature-row--clickable" (click)="toggleLoginActivity()">
+                  <div class="security-feature-icon">🕒</div>
+                  <div class="security-feature-text">
+                    <h4>Login Activity</h4>
+                    <p>Track your recent sessions and quickly spot unfamiliar device access.</p>
+              </div>
+                  <button type="button" class="activity-link-btn" (click)="$event.stopPropagation(); toggleLoginActivity()">
+                    @if (showLoginActivity()) { Hide Log } @else { View Log }
+                  </button>
+                </div>
+                @if (showLoginActivity()) {
+                  <div class="login-activity-panel">
+                    <div class="login-activity-head">
+                      <span>Recent Sessions</span>
+                      <button type="button" class="activity-link-btn" (click)="refreshLoginActivity()">Refresh</button>
+                    </div>
+                    @if (loginActivityLoading) {
+                      <div class="login-activity-status">Loading login activity...</div>
+                    } @else if (loginActivityError) {
+                      <div class="login-activity-status login-activity-status--error">{{ loginActivityError }}</div>
+                    } @else if (loginActivities().length === 0) {
+                      <div class="login-activity-status">No login activity yet.</div>
+                    } @else {
+                      @for (activity of loginActivities(); track activity.loggedAt + (activity.ipAddress ?? '')) {
+                        <div class="login-activity-row">
+                          <div>{{ formatActivityDate(activity.loggedAt) }}</div>
+                          <div>{{ activity.ipAddress || 'Unknown IP' }}</div>
+                          <div>{{ activity.userAgent || 'Unknown device' }}</div>
+              </div>
+                      }
+                    }
+            </div>
+                }
+              </section>
+
+              <section class="card">
+                <h3>Privacy Settings</h3>
+                <div class="security-feature-row">
+                  <div class="security-feature-icon">🟢</div>
+                  <div class="security-feature-text">
+                    <h4>Active Status</h4>
+                    <p>Let friends see when you are online and your last seen, just like modern messaging apps.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="security-toggle"
+                    [class.security-toggle--on]="activeStatusVisible()"
+                    [disabled]="activeStatusSaving"
+                    (click)="toggleActiveStatusVisibility()"
+                    [attr.aria-pressed]="activeStatusVisible()"
+                  >
+                    <span class="security-toggle__knob"></span>
+              </button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+        </main>
           </form>
-        </div>
       }
-    </div>
   </div>
 }

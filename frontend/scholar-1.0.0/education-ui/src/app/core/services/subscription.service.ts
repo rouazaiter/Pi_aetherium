@@ -19,4 +19,10 @@ export class SubscriptionService {
   create(body: SubscriptionRequest): Observable<SubscriptionResponse> {
     return this.http.post<SubscriptionResponse>(`${environment.apiUrl}/api/subscriptions`, body);
   }
+
+  downloadInvoice(subscriptionId: number): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/api/subscriptions/${subscriptionId}/invoice`, {
+      responseType: 'blob',
+    });
+  }
 }

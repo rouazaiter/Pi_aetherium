@@ -121,6 +121,63 @@ public class AccountMailService {
         }
     }
 
+    /**
+     * Notifie l’équipe support qu’une nouvelle réclamation a été soumise (ne propage pas d’exception).
+     */
+    public void sendReclamationSubmittedToAdmin(
+            String adminInboxEmail,
+            String submitterUsername,
+            String submitterEmail,
+            long reclamationId,
+            String reclamationSubject,
+            String reclamationDescription,
+            String adminReclamationsUrl) {
+        if (!StringUtils.hasText(adminInboxEmail)) {
+            log.warn("app.reclamations.notify-email vide — pas d'e-mail pour la réclamation #{}", reclamationId);
+            return;
+        }
+        String to = adminInboxEmail.trim();
+        String desc = reclamationDescription == null ? "" : reclamationDescription;
+        final int maxDesc = 6000;
+        if (desc.length() > maxDesc) {
+            desc = desc.substring(0, maxDesc) + "\n\n[… Texte tronqué — voir la fiche complète dans l’administration.]";
+        }
+        String subject = "[SkillHub] Nouvelle réclamation #" + reclamationId + " — " + reclamationSubject;
+        StringBuilder body = new StringBuilder();
+        body.append("Une nouvelle réclamation a été envoyée depuis la plateforme.\n\n");
+        body.append("ID : ").append(reclamationId).append("\n");
+        body.append("Utilisateur : ").append(submitterUsername).append("\n");
+        body.append("E-mail du compte : ").append(submitterEmail != null ? submitterEmail : "(inconnu)").append("\n\n");
+        body.append("Sujet : ").append(reclamationSubject).append("\n\n");
+        body.append("Description :\n").append(desc).append("\n");
+        if (StringUtils.hasText(adminReclamationsUrl)) {
+            body.append("\nTraitement (admin) : ").append(adminReclamationsUrl.trim()).append("\n");
+        }
+
+        JavaMailSender sender = mailSender.getIfAvailable();
+        String from = resolveFrom();
+        if (sender == null) {
+            log.warn("Pas de JavaMailSender — notification réclamation #{} non envoyée (destinataire {}).", reclamationId, to);
+            log.info("Réclamation #{} — sujet : {}", reclamationId, reclamationSubject);
+            return;
+        }
+        if (!StringUtils.hasText(from)) {
+            log.warn("Expéditeur vide — notification réclamation #{} non envoyée.", reclamationId);
+            return;
+        }
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setFrom(from);
+            msg.setTo(to);
+            msg.setSubject(subject);
+            msg.setText(body.toString());
+            sender.send(msg);
+            log.info("Notification réclamation #{} envoyée à {}.", reclamationId, to);
+        } catch (Exception e) {
+            log.error("Échec envoi notification réclamation #{} vers {}.", reclamationId, to, e);
+        }
+    }
+
     private String resolveFrom() {
         if (StringUtils.hasText(appMailFrom)) {
             return appMailFrom.trim();

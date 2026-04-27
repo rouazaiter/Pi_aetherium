@@ -4,6 +4,7 @@ import com.education.platform.dto.friend.FriendRequestCreateRequest;
 import com.education.platform.dto.friend.FriendRequestResponse;
 import com.education.platform.dto.friend.FriendSearchResponse;
 import com.education.platform.dto.friend.FriendResponse;
+import com.education.platform.dto.friend.FriendProfileResponse;
 import com.education.platform.services.interfaces.CurrentUserService;
 import com.education.platform.services.interfaces.FriendService;
 import jakarta.validation.Valid;
@@ -42,6 +43,11 @@ public class FriendController {
         return friendService.searchUsers(currentUserService.getCurrentUser(), query);
     }
 
+    @GetMapping("/discover")
+    public List<FriendSearchResponse> discover() {
+        return friendService.discoverUsers(currentUserService.getCurrentUser());
+    }
+
     @GetMapping("/requests/incoming")
     public List<FriendRequestResponse> incomingRequests() {
         return friendService.listIncomingRequests(currentUserService.getCurrentUser());
@@ -56,6 +62,11 @@ public class FriendController {
     @PostMapping("/requests/{requestId}/accept")
     public FriendResponse acceptRequest(@PathVariable Long requestId) {
         return friendService.acceptFriendRequest(currentUserService.getCurrentUser(), requestId);
+    }
+
+    @GetMapping("/{friendId}/profile")
+    public FriendProfileResponse profile(@PathVariable Long friendId) {
+        return friendService.getFriendProfile(currentUserService.getCurrentUser(), friendId);
     }
 
     @PostMapping("/requests/{requestId}/decline")

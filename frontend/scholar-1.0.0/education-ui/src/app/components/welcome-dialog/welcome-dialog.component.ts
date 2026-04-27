@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+﻿import { Component, HostListener, inject } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { WelcomeDialogService } from '../../core/services/welcome-dialog.service';
 
@@ -6,7 +6,7 @@ import { WelcomeDialogService } from '../../core/services/welcome-dialog.service
   selector: 'app-welcome-dialog',
   standalone: true,
   templateUrl: './welcome-dialog.component.html',
-  styleUrl: './welcome-dialog.component.scss',
+  styleUrl: './welcome-dialog.component\.css',
   animations: [
     trigger('backdrop', [
       transition(':enter', [
@@ -52,3 +52,4 @@ export class WelcomeDialogComponent {
     }
   }
 }
+

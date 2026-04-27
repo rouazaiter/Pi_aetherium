@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+﻿import { Component, inject, OnInit } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -12,7 +12,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, SignInProvidersComponent],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss',
+  styleUrl: './login.component\.css',
   animations: [
     trigger('shellEnter', [
       transition(':enter', [
@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly welcomeDialog = inject(WelcomeDialogService);
 
-  /** After clicking “Continue with email or username”. */
+  /** After clicking â€œContinue with email or usernameâ€. */
   showEmailForm = false;
 
   /** Toggle password visibility on the email form. */
@@ -95,3 +95,4 @@ export class LoginComponent implements OnInit {
     });
   }
 }
+

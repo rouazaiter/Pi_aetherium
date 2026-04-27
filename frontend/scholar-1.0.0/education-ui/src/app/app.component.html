@@ -2,7 +2,7 @@
   <div class="container app-nav__inner">
     <a routerLink="/" class="app-nav__brand" (click)="closeNav()">
       <span class="app-nav__brand-mark">S</span>
-      <span class="app-nav__brand-text">Scholar</span>
+      <span class="app-nav__brand-text">SkillHub</span>
     </a>
 
     <button
@@ -35,22 +35,42 @@
       </a>
 
       @if (auth.isLoggedIn()) {
-        <a
-          routerLink="/profile"
-          class="app-nav__avatar-link"
-          [attr.aria-label]="'Mon profil'"
-          (click)="closeNav()"
-        >
-          @if (navAvatarUrl() && !navAvatarImgError()) {
-            <img [src]="navAvatarUrl()" alt="" (error)="navAvatarImgError.set(true)" />
-          } @else {
-            <span class="app-nav__avatar-fallback">{{ navAvatarInitials() }}</span>
+        <div class="app-nav__user-menu-wrap">
+          <button
+            type="button"
+            class="app-nav__avatar-link app-nav__avatar-link--btn"
+            [attr.aria-label]="'Ouvrir le menu utilisateur'"
+            [attr.aria-expanded]="userMenuOpen()"
+            (click)="toggleUserMenu()"
+          >
+            @if (navAvatarUrl() && !navAvatarImgError()) {
+              <img [src]="navAvatarUrl()" alt="" (error)="navAvatarImgError.set(true)" />
+            } @else {
+              <span class="app-nav__avatar-fallback">{{ navAvatarInitials() }}</span>
+            }
+          </button>
+
+          @if (userMenuOpen()) {
+            <div class="app-nav__user-menu">
+              <a routerLink="/profile" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Profil</a>
+              <a routerLink="/subscriptions" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Abonnements</a>
+              <a routerLink="/friends" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Amis</a>
+              <a routerLink="/social-hub" routerLinkActive="app-nav__link--active" class="app-nav__link app-nav__social-link" (click)="closeNav()">
+                Social Hub
+                @if (mentorshipPendingCount() > 0) {
+                  <span class="app-nav__badge">{{ mentorshipPendingCount() }}</span>
+                }
+              </a>
+              <a routerLink="/reclamation" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Réclamation</a>
+              @if (auth.auth()?.role === 'admin') {
+                <a routerLink="/admin/reclamations" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                  Admin réclamations
+                </a>
+              }
+              <button type="button" class="app-nav__link app-nav__link--btn" (click)="logout(); closeNav()">Déconnexion</button>
+            </div>
           }
-        </a>
-        <a routerLink="/profile" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Profil</a>
-        <a routerLink="/subscriptions" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Abonnements</a>
-        <a routerLink="/friends" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Amis</a>
-        <button type="button" class="app-nav__link app-nav__link--btn" (click)="logout(); closeNav()">Déconnexion</button>
+        </div>
       } @else {
         <a routerLink="/login" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Connexion</a>
         <a routerLink="/register" routerLinkActive="app-nav__link--active" class="app-nav__cta" (click)="closeNav()">Inscription</a>

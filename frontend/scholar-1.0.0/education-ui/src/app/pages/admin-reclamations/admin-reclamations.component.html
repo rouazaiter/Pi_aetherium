@@ -1,0 +1,68 @@
+<div class="adm-wrap container">
+  <header class="adm-head">
+    <h1>Réclamations (administration)</h1>
+    <p class="adm-lead">Examinez les demandes, passez en traitement puis clôturez avec une réponse visible par le client.</p>
+  </header>
+
+  @if (loadError()) {
+    <p class="adm-alert adm-alert--err">{{ loadError() }}</p>
+  }
+
+  @if (!loadError() && items().length === 0) {
+    <p class="adm-empty">Aucune réclamation en base.</p>
+  }
+
+  <ul class="adm-list">
+    @for (r of items(); track r.id) {
+      @let d = drafts()[r.id];
+      <li class="adm-card">
+        <div class="adm-card-top">
+          <div>
+            <h2 class="adm-title">{{ r.subject }}</h2>
+            <p class="adm-meta">
+              @if (r.submitterUsername) {
+                <span>{{ r.submitterUsername }}</span>
+                ·
+              }
+              reçue le {{ r.createdAt | date: 'medium' }}
+            </p>
+          </div>
+          <span class="adm-badge" [attr.data-status]="r.status">{{ statusLabel(r.status) }}</span>
+        </div>
+        <p class="adm-desc">{{ r.description }}</p>
+
+        @if (d) {
+          <div class="adm-actions">
+            <label class="adm-field">
+              <span>Action</span>
+              <select
+                [ngModel]="d.status"
+                (ngModelChange)="patchDraft(r.id, { status: $event })"
+                [ngModelOptions]="{ standalone: true }"
+              >
+                <option value="IN_REVIEW">Marquer en traitement</option>
+                <option value="RESOLVED">Clôturer avec réponse</option>
+              </select>
+            </label>
+            <label class="adm-field adm-field--grow">
+              <span>Message au client {{ d.status === 'RESOLVED' ? '(obligatoire pour clôturer)' : '(optionnel)' }}</span>
+              <textarea
+                rows="4"
+                [ngModel]="d.adminResponse"
+                (ngModelChange)="patchDraft(r.id, { adminResponse: $event })"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Réponse après vérification…"
+              ></textarea>
+            </label>
+            @if (d.error) {
+              <p class="adm-alert adm-alert--err">{{ d.error }}</p>
+            }
+            <button type="button" class="adm-save" [disabled]="d.saving" (click)="save(r)">
+              {{ d.saving ? 'Enregistrement…' : 'Enregistrer' }}
+            </button>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+</div>

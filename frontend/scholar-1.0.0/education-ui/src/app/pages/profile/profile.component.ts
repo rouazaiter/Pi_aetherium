@@ -15,12 +15,13 @@ import {
   resolvePresetProfilePicture,
 } from '../../core/data/preset-avatars';
 import { messageFromHttpError } from '../../core/util/http-error';
+import type { LoginActivityResponse } from '../../core/models/api.models';
 
 const PRESET_LABELS: Record<string, string> = {
   '1': 'Violet',
   '2': 'Corail',
-  '3': 'Océan',
-  '4': 'Forêt',
+  '3': 'OcÃ©an',
+  '4': 'ForÃªt',
   '5': 'Soleil',
   '6': 'Nuit',
   '7': 'Ardoise',
@@ -32,7 +33,7 @@ const PRESET_LABELS: Record<string, string> = {
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss',
+  styleUrl: './profile.component\.css',
   animations: [
     trigger('profileBackdrop', [
       transition(':enter', [
@@ -110,6 +111,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
   });
 
   readonly saveAck = signal(false);
+  readonly twoFactorEnabled = signal(false);
+  readonly activeStatusVisible = signal(true);
+  readonly showLoginActivity = signal(false);
+  readonly loginActivities = signal<LoginActivityResponse[]>([]);
+  twoFactorSaving = false;
+  activeStatusSaving = false;
+  loginActivityLoading = false;
+  loginActivityError = '';
 
   loadError = '';
   saveError = '';
@@ -122,21 +131,21 @@ export class ProfileComponent implements OnInit, OnDestroy {
   verifyError = '';
   codeHint = '';
 
-  /** Pour l’avatar : éviter les schémas dangereux. */
+  /** Pour lâ€™avatar : Ã©viter les schÃ©mas dangereux. */
   avatarBroken = false;
 
-  /** Aperçu local avant réponse serveur (object URL). */
+  /** AperÃ§u local avant rÃ©ponse serveur (object URL). */
   photoPreviewUrl: string | null = null;
   photoUploading = false;
   photoError = '';
 
   private readonly maxPhotoBytes = 3 * 1024 * 1024;
 
-  /** Carte photo retournée : face arrière = grille d’avatars SkillHub. */
+  /** Carte photo retournÃ©e : face arriÃ¨re = grille dâ€™avatars SkillHub. */
   readonly avatarPickerOpen = signal(false);
   presetSaving = false;
 
-  /** IDs dont le PNG local a échoué → affichage SVG intégré à la place. */
+  /** IDs dont le PNG local a Ã©chouÃ© â†’ affichage SVG intÃ©grÃ© Ã  la place. */
   private readonly presetAssetLoadFailed = signal<ReadonlySet<string>>(new Set());
 
   readonly presetAvatars: { id: string; label: string }[] = PRESET_AVATAR_IDS.map((id) => ({
@@ -144,7 +153,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     label: PRESET_LABELS[id] ?? id,
   }));
 
-  /** Grille presets : PNG si configuré et dispo, sinon repli sur data-URL SVG. */
+  /** Grille presets : PNG si configurÃ© et dispo, sinon repli sur data-URL SVG. */
   presetGridImgSrc(id: string): string {
     if (this.presetAssetLoadFailed().has(id)) {
       return presetAvatarDataUrl(id);
@@ -172,13 +181,88 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   maskedEmail(): string {
-    const email = this.auth.auth()?.email?.trim();
+    const email = this.primaryEmail();
     if (!email || !email.includes('@')) {
       return 'votre adresse e-mail';
     }
     const [local, domain] = email.split('@');
-    const vis = local.length <= 2 ? `${local[0] ?? ''}••` : `${local.slice(0, 2)}•••`;
+    const vis = local.length <= 2 ? `${local[0] ?? ''}â€¢â€¢` : `${local.slice(0, 2)}â€¢â€¢â€¢`;
     return `${vis}@${domain}`;
+  }
+
+  primaryEmail(): string {
+    const raw = this.auth.auth()?.email ?? '';
+    return this.normalizeDisplayText(raw).trim();
+  }
+
+  toggleTwoFactor(): void {
+    const nextEnabled = !this.twoFactorEnabled();
+    this.twoFactorSaving = true;
+    this.profileApi.setTwoFactorEnabled(nextEnabled).subscribe({
+      next: (p) => {
+        this.twoFactorSaving = false;
+        this.twoFactorEnabled.set(!!p.twoFactorEnabled);
+      },
+      error: (err) => {
+        this.twoFactorSaving = false;
+        this.saveError = messageFromHttpError(err, 'Unable to update two-factor authentication.');
+      },
+    });
+  }
+
+  toggleLoginActivity(): void {
+    const nextOpen = !this.showLoginActivity();
+    this.showLoginActivity.set(nextOpen);
+    if (!nextOpen) {
+      return;
+    }
+    this.loadLoginActivity();
+  }
+
+  refreshLoginActivity(): void {
+    this.showLoginActivity.set(true);
+    this.loadLoginActivity();
+  }
+
+  toggleActiveStatusVisibility(): void {
+    const nextEnabled = !this.activeStatusVisible();
+    this.activeStatusSaving = true;
+    this.profileApi.setActiveStatusVisibility(nextEnabled).subscribe({
+      next: (p) => {
+        this.activeStatusSaving = false;
+        this.activeStatusVisible.set(!!p.activeStatusVisible);
+      },
+      error: (err) => {
+        this.activeStatusSaving = false;
+        this.saveError = messageFromHttpError(err, 'Unable to update active status visibility.');
+      },
+    });
+  }
+
+  private loadLoginActivity(): void {
+    this.loginActivityLoading = true;
+    this.loginActivityError = '';
+    this.profileApi.loginActivity().subscribe({
+      next: (rows) => {
+        this.loginActivityLoading = false;
+        this.loginActivities.set(rows);
+      },
+      error: (err) => {
+        this.loginActivityLoading = false;
+        this.loginActivityError = messageFromHttpError(err, 'Unable to load login activity.');
+      },
+    });
+  }
+
+  formatActivityDate(value: string): string {
+    if (!value) {
+      return '-';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+    return date.toLocaleString();
   }
 
   displayName(): string {
@@ -204,8 +288,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * URL affichable pour la photo : fichier hébergé par l’API (`/api/files/...`),
-   * lien https externe, ou aperçu local pendant l’upload.
+   * URL affichable pour la photo : fichier hÃ©bergÃ© par lâ€™API (`/api/files/...`),
+   * lien https externe, ou aperÃ§u local pendant lâ€™upload.
    */
   resolvedProfilePictureUrl(): string {
     if (this.photoPreviewUrl) {
@@ -276,7 +360,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           if (this.tryHandleProfileVerificationRequired(err)) {
             return;
           }
-          this.saveError = messageFromHttpError(err, 'Enregistrement de l’avatar impossible.');
+          this.saveError = messageFromHttpError(err, 'Enregistrement de lâ€™avatar impossible.');
         },
       });
   }
@@ -364,7 +448,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.verifying = false;
-        this.verifyError = messageFromHttpError(err, 'Vérification impossible.');
+        this.verifyError = messageFromHttpError(err, 'VÃ©rification impossible.');
       },
     });
   }
@@ -384,6 +468,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
           profilePicture: p.profilePicture ?? '',
           recuperationEmail: p.recuperationEmail ?? '',
         });
+        this.twoFactorEnabled.set(!!p.twoFactorEnabled);
+        this.activeStatusVisible.set(p.activeStatusVisible !== false);
         this.auth.patchSessionProfilePicture(p.profilePicture ?? null);
         this.welcomeDialog.tryShowPendingWelcome();
       },
@@ -403,8 +489,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Session « profil » expirée (ou nouvelle connexion) : le serveur renvoie 403 avec ce code.
-   * On rouvre l’écran code e-mail au lieu d’afficher l’identifiant technique.
+   * Session Â« profil Â» expirÃ©e (ou nouvelle connexion) : le serveur renvoie 403 avec ce code.
+   * On rouvre lâ€™Ã©cran code e-mail au lieu dâ€™afficher lâ€™identifiant technique.
    */
   private tryHandleProfileVerificationRequired(err: unknown): boolean {
     if (!(err instanceof HttpErrorResponse) || err.status !== 403) {
@@ -420,6 +506,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.loadError = '';
     this.requestSendCode();
     return true;
+  }
+
+  private normalizeDisplayText(value: string): string {
+    if (!value) {
+      return '';
+    }
+    let fixed = value;
+    for (let i = 0; i < 2; i += 1) {
+      if (!/[ÃÂâ]/.test(fixed)) {
+        break;
+      }
+      try {
+        const bytes = Uint8Array.from([...fixed].map((ch) => ch.charCodeAt(0) & 0xff));
+        fixed = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+      } catch {
+        break;
+      }
+    }
+    return fixed;
   }
 
   save(): void {
@@ -460,3 +565,4 @@ export class ProfileComponent implements OnInit, OnDestroy {
       });
   }
 }
+

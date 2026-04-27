@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import type { FriendRequestResponse, FriendResponse, FriendSearchResponse } from '../models/api.models';
+import type { FriendProfileResponse, FriendRequestResponse, FriendResponse, FriendSearchResponse } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class FriendService {
@@ -16,6 +16,10 @@ export class FriendService {
     return this.http.get<FriendSearchResponse[]>(`${environment.apiUrl}/api/friends/search`, {
       params: { query },
     });
+  }
+
+  discover(): Observable<FriendSearchResponse[]> {
+    return this.http.get<FriendSearchResponse[]>(`${environment.apiUrl}/api/friends/discover`);
   }
 
   listIncomingRequests(): Observable<FriendRequestResponse[]> {
@@ -36,5 +40,9 @@ export class FriendService {
 
   remove(friendId: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/api/friends/${friendId}`);
+  }
+
+  profile(friendId: number): Observable<FriendProfileResponse> {
+    return this.http.get<FriendProfileResponse>(`${environment.apiUrl}/api/friends/${friendId}/profile`);
   }
 }

@@ -11,4 +11,7 @@ public class UploadProperties {
 
     /** Répertoire local pour les photos de profil (relatif au répertoire de travail). */
     private String profilePicturesDir = "uploads/profile-pictures";
+
+    /** Répertoire local pour les messages vocaux. */
+    private String voiceMessagesDir = "uploads/voice-messages";
 }

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, NgZone, OnDestroy, ViewChild, inject } from '@angular/core';
+﻿import { AfterViewInit, Component, ElementRef, Input, NgZone, OnDestroy, ViewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
@@ -30,13 +30,13 @@ declare global {
   selector: 'app-social-login',
   standalone: true,
   templateUrl: './social-login.component.html',
-  styleUrl: './social-login.component.scss',
+  styleUrl: './social-login.component\.css',
 })
 export class SocialLoginComponent implements AfterViewInit, OnDestroy {
   /** Affiche un titre au-dessus du bouton Google (ex. page connexion). */
   @Input() showGoogleHeading = false;
 
-  /** Sans bordure du haut (quand le bloc est placé en premier sur la page). */
+  /** Sans bordure du haut (quand le bloc est placÃ© en premier sur la page). */
   @Input() flushTop = false;
 
   @ViewChild('googleHost') googleHost?: ElementRef<HTMLDivElement>;
@@ -94,7 +94,7 @@ export class SocialLoginComponent implements AfterViewInit, OnDestroy {
           if (token) {
             this.sendSocial('FACEBOOK', token);
           } else {
-            this.errorMsg = 'Connexion Facebook annulée ou refusée.';
+            this.errorMsg = 'Connexion Facebook annulÃ©e ou refusÃ©e.';
           }
         });
       },
@@ -220,3 +220,4 @@ export class SocialLoginComponent implements AfterViewInit, OnDestroy {
     });
   }
 }
+

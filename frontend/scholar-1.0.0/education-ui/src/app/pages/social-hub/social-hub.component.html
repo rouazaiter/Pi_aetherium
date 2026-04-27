@@ -1,0 +1,238 @@
+<div class="hub-shell">
+  <aside class="hub-sidebar">
+    <h2>StudySphere</h2>
+    <button [class.active]="activePage() === 'discover'" (click)="setPage('discover')" type="button">Discover</button>
+    <button [class.active]="activePage() === 'group-room'" (click)="setPage('group-room')" type="button">My Groups</button>
+    <button [class.active]="activePage() === 'quiz'" (click)="setPage('quiz')" type="button">Quiz AI</button>
+    <button [class.active]="activePage() === 'goals'" (click)="setPage('goals')" type="button">Personal Goals</button>
+  </aside>
+
+  <main class="hub-main">
+    @if (activePage() === 'discover') {
+      <section class="panel">
+        <h3>Find Your Next Study Squad</h3>
+        <p class="sub">Create your group with a required picture and IT-focused topic.</p>
+
+        <form [formGroup]="createGroupForm" (ngSubmit)="createGroup()" class="create-grid">
+          <input class="form-control" formControlName="name" placeholder="Group name" />
+          <input class="form-control" formControlName="topic" list="it-topics" placeholder="Type your interest (e.g. Blockchain, Flutter, AI, DevOps)" />
+          <textarea class="form-control full" rows="3" formControlName="description" placeholder="Group objective and focus"></textarea>
+          <label class="upload full">
+            <span>Group Picture (optional)</span>
+            <input type="file" accept="image/*" (change)="onGroupImagePicked($event)" />
+            @if (selectedGroupImagePreview()) {
+              <img class="group-image-preview" [src]="selectedGroupImagePreview()" alt="Selected group preview" />
+            }
+          </label>
+          <button class="action-btn full" type="submit" [disabled]="createGroupLoading">
+            {{ createGroupLoading ? 'Creating...' : 'Create Study Group' }}
+          </button>
+          @if (createGroupError) {
+            <p class="sub full form-error">{{ createGroupError }}</p>
+          }
+        </form>
+        <datalist id="it-topics">
+          @for (topic of itTopics; track topic) {
+            <option [value]="topic"></option>
+          }
+        </datalist>
+      </section>
+
+      <section class="cards-grid">
+        @if (loadingGroups) {
+          <p class="sub">Loading groups...</p>
+        } @else if (suggestedGroups().length === 0) {
+          <p class="sub">No groups yet. Create one and everyone will see it.</p>
+        } @else {
+          @for (group of suggestedGroups(); track group.id) {
+            <article class="group-card" (click)="openGroup(group)">
+              <img [src]="group.imageUrl" [alt]="group.name" />
+              <div class="group-body">
+                <span class="topic-chip">{{ group.topic }}</span>
+                <h4>{{ group.name }}</h4>
+                <p>{{ group.description }}</p>
+                <div class="meta">{{ group.members }} members · Owner {{ group.owner }}</div>
+              </div>
+            </article>
+          }
+        }
+      </section>
+    }
+
+    @if (activePage() === 'group-room') {
+      <section class="panel">
+        <h3>{{ selectedGroup()?.name ?? 'Quantum Mechanics II' }}</h3>
+        <p class="sub">Focus: {{ selectedGroup()?.topic ?? 'Advanced core IT' }}</p>
+        <div class="actions">
+          <button class="ghost-btn" type="button" (click)="proposeQuiz()">Propose a Quiz</button>
+          <input
+            class="form-control ai-topic"
+            [ngModel]="selectedAiTopic()"
+            (ngModelChange)="selectedAiTopic.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            list="quiz-topics"
+            placeholder="Type quiz topic (e.g. React, Node, Security)" />
+          <button class="action-btn" type="button" [disabled]="aiQuizLoading" (click)="generateQuizByAi()">
+            {{ aiQuizLoading ? 'Generating...' : 'Generate AI Quiz' }}
+          </button>
+        </div>
+        @if (aiQuizError) {
+          <p class="sub form-error">{{ aiQuizError }}</p>
+        }
+        <datalist id="quiz-topics">
+          @for (topic of aiQuizTopics; track topic) {
+            <option [value]="topic"></option>
+          }
+        </datalist>
+      </section>
+
+      <div class="room-grid">
+        <section class="panel">
+          <h4>Study Squad Members</h4>
+          @if (membersLoading) {
+            <p class="sub">Loading real group members...</p>
+          } @else if (groupMembers().length === 0) {
+            <p class="sub">No members found for this group.</p>
+          } @else {
+            <div class="member-list">
+              @for (member of groupMembers(); track member.id) {
+                <article class="member-card">
+                  @if (member.profilePicture) {
+                    <img class="avatar avatar-image" [src]="member.profilePicture" [alt]="member.name" />
+                  } @else {
+                    <div class="avatar">{{ member.avatar }}</div>
+                  }
+                  <div>
+                    <strong>{{ member.name }}</strong>
+                    <p>{{ member.role }} · {{ member.points }} pts</p>
+                  </div>
+                  <button class="link-btn" type="button" (click)="viewProfile(member)">View Profile</button>
+                </article>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="panel leaderboard">
+          <h4>Leaderboard</h4>
+          @if (leaderboard().length === 0) {
+            <p class="sub">No quiz results yet for this group.</p>
+          } @else {
+            @for (row of leaderboard(); track row.userId) {
+              <div class="leader-row">
+                <span>#{{ row.rank }} {{ displayUserLabel(row.username) }}</span>
+                <strong>{{ row.accuracyPercent }}%</strong>
+              </div>
+            }
+          }
+        </section>
+      </div>
+    }
+
+    @if (activePage() === 'quiz') {
+      @if (!showQuizResult()) {
+        <section class="panel quiz-panel">
+          <div class="quiz-header">
+            <h4>AI Quiz Exam Mode</h4>
+            <span>{{ currentQuestionIndex() + 1 }}/{{ quizQuestions().length }}</span>
+          </div>
+          <div class="progress"><div [style.width.%]="quizProgress()"></div></div>
+          <h3>{{ currentQuestion().question }}</h3>
+          @if (currentQuestion().image) {
+            <img class="quiz-image" [src]="currentQuestion().image" alt="quiz illustration" />
+          }
+          <div class="answers">
+            @for (option of currentQuestion().options; track option) {
+              <button
+                class="answer-btn"
+                [class.selected]="selectedAnswers()[currentQuestionIndex()] === option"
+                type="button"
+                (click)="answerCurrent(option)">
+                {{ option }}
+              </button>
+            }
+          </div>
+          <div class="quiz-footer">
+            <button class="ghost-btn" type="button" (click)="setPage('group-room')">Back to Group</button>
+            <button class="action-btn" type="button" (click)="nextQuestion()">
+              {{ currentQuestionIndex() < quizQuestions().length - 1 ? 'Next Question' : 'Finish Exam' }}
+            </button>
+          </div>
+        </section>
+      } @else {
+        <section class="panel">
+          <h3>Exam Correction</h3>
+          <p class="sub">Score {{ quizScore() }}/{{ quizQuestions().length }}. Correct answers are visible below.</p>
+          <div class="results">
+            @for (q of quizQuestions(); track q.question; let i = $index) {
+              <article class="result-card">
+                <h4>Q{{ i + 1 }}. {{ q.question }}</h4>
+                <p>Your answer: {{ selectedAnswers()[i] || 'No answer' }}</p>
+                <p class="correct">Correct answer: {{ q.correct }}</p>
+              </article>
+            }
+          </div>
+          <button class="action-btn" type="button" (click)="restartQuiz()">Retry Quiz</button>
+        </section>
+      }
+    }
+
+    @if (activePage() === 'goals') {
+      <section class="panel">
+        <h3>Personal Goals</h3>
+        <p class="sub">Track your motivation streak and complete your IT milestones.</p>
+        <div class="goal-editor">
+          <input
+            class="form-control"
+            [ngModel]="newGoalTitle()"
+            (ngModelChange)="newGoalTitle.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="New goal title" />
+          <input
+            class="form-control"
+            type="number"
+            min="0"
+            max="100"
+            [ngModel]="newGoalProgress()"
+            (ngModelChange)="newGoalProgress.set(+$event)"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Progress %" />
+          <button class="action-btn" type="button" (click)="addPersonalGoal()">Add Goal</button>
+        </div>
+      </section>
+      <section class="goal-grid">
+        @for (goal of personalGoals(); track goal.id) {
+          <article class="goal-card" [class.priority]="goal.status === 'priority'">
+            @if (editingGoalId() === goal.id) {
+              <input
+                class="form-control form-control-sm"
+                [ngModel]="editGoalTitle()"
+                (ngModelChange)="editGoalTitle.set($event)"
+                [ngModelOptions]="{ standalone: true }" />
+              <input
+                class="form-control form-control-sm"
+                type="number"
+                min="0"
+                max="100"
+                [ngModel]="editGoalProgress()"
+                (ngModelChange)="editGoalProgress.set(+$event)"
+                [ngModelOptions]="{ standalone: true }" />
+              <div class="goal-actions">
+                <button class="action-btn" type="button" (click)="saveGoalEdit(goal.id)">Save</button>
+                <button class="ghost-btn" type="button" (click)="cancelGoalEdit()">Cancel</button>
+              </div>
+            } @else {
+              <h4>{{ goal.title }}</h4>
+              <div class="goal-progress"><div [style.width.%]="goal.progress"></div></div>
+              <p>{{ goal.progress }}% completed</p>
+              <div class="goal-actions">
+                <button class="ghost-btn" type="button" (click)="startGoalEdit(goal)">Edit</button>
+                <button class="ghost-btn" type="button" (click)="deleteGoal(goal.id)">Delete</button>
+              </div>
+            }
+          </article>
+        }
+      </section>
+    }
+  </main>
+</div>

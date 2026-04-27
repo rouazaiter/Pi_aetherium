@@ -6,7 +6,7 @@ import { WelcomeDialogService } from '../../core/services/welcome-dialog.service
   selector: 'app-welcome-dialog',
   standalone: true,
   templateUrl: './welcome-dialog.component.html',
-  styleUrl: './welcome-dialog.component\.css',
+  styleUrl: './welcome-dialog.component.scss',
   animations: [
     trigger('backdrop', [
       transition(':enter', [

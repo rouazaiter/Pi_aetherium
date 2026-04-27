@@ -12,7 +12,7 @@ import { SocialGraphService } from './core/services/social-graph.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, WelcomeDialogComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component\.css',
+  styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit, OnDestroy {
   protected readonly auth = inject(AuthService);

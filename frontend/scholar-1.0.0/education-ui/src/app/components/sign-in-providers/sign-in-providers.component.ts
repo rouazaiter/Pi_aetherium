@@ -34,7 +34,7 @@ declare global {
   selector: 'app-sign-in-providers',
   standalone: true,
   templateUrl: './sign-in-providers.component.html',
-  styleUrl: './sign-in-providers.component\.css',
+  styleUrl: './sign-in-providers.component.scss',
 })
 export class SignInProvidersComponent implements AfterViewInit, OnDestroy {
   /** `signup` â†’ libellÃ© Google Â« Sign up Â» ; mÃªme API backend (crÃ©ation de compte si besoin). */

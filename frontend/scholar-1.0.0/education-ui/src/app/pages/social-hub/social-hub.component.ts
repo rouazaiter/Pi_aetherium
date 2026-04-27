@@ -10,7 +10,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, FormsModule, DatePipe],
   templateUrl: './social-hub.component.html',
-  styleUrl: './social-hub.component.css',
+  styleUrl: './social-hub.component.scss',
 })
 export class SocialHubComponent implements OnInit {
   private readonly quizSize = 10;

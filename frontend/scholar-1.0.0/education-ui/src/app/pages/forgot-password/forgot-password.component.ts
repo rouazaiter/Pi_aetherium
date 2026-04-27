@@ -9,7 +9,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component\.css',
+  styleUrl: './forgot-password.component.scss',
 })
 export class ForgotPasswordComponent {
   private readonly fb = inject(FormBuilder);

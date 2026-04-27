@@ -12,7 +12,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, DatePipe, RouterLink],
   templateUrl: './reclamation.component.html',
-  styleUrl: './reclamation.component.css',
+  styleUrl: './reclamation.component.scss',
 })
 export class ReclamationComponent implements OnInit {
   private readonly api = inject(ReclamationService);

@@ -30,7 +30,7 @@ declare global {
   selector: 'app-social-login',
   standalone: true,
   templateUrl: './social-login.component.html',
-  styleUrl: './social-login.component\.css',
+  styleUrl: './social-login.component.scss',
 })
 export class SocialLoginComponent implements AfterViewInit, OnDestroy {
   /** Affiche un titre au-dessus du bouton Google (ex. page connexion). */

@@ -64,7 +64,7 @@ const FALLBACK_GIFS: GifPickerResultItem[] = [
   standalone: true,
   imports: [ReactiveFormsModule, DatePipe, FormsModule],
   templateUrl: './friends.component.html',
-  styleUrl: './friends.component\.css',
+  styleUrl: './friends.component.scss',
 })
 export class FriendsComponent implements OnInit, OnDestroy {
   private static readonly MUTED_USERS_STORAGE_KEY = 'friends.mutedUserIds';

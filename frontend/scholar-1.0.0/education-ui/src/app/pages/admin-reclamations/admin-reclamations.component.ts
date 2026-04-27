@@ -18,7 +18,7 @@ type RowDraft = {
   standalone: true,
   imports: [DatePipe, FormsModule],
   templateUrl: './admin-reclamations.component.html',
-  styleUrl: './admin-reclamations.component.css',
+  styleUrl: './admin-reclamations.component.scss',
 })
 export class AdminReclamationsComponent implements OnInit {
   private readonly api = inject(ReclamationService);

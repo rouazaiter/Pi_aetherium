@@ -14,7 +14,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component\.css',
+  styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);

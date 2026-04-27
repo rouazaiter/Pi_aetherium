@@ -33,7 +33,7 @@ const PRESET_LABELS: Record<string, string> = {
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component\.css',
+  styleUrl: './profile.component.scss',
   animations: [
     trigger('profileBackdrop', [
       transition(':enter', [

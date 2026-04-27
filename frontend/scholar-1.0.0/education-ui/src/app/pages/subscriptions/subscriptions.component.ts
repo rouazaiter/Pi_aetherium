@@ -21,7 +21,7 @@ type PlanUiConfig = {
   standalone: true,
   imports: [CurrencyPipe, DatePipe, DecimalPipe],
   templateUrl: './subscriptions.component.html',
-  styleUrl: './subscriptions.component\.css',
+  styleUrl: './subscriptions.component.scss',
 })
 export class SubscriptionsComponent implements OnInit {
   private readonly api = inject(SubscriptionService);

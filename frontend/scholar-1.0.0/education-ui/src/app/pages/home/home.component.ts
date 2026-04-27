@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
   standalone: true,
   imports: [RouterLink, SocialLoginComponent],
   templateUrl: './home.component.html',
-  styleUrl: './home.component\.css',
+  styleUrl: './home.component.scss',
 })
 export class HomeComponent {
   protected readonly auth = inject(AuthService);

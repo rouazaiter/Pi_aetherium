@@ -20,7 +20,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, TitleCasePipe, SignInProvidersComponent],
   templateUrl: './register.component.html',
-  styleUrl: './register.component\.css',
+  styleUrl: './register.component.scss',
   animations: [
     trigger('wizardPane', [
       transition(':enter', [

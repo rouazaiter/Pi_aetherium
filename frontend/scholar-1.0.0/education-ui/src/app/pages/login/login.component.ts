@@ -12,7 +12,7 @@ import { messageFromHttpError } from '../../core/util/http-error';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, SignInProvidersComponent],
   templateUrl: './login.component.html',
-  styleUrl: './login.component\.css',
+  styleUrl: './login.component.scss',
   animations: [
     trigger('shellEnter', [
       transition(':enter', [

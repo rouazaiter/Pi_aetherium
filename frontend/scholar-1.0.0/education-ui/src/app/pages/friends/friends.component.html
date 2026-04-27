@@ -117,7 +117,7 @@
                 <p>When someone sends you a request, it will appear here.</p>
               </article>
             }
-          </div>
+  </div>
         </section>
 
         <section class="pc-section pc-section--invitations pc-section--vivid">
@@ -325,7 +325,7 @@
                   >
                     <span class="pc-composer-gif-text" aria-hidden="true">GIF</span>
                   </button>
-                </div>
+        </div>
                 <input
                   #composerInput
                   class="pc-composer-input"
@@ -362,8 +362,8 @@
                 <button type="button" class="pc-btn-ghost" (click)="openSelectedConversationProfile()">Profile</button>
                 <button type="button" class="pc-btn-ghost" [class.pc-btn-ghost--danger]="isConversationMuted(selectedConversation)" (click)="toggleMuteSelectedConversation()">
                   {{ isConversationMuted(selectedConversation) ? 'Unmute' : 'Mute' }}
-                </button>
-              </div>
+          </button>
+        </div>
               <button type="button" class="pc-btn-ghost pc-ai-summary-btn" [disabled]="summarizingConversation" (click)="summarizeSelectedConversation()">
                 {{ summarizingConversation ? 'Generating summary...' : 'AI Summary (no voice)' }}
               </button>
@@ -374,7 +374,7 @@
                 <div class="pc-summary-card">
                   <h5>Conversation Summary</h5>
                   <p>{{ conversationSummary }}</p>
-                </div>
+    </div>
               }
               <div class="pc-chat-info-card">
                 <h5>Contact Info</h5>
@@ -383,7 +383,7 @@
                 @if (isConversationMuted(selectedConversation)) {
                   <p>🔕 Muted</p>
                 }
-              </div>
+  </div>
             </aside>
           }
         </section>
@@ -398,7 +398,7 @@
           }
           @if (profilePictureUrl(selectedFriendProfile.profilePicture)) {
             <img class="pc-profile-photo" [src]="profilePictureUrl(selectedFriendProfile.profilePicture)" [alt]="selectedFriendProfile.username" />
-          } @else {
+  } @else {
             <div class="pc-profile-photo pc-profile-photo--fallback">{{ initials(selectedFriendProfile) }}</div>
           }
           <h3>{{ profileDisplayName(selectedFriendProfile) }}</h3>
@@ -418,9 +418,9 @@
                 <span>No interests yet</span>
               }
             </div>
-          </div>
+    </div>
         </section>
-      }
+  }
     </main>
   </div>
 </div>

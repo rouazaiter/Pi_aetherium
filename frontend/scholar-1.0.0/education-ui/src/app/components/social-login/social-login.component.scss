@@ -1,1 +1,15 @@
-@import './social-login.component.css';
+.social-login {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.social-login--flush {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.google-btn-host {
+  min-height: 40px;
+}

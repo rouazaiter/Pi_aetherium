@@ -373,7 +373,10 @@
               @if (conversationSummary) {
                 <div class="pc-summary-card">
                   <h5>Conversation Summary</h5>
-                  <p>{{ conversationSummary }}</p>
+                  <p class="pc-summary-text">{{ conversationSummary }}</p>
+                  @if (conversationSummaryAnalyzedCount !== null) {
+                    <small class="pc-summary-meta">Analyzed text messages: {{ conversationSummaryAnalyzedCount }}</small>
+                  }
     </div>
               }
               <div class="pc-chat-info-card">

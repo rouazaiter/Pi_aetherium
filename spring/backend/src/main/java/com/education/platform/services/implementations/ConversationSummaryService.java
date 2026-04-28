@@ -12,6 +12,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -61,22 +62,29 @@ public class ConversationSummaryService {
             return "No text messages to summarize yet.";
         }
         String provider = aiProvider == null ? "" : aiProvider.trim().toLowerCase(Locale.ROOT);
+        String fallback = summarizeWithFallback(meUsername, otherUsername, lines);
         try {
             if ("ollama".equals(provider)) {
                 String summary = summarizeWithOllama(meUsername, otherUsername, lines);
                 if (!summary.isBlank()) {
-                    return summary;
+                    String normalized = normalizeSummaryText(summary);
+                    if (isAcceptableSummary(normalized, lines)) {
+                        return normalized;
+                    }
                 }
             } else if ("openai".equals(provider) && openAiApiKey != null && !openAiApiKey.isBlank()) {
                 String summary = summarizeWithOpenAi(meUsername, otherUsername, lines);
                 if (!summary.isBlank()) {
-                    return summary;
+                    String normalized = normalizeSummaryText(summary);
+                    if (isAcceptableSummary(normalized, lines)) {
+                        return normalized;
+                    }
                 }
             }
         } catch (Exception ignored) {
             // Keep feature available even without LLM runtime.
         }
-        return summarizeWithFallback(meUsername, otherUsername, lines);
+        return fallback;
     }
 
     private String summarizeWithOllama(String meUsername, String otherUsername, List<String> lines)
@@ -134,17 +142,28 @@ public class ConversationSummaryService {
         for (String line : clipped) {
             transcript.append("- ").append(line).append("\n");
         }
-        return "Summarize this private chat between " + meUsername + " and " + otherUsername + ".\n"
-                + "Important: voice messages are already removed. Keep the summary factual.\n"
+        return "You are summarizing a private text chat between " + meUsername + " and " + otherUsername + ".\n"
+                + "Important constraints:\n"
+                + "- Voice messages are already removed.\n"
+                + "- Do NOT rewrite the conversation line-by-line.\n"
+                + "- Do NOT include email addresses, usernames, or direct quotes.\n"
+                + "- Keep it concise, factual, and useful.\n"
                 + "Output format:\n"
-                + "1) 3-5 short bullet points (key topics and decisions)\n"
-                + "2) one final line: \"Next likely action: ...\"\n\n"
+                + "Key points:\n"
+                + "- ...\n"
+                + "- ...\n"
+                + "- ...\n"
+                + "Action items:\n"
+                + "- ...\n"
+                + "Open question: ...\n\n"
                 + "Transcript:\n" + transcript;
     }
 
     private String summarizeWithFallback(String meUsername, String otherUsername, List<String> lines) {
-        List<String> recent = lines.size() > 6 ? lines.subList(lines.size() - 6, lines.size()) : lines;
         Map<String, Integer> keywords = new HashMap<>();
+        List<String> lastUserQuestions = new ArrayList<>();
+        List<String> lastAssistantActions = new ArrayList<>();
+
         for (String line : lines) {
             String cleaned = line.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9\\s]", " ");
             for (String token : cleaned.split("\\s+")) {
@@ -153,34 +172,173 @@ public class ConversationSummaryService {
                 }
                 keywords.merge(token, 1, Integer::sum);
             }
+
+            String[] parts = splitSpeakerAndText(line);
+            String speaker = parts[0];
+            String text = parts[1];
+            if (text.isBlank()) {
+                continue;
+            }
+            String lowered = text.toLowerCase(Locale.ROOT);
+            if (speaker.equals(meUsername) && text.contains("?")) {
+                lastUserQuestions.add(compact(text, 120));
+                if (lastUserQuestions.size() > 3) {
+                    lastUserQuestions.remove(0);
+                }
+            }
+            if (speaker.equals(otherUsername) && looksLikeAction(lowered)) {
+                lastAssistantActions.add(compact(text, 120));
+                if (lastAssistantActions.size() > 3) {
+                    lastAssistantActions.remove(0);
+                }
+            }
         }
         List<String> topWords = keywords.entrySet().stream()
-                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                .sorted(Comparator.comparingInt((Map.Entry<String, Integer> e) -> e.getValue()).reversed())
                 .limit(5)
                 .map(Map.Entry::getKey)
                 .toList();
-        Set<String> bullets = new LinkedHashSet<>();
-        for (String line : recent) {
-            String trimmed = line.trim();
-            if (!trimmed.isBlank()) {
-                bullets.add(trimmed.length() <= 120 ? trimmed : trimmed.substring(0, 120) + "...");
+
+        int questionCount = 0;
+        int actionCount = 0;
+        int decisionCount = 0;
+        int issueCount = 0;
+        for (String line : lines) {
+            String l = line == null ? "" : line.toLowerCase(Locale.ROOT).trim();
+            if (l.isBlank()) {
+                continue;
+            }
+            if (l.contains("?")) {
+                questionCount++;
+            }
+            if (l.matches(".*\\b(please|do it|fix|update|add|send|create|implement)\\b.*")) {
+                actionCount++;
+            }
+            if (l.matches(".*\\b(done|ok|yes|accepted|resolved|works|working)\\b.*")) {
+                decisionCount++;
+            }
+            if (l.matches(".*\\b(error|failed|issue|problem|bug|exception|404|500|truncation)\\b.*")) {
+                issueCount++;
             }
         }
+
         StringBuilder out = new StringBuilder();
-        out.append("Summary for ").append(meUsername).append(" and ").append(otherUsername).append(":\n");
+        out.append("Key points:\n");
         if (!topWords.isEmpty()) {
-            out.append("- Frequent topics: ").append(String.join(", ", topWords)).append(".\n");
+            out.append("- Main topics discussed: ").append(String.join(", ", topWords)).append(".\n");
         }
-        int count = 0;
-        for (String bullet : bullets) {
-            out.append("- ").append(bullet).append("\n");
-            count++;
-            if (count >= 4) {
+        if (issueCount > 0) {
+            out.append("- The conversation includes troubleshooting and error-resolution steps.\n");
+        }
+        if (decisionCount > 0) {
+            out.append("- At least one decision/confirmation was made during the exchange.\n");
+        }
+
+        out.append("Action items:\n");
+        if (actionCount > 0) {
+            out.append("- Follow through on the requested implementation/fix and validate result.\n");
+        } else {
+            out.append("- Clarify the exact expected outcome and next technical step.\n");
+        }
+        if (!lastAssistantActions.isEmpty()) {
+            out.append("- Latest proposed action: ").append(lastAssistantActions.get(lastAssistantActions.size() - 1)).append("\n");
+        }
+        out.append("Open question: ");
+        if (!lastUserQuestions.isEmpty()) {
+            out.append(lastUserQuestions.get(lastUserQuestions.size() - 1));
+        } else if (questionCount > 0) {
+            out.append("Confirm whether the latest issue is fully resolved after the change.");
+        } else {
+            out.append("What is the next priority task to execute in this thread?");
+        }
+
+        return out.toString().trim();
+    }
+
+    private String normalizeSummaryText(String raw) {
+        String text = raw == null ? "" : raw.trim();
+        if (text.isBlank()) {
+            return "";
+        }
+        text = text.replaceAll("\\r\\n?", "\n");
+        text = text.replaceAll("(?im)^summary\\s*:?\\s*", "");
+
+        String[] lines = text.split("\n");
+        List<String> clean = new ArrayList<>();
+        for (String line : lines) {
+            String l = line.trim();
+            if (l.isBlank()) {
+                continue;
+            }
+            // avoid transcript-like rows "name: message"
+            if (l.matches("^[^\\s:]{2,40}:\\s+.*")) {
+                continue;
+            }
+            // avoid leaking emails in summary card
+            l = l.replaceAll("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[email]");
+            clean.add(l);
+        }
+        if (clean.isEmpty()) {
+            return "Key points:\n- The conversation contains short exchanges with limited context.\nAction items:\n- Ask one clarifying question before proceeding.\nOpen question: What should be done next?";
+        }
+        return String.join("\n", clean);
+    }
+
+    private boolean isAcceptableSummary(String summary, List<String> lines) {
+        if (summary == null || summary.isBlank()) {
+            return false;
+        }
+        String s = summary.toLowerCase(Locale.ROOT);
+        if (!s.contains("key points") && !s.contains("action items") && !s.contains("open question")) {
+            return false;
+        }
+
+        int echoedLines = 0;
+        int checked = 0;
+        for (String line : lines) {
+            String[] parts = splitSpeakerAndText(line);
+            String text = parts[1];
+            if (text.length() < 12) {
+                continue;
+            }
+            checked++;
+            String probe = text.length() > 60 ? text.substring(0, 60).toLowerCase(Locale.ROOT) : text.toLowerCase(Locale.ROOT);
+            if (s.contains(probe)) {
+                echoedLines++;
+            }
+            if (checked >= 12) {
                 break;
             }
         }
-        out.append("Next likely action: follow up on the latest open question in chat.");
-        return out.toString().trim();
+        // Reject transcript-like summaries that copy too many original lines.
+        return checked == 0 || ((double) echoedLines / checked) < 0.34;
+    }
+
+    private String[] splitSpeakerAndText(String line) {
+        String v = line == null ? "" : line.trim();
+        int i = v.indexOf(':');
+        if (i <= 0 || i >= v.length() - 1) {
+            return new String[]{"", v};
+        }
+        return new String[]{v.substring(0, i).trim(), v.substring(i + 1).trim()};
+    }
+
+    private boolean looksLikeAction(String lowered) {
+        return lowered.contains("i will")
+                || lowered.contains("i'll")
+                || lowered.contains("done")
+                || lowered.contains("fixed")
+                || lowered.contains("updated")
+                || lowered.contains("changed")
+                || lowered.contains("added");
+    }
+
+    private String compact(String text, int max) {
+        String t = text == null ? "" : text.trim().replaceAll("\\s+", " ");
+        if (t.length() <= max) {
+            return t;
+        }
+        return t.substring(0, max) + "...";
     }
 }
 

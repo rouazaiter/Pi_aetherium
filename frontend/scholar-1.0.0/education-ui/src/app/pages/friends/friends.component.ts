@@ -113,6 +113,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
   sendingMessage = false;
   summarizingConversation = false;
   conversationSummary = '';
+  conversationSummaryAnalyzedCount: number | null = null;
   conversationSummaryError = '';
   summaryConversationId: number | null = null;
   messageDraft = '';
@@ -445,19 +446,21 @@ export class FriendsComponent implements OnInit, OnDestroy {
     this.summarizingConversation = true;
     this.conversationSummaryError = '';
     this.conversationSummary = '';
+    this.conversationSummaryAnalyzedCount = null;
     this.summaryConversationId = thread.id;
     this.messaging.summarizeConversation(thread.id).subscribe({
       next: (res) => {
         this.summarizingConversation = false;
         this.summaryConversationId = thread.id;
-        const analyzed = res.analyzedTextMessages;
-        this.conversationSummary =
-          (res.summary?.trim() || 'No text messages available for summary.') +
-          `\n\n(Analyzed text messages: ${analyzed})`;
+        this.conversationSummary = res.summary?.trim() || 'No text messages available for summary.';
+        this.conversationSummaryAnalyzedCount = Number.isFinite(res.analyzedTextMessages)
+          ? res.analyzedTextMessages
+          : null;
       },
       error: (err) => {
         this.summarizingConversation = false;
         this.summaryConversationId = thread.id;
+        this.conversationSummaryAnalyzedCount = null;
         this.conversationSummaryError = messageFromHttpError(
           err,
           'Unable to summarize this conversation right now.',
@@ -1103,6 +1106,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
     }
     this.summarizingConversation = false;
     this.conversationSummary = '';
+    this.conversationSummaryAnalyzedCount = null;
     this.conversationSummaryError = '';
     this.summaryConversationId = null;
   }

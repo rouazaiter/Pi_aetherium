@@ -22,6 +22,10 @@ public class File {
 
     private String type;
 
+    private long duration;
+
+    private String thumbnailPath; // chemin vers la miniature JPG générée par FFmpeg
+
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

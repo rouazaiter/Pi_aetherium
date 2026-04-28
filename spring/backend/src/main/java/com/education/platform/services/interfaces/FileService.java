@@ -26,4 +26,9 @@ public interface FileService {
     Long startAiSummary(Long fileId);
 
     List<File> searchFiles(Long userId, String keyword);
+
+    // ========================= TRANSCRIPTION =========================
+    Long startTranscription(Long fileId);
+
+
 }

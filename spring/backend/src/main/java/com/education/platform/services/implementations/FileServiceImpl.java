@@ -2,6 +2,7 @@ package com.education.platform.services.implementations;
 
 import com.education.platform.entities.AiJob;
 import com.education.platform.entities.File;
+import com.education.platform.entities.JobStatus;
 import com.education.platform.entities.PrivateDrive;
 import com.education.platform.repositories.AiJobRepository;
 import com.education.platform.repositories.FileRepository;
@@ -10,7 +11,6 @@ import com.education.platform.services.interfaces.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,8 +20,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-
 @Service
 public class FileServiceImpl implements FileService {
 
@@ -37,6 +37,12 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private AiJobRepository jobRepository;
+
+    @Autowired
+    private AsyncJobService asyncJobService;
+
+    @Autowired
+    private VideoService videoService;
     // ========================= UPLOAD =========================
     @Override
     public File uploadFile(MultipartFile file, Long userId) {
@@ -81,10 +87,22 @@ public class FileServiceImpl implements FileService {
         f.setCreatedAt(LocalDateTime.now());
         f.setDrive(drive);
 
+        // 🔥 IMPORTANT FIX
+        long duration = videoService.getVideoDurationSeconds(filePath);
+        f.setDuration(duration);
+
+        // 🎬 THUMBNAIL : générer miniature si c'est une vidéo
+        if (file.getContentType() != null && file.getContentType().startsWith("video")) {
+            String thumbnailPath = videoService.generateThumbnail(filePath, duration);
+            f.setThumbnailPath(thumbnailPath);
+        }
+
         // 📊 UPDATE QUOTA
         drive.setUsedVolume(drive.getUsedVolume() + file.getSize());
         driveRepository.save(drive);
-
+        System.out.println("DURATION = " + f.getDuration());
+        System.out.println("VIDEO PATH = " + filePath);
+        System.out.println("DURATION = " + duration);
         return fileRepository.save(f);
     }
 
@@ -199,36 +217,15 @@ public class FileServiceImpl implements FileService {
 
         AiJob job = new AiJob();
         job.setFileId(fileId);
-        job.setStatus("PENDING");
+        job.setStatus(JobStatus.PENDING);
         job.setCreatedAt(LocalDateTime.now());
 
         job = jobRepository.save(job);
 
         // 🔥 lancer traitement async
-        processAsync(job.getId(), fileId);
+        asyncJobService.processAiSummaryAsync(job.getId(), fileId);
 
         return job.getId();
-    }
-
-    @Async
-    public void processAsync(Long jobId, Long fileId) {
-
-        AiJob job = jobRepository.findById(jobId).get();
-        job.setStatus("PROCESSING");
-        jobRepository.save(job);
-
-        try {
-            String result = processVideo(fileId); // ton code existant
-
-            job.setResult(result);
-            job.setStatus("DONE");
-
-        } catch (Exception e) {
-            job.setStatus("ERROR");
-            job.setResult("Failed: " + e.getMessage());
-        }
-
-        jobRepository.save(job);
     }
 
     @Override
@@ -247,6 +244,21 @@ public class FileServiceImpl implements FileService {
         System.out.println("RESULT SIZE = " + result.size());
 
         return result;
+    }
+
+    // ========================= TRANSCRIPTION (faster-whisper) =========================
+    @Override
+    public Long startTranscription(Long fileId) {
+
+        AiJob job = new AiJob();
+        job.setFileId(fileId);
+        job.setStatus(JobStatus.PENDING);
+        job.setCreatedAt(LocalDateTime.now());
+        job = jobRepository.save(job);
+
+        asyncJobService.transcribeAsync(job.getId(), fileId);
+
+        return job.getId();
     }
 
 }

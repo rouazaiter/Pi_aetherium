@@ -15,7 +15,8 @@ public class AiJob {
 
     private Long fileId;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private JobStatus status;
     // PENDING, PROCESSING, DONE, ERROR
 
     @Lob

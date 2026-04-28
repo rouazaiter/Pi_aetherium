@@ -2,6 +2,7 @@ package com.education.platform.services.interfaces.portfolio;
 
 import com.education.platform.dto.portfolio.SkillSummaryDto;
 import com.education.platform.dto.portfolio.CreateSkillRequest;
+import com.education.platform.dto.portfolio.UpdateSkillRequest;
 import com.education.platform.entities.portfolio.Skill;
 import com.education.platform.entities.portfolio.SkillCategory;
 
@@ -17,6 +18,10 @@ public interface SkillCatalogService {
     List<SkillCategory> listCategories();
 
     SkillSummaryDto findOrCreate(CreateSkillRequest request);
+
+    SkillSummaryDto update(Long skillId, UpdateSkillRequest request);
+
+    void delete(Long skillId);
 
     Set<Skill> requireSkillsByIds(List<Long> skillIds);
 }

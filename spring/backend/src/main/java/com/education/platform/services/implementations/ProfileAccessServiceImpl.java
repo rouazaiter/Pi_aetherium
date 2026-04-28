@@ -2,8 +2,10 @@ package com.education.platform.services.implementations;
 
 import com.education.platform.common.ApiException;
 import com.education.platform.entities.ProfileAccessCode;
+import com.education.platform.entities.Profile;
 import com.education.platform.entities.User;
 import com.education.platform.repositories.ProfileAccessCodeRepository;
+import com.education.platform.repositories.ProfileRepository;
 import com.education.platform.repositories.UserRepository;
 import com.education.platform.services.interfaces.ProfileAccessService;
 import org.springframework.http.HttpStatus;
@@ -14,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class ProfileAccessServiceImpl implements ProfileAccessService {
@@ -24,18 +28,23 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
     private static final Duration RESEND_COOLDOWN = Duration.ofSeconds(60);
     private static final int MAX_ATTEMPTS = 5;
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     private final ProfileAccessCodeRepository codeRepository;
+    private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AccountMailService accountMailService;
 
     public ProfileAccessServiceImpl(
             ProfileAccessCodeRepository codeRepository,
+            ProfileRepository profileRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             AccountMailService accountMailService) {
         this.codeRepository = codeRepository;
+        this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.accountMailService = accountMailService;
@@ -43,6 +52,10 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
 
     @Override
     public void requireProfileAccess(User user) {
+        Profile profile = profileRepository.findByUser_Id(user.getId()).orElse(null);
+        if (profile == null || !profile.isTwoFactorEnabled()) {
+            return;
+        }
         Instant until = user.getProfileAccessValidUntil();
         if (until == null || until.isBefore(Instant.now())) {
             throw new ApiException(HttpStatus.FORBIDDEN, "PROFILE_VERIFICATION_REQUIRED");
@@ -59,21 +72,21 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
                 throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, "Réessayez dans une minute.");
             }
         }
-        codeRepository.deleteByUser_Id(user.getId());
 
         int codeNum = 100_000 + RANDOM.nextInt(900_000);
         String plain = String.valueOf(codeNum);
         Instant now = Instant.now();
-        ProfileAccessCode entity =
+        ProfileAccessCode entity = existing.orElseGet(() ->
                 ProfileAccessCode.builder()
                         .user(userRepository.getReferenceById(user.getId()))
-                        .codeHash(passwordEncoder.encode(plain))
-                        .expiresAt(now.plus(CODE_TTL))
-                        .sentAt(now)
-                        .attempts(0)
-                        .build();
+                        .build()
+        );
+        entity.setCodeHash(passwordEncoder.encode(plain));
+        entity.setExpiresAt(now.plus(CODE_TTL));
+        entity.setSentAt(now);
+        entity.setAttempts(0);
         codeRepository.save(entity);
-        accountMailService.sendProfileAccessCode(user.getEmail(), plain);
+        accountMailService.sendProfileAccessCode(resolveConnectedUserEmail(user), plain);
     }
 
     @Override
@@ -107,5 +120,30 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
         User fresh = userRepository.findById(user.getId()).orElseThrow();
         fresh.setProfileAccessValidUntil(Instant.now().plus(SESSION_TTL));
         userRepository.save(fresh);
+    }
+
+    private String resolveConnectedUserEmail(User user) {
+        User freshUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+        String primary = normalizeEmail(freshUser.getEmail());
+        if (isValidEmail(primary)) {
+            return primary;
+        }
+        Profile profile = profileRepository.findByUser_Id(freshUser.getId()).orElse(null);
+        String recovery = profile != null ? normalizeEmail(profile.getRecuperationEmail()) : "";
+        if (isValidEmail(recovery)) {
+            return recovery;
+        }
+        throw new ApiException(
+                HttpStatus.BAD_REQUEST,
+                "Adresse e-mail du compte invalide. Mettez à jour votre e-mail principal.");
+    }
+
+    private String normalizeEmail(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private boolean isValidEmail(String email) {
+        return !email.isBlank() && EMAIL_PATTERN.matcher(email).matches();
     }
 }

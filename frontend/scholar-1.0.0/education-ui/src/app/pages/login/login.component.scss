@@ -1,3 +1,4 @@
+@charset "UTF-8";
 :host {
   display: block;
   min-height: 100vh;
@@ -68,8 +69,7 @@
 }
 
 @keyframes signin-float {
-  0%,
-  100% {
+  0%, 100% {
     transform: translate(0, 0) scale(1);
   }
   33% {
@@ -79,7 +79,6 @@
     transform: translate(-2%, -2%) scale(0.98);
   }
 }
-
 /* —— Glass card —— */
 .signin-shell {
   position: relative;
@@ -90,10 +89,7 @@
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow:
-    0 4px 24px rgba(95, 82, 184, 0.08),
-    0 24px 64px -24px rgba(122, 106, 216, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 24px rgba(95, 82, 184, 0.08), 0 24px 64px -24px rgba(122, 106, 216, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -151,10 +147,9 @@
   text-underline-offset: 3px;
   font-weight: 600;
   transition: color 0.2s ease;
-
-  &:hover {
-    color: #7a6ad8;
-  }
+}
+.signin-link:hover {
+  color: #7a6ad8;
 }
 
 .signin-card-inner {
@@ -198,14 +193,12 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(122, 106, 216, 0.35), transparent);
-  }
+}
+.signin-form-divider::before, .signin-form-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(122, 106, 216, 0.35), transparent);
 }
 
 .signin-field-label {
@@ -216,10 +209,9 @@
   margin-bottom: 0.4rem;
   margin-top: 1rem;
   letter-spacing: 0.02em;
-
-  &:first-of-type {
-    margin-top: 0;
-  }
+}
+.signin-field-label:first-of-type {
+  margin-top: 0;
 }
 
 .signin-input-wrap {
@@ -234,25 +226,19 @@
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.9);
   box-sizing: border-box;
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease;
-
-  &::placeholder {
-    color: #a8a8a8;
-  }
-
-  &:hover:not(:focus) {
-    border-color: rgba(122, 106, 216, 0.35);
-  }
-
-  &:focus {
-    outline: none;
-    border-color: #7a6ad8;
-    box-shadow: 0 0 0 4px rgba(122, 106, 216, 0.18);
-    background: #fff;
-  }
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.signin-field::placeholder {
+  color: #a8a8a8;
+}
+.signin-field:hover:not(:focus) {
+  border-color: rgba(122, 106, 216, 0.35);
+}
+.signin-field:focus {
+  outline: none;
+  border-color: #7a6ad8;
+  box-shadow: 0 0 0 4px rgba(122, 106, 216, 0.18);
+  background: #fff;
 }
 
 .signin-field--with-action {
@@ -261,10 +247,9 @@
 
 .signin-field--invalid {
   border-color: rgba(176, 42, 55, 0.45);
-
-  &:focus {
-    box-shadow: 0 0 0 4px rgba(176, 42, 55, 0.12);
-  }
+}
+.signin-field--invalid:focus {
+  box-shadow: 0 0 0 4px rgba(176, 42, 55, 0.12);
 }
 
 .signin-field-error {
@@ -289,19 +274,15 @@
   background: transparent;
   color: #666;
   cursor: pointer;
-  transition:
-    color 0.2s ease,
-    background 0.2s ease;
-
-  &:hover {
-    color: #7a6ad8;
-    background: rgba(122, 106, 216, 0.08);
-  }
-
-  &:focus-visible {
-    outline: 2px solid #7a6ad8;
-    outline-offset: 2px;
-  }
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.signin-password-toggle:hover {
+  color: #7a6ad8;
+  background: rgba(122, 106, 216, 0.08);
+}
+.signin-password-toggle:focus-visible {
+  outline: 2px solid #7a6ad8;
+  outline-offset: 2px;
 }
 
 .signin-forgot-global {
@@ -316,14 +297,11 @@
   text-decoration: none;
   padding: 0.35rem 0.5rem;
   border-radius: 8px;
-  transition:
-    color 0.2s ease,
-    background 0.2s ease;
-
-  &:hover {
-    color: #5f52b8;
-    background: rgba(122, 106, 216, 0.1);
-  }
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.signin-forgot-prominent:hover {
+  color: #5f52b8;
+  background: rgba(122, 106, 216, 0.1);
 }
 
 .signin-forgot-row {
@@ -337,11 +315,10 @@
   font-weight: 600;
   color: #7a6ad8;
   text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-    color: #5f52b8;
-  }
+}
+.signin-forgot:hover {
+  text-decoration: underline;
+  color: #5f52b8;
 }
 
 .signin-submit {
@@ -361,31 +338,21 @@
   border-radius: 14px;
   cursor: pointer;
   background: linear-gradient(135deg, #8b7ee8 0%, #7a6ad8 40%, #6b5cc9 100%);
-  box-shadow:
-    0 4px 16px rgba(122, 106, 216, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    filter 0.2s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 28px rgba(122, 106, 216, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    filter: brightness(1.03);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.75;
-    cursor: not-allowed;
-    transform: none;
-  }
+  box-shadow: 0 4px 16px rgba(122, 106, 216, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.signin-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(122, 106, 216, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  filter: brightness(1.03);
+}
+.signin-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+.signin-submit:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .signin-submit__label {
@@ -406,12 +373,7 @@
 .signin-submit--loading .signin-submit__shimmer {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.18) 45%,
-    transparent 55%
-  );
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.18) 45%, transparent 55%);
   animation: signin-shimmer 1.4s ease-in-out infinite;
 }
 
@@ -423,33 +385,27 @@
     transform: translateX(100%);
   }
 }
-
 .signin-dots {
   display: inline-flex;
   gap: 4px;
   align-items: center;
-
-  span {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.95);
-    animation: signin-dot 0.9s ease-in-out infinite both;
-
-    &:nth-child(2) {
-      animation-delay: 0.15s;
-    }
-
-    &:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-  }
+}
+.signin-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  animation: signin-dot 0.9s ease-in-out infinite both;
+}
+.signin-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.signin-dots span:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
 @keyframes signin-dot {
-  0%,
-  80%,
-  100% {
+  0%, 80%, 100% {
     opacity: 0.35;
     transform: scale(0.85);
   }
@@ -458,18 +414,15 @@
     transform: scale(1);
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .signin-blob,
   .signin-submit__shimmer,
   .signin-dots span {
     animation: none !important;
   }
-
   .signin-submit:hover:not(:disabled) {
     transform: none;
   }
-
   .signin-submit:hover:not(:disabled) .signin-submit__arrow {
     transform: none;
   }

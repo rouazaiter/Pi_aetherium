@@ -11,4 +11,6 @@ public class SkillSummaryDto {
     private Long id;
     private String name;
     private SkillCategory category;
+    private String description;
+    private String slug;
 }

@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+﻿import { Component, HostListener, inject } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { WelcomeDialogService } from '../../core/services/welcome-dialog.service';
 
@@ -52,3 +52,4 @@ export class WelcomeDialogComponent {
     }
   }
 }
+

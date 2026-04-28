@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SocialLoginComponent } from '../../components/social-login/social-login.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -17,3 +17,4 @@ export class HomeComponent {
     environment.googleClientId?.trim() || environment.facebookAppId?.trim(),
   );
 }
+

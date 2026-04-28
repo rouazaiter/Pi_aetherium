@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import type { MessageResponse, ProfileResponse, ProfileUpdateRequest } from '../models/api.models';
+import type { LoginActivityResponse, MessageResponse, ProfileResponse, ProfileUpdateRequest } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -34,5 +34,17 @@ export class ProfileService {
     const body = new FormData();
     body.append('file', file, file.name);
     return this.http.post<ProfileResponse>(this.api('/api/profile/me/photo'), body);
+  }
+
+  setTwoFactorEnabled(enabled: boolean): Observable<ProfileResponse> {
+    return this.http.patch<ProfileResponse>(this.api('/api/profile/me/security/two-factor'), { enabled });
+  }
+
+  setActiveStatusVisibility(enabled: boolean): Observable<ProfileResponse> {
+    return this.http.patch<ProfileResponse>(this.api('/api/profile/me/privacy/active-status'), { enabled });
+  }
+
+  loginActivity(): Observable<LoginActivityResponse[]> {
+    return this.http.get<LoginActivityResponse[]>(this.api('/api/profile/me/security/login-activity'));
   }
 }

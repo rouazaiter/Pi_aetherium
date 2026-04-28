@@ -19,4 +19,7 @@ public class ProfileUpdateRequest {
 
     @Email(message = "E-mail de récupération invalide")
     private String recuperationEmail;
+
+    private Boolean twoFactorEnabled;
+    private Boolean activeStatusVisible;
 }

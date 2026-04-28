@@ -66,7 +66,8 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         portfolio.getSkills().addAll(skillCatalogService.requireSkillsByIds(request.getSkillIds()));
         Portfolio saved = portfolioRepository.save(portfolio);
-        return buildOwnerResponse(saved);
+        return buildOwnerResponse(portfolioRepository.findById(saved.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Portfolio cree mais introuvable")));
     }
 
     @Override

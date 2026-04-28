@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import type { ApiErrorBody } from '../models/api.models';
 
 const MSG_404_API =
-  'Réponse 404 : la requête n’atteint pas le bon service. 1) Démarrez le backend Spring (port 8081, voir application.properties). 2) Ouvrez dans le navigateur : http://localhost:8081/api/auth/health — vous devez voir JSON {"status":"ok",...}. Sinon, recompilez (Maven Rebuild) et relancez l’appli. 3) Vérifiez que environment.apiUrl pointe vers ce même hôte/port.';
+  'Réponse 404 : la ressource est introuvable. Vérifiez que le backend Spring est lancé (port 8089) et que vous exécutez la dernière version du backend. Test rapide : http://localhost:8089/api/auth/health (JSON {"status":"ok",...}).';
 
 /** Codes d’erreur API → message lisible (évite d’afficher des identifiants techniques). */
 const KNOWN_API_ERRORS: Record<string, string> = {
@@ -18,6 +18,9 @@ function humanizeApiError(raw: string): string {
 export function messageFromHttpError(err: unknown, fallback: string): string {
   if (err instanceof HttpErrorResponse) {
     if (err.status === 404) {
+      if (err.url?.includes('/api/subscriptions/') && err.url?.includes('/invoice')) {
+        return "Facture introuvable pour cet abonnement. Redémarrez le backend (version à jour) puis réessayez.";
+      }
       return MSG_404_API;
     }
     const body = err.error as ApiErrorBody | string | null;
@@ -33,7 +36,7 @@ export function messageFromHttpError(err: unknown, fallback: string): string {
       return body;
     }
     if (err.status === 0) {
-      return 'Après Google, l’application appelle votre API Spring (POST /api/auth/social) sur http://localhost:8081 — le navigateur n’a pas reçu de réponse (serveur arrêté, mauvais port, ou pare-feu). Démarrez le backend (Maven / IntelliJ), vérifiez server.port=8081, puis testez http://localhost:8081/api/auth/health dans le navigateur. Ouvrez le site en http://localhost:4200 (même machine).';
+      return 'L’application n’a pas reçu de réponse de l’API Spring (serveur arrêté, mauvais port, ou pare-feu). Démarrez le backend, vérifiez server.port=8089, puis testez http://localhost:8089/api/auth/health dans le navigateur.';
     }
   }
   return fallback;

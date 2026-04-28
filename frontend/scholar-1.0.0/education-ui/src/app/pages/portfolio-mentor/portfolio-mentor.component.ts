@@ -91,7 +91,7 @@ export class PortfolioMentorComponent implements OnInit, OnDestroy {
 
   protected readonly quickPrompts: MentorQuickPrompt[] = [
     { label: 'Improve my portfolio', message: 'Improve my portfolio', target: 'general', replyMode: 'ADVICE' },
-    { label: 'What’s missing?', message: 'What is missing from my portfolio?', target: 'general', replyMode: 'ADVICE' },
+    { label: "What's missing?", message: 'What is missing from my portfolio?', target: 'general', replyMode: 'ADVICE' },
     { label: 'Rewrite my bio', message: 'Rewrite my bio to make it stronger', target: 'bio', replyMode: 'REWRITE' },
     {
       label: 'Check coherence',
@@ -148,7 +148,7 @@ export class PortfolioMentorComponent implements OnInit, OnDestroy {
 
   protected greeting(): string {
     const userName = this.userName();
-    return userName ? `Hi ${userName} 👋` : 'Hi there 👋';
+    return userName ? `Hi ${userName}` : 'Hi there';
   }
 
   protected assistantWelcomeMessage(): string {

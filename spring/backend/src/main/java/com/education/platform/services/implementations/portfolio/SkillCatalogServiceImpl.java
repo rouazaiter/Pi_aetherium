@@ -3,8 +3,13 @@ package com.education.platform.services.implementations.portfolio;
 import com.education.platform.common.ApiException;
 import com.education.platform.dto.portfolio.CreateSkillRequest;
 import com.education.platform.dto.portfolio.SkillSummaryDto;
+import com.education.platform.dto.portfolio.UpdateSkillRequest;
 import com.education.platform.entities.portfolio.Skill;
 import com.education.platform.entities.portfolio.SkillCategory;
+import com.education.platform.entities.portfolio.Portfolio;
+import com.education.platform.entities.portfolio.PortfolioProject;
+import com.education.platform.repositories.portfolio.PortfolioProjectRepository;
+import com.education.platform.repositories.portfolio.PortfolioRepository;
 import com.education.platform.repositories.portfolio.SkillRepository;
 import com.education.platform.services.interfaces.portfolio.SkillCatalogService;
 import org.springframework.data.domain.Sort;
@@ -21,10 +26,18 @@ import java.util.Set;
 public class SkillCatalogServiceImpl implements SkillCatalogService {
 
     private final SkillRepository skillRepository;
+    private final PortfolioRepository portfolioRepository;
+    private final PortfolioProjectRepository portfolioProjectRepository;
     private final PortfolioMapper portfolioMapper;
 
-    public SkillCatalogServiceImpl(SkillRepository skillRepository, PortfolioMapper portfolioMapper) {
+    public SkillCatalogServiceImpl(
+            SkillRepository skillRepository,
+            PortfolioRepository portfolioRepository,
+            PortfolioProjectRepository portfolioProjectRepository,
+            PortfolioMapper portfolioMapper) {
         this.skillRepository = skillRepository;
+        this.portfolioRepository = portfolioRepository;
+        this.portfolioProjectRepository = portfolioProjectRepository;
         this.portfolioMapper = portfolioMapper;
     }
 
@@ -81,6 +94,57 @@ public class SkillCatalogServiceImpl implements SkillCatalogService {
 
         Skill saved = skillRepository.save(skill);
         return portfolioMapper.toSkillSummary(saved);
+    }
+
+    @Override
+    @Transactional
+    public SkillSummaryDto update(Long skillId, UpdateSkillRequest request) {
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Competence introuvable"));
+
+        String rawName = request == null ? null : request.getName();
+        if (rawName != null) {
+            String normalizedName = Skill.normalizeName(rawName);
+            if (normalizedName == null) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Le nom de la competence est obligatoire");
+            }
+            skillRepository.findByNormalizedName(normalizedName)
+                    .filter(existing -> !existing.getId().equals(skillId))
+                    .ifPresent(existing -> {
+                        throw new ApiException(HttpStatus.CONFLICT, "Une competence avec ce nom existe deja");
+                    });
+            skill.setName(rawName.trim());
+        }
+
+        if (request != null && request.getCategory() != null) {
+            skill.setCategory(request.getCategory());
+        }
+
+        if (request != null && request.getDescription() != null) {
+            String description = request.getDescription().trim();
+            skill.setDescription(description.isEmpty() ? null : description);
+        }
+
+        return portfolioMapper.toSkillSummary(skillRepository.save(skill));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long skillId) {
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Competence introuvable"));
+
+        List<Portfolio> portfolios = portfolioRepository.findDistinctBySkills_Id(skillId);
+        for (Portfolio portfolio : portfolios) {
+            portfolio.getSkills().remove(skill);
+        }
+
+        List<PortfolioProject> projects = portfolioProjectRepository.findDistinctBySkills_Id(skillId);
+        for (PortfolioProject project : projects) {
+            project.getSkills().remove(skill);
+        }
+
+        skillRepository.delete(skill);
     }
 
     @Override

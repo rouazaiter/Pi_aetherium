@@ -59,6 +59,14 @@ public class Profile {
     @Column(name = "recuperationEmail", length = 255)
     private String recuperationEmail;
 
+    @Column(name = "twoFactorEnabled", nullable = false)
+    @Builder.Default
+    private boolean twoFactorEnabled = false;
+
+    @Column(name = "activeStatusVisible", nullable = false)
+    @Builder.Default
+    private boolean activeStatusVisible = true;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "User_id", nullable = false, unique = true)
     private User user;

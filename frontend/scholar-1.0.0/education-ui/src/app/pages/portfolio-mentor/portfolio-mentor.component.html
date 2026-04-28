@@ -1,12 +1,32 @@
 <section class="portfolio-mentor">
+  <header class="mentor-topbar">
+    <div class="mentor-topbar__brand">
+      <span class="mentor-sidebar__brand-mark">S</span>
+      <strong>Scholar</strong>
+    </div>
+    <div class="mentor-topbar__title">Portfolio Mentor</div>
+    <div class="mentor-topbar__actions" aria-label="Account actions">
+      <span class="mentor-topbar__bell" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 0-5 5v3.7l-1.6 2.7A1.4 1.4 0 0 0 6.6 16.5h10.8a1.4 1.4 0 0 0 1.2-2.1L17 11.7V8a5 5 0 0 0-5-5Zm-1.6 15.2a1.8 1.8 0 0 0 3.2 0h-3.2Z" /></svg>
+      </span>
+      <span class="mentor-topbar__avatar" aria-hidden="true">{{ userName() ? userName().charAt(0).toUpperCase() : 'S' }}</span>
+      <span class="mentor-topbar__chevron" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="m7 9.5 5 5 5-5 1.4 1.4-6.4 6.4-6.4-6.4L7 9.5Z" /></svg>
+      </span>
+    </div>
+  </header>
+
   <div class="portfolio-mentor__shell">
     <aside class="mentor-sidebar">
-      <div class="mentor-sidebar__brand">
-        <span class="mentor-sidebar__brand-mark">S</span>
+      <div class="mentor-sidebar__workspace">
+        <span class="mentor-sidebar__workspace-mark">E</span>
         <div>
-          <strong>Scholar</strong>
-          <span>AI Workspace</span>
+          <strong>Enterprise Workspace</strong>
+          <span>Admin</span>
         </div>
+        <span class="mentor-sidebar__workspace-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m7 9.5 5 5 5-5 1.4 1.4-6.4 6.4-6.4-6.4L7 9.5Z" /></svg>
+        </span>
       </div>
 
       <nav class="mentor-sidebar__nav" aria-label="Portfolio Mentor navigation">
@@ -50,9 +70,12 @@
       </nav>
 
       <div class="mentor-sidebar__help">
-        <span class="mentor-sidebar__help-badge">AI</span>
-        <h3>Need help building a stronger portfolio?</h3>
-        <p>Ask me anything. I’m here to help.</p>
+        <span class="mentor-sidebar__help-badge">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 3 5.6 6.2 1.1-4.4 4.5.9 6.2L12 17.6l-5.7 2.8.9-6.2-4.4-4.5L9 8.6 12 3Z" /></svg>
+        </span>
+        <h3>Unlock advanced insights</h3>
+        <p>Upgrade to Pro for deeper AI analysis and priority support.</p>
+        <button type="button" class="mentor-sidebar__upgrade">Upgrade to Pro</button>
       </div>
 
       <div class="mentor-sidebar__profile">
@@ -61,21 +84,35 @@
           <strong>{{ userName() || 'Scholar user' }}</strong>
           <span>View profile</span>
         </div>
+        <span class="mentor-sidebar__profile-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m7 9.5 5 5 5-5 1.4 1.4-6.4 6.4-6.4-6.4L7 9.5Z" /></svg>
+        </span>
       </div>
     </aside>
 
     <div class="mentor-content">
       <header class="mentor-header">
         <div>
-          <h1>{{ greeting() }}</h1>
-          <p>I’m your AI portfolio mentor. Ask me anything or get feedback to improve.</p>
+          <h1>Hi <span class="mentor-header__name">{{ userName() || 'there' }}</span> <span aria-hidden="true">👋</span></h1>
+          <p>I'm your AI portfolio mentor. Ask me anything or get feedback to improve.</p>
         </div>
-        <div class="mentor-header__chip">AI Mentor</div>
+        <div class="mentor-header__chip">
+          <span class="mentor-header__bot" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M11 4h2v2h3a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h3V4Zm-3 4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H8Zm1.7 3.2a1.1 1.1 0 1 1 2.2 0 1.1 1.1 0 0 1-2.2 0Zm4.4 0a1.1 1.1 0 1 1 2.2 0 1.1 1.1 0 0 1-2.2 0ZM10 13h4v1h-4v-1Z" /></svg>
+          </span>
+          <div>
+            <strong>AI Mentor</strong>
+            <span>Online</span>
+          </div>
+          <span class="mentor-header__wave" aria-hidden="true"></span>
+        </div>
       </header>
 
       <section class="mentor-chat-card">
         <div class="mentor-chat-card__intro">
-          <div class="mentor-avatar mentor-avatar--assistant">AI</div>
+          <div class="mentor-avatar mentor-avatar--assistant">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 9.8 7.8 5 10l4.8 2.2L12 17l2.2-4.8L19 10l-4.8-2.2L12 3Z" /></svg>
+          </div>
           <div class="mentor-chat-card__welcome">
             <p>{{ assistantWelcomeMessage() }}</p>
           </div>
@@ -84,9 +121,16 @@
         <div class="mentor-chat-card__quick-actions">
           @for (prompt of quickPrompts; track trackByLabel($index, prompt)) {
             <button type="button" class="mentor-quick-action" (click)="sendQuickPrompt(prompt)">
+              <span class="mentor-quick-action__icon" aria-hidden="true"></span>
               {{ prompt.label }}
             </button>
           }
+        </div>
+
+        <div class="mentor-chat-card__suggestions" aria-label="Suggested portfolio questions">
+          <span>How to position myself for better opportunities</span>
+          <span>Make my projects stand out more</span>
+          <span>Improve technical depth</span>
         </div>
 
         <div class="mentor-chat-card__messages">
@@ -180,231 +224,250 @@
             </button>
           </div>
         </form>
-        <p class="mentor-chat-card__hint">Try asking about skills to learn, project ideas, improving your bio, job readiness, and more.</p>
+        <p class="mentor-chat-card__hint">
+          <span aria-hidden="true">▣</span>
+          Your data is private and used only to generate personalized insights.
+        </p>
       </section>
 
-      <section class="mentor-section">
-        <article class="mentor-soft-card mentor-insight-card">
-          <div class="mentor-section__row">
-            <div class="mentor-section__title-wrap">
-              <span class="mentor-section__icon mentor-section__icon--purple">✦</span>
-              <div>
-                <h2>AI Insight</h2>
-                <span class="mentor-pill mentor-pill--purple">New</span>
+      <div class="mentor-dashboard-grid mentor-dashboard-grid--top">
+        <section class="mentor-section">
+          <article class="mentor-soft-card mentor-insight-card">
+            <div class="mentor-section__row">
+              <div class="mentor-section__title-wrap">
+                <span class="mentor-section__icon mentor-section__icon--purple" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 4.5h2v15h-2v-15Zm-5 4h2v11H7v-11Zm10 5h2v6h-2v-6Z" /></svg>
+                </span>
+                <div class="mentor-section__title-line">
+                  <h2>AI Insight</h2>
+                  <span class="mentor-pill mentor-pill--purple">New</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          @if (summaryState.loading || strengthsState.loading || movesState.loading) {
-            <div class="mentor-soft-card__state">Building your latest AI summary...</div>
-          } @else {
-            @if (insightSummary(); as insight) {
-              <div class="mentor-insight-card__content">
-                @if (insight.intro) {
-                  <p>{{ insight.intro }}</p>
-                }
-                @if (insight.gaps) {
-                  <p>{{ insight.gaps }}</p>
-                }
-                @if (insight.nextStep) {
-                  <a class="mentor-inline-link" routerLink="/jihen-portfolio">{{ insight.nextStep }}</a>
-                }
-              </div>
+            @if (summaryState.loading || strengthsState.loading || movesState.loading) {
+              <div class="mentor-soft-card__state">Building your latest AI summary...</div>
             } @else {
-              <div class="mentor-soft-card__state">Not enough AI insight data yet. Ask the mentor a question or add more portfolio details.</div>
+              @if (insightSummary(); as insight) {
+                <div class="mentor-insight-card__content">
+                  @if (insight.intro) {
+                    <p>{{ insight.intro }}</p>
+                  }
+                  @if (insight.gaps) {
+                    <p>{{ insight.gaps }}</p>
+                  }
+                  @if (insight.nextStep) {
+                    <a class="mentor-inline-link" routerLink="/jihen-portfolio">
+                      <span class="mentor-inline-link__icon" aria-hidden="true">↗</span>
+                      {{ insight.nextStep }}
+                    </a>
+                  }
+                </div>
+              } @else {
+                <div class="mentor-soft-card__state">Not enough AI insight data yet. Ask the mentor a question or add more portfolio details.</div>
+              }
             }
-          }
-        </article>
-      </section>
+          </article>
+        </section>
 
-      <section class="mentor-section">
-        <article class="mentor-soft-card">
-          <div class="mentor-section__row">
-            <div class="mentor-section__title-wrap">
-              <span class="mentor-section__icon mentor-section__icon--green">✓</span>
-              <div class="mentor-section__title-line">
-                <h2>Your Strengths</h2>
-                <span class="mentor-pill mentor-pill--green">{{ strengthCount() }}</span>
+        <section class="mentor-section">
+          <article class="mentor-soft-card mentor-list-card">
+            <div class="mentor-section__row">
+              <div class="mentor-section__title-wrap">
+                <span class="mentor-section__icon mentor-section__icon--green" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="m9.4 16.6-4-4L6.8 11.2l2.6 2.6 7.8-7.8 1.4 1.4-9.2 9.2Z" /></svg>
+                </span>
+                <div class="mentor-section__title-line">
+                  <h2>Your Strengths</h2>
+                  <span class="mentor-pill mentor-pill--green">{{ strengthCount() }}</span>
+                </div>
               </div>
+              <a class="mentor-action-link" routerLink="/jihen-portfolio">View details <span aria-hidden="true">→</span></a>
             </div>
-            <a class="mentor-action-link" routerLink="/jihen-portfolio">View details</a>
-          </div>
 
-          @if (strengthsState.loading) {
-            <div class="mentor-soft-card__state">Loading your strengths...</div>
-          } @else if (strengthsState.error) {
-            <div class="mentor-inline-state mentor-inline-state--error">
-              <p>{{ strengthsState.error }}</p>
-            </div>
-          } @else if (topStrengths().length > 0) {
-            <div class="mentor-triple-grid">
-              @for (item of topStrengths(); track trackByTitle($index, item)) {
-                <article class="mentor-compact-item mentor-compact-item--strength">
-                  <span class="mentor-item-mark mentor-item-mark--green">{{ insightItemIcon(item, true) }}</span>
-                  <h3>{{ item.title }}</h3>
-                  <p>{{ item.description || item.category }}</p>
-                  <div class="mentor-compact-item__meta">
-                    @if (item.score > 0) {
-                      <span>{{ item.score }}/100</span>
-                    }
-                    @if (item.priority) {
-                      <span>{{ item.priority }}</span>
-                    }
-                  </div>
-                </article>
-              }
-            </div>
-          } @else {
-            <div class="mentor-soft-card__state">No strengths were returned yet.</div>
-          }
-        </article>
-      </section>
-
-      <section class="mentor-section">
-        <article class="mentor-soft-card">
-          <div class="mentor-section__row">
-            <div class="mentor-section__title-wrap">
-              <span class="mentor-section__icon mentor-section__icon--danger">!</span>
-              <div class="mentor-section__title-line">
-                <h2>Areas to Improve</h2>
-                <span class="mentor-pill mentor-pill--danger">{{ gapCount() }}</span>
+            @if (strengthsState.loading) {
+              <div class="mentor-soft-card__state">Loading your strengths...</div>
+            } @else if (strengthsState.error) {
+              <div class="mentor-inline-state mentor-inline-state--error">
+                <p>{{ strengthsState.error }}</p>
               </div>
-            </div>
-            <a class="mentor-action-link" routerLink="/jihen-portfolio">View details</a>
-          </div>
-
-          @if (strengthsState.loading) {
-            <div class="mentor-soft-card__state">Loading your gaps...</div>
-          } @else if (strengthsState.error) {
-            <div class="mentor-inline-state mentor-inline-state--error">
-              <p>{{ strengthsState.error }}</p>
-            </div>
-          } @else if (topGaps().length > 0) {
-            <div class="mentor-triple-grid">
-              @for (item of topGaps(); track trackByTitle($index, item)) {
-                <article class="mentor-compact-item mentor-compact-item--gap">
-                  <span class="mentor-item-mark mentor-item-mark--danger">{{ insightItemIcon(item, false) }}</span>
-                  <h3>{{ item.title }}</h3>
-                  <p>{{ item.description || item.category }}</p>
-                  <div class="mentor-compact-item__meta">
-                    @if (item.score > 0) {
-                      <span>{{ item.score }}/100</span>
-                    }
-                    @if (item.priority) {
-                      <span>{{ item.priority }}</span>
-                    }
-                  </div>
-                </article>
-              }
-            </div>
-          } @else {
-            <div class="mentor-soft-card__state">No gaps were returned yet.</div>
-          }
-        </article>
-      </section>
-
-      <section class="mentor-section">
-        <article class="mentor-soft-card">
-          <div class="mentor-section__row">
-            <div class="mentor-section__title-wrap">
-              <span class="mentor-section__icon mentor-section__icon--purple">→</span>
-              <div class="mentor-section__title-line">
-                <h2>Next Best Moves</h2>
-                <span class="mentor-pill mentor-pill--purple">{{ moveCount() }}</span>
-              </div>
-            </div>
-            <a class="mentor-action-link" routerLink="/jihen-portfolio">View roadmap</a>
-          </div>
-
-          @if (movesState.loading) {
-            <div class="mentor-soft-card__state">Loading your roadmap...</div>
-          } @else if (movesState.error) {
-            <div class="mentor-inline-state mentor-inline-state--error">
-              <p>{{ movesState.error }}</p>
-            </div>
-          } @else if (topMoves().length > 0) {
-            <div class="mentor-checklist">
-              @for (move of topMoves(); track trackByTitle($index, move)) {
-                <article class="mentor-checklist__item">
-                  <span class="mentor-checklist__circle" aria-hidden="true"></span>
-                  <div class="mentor-checklist__body">
-                    <div class="mentor-checklist__top">
-                      <h3>{{ move.title }}</h3>
-                      <div class="mentor-checklist__badges">
-                        @if (move.category) {
-                          <span class="mentor-pill mentor-pill--neutral">{{ move.category }}</span>
-                        }
-                        @if (move.impact) {
-                          <span class="mentor-pill mentor-pill--purple-soft">{{ move.impact }}</span>
-                        }
-                        <span class="mentor-pill mentor-pill--neutral">Priority {{ move.priority }}</span>
-                      </div>
+            } @else if (topStrengths().length > 0) {
+              <div class="mentor-triple-grid">
+                @for (item of topStrengths(); track trackByTitle($index, item)) {
+                  <article class="mentor-compact-item mentor-compact-item--strength">
+                    <span class="mentor-item-mark mentor-item-mark--green">{{ insightItemIcon(item, true) }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <div class="mentor-progress">
+                      <span [style.width.%]="item.score || 48"></span>
                     </div>
-                    @if (move.description) {
-                      <p>{{ move.description }}</p>
-                    }
-                  </div>
-                </article>
-              }
-            </div>
-          } @else {
-            <div class="mentor-soft-card__state">No roadmap moves were returned yet.</div>
-          }
-        </article>
-      </section>
-
-      <section class="mentor-section">
-        <article class="mentor-soft-card mentor-coherence">
-          <div class="mentor-section__row">
-            <div class="mentor-section__title-wrap">
-              <div>
-                <h2>Portfolio Coherence</h2>
-              </div>
-            </div>
-          </div>
-
-          @if (coherenceState.loading) {
-            <div class="mentor-soft-card__state">Loading your coherence analysis...</div>
-          } @else if (coherenceState.error) {
-            <div class="mentor-inline-state mentor-inline-state--error">
-              <p>{{ coherenceState.error }}</p>
-            </div>
-          } @else if (coherenceState.data) {
-            <div class="mentor-coherence__layout">
-              <div class="mentor-coherence__summary">
-                <div class="mentor-coherence__score" [class.mentor-coherence__score--medium]="scoreTone(coherenceState.data.score) === 'medium'" [class.mentor-coherence__score--critical]="scoreTone(coherenceState.data.score) === 'critical'">
-                  <strong>{{ coherenceState.data.score }}</strong>
-                  <span>/100</span>
-                </div>
-                <div class="mentor-coherence__copy">
-                  <span class="mentor-pill" [class.mentor-pill--green]="scoreTone(coherenceState.data.score) === 'strong'" [class.mentor-pill--orange]="scoreTone(coherenceState.data.score) === 'medium'" [class.mentor-pill--danger]="scoreTone(coherenceState.data.score) === 'critical'">
-                    {{ coherenceState.data.status }}
-                  </span>
-                  <p>{{ coherenceState.data.explanation }}</p>
-                </div>
-              </div>
-
-              <div class="mentor-coherence__metrics">
-                @for (metric of coherenceState.data.metrics; track trackByTitle($index, metric)) {
-                  <article class="mentor-mini-metric">
-                    <h3>{{ metric.title }}</h3>
-                    <strong>{{ metric.score }}/100</strong>
-                    <div class="mentor-mini-metric__bar">
-                      <span [style.width.%]="metric.progress"></span>
+                    <div class="mentor-compact-item__meta">
+                      @if (item.priority) {
+                        <span>{{ item.priority }}</span>
+                      }
                     </div>
                   </article>
                 }
               </div>
+            } @else {
+              <div class="mentor-soft-card__state">No strengths were returned yet.</div>
+            }
+          </article>
+        </section>
+
+        <section class="mentor-section">
+          <article class="mentor-soft-card mentor-list-card">
+            <div class="mentor-section__row">
+              <div class="mentor-section__title-wrap">
+                <span class="mentor-section__icon mentor-section__icon--danger">3</span>
+                <div class="mentor-section__title-line">
+                  <h2>Areas to Improve</h2>
+                  <span class="mentor-pill mentor-pill--danger">{{ gapCount() }}</span>
+                </div>
+              </div>
+              <a class="mentor-action-link" routerLink="/jihen-portfolio">View details <span aria-hidden="true">→</span></a>
             </div>
-          } @else {
-            <div class="mentor-soft-card__state">Coherence analysis is not available yet.</div>
-          }
-        </article>
-      </section>
+
+            @if (strengthsState.loading) {
+              <div class="mentor-soft-card__state">Loading your gaps...</div>
+            } @else if (strengthsState.error) {
+              <div class="mentor-inline-state mentor-inline-state--error">
+                <p>{{ strengthsState.error }}</p>
+              </div>
+            } @else if (topGaps().length > 0) {
+              <div class="mentor-triple-grid">
+                @for (item of topGaps(); track trackByTitle($index, item)) {
+                  <article class="mentor-compact-item mentor-compact-item--gap">
+                    <span class="mentor-item-mark mentor-item-mark--danger">{{ insightItemIcon(item, false) }}</span>
+                    <h3>{{ item.title }}</h3>
+                    <div class="mentor-progress mentor-progress--gap">
+                      <span [style.width.%]="item.score || 40"></span>
+                    </div>
+                    <div class="mentor-compact-item__meta">
+                      @if (item.priority) {
+                        <span>{{ item.priority }}</span>
+                      }
+                    </div>
+                  </article>
+                }
+              </div>
+            } @else {
+              <div class="mentor-soft-card__state">No gaps were returned yet.</div>
+            }
+          </article>
+        </section>
+      </div>
+
+      <div class="mentor-dashboard-grid mentor-dashboard-grid--bottom">
+        <section class="mentor-section">
+          <article class="mentor-soft-card mentor-moves-card">
+            <div class="mentor-section__row">
+              <div class="mentor-section__title-wrap">
+                <span class="mentor-section__icon mentor-section__icon--purple" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M5 7h14v10H5V7Zm2 2v6h10V9H7Zm1.5 1h7v1.5h-7V10Zm0 2.5h4.5V14H8.5v-1.5Z" /></svg>
+                </span>
+                <div class="mentor-section__title-line">
+                  <h2>Next Best Moves</h2>
+                  <span class="mentor-pill mentor-pill--purple">{{ moveCount() }}</span>
+                </div>
+              </div>
+              <a class="mentor-action-link" routerLink="/jihen-portfolio">View roadmap <span aria-hidden="true">→</span></a>
+            </div>
+
+            @if (movesState.loading) {
+              <div class="mentor-soft-card__state">Loading your roadmap...</div>
+            } @else if (movesState.error) {
+              <div class="mentor-inline-state mentor-inline-state--error">
+                <p>{{ movesState.error }}</p>
+              </div>
+            } @else if (topMoves().length > 0) {
+              <div class="mentor-checklist">
+                @for (move of topMoves(); track trackByTitle($index, move)) {
+                  <article class="mentor-checklist__item">
+                    <span class="mentor-checklist__circle" aria-hidden="true">{{ move.priority }}</span>
+                    <span class="mentor-checklist__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24"><path d="M5 6h14v12H5V6Zm2 2v8h10V8H7Zm2 2h6v1.5H9V10Zm0 3h4v1.5H9V13Z" /></svg>
+                    </span>
+                    <div class="mentor-checklist__body">
+                      <h3>{{ move.title }}</h3>
+                      @if (move.description) {
+                        <p>{{ move.description }}</p>
+                      }
+                    </div>
+                    <div class="mentor-checklist__badges">
+                      @if (move.category) {
+                        <span class="mentor-pill mentor-pill--neutral">{{ move.category }}</span>
+                      }
+                      @if (move.impact) {
+                        <span class="mentor-pill mentor-pill--danger-soft">{{ move.impact }}</span>
+                      }
+                    </div>
+                  </article>
+                }
+              </div>
+            } @else {
+              <div class="mentor-soft-card__state">No roadmap moves were returned yet.</div>
+            }
+          </article>
+        </section>
+
+        <section class="mentor-section">
+          <article class="mentor-soft-card mentor-coherence">
+            <div class="mentor-section__row">
+              <div class="mentor-section__title-wrap">
+                <span class="mentor-section__icon mentor-section__icon--purple" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M7 5h10v14H7V5Zm2 2v10h6V7H9Z" /></svg>
+                </span>
+                <div class="mentor-section__title-line">
+                  <h2>Portfolio Coherence</h2>
+                  <span class="mentor-info-dot" aria-hidden="true">i</span>
+                </div>
+              </div>
+              <a class="mentor-action-link" routerLink="/jihen-portfolio">View full report <span aria-hidden="true">→</span></a>
+            </div>
+
+            @if (coherenceState.loading) {
+              <div class="mentor-soft-card__state">Loading your coherence analysis...</div>
+            } @else if (coherenceState.error) {
+              <div class="mentor-inline-state mentor-inline-state--error">
+                <p>{{ coherenceState.error }}</p>
+              </div>
+            } @else if (coherenceState.data) {
+              <div class="mentor-coherence__layout">
+                <div class="mentor-coherence__summary">
+                  <div class="mentor-coherence__score" [class.mentor-coherence__score--medium]="scoreTone(coherenceState.data.score) === 'medium'" [class.mentor-coherence__score--critical]="scoreTone(coherenceState.data.score) === 'critical'">
+                    <strong>{{ coherenceState.data.score }}</strong>
+                    <span>/100</span>
+                  </div>
+                  <div class="mentor-coherence__copy">
+                    <span class="mentor-pill" [class.mentor-pill--green]="scoreTone(coherenceState.data.score) === 'strong'" [class.mentor-pill--orange]="scoreTone(coherenceState.data.score) === 'medium'" [class.mentor-pill--danger]="scoreTone(coherenceState.data.score) === 'critical'">
+                      {{ coherenceState.data.status }}
+                    </span>
+                    <p>{{ coherenceState.data.explanation }}</p>
+                  </div>
+                </div>
+
+                <div class="mentor-coherence__metrics">
+                  @for (metric of coherenceState.data.metrics; track trackByTitle($index, metric)) {
+                    <article class="mentor-mini-metric">
+                      <h3>{{ metric.title }}</h3>
+                      <strong>{{ metric.score }}/100</strong>
+                      <div class="mentor-mini-metric__bar">
+                        <span [style.width.%]="metric.progress"></span>
+                      </div>
+                    </article>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="mentor-soft-card__state">Coherence analysis is not available yet.</div>
+            }
+          </article>
+        </section>
+      </div>
 
       <div class="mentor-tip-bar">
-        <span class="mentor-tip-bar__dot">•</span>
-        <p>Tip: Ask follow-up questions for more specific advice tailored to your goals.</p>
+        <span class="mentor-tip-bar__dot" aria-hidden="true">✦</span>
+        <p><strong>Tip:</strong> Add a short case study to one of your projects to demonstrate real impact.</p>
       </div>
     </div>
   </div>

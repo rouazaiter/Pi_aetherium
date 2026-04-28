@@ -2,14 +2,18 @@ package com.education.platform.controllers.portfolio;
 
 import com.education.platform.dto.portfolio.CreateSkillRequest;
 import com.education.platform.dto.portfolio.SkillSummaryDto;
+import com.education.platform.dto.portfolio.UpdateSkillRequest;
 import com.education.platform.entities.portfolio.SkillCategory;
 import com.education.platform.services.interfaces.portfolio.SkillCatalogService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,5 +46,16 @@ public class SkillController {
     @ResponseStatus(HttpStatus.OK)
     public SkillSummaryDto createSkill(@Valid @RequestBody CreateSkillRequest request) {
         return skillCatalogService.findOrCreate(request);
+    }
+
+    @PutMapping("/{skillId}")
+    public SkillSummaryDto updateSkill(@PathVariable Long skillId, @RequestBody UpdateSkillRequest request) {
+        return skillCatalogService.update(skillId, request);
+    }
+
+    @DeleteMapping("/{skillId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteSkill(@PathVariable Long skillId) {
+        skillCatalogService.delete(skillId);
     }
 }

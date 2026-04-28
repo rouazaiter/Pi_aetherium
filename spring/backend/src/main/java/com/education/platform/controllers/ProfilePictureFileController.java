@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.springframework.util.InvalidMimeTypeException;
 
 @RestController
 @RequestMapping("/api/files/profile-pictures")
@@ -37,8 +38,12 @@ public class ProfilePictureFileController {
         } catch (Exception e) {
             probe = null;
         }
-        MediaType mediaType =
-                MediaType.parseMediaType(probe != null ? probe : MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        MediaType mediaType;
+        try {
+            mediaType = MediaType.parseMediaType(probe != null ? probe : MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        } catch (InvalidMimeTypeException ex) {
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "public, max-age=86400")
                 .contentType(mediaType)

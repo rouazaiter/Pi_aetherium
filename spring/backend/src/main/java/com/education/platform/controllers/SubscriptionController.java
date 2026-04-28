@@ -7,7 +7,10 @@ import com.education.platform.dto.subscription.UpdateAutoRenewRequest;
 import com.education.platform.services.interfaces.CurrentUserService;
 import com.education.platform.services.interfaces.SubscriptionService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,5 +63,14 @@ public class SubscriptionController {
     @PatchMapping("/{id}/auto-renew")
     public SubscriptionResponse updateAutoRenew(@PathVariable Long id, @Valid @RequestBody UpdateAutoRenewRequest request) {
         return subscriptionService.updateAutoRenew(currentUserService.getCurrentUser(), id, request.getAutoRenew());
+    }
+
+    @GetMapping("/{id}/invoice")
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long id) {
+        byte[] content = subscriptionService.generateInvoiceForUser(currentUserService.getCurrentUser(), id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_HTML)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"invoice-" + id + ".html\"")
+                .body(content);
     }
 }

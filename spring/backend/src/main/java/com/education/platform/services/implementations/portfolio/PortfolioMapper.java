@@ -18,9 +18,12 @@ import com.education.platform.entities.portfolio.PortfolioCollection;
 import com.education.platform.entities.portfolio.PortfolioProject;
 import com.education.platform.entities.portfolio.ProjectMedia;
 import com.education.platform.entities.portfolio.Skill;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -97,6 +100,8 @@ public class PortfolioMapper {
                 .id(skill.getId())
                 .name(skill.getName())
                 .category(skill.getCategory())
+                .description(skill.getDescription())
+                .slug(skill.getNormalizedName())
                 .build();
     }
 
@@ -132,12 +137,16 @@ public class PortfolioMapper {
         if (profile == null) {
             return PortfolioProfileDto.builder().build();
         }
+        List<String> interests = Collections.emptyList();
+        if (profile.getInterests() != null && Hibernate.isInitialized(profile.getInterests())) {
+            interests = new ArrayList<>(profile.getInterests());
+        }
         return PortfolioProfileDto.builder()
                 .firstName(profile.getFirstName())
                 .lastName(profile.getLastName())
                 .profilePicture(profile.getProfilePicture())
                 .location(null)
-                .interests(profile.getInterests())
+                .interests(interests)
                 .build();
     }
 

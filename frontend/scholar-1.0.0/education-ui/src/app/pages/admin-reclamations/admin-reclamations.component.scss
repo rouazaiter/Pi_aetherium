@@ -1,0 +1,156 @@
+.adm-wrap {
+  padding: 2.5rem 1rem 4rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.adm-head h1 {
+  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+  color: #1a1744;
+}
+
+.adm-lead {
+  margin: 0 0 1.75rem;
+  color: #5c5a72;
+  line-height: 1.5;
+}
+
+.adm-alert {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.adm-alert--err {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.adm-empty {
+  color: #6c6a80;
+}
+
+.adm-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.adm-card {
+  border-radius: 14px;
+  border: 1px solid rgba(122, 106, 216, 0.2);
+  padding: 1.2rem 1.35rem;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(30, 30, 60, 0.05);
+}
+
+.adm-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.adm-title {
+  font-size: 1.05rem;
+  margin: 0;
+  color: #1a1744;
+}
+
+.adm-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: #8886a0;
+}
+
+.adm-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  background: #ede9ff;
+  color: #5f52b8;
+  height: fit-content;
+}
+
+.adm-badge[data-status='PENDING'] {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.adm-badge[data-status='IN_REVIEW'] {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.adm-badge[data-status='RESOLVED'] {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.adm-desc {
+  margin: 0.85rem 0 0;
+  font-size: 0.9rem;
+  color: #3d3b55;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.adm-actions {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed rgba(122, 106, 216, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.adm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: #4a4860;
+}
+
+.adm-field--grow {
+  flex: 1;
+}
+
+.adm-field select,
+.adm-field textarea {
+  font: inherit;
+  border-radius: 10px;
+  border: 1px solid rgba(122, 106, 216, 0.25);
+  padding: 0.5rem 0.65rem;
+}
+
+.adm-field textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+.adm-save {
+  align-self: flex-start;
+  padding: 0.55rem 1.25rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7a6ad8, #5f52b8);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.adm-save:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

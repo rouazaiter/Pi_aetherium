@@ -15,6 +15,7 @@ Thumbs.db
 # Secrets locaux
 .env
 .env.local
+**/.env.local
 *.local.properties
 
 # IDE (racine)

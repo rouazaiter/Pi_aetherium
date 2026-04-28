@@ -68,6 +68,34 @@ type JihenPortfolioInfoItem = {
   jihenIcon: JihenPortfolioInfoIcon;
 };
 
+type JihenSkillLogoKey =
+  | 'angular'
+  | 'java'
+  | 'mongodb'
+  | 'mysql'
+  | 'python'
+  | 'spring'
+  | 'react'
+  | 'openstack'
+  | 'nodejs'
+  | 'docker'
+  | 'postgresql'
+  | 'aws'
+  | 'git'
+  | 'github'
+  | 'postman'
+  | 'linux'
+  | 'kubernetes'
+  | 'terraform'
+  | 'typescript'
+  | 'vue'
+  | 'nestjs'
+  | 'ci'
+  | 'vscode'
+  | 'default';
+
+type JihenSkillCategoryDesignKey = 'frontend' | 'backend' | 'database' | 'devops' | 'tools' | 'other';
+
 type JihenPortfolioViewModel = {
   jihenTitle: string;
   jihenBio: string;
@@ -481,7 +509,7 @@ export class JihenPortfolioComponent implements OnInit {
   get jihenStats(): JihenPortfolioStat[] {
     return [
       {
-        jihenLabel: 'Visibilit\u00e9',
+        jihenLabel: 'Visibility',
         jihenValue: this.jihenPortfolio.jihenVisibility,
         jihenIcon: 'globe',
         jihenAccent:
@@ -491,21 +519,206 @@ export class JihenPortfolioComponent implements OnInit {
               ? 'warning'
               : 'muted',
       },
-      { jihenLabel: 'Vues du profil', jihenValue: '128', jihenIcon: 'eye' },
-      { jihenLabel: 'Projets', jihenValue: String(this.jihenProjects.length), jihenIcon: 'stack' },
+      { jihenLabel: 'Profile Views', jihenValue: '128', jihenIcon: 'eye' },
+      { jihenLabel: 'Projects', jihenValue: String(this.jihenProjects.length), jihenIcon: 'stack' },
       { jihenLabel: 'Collections', jihenValue: String(this.jihenCollections.length), jihenIcon: 'folder' },
     ];
   }
 
   get jihenAboutItems(): JihenPortfolioInfoItem[] {
     return [
-      { jihenLabel: 'Membre depuis', jihenValue: this.jihenPortfolio.jihenMemberSince, jihenIcon: 'calendar' },
-      { jihenLabel: 'Derni\u00e8re mise \u00e0 jour', jihenValue: this.jihenPortfolio.jihenUpdatedAt, jihenIcon: 'clock' },
+      { jihenLabel: 'Member since', jihenValue: this.jihenPortfolio.jihenMemberSince, jihenIcon: 'calendar' },
+      { jihenLabel: 'Last updated', jihenValue: this.jihenPortfolio.jihenUpdatedAt, jihenIcon: 'clock' },
     ];
   }
 
   get jihenCvHasSummary(): boolean {
     return Boolean(this.jihenCvDraft.profile.summary?.trim());
+  }
+
+  getJihenSkillLogoKey(jihenSkillName: string): JihenSkillLogoKey {
+    const jihenNormalized = jihenSkillName.trim().toLowerCase();
+
+    if (jihenNormalized.includes('angular')) {
+      return 'angular';
+    }
+    if (jihenNormalized === 'java') {
+      return 'java';
+    }
+    if (jihenNormalized.includes('mongo')) {
+      return 'mongodb';
+    }
+    if (jihenNormalized.includes('mysql')) {
+      return 'mysql';
+    }
+    if (jihenNormalized.includes('python')) {
+      return 'python';
+    }
+    if (jihenNormalized.includes('spring')) {
+      return 'spring';
+    }
+    if (jihenNormalized.includes('react')) {
+      return 'react';
+    }
+    if (jihenNormalized.includes('openstack')) {
+      return 'openstack';
+    }
+    if (jihenNormalized.includes('node')) {
+      return 'nodejs';
+    }
+    if (jihenNormalized.includes('docker')) {
+      return 'docker';
+    }
+    if (jihenNormalized.includes('postgres')) {
+      return 'postgresql';
+    }
+    if (jihenNormalized.includes('aws') || jihenNormalized.includes('amazon web services')) {
+      return 'aws';
+    }
+    if (jihenNormalized === 'git') {
+      return 'git';
+    }
+    if (jihenNormalized.includes('github')) {
+      return 'github';
+    }
+    if (jihenNormalized.includes('postman')) {
+      return 'postman';
+    }
+    if (jihenNormalized.includes('linux')) {
+      return 'linux';
+    }
+    if (jihenNormalized.includes('kubernetes')) {
+      return 'kubernetes';
+    }
+    if (jihenNormalized.includes('terraform')) {
+      return 'terraform';
+    }
+    if (jihenNormalized.includes('typescript')) {
+      return 'typescript';
+    }
+    if (jihenNormalized.includes('vue')) {
+      return 'vue';
+    }
+    if (jihenNormalized.includes('nest')) {
+      return 'nestjs';
+    }
+    if (jihenNormalized.includes('ci/cd') || jihenNormalized.includes('cicd') || jihenNormalized.includes('ci cd')) {
+      return 'ci';
+    }
+    if (jihenNormalized.includes('vs code') || jihenNormalized.includes('vscode')) {
+      return 'vscode';
+    }
+
+    return 'default';
+  }
+
+  getJihenSkillCategoryDesignKey(jihenCategory: string): JihenSkillCategoryDesignKey {
+    const jihenNormalized = this.jihenNormalizeForMatching(jihenCategory);
+
+    if (jihenNormalized.includes('front')) {
+      return 'frontend';
+    }
+    if (jihenNormalized.includes('back')) {
+      return 'backend';
+    }
+    if (jihenNormalized.includes('data')) {
+      return 'database';
+    }
+    if (jihenNormalized.includes('devops') || jihenNormalized.includes('cloud') || jihenNormalized.includes('infra')) {
+      return 'devops';
+    }
+    if (jihenNormalized.includes('tool') || jihenNormalized.includes('other') || jihenNormalized.includes('util')) {
+      return 'tools';
+    }
+
+    return 'other';
+  }
+
+  getJihenSkillCategoryDisplayTitle(jihenCategory: string): string {
+    switch (this.getJihenSkillCategoryDesignKey(jihenCategory)) {
+      case 'frontend':
+        return 'Frontend Development';
+      case 'backend':
+        return 'Backend Development';
+      case 'database':
+        return 'Database';
+      case 'devops':
+        return 'DevOps & Cloud';
+      case 'tools':
+        return 'Tools & Others';
+      default:
+        return 'Other';
+    }
+  }
+
+  getJihenSkillCategoryDescription(jihenCategory: string): string {
+    switch (this.getJihenSkillCategoryDesignKey(jihenCategory)) {
+      case 'frontend':
+        return 'Technologies used to build user interfaces and client-side experiences.';
+      case 'backend':
+        return 'Server-side technologies and frameworks for building robust APIs.';
+      case 'database':
+        return 'Data storage, management, and database technologies.';
+      case 'devops':
+        return 'Deployment, infrastructure, cloud, and delivery tooling.';
+      case 'tools':
+        return 'Development tools, utilities, and supporting technologies.';
+      default:
+        return 'Other relevant skills and supporting technologies.';
+    }
+  }
+
+  getJihenSkillLogoSvg(jihenSkillName: string): string {
+    switch (this.getJihenSkillLogoKey(jihenSkillName)) {
+      case 'angular':
+        return '<svg viewBox="0 0 24 24"><path d="M12 2 3.8 4.9l1.26 10.84L12 22l6.94-6.26L20.2 4.9 12 2Zm0 2.28 5.15 11.57h-1.92l-1.03-2.57H9.75L8.72 15.85H6.8L12 4.28Zm0 3.92-1.62 3.93h3.24L12 8.2Z"/></svg>';
+      case 'java':
+        return '<svg viewBox="0 0 24 24"><path d="M13.38 3.5c1.18 1.15-1.01 2.2-1.01 3.42 0 .7.59 1.1 1.1 1.48 1.17.85 2.44 1.78 2.44 3.6 0 2.16-1.8 3.46-4.4 3.46-1.27 0-2.59-.23-3.54-.69 2.85.25 6.56-.48 6.56-2.6 0-1.06-.88-1.68-1.82-2.36-.89-.64-1.85-1.35-1.85-2.61 0-1.67 1.51-2.49 2.52-3.7Z"/></svg>';
+      case 'mongodb':
+        return '<svg viewBox="0 0 24 24"><path d="M12.14 2c.92 1.11 3.62 4.12 3.62 8.58 0 3.72-2.23 6.39-3.32 7.52-.18.19-.34.33-.48.43a1.27 1.27 0 0 1-.27-.25c-.97-1.02-3.45-3.76-3.45-7.7 0-4.06 2.28-7.08 3.34-8.28.2-.23.38-.41.56-.3Z"/></svg>';
+      case 'mysql':
+        return '<svg viewBox="0 0 24 24"><path d="M18.7 7.2c-1.14-.96-2.92-1.54-4.88-1.54-3.93 0-7.12 2.3-7.12 5.14 0 1.73 1.18 3.26 2.98 4.2-.26.72-.82 1.47-1.76 2 .96-.08 2.34-.42 3.34-1 0 0 1.08.24 2.56.24 3.93 0 7.12-2.3 7.12-5.14 0-1.51-.9-2.86-2.24-3.8Z"/></svg>';
+      case 'python':
+        return '<svg viewBox="0 0 24 24"><path d="M12.05 2c-4.14 0-3.88 1.8-3.88 1.8l.01 1.86h3.95v.56H6.6S4 5.9 4 9.98s2.28 3.95 2.28 3.95h1.36v-1.9s-.07-2.28 2.24-2.28h3.86s2.17.04 2.17-2.1V3.99S16.24 2 12.05 2Zm-.1 20c4.14 0 3.88-1.8 3.88-1.8l-.01-1.86h-3.95v-.56h5.53S20 18.1 20 14.02s-2.28-3.95-2.28-3.95h-1.36v1.9s.07 2.28-2.24 2.28h-3.86s-2.17-.04-2.17 2.1v3.66S7.76 22 11.95 22Z"/></svg>';
+      case 'spring':
+        return '<svg viewBox="0 0 24 24"><path d="M20.24 6.65c-.65.3-1.34.5-2.03.63.73-.44 1.29-1.13 1.55-1.96-.69.41-1.45.71-2.25.87A3.53 3.53 0 0 0 15 5c-1.95 0-3.52 1.58-3.52 3.52 0 .28.03.54.09.8-2.93-.15-5.52-1.55-7.26-3.68-.3.52-.48 1.13-.48 1.77 0 1.22.62 2.3 1.57 2.93Z"/></svg>';
+      case 'react':
+        return '<svg viewBox="0 0 24 24"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 0 0 0-5.6Zm0-6.2c1.5 0 2.92 1.05 4.03 2.8 1.4-.22 2.7-.25 3.73-.03 1.47.3 2.24.93 2.24 1.83 0 1.06-1.06 2.08-2.8 2.9.15.56.23 1.13.23 1.7 0 .57-.08 1.14-.23 1.7 1.74.82 2.8 1.84 2.8 2.9 0 .9-.77 1.53-2.24 1.83-1.03.21-2.33.19-3.73-.03C14.92 19.95 13.5 21 12 21c-1.5 0-2.92-1.05-4.03-2.8-1.4.22-2.7.24-3.73.03C2.77 17.93 2 17.3 2 16.4c0-1.06 1.06-2.08 2.8-2.9A6.71 6.71 0 0 1 4.57 12c0-.57.08-1.14.23-1.7C3.06 9.48 2 8.46 2 7.4c0-.9.77-1.53 2.24-1.83 1.03-.22 2.33-.19 3.73.03C9.08 4.05 10.5 3 12 3Z"/></svg>';
+      case 'openstack':
+        return '<svg viewBox="0 0 24 24"><path d="M5.5 7.3A2.3 2.3 0 0 1 7.8 5H16a2.3 2.3 0 0 1 2.3 2.3v1.2h-2V7.4a.4.4 0 0 0-.4-.4H7.9a.4.4 0 0 0-.4.4v9.2c0 .22.18.4.4.4h4.1v2H7.8a2.3 2.3 0 0 1-2.3-2.3V7.3Z"/></svg>';
+      case 'nodejs':
+        return '<svg viewBox="0 0 24 24"><path d="M11.98 2 4.5 6.32v11.36L11.98 22l7.52-4.32V6.32L11.98 2Zm4.6 13.43c0 1.56-.92 2.47-2.26 2.47-.99 0-1.57-.39-1.88-.91l1.03-.62c.2.35.38.64.81.64.41 0 .67-.16.67-.79v-4.28h1.63v4.49Z"/></svg>';
+      case 'docker':
+        return '<svg viewBox="0 0 24 24"><path d="M7.1 10.1h2.1v2H7.1v-2Zm2.5 0h2.1v2H9.6v-2Zm2.5 0h2.1v2h-2.1v-2Zm-5-2.5h2.1v2H7.1v-2Zm2.5 0h2.1v2H9.6v-2Zm2.5 0h2.1v2h-2.1v-2Zm2.6 2.6c.34-.15.96-.2 1.43.05.6-.67.93-1.68.83-2.58.86.51 1.34 1.5 1.32 2.49.72.04 1.44-.2 2.08-.68-.08 2.63-1.8 4.58-5.15 4.58H9.05c-2.18 0-3.95-1.78-3.95-3.96h11.56Z"/></svg>';
+      case 'postgresql':
+        return '<svg viewBox="0 0 24 24"><path d="M12 3c-3.46 0-6.4 2.62-6.4 5.89 0 2.1 1.22 4.02 3.03 5.08-.07.58-.36 2.03-.47 2.53-.07.34.12.45.36.32.2-.1 2.84-1.84 3.56-2.31.62.16 1.26.24 1.92.24 3.46 0 6.4-2.62 6.4-5.86C18.4 5.62 15.46 3 12 3Z"/></svg>';
+      case 'aws':
+        return '<svg viewBox="0 0 24 24"><path d="M7.33 14.7c1.48 1.1 3.62 1.68 5.46 1.68 2.58 0 4.96-.95 6.74-2.53.28-.25.03-.58-.3-.39-1.93 1.13-4.3 1.8-6.75 1.8-1.63 0-3.42-.34-5.06-1.05-.25-.11-.46.16-.09.49Zm11.02.51c-.19-.24-1.26-.11-1.74-.06-.15.02-.18-.11-.04-.21.9-.63 2.37-.45 2.54-.24.17.21-.04 1.68-.89 2.38Z"/></svg>';
+      case 'git':
+        return '<svg viewBox="0 0 24 24"><path d="m12 2.75 9.25 9.25L12 21.25 2.75 12 12 2.75Zm2.44 8.2a1.7 1.7 0 0 0-2.29-1.62L10.9 8.08a1.7 1.7 0 1 0-.9.9l1.23 1.23a1.7 1.7 0 0 0 .95 2.36v2.13a1.7 1.7 0 1 0 1.2 0v-2.13a1.7 1.7 0 0 0 1.06-1.62Z"/></svg>';
+      case 'github':
+        return '<svg viewBox="0 0 24 24"><path d="M12 2.75a9.25 9.25 0 0 0-2.92 18.03c.46.08.63-.2.63-.45 0-.22-.01-.95-.01-1.73-2.32.43-2.92-.57-3.1-1.1-.1-.27-.52-1.1-.89-1.32-.3-.16-.73-.57-.01-.58.68-.01 1.16.62 1.32.88.78 1.32 2.02.95 2.51.72.08-.57.3-.95.55-1.16-2.06-.23-4.2-1.03-4.2-4.57 0-1.01.36-1.84.95-2.49-.1-.23-.42-1.18.09-2.45 0 0 .77-.25 2.53.95a8.63 8.63 0 0 1 4.6 0c1.76-1.2 2.53-.95 2.53-.95.5 1.27.18 2.22.09 2.45.59.65.95 1.47.95 2.49 0 3.55-2.15 4.34-4.21 4.57.31.27.59.8.59 1.62 0 1.17-.01 2.1-.01 2.39 0 .25.17.54.63.45A9.25 9.25 0 0 0 12 2.75Z"/></svg>';
+      case 'postman':
+        return '<svg viewBox="0 0 24 24"><path d="M12 3c4.97 0 9 4.03 9 9s-4.03 9-9 9a9 9 0 1 1 0-18Zm2.85 5.3a1.1 1.1 0 0 0-1.55 0l-6.2 6.2a1.1 1.1 0 1 0 1.56 1.56l6.2-6.2a1.1 1.1 0 0 0 0-1.56Z"/></svg>';
+      case 'linux':
+        return '<svg viewBox="0 0 24 24"><path d="M12 2.5c2.18 0 3.55 1.84 3.55 4.78 0 .97-.14 1.86-.39 2.62.99.74 1.84 1.92 2.29 3.37.48 1.54.36 3.31-.7 4.77-.52.71-1.2 1.24-2 1.54-.2.92-.93 1.92-2.75 1.92-1.83 0-2.55-1-2.76-1.92a4.18 4.18 0 0 1-2-1.54c-1.06-1.46-1.17-3.23-.7-4.77.45-1.45 1.3-2.63 2.3-3.37-.26-.76-.4-1.65-.4-2.62C8.45 4.34 9.82 2.5 12 2.5Z"/></svg>';
+      case 'kubernetes':
+        return '<svg viewBox="0 0 24 24"><path d="m12 2 7.5 4.33v8.67L12 19.33 4.5 15V6.33L12 2Zm0 2.08-5.7 3.29v6.58L12 17.24l5.7-3.29V7.37L12 4.08Z"/></svg>';
+      case 'terraform':
+        return '<svg viewBox="0 0 24 24"><path d="M13.5 3.5 20 7.25v7.5l-6.5-3.75V3.5Zm-9.5 0L10.5 7v7.5L4 10.75V3.5Zm0 11 6.5 3.75V21L4 17.25v-2.75Zm8 0 6.5 3.75V21L12 17.25v-2.75Z"/></svg>';
+      case 'typescript':
+        return '<svg viewBox="0 0 24 24"><path d="M3.5 3.5h17v17h-17v-17Zm9.17 5.18H7.14v1.63h2.04v5.98h1.78v-5.98h2.04V8.68Zm1.51 6.38c.47.76 1.25 1.15 2.34 1.15 1.24 0 2.4-.65 2.4-2.1 0-1.12-.64-1.68-1.9-2.17-.93-.36-1.18-.58-1.18-.98 0-.32.25-.58.74-.58.47 0 .87.19 1.32.62l1.05-1.2a3.24 3.24 0 0 0-2.3-.94Z"/></svg>';
+      case 'vue':
+        return '<svg viewBox="0 0 24 24"><path d="M4 5h4.06L12 11.4 15.94 5H20l-8 14L4 5Zm4.62 0H11l1 1.74L13 5h2.38L12 10.9 8.62 5Z"/></svg>';
+      case 'nestjs':
+        return '<svg viewBox="0 0 24 24"><path d="M12.02 2.5 6.2 5.65v6.76c0 4.24 2.47 7.88 5.82 9.09 3.35-1.21 5.78-4.85 5.78-9.09V5.65L12.02 2.5Z"/></svg>';
+      case 'ci':
+        return '<svg viewBox="0 0 24 24"><path d="M6 8.5c0-1.38 1.12-2.5 2.5-2.5h2v2h-2a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h2v2h-2A2.5 2.5 0 0 1 6 15.5v-7Zm7.5-2.5H16a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 16 18h-2.5v-2H16a.5.5 0 0 0 .5-.5v-7A.5.5 0 0 0 16 8h-2.5V6Zm-4 5h5v2h-5v-2Z"/></svg>';
+      case 'vscode':
+        return '<svg viewBox="0 0 24 24"><path d="m17.9 3.5 1.85.88a.65.65 0 0 1 .37.59v13.99a.65.65 0 0 1-.37.59l-1.85.88a.65.65 0 0 1-.73-.11l-5.42-4.95-2.96 2.25a.65.65 0 0 1-.81-.03l-1.58-1.44a.65.65 0 0 1 0-.96l2.58-2.2-2.58-2.2a.65.65 0 0 1 0-.96l1.58-1.44a.65.65 0 0 1 .81-.03l2.96 2.25 5.42-4.95a.65.65 0 0 1 .73-.11Z"/></svg>';
+      default:
+        return '<svg viewBox="0 0 24 24"><path d="M12 3 4.5 7.2v9.6L12 21l7.5-4.2V7.2L12 3Zm0 2.1 5.6 3.14v7.5L12 18.9l-5.6-3.16v-7.5L12 5.1Z"/></svg>';
+    }
   }
 
   get jihenCvHasSkills(): boolean {

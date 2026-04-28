@@ -1,5 +1,6 @@
 package tn.esprit.aetherium.skillhubbackend.controllers.blog;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -11,7 +12,9 @@ import java.util.Map;
 @RequestMapping("/api/ai")
 public class AiProxyController {
 
-    private static final String GROQ_KEY = "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";
+    @Value("${groq.api.key}")
+    private String groqKey;
+
     private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
     private static final String MODEL = "llama-3.1-8b-instant";
 
@@ -27,7 +30,7 @@ public class AiProxyController {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(GROQ_KEY);
+            headers.setBearerAuth(groqKey);
 
             Map<String, Object> requestBody = Map.of(
                 "model", MODEL,

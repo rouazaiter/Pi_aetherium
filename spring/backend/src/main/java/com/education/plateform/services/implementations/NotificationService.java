@@ -1,0 +1,126 @@
+package com.education.plateform.services.implementations;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.education.plateform.dto.NotificationDto;
+import com.education.plateform.dto.NotificationPriority;
+import com.education.plateform.entities.UserNotification;
+import com.education.plateform.repositories.UserNotificationRepository;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class NotificationService {
+  private final SimpMessagingTemplate messagingTemplate;
+  private final NotificationAiAssistantService notificationAiAssistantService;
+  private final UserNotificationRepository userNotificationRepository;
+
+  public void notifyUser(Long userId, NotificationDto dto) {
+    userNotificationRepository.save(UserNotification.builder()
+            .userId(userId)
+            .type(dto.type())
+            .message(dto.message())
+            .priority(dto.priority())
+            .suggestedAction(dto.suggestedAction())
+            .generatedByAi(dto.generatedByAi())
+            .serviceRequestId(dto.serviceRequestId())
+            .applicationId(dto.applicationId())
+            .createdAt(dto.createdAt() == null ? LocalDateTime.now() : dto.createdAt())
+            .build());
+
+    messagingTemplate.convertAndSend("/topic/notifications/user/" + userId, dto);
+  }
+
+  public void notifyUserWithAssistant(
+          Long userId,
+          String type,
+          String fallbackMessage,
+          String actorName,
+          String requestName,
+          NotificationPriority fallbackPriority,
+          String fallbackAction,
+          Long serviceRequestId,
+          Long applicationId
+  ) {
+    NotificationAiAssistantService.NotificationPayload payload = notificationAiAssistantService.build(
+            type,
+            fallbackMessage,
+            actorName,
+            requestName,
+            fallbackPriority,
+            fallbackAction
+    );
+
+    notifyUser(
+            userId,
+            new NotificationDto(
+                    type,
+                    payload.message(),
+                    payload.priority(),
+                    payload.suggestedAction(),
+                    payload.generatedByAi(),
+                    serviceRequestId,
+                    applicationId,
+                    LocalDateTime.now()
+            )
+    );
+  }
+
+  public void notifyUsersWithAssistant(
+          List<Long> userIds,
+          String type,
+          String fallbackMessage,
+          String actorName,
+          String requestName,
+          NotificationPriority fallbackPriority,
+          String fallbackAction,
+          Long serviceRequestId,
+          Long applicationId
+  ) {
+    if (userIds == null || userIds.isEmpty()) {
+      return;
+    }
+    for (Long userId : userIds) {
+      notifyUserWithAssistant(
+              userId,
+              type,
+              fallbackMessage,
+              actorName,
+              requestName,
+              fallbackPriority,
+              fallbackAction,
+              serviceRequestId,
+              applicationId
+      );
+    }
+  }
+
+  public List<NotificationDto> getRecentNotifications(Long userId, int limit) {
+    int safeLimit = Math.max(1, Math.min(limit, 50));
+
+    return userNotificationRepository.findTop50ByUserIdOrderByCreatedAtDesc(userId).stream()
+            .sorted(Comparator.comparing(UserNotification::getCreatedAt).reversed())
+            .limit(safeLimit)
+            .map(notification -> new NotificationDto(
+                    notification.getType(),
+                    notification.getMessage(),
+                    notification.getPriority(),
+                    notification.getSuggestedAction(),
+                    notification.isGeneratedByAi(),
+                    notification.getServiceRequestId(),
+                    notification.getApplicationId(),
+                    notification.getCreatedAt()
+            ))
+            .toList();
+  }
+
+  @Transactional
+  public void clearNotifications(Long userId) {
+    userNotificationRepository.deleteByUserId(userId);
+  }
+}

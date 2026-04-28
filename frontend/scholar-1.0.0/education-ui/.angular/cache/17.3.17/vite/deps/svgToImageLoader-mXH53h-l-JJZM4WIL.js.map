@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../node_modules/@netless/appliance-plugin/dist/svgToImageLoader-mXH53h-l.mjs"],
+  "sourcesContent": ["let t = null, r = null;\nasync function n() {\n  return t || r || (r = (async () => {\n    try {\n      const e = await import(\"dom-to-image\");\n      return t = e.default || e, t;\n    } catch (e) {\n      throw r = null, e;\n    }\n  })(), r);\n}\nfunction o() {\n  return t;\n}\nexport {\n  o as getSvgToImageLib,\n  n as loadSvgToImageLib\n};\n"],
+  "mappings": ";;;;;AAAA,IAAI,IAAI;AAAR,IAAc,IAAI;AAClB,SAAe,IAAI;AAAA;AACjB,WAAO,KAAK,MAAM,KAAK,MAAY;AACjC,UAAI;AACF,cAAM,IAAI,MAAM,OAAO,4BAAc;AACrC,eAAO,IAAI,EAAE,WAAW,GAAG;AAAA,MAC7B,SAAS,GAAG;AACV,cAAM,IAAI,MAAM;AAAA,MAClB;AAAA,IACF,IAAG,GAAG;AAAA,EACR;AAAA;AACA,SAAS,IAAI;AACX,SAAO;AACT;",
+  "names": []
+}

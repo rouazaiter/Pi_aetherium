@@ -18,7 +18,7 @@
           {{ savingDraft ? 'Saving...' : 'Save Draft' }}
         </button>
         <button type="button" class="cv-btn cv-btn--ghost" [disabled]="!canDownloadPdf" (click)="downloadPdf()">
-          Download PDF
+          {{ downloadingPdf ? 'Downloading...' : 'Download PDF' }}
         </button>
       </div>
     </header>
@@ -63,6 +63,9 @@
         }
         @if (saveError) {
           <p class="cv-builder-toolbar__message cv-builder-toolbar__message--error">{{ saveError }}</p>
+        }
+        @if (downloadError) {
+          <p class="cv-builder-toolbar__message cv-builder-toolbar__message--error">{{ downloadError }}</p>
         }
       </section>
 

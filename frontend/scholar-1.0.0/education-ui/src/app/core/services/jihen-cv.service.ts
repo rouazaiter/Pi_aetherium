@@ -54,6 +54,12 @@ export class JihenCvService {
     return this.http.put<CvDraftApiResponse>(this.api('/api/cv/me/drafts/latest'), body);
   }
 
+  downloadDraftCv(draftId: number): Observable<Blob> {
+    return this.http.get(this.api(`/api/cv/me/drafts/${draftId}/download`), {
+      responseType: 'blob',
+    });
+  }
+
   improveMyCvText(body: CvAiImproveRequest): Observable<CvAiImproveResponse> {
     return this.http.post<CvAiImproveResponse>(this.api('/api/cv/me/ai/improve'), body);
   }

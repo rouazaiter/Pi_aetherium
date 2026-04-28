@@ -18,9 +18,14 @@ import com.education.platform.services.interfaces.cv.CVAiJobMatchService;
 import com.education.platform.services.interfaces.cv.CVAiImprovementService;
 import com.education.platform.services.interfaces.cv.CVBuilderService;
 import com.education.platform.services.interfaces.cv.CVDraftService;
+import com.education.platform.services.interfaces.cv.CVPdfGenerationService;
 import com.education.platform.services.interfaces.cv.CVProfileService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +44,7 @@ public class CVController {
     private final CVProfileService cvProfileService;
     private final CVBuilderService cvBuilderService;
     private final CVDraftService cvDraftService;
+    private final CVPdfGenerationService cvPdfGenerationService;
     private final CVAiImprovementService cvAiImprovementService;
     private final CVAiAssistantService cvAiAssistantService;
     private final CVAiJobMatchService cvAiJobMatchService;
@@ -48,6 +54,7 @@ public class CVController {
             CVProfileService cvProfileService,
             CVBuilderService cvBuilderService,
             CVDraftService cvDraftService,
+            CVPdfGenerationService cvPdfGenerationService,
             CVAiImprovementService cvAiImprovementService,
             CVAiAssistantService cvAiAssistantService,
             CVAiJobMatchService cvAiJobMatchService) {
@@ -55,6 +62,7 @@ public class CVController {
         this.cvProfileService = cvProfileService;
         this.cvBuilderService = cvBuilderService;
         this.cvDraftService = cvDraftService;
+        this.cvPdfGenerationService = cvPdfGenerationService;
         this.cvAiImprovementService = cvAiImprovementService;
         this.cvAiAssistantService = cvAiAssistantService;
         this.cvAiJobMatchService = cvAiJobMatchService;
@@ -96,11 +104,29 @@ public class CVController {
         return cvDraftService.getLatestForUser(currentUserService.getCurrentUser());
     }
 
+    @PutMapping("/drafts/latest")
+    public CVDraftResponse updateLatestDraft(@Valid @RequestBody UpdateCVDraftRequest request) {
+        return cvDraftService.updateLatestForUser(currentUserService.getCurrentUser(), request);
+    }
+
     @PutMapping("/drafts/{draftId}")
     public CVDraftResponse updateMyDraft(
             @PathVariable Long draftId,
             @Valid @RequestBody UpdateCVDraftRequest request) {
         return cvDraftService.updateForUser(currentUserService.getCurrentUser(), draftId, request);
+    }
+
+    @GetMapping("/drafts/{draftId}/download")
+    public ResponseEntity<ByteArrayResource> downloadMyDraftPdf(@PathVariable Long draftId) {
+        Long userId = currentUserService.getCurrentUser().getId();
+        byte[] pdfBytes = cvPdfGenerationService.generatePdf(userId, draftId);
+        String filename = cvPdfGenerationService.resolveFilename(userId, draftId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentLength(pdfBytes.length)
+                .body(new ByteArrayResource(pdfBytes));
     }
 
     @PostMapping("/ai/improve")

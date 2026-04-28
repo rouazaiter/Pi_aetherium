@@ -10,5 +10,7 @@ public interface CVDraftService {
 
     CVDraftResponse getLatestForUser(User user);
 
+    CVDraftResponse updateLatestForUser(User user, UpdateCVDraftRequest request);
+
     CVDraftResponse updateForUser(User user, Long draftId, UpdateCVDraftRequest request);
 }

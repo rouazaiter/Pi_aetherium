@@ -85,10 +85,21 @@ public class CVDraftServiceImpl implements CVDraftService {
 
     @Override
     @Transactional
+    public CVDraftResponse updateLatestForUser(User user, UpdateCVDraftRequest request) {
+        CVDraft draft = cvDraftRepository.findTopByUser_IdOrderByUpdatedAtDescIdDesc(user.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CV draft not found"));
+        return updateDraft(draft, request);
+    }
+
+    @Override
+    @Transactional
     public CVDraftResponse updateForUser(User user, Long draftId, UpdateCVDraftRequest request) {
         CVDraft draft = cvDraftRepository.findByIdAndUser_Id(draftId, user.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CV draft not found"));
+        return updateDraft(draft, request);
+    }
 
+    private CVDraftResponse updateDraft(CVDraft draft, UpdateCVDraftRequest request) {
         String theme = normalizeTheme(request == null ? null : request.getTheme());
         draft.setTheme(theme);
         draft.setSettingsJson(toJson(buildUpdatedSettings(draft.getSettingsJson(), request == null ? null : request.getSettings(), theme)));

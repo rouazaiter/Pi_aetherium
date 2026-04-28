@@ -131,6 +131,7 @@ type JihenPortfolioProjectView = {
   jihenSkills: string[];
   jihenVisibility: PortfolioVisibility;
   jihenCoverImage: string;
+  jihenHasMediaPreview: boolean;
   jihenCoverMediaType: JihenProjectMediaType | null;
   jihenMedia: JihenProjectMediaItem[];
   jihenCreatedAt: string | null;
@@ -1463,7 +1464,7 @@ export class JihenPortfolioComponent implements OnInit {
 
       this.jihenEditCoverPreview = jihenReader.result;
       this.jihenEditCoverFileName = jihenFile.name;
-      this.jihenPortfolioForm.controls.coverImage.setValue('');
+      this.jihenPortfolioForm.controls.coverImage.setValue(jihenReader.result);
       jihenInput.value = '';
     };
     jihenReader.readAsDataURL(jihenFile);
@@ -1962,6 +1963,7 @@ export class JihenPortfolioComponent implements OnInit {
     this.jihenProjectActionErrors[jihenProjectId] = '';
     const jihenPreviousVisibility = jihenProject.jihenVisibility;
     jihenProject.jihenVisibility = this.jihenBuildNextChildVisibility(jihenProject.jihenVisibility);
+    this.jihenEnsureProjectVisibilityStillVisible(jihenProject.jihenVisibility);
     this.jihenProjects = [...this.jihenProjects];
 
     try {
@@ -2003,6 +2005,7 @@ export class JihenPortfolioComponent implements OnInit {
     this.jihenCollectionActionErrors[jihenCollectionId] = '';
     const jihenPreviousVisibility = jihenCollection.jihenVisibility;
     jihenCollection.jihenVisibility = this.jihenBuildNextChildVisibility(jihenCollection.jihenVisibility);
+    this.jihenEnsureCollectionVisibilityStillVisible(jihenCollection.jihenVisibility);
     this.jihenCollections = [...this.jihenCollections];
 
     try {
@@ -3366,6 +3369,7 @@ export class JihenPortfolioComponent implements OnInit {
       jihenVisibility: jihenRequest.visibility,
       jihenMedia: jihenMedia,
       jihenCoverImage: jihenCoverMedia?.mediaUrl || jihenExistingProject.jihenCoverImage,
+      jihenHasMediaPreview: jihenCoverMedia ? true : jihenExistingProject.jihenHasMediaPreview,
       jihenCoverMediaType: jihenCoverMedia?.mediaType ?? null,
       jihenUpdatedAt: new Date().toISOString(),
       jihenUpdatedAtLabel: this.jihenFormatProjectDate(new Date().toISOString(), 'today'),
@@ -3385,7 +3389,7 @@ export class JihenPortfolioComponent implements OnInit {
 
   private jihenMapProject(jihenProject: PortfolioProjectDto, index: number): JihenPortfolioProjectView {
     const jihenProjectMedia = this.jihenMapProjectMedia(jihenProject);
-    const jihenProjectCoverMedia = this.jihenBuildProjectCoverMedia(jihenProjectMedia);
+    const jihenProjectCoverMedia = this.jihenResolveProjectCover(jihenProject, jihenProjectMedia, index);
     const jihenCreatedAt = jihenProject.createdAt?.trim() ?? null;
     const jihenUpdatedAt = jihenProject.updatedAt?.trim() ?? null;
 
@@ -3398,9 +3402,9 @@ export class JihenPortfolioComponent implements OnInit {
       jihenSkillIds: jihenProject.skills?.map((jihenSkill) => jihenSkill.id) ?? [],
       jihenSkills: this.jihenMapProjectSkills(jihenProject),
       jihenVisibility: jihenProject.visibility,
-      jihenCoverImage:
-        jihenProjectCoverMedia?.mediaUrl || this.jihenProjectPlaceholders[index % this.jihenProjectPlaceholders.length],
-      jihenCoverMediaType: jihenProjectCoverMedia?.mediaType ?? null,
+      jihenCoverImage: jihenProjectCoverMedia.mediaUrl,
+      jihenHasMediaPreview: jihenProjectCoverMedia.hasPreview,
+      jihenCoverMediaType: jihenProjectCoverMedia.mediaType,
       jihenMedia: jihenProjectMedia,
       jihenCreatedAt,
       jihenUpdatedAt,
@@ -3665,6 +3669,55 @@ export class JihenPortfolioComponent implements OnInit {
       jihenSortedMedia[0] ||
       null
     );
+  }
+
+  private jihenResolveProjectCover(
+    jihenProject: PortfolioProjectDto,
+    jihenProjectMedia: JihenProjectMediaItem[],
+    index: number,
+  ): { mediaUrl: string; mediaType: JihenProjectMediaType | null; hasPreview: boolean } {
+    const jihenThumbnailUrl = this.jihenReadProjectPreviewUrl(jihenProject, ['thumbnailUrl']);
+    const jihenImageUrl = this.jihenReadProjectPreviewUrl(jihenProject, ['imageUrl', 'coverImage']);
+    const jihenVideoUrl = this.jihenReadProjectPreviewUrl(jihenProject, ['videoUrl']);
+    const jihenMediaPreview = this.jihenBuildProjectCoverMedia(jihenProjectMedia);
+
+    if (jihenThumbnailUrl) {
+      return { mediaUrl: jihenThumbnailUrl, mediaType: 'IMAGE', hasPreview: true };
+    }
+
+    if (jihenImageUrl) {
+      return { mediaUrl: jihenImageUrl, mediaType: 'IMAGE', hasPreview: true };
+    }
+
+    if (jihenVideoUrl) {
+      return { mediaUrl: jihenVideoUrl, mediaType: 'VIDEO', hasPreview: true };
+    }
+
+    if (jihenMediaPreview?.mediaUrl) {
+      return { mediaUrl: jihenMediaPreview.mediaUrl, mediaType: jihenMediaPreview.mediaType, hasPreview: true };
+    }
+
+    return {
+      mediaUrl: this.jihenProjectPlaceholders[index % this.jihenProjectPlaceholders.length],
+      mediaType: null,
+      hasPreview: false,
+    };
+  }
+
+  private jihenReadProjectPreviewUrl(
+    jihenProject: PortfolioProjectDto,
+    jihenKeys: string[],
+  ): string {
+    const jihenSource = jihenProject as unknown as Record<string, unknown>;
+
+    for (const jihenKey of jihenKeys) {
+      const jihenValue = String(jihenSource[jihenKey] ?? '').trim();
+      if (jihenValue) {
+        return jihenValue;
+      }
+    }
+
+    return '';
   }
 
   private jihenHandleProjectMediaUpload(event: Event, jihenExpectedKind: JihenProjectMediaType): void {
@@ -4096,6 +4149,18 @@ export class JihenPortfolioComponent implements OnInit {
     }
 
     return 'PRIVATE';
+  }
+
+  private jihenEnsureProjectVisibilityStillVisible(jihenVisibility: PortfolioVisibility): void {
+    if (this.jihenProjectVisibilityFilter !== 'ALL' && this.jihenProjectVisibilityFilter !== jihenVisibility) {
+      this.jihenProjectVisibilityFilter = 'ALL';
+    }
+  }
+
+  private jihenEnsureCollectionVisibilityStillVisible(jihenVisibility: PortfolioVisibility): void {
+    if (this.jihenCollectionVisibilityFilter !== 'ALL' && this.jihenCollectionVisibilityFilter !== jihenVisibility) {
+      this.jihenCollectionVisibilityFilter = 'ALL';
+    }
   }
 
   private jihenNormalizeForMatching(jihenValue: string): string {

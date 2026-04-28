@@ -58,11 +58,6 @@
                           d="m12 3 2.1 2.3 3.1-.3.8 3 2.8 1.3-1.3 2.8 1.3 2.8-2.8 1.3-.8 3-3.1-.3L12 21l-2.1-2.3-3.1.3-.8-3-2.8-1.3 1.3-2.8-1.3-2.8 2.8-1.3.8-3 3.1.3L12 3Zm0 5.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7Z" />
                       </svg>
                     }
-                    @case ('cv') {
-                      <svg viewBox="0 0 24 24">
-                        <path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" />
-                      </svg>
-                    }
                     @default {
                       <svg viewBox="0 0 24 24">
                         <path d="M12 4a8 8 0 1 0 8 8a8 8 0 0 0-8-8Zm-3 7.5h6v1H9v-1Zm0 3h4v1H9v-1Zm0-6h6v1H9v-1Z" />
@@ -78,7 +73,7 @@
 
         <div class="jihen-layout__main">
           @if (jihenActiveSection === 'portfolio') {
-            <section class="jihen-panel jihen-hero jihen-dashboard-shell" [class.jihen-hero--with-cover]="jihenHeroHasCoverImage">
+            <section class="jihen-panel jihen-hero" [class.jihen-hero--with-cover]="jihenHeroHasCoverImage">
               <div class="jihen-hero__banner" [style.background-image]="jihenHeroBackgroundImage"></div>
 
               <div class="jihen-hero__content p-4 p-lg-5">
@@ -107,9 +102,9 @@
                           </div>
                         </div>
 
-                        <p class="jihen-hero__role">{{ jihenPortfolio.jihenJob || 'Role not specified' }}</p>
+                        <p class="jihen-hero__role">{{ jihenPortfolio.jihenJob || 'Métier non renseigné' }}</p>
                         <p class="jihen-hero__bio mb-0">
-                          {{ jihenPortfolio.jihenBio || 'No bio is available yet.' }}
+                          {{ jihenPortfolio.jihenBio || 'Aucune biographie disponible pour le moment.' }}
                         </p>
 
                         <div class="jihen-hero__meta">
@@ -129,9 +124,9 @@
                         </div>
 
                         <div class="jihen-actions">
-                          <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenEditModal()">Edit Portfolio</button>
-                          <button type="button" class="jihen-btn jihen-btn--soft" (click)="openJihenShareModal()">Share</button>
-                          <button type="button" class="jihen-btn jihen-btn--ghost" (click)="openJihenProjectModal()">Add Project</button>
+                          <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenEditModal()">Modifier le portfolio</button>
+                          <button type="button" class="jihen-btn jihen-btn--soft" (click)="openJihenShareModal()">Partager</button>
+                          <button type="button" class="jihen-btn jihen-btn--ghost" (click)="openJihenProjectModal()">Ajouter un projet</button>
                         </div>
                       </div>
                     </div>
@@ -169,7 +164,6 @@
                             <p class="jihen-stat__label">{{ jihenStat.jihenLabel }}</p>
                             <p
                               class="jihen-stat__value"
-                              [class.jihen-stat__value--badge]="jihenStat.jihenIcon === 'globe'"
                               [class.jihen-stat__value--success]="jihenStat.jihenAccent === 'success'"
                               [class.jihen-stat__value--warning]="jihenStat.jihenAccent === 'warning'"
                               [class.jihen-stat__value--muted]="jihenStat.jihenAccent === 'muted'">
@@ -186,150 +180,76 @@
 
             <section class="row g-4">
               <div class="col-lg-7">
-                <section class="jihen-panel jihen-dashboard-card jihen-dashboard-card--skills p-4 h-100">
-                  <div class="jihen-section-head jihen-section-head--dashboard">
-                    <h2 class="jihen-section-title">Main Skills</h2>
-                    <button type="button" class="jihen-section-head__action" (click)="activateJihenSidebarItem(jihenSidebarItems[4])">View all skills</button>
-                  </div>
+                <section class="jihen-panel p-4 h-100">
+                  <h2 class="jihen-section-title">Compétences principales</h2>
                   @if (jihenSelectedSkills.length > 0) {
                     <div class="jihen-skill-list">
                       @for (jihenSkill of jihenSelectedSkills; track jihenSkill.id) {
-                        <span class="jihen-skill-pill">
-                          <span class="jihen-skill-pill__icon" [attr.data-skill-logo]="getJihenSkillLogoKey(jihenSkill.name)" aria-hidden="true">
-                            @switch (getJihenSkillLogoKey(jihenSkill.name)) {
-                              @case ('angular') {
-                                <svg viewBox="0 0 24 24"><path d="M12 2 3.8 4.9l1.26 10.84L12 22l6.94-6.26L20.2 4.9 12 2Zm0 2.28 5.15 11.57h-1.92l-1.03-2.57H9.75L8.72 15.85H6.8L12 4.28Zm0 3.92-1.62 3.93h3.24L12 8.2Z"/></svg>
-                              }
-                              @case ('java') {
-                                <svg viewBox="0 0 24 24"><path d="M13.38 3.5c1.18 1.15-1.01 2.2-1.01 3.42 0 .7.59 1.1 1.1 1.48 1.17.85 2.44 1.78 2.44 3.6 0 2.16-1.8 3.46-4.4 3.46-1.27 0-2.59-.23-3.54-.69 2.85.25 6.56-.48 6.56-2.6 0-1.06-.88-1.68-1.82-2.36-.89-.64-1.85-1.35-1.85-2.61 0-1.67 1.51-2.49 2.52-3.7Zm-4.9 13.58c-1.72.4-2.76 1.1-2.76 1.87 0 1.19 2.46 2.05 5.84 2.05 3.63 0 6.05-.94 6.05-2.21 0-.92-1.2-1.54-3.08-1.91.81.45 1.23.94 1.23 1.46 0 1.3-2.68 1.95-5.02 1.95-2.32 0-4.82-.62-4.82-1.86 0-.47.33-.92 1.01-1.35h1.55Z"/></svg>
-                              }
-                              @case ('mongodb') {
-                                <svg viewBox="0 0 24 24"><path d="M12.14 2c.92 1.11 3.62 4.12 3.62 8.58 0 3.72-2.23 6.39-3.32 7.52-.18.19-.34.33-.48.43a1.27 1.27 0 0 1-.27-.25c-.97-1.02-3.45-3.76-3.45-7.7 0-4.06 2.28-7.08 3.34-8.28.2-.23.38-.41.56-.3Zm-.56 2.96c-.53 1.02-1.58 3.16-1.58 5.87 0 3.16 1.43 5.34 2 6.1.55-.72 2-2.78 2-6.14 0-2.68-1.07-4.78-1.66-5.83v8.98h-.76V4.96Z"/></svg>
-                              }
-                              @case ('mysql') {
-                                <svg viewBox="0 0 24 24"><path d="M18.7 7.2c-1.14-.96-2.92-1.54-4.88-1.54-3.93 0-7.12 2.3-7.12 5.14 0 1.73 1.18 3.26 2.98 4.2-.26.72-.82 1.47-1.76 2 .96-.08 2.34-.42 3.34-1 0 0 1.08.24 2.56.24 3.93 0 7.12-2.3 7.12-5.14 0-1.51-.9-2.86-2.24-3.8Zm-8.04 3.46c.48-.32 1.07-.5 1.69-.5.76 0 1.36.24 1.84.74-.52.44-.88 1.08-.88 1.82 0 .21.03.4.08.59-.3.11-.63.16-1 .16-1.57 0-2.72-.92-2.72-2.17 0-.23.03-.44.1-.64.3.18.58.31.89.4Zm7.14 1.84c-.58.62-1.55.98-2.62.98-.19 0-.37-.02-.55-.04.11-.29.19-.6.19-.95 0-.71-.26-1.36-.69-1.88.44-.33.99-.5 1.58-.5 1.34 0 2.4.88 2.4 2 0 .13-.01.26-.05.39-.31-.1-.56-.01-.26 0Z"/></svg>
-                              }
-                              @case ('python') {
-                                <svg viewBox="0 0 24 24"><path d="M12.05 2c-4.14 0-3.88 1.8-3.88 1.8l.01 1.86h3.95v.56H6.6S4 5.9 4 9.98s2.28 3.95 2.28 3.95h1.36v-1.9s-.07-2.28 2.24-2.28h3.86s2.17.04 2.17-2.1V3.99S16.24 2 12.05 2Zm-2.18 1.23a.72.72 0 1 1 0 1.45.72.72 0 0 1 0-1.45Zm2.08 18.77c4.14 0 3.88-1.8 3.88-1.8l-.01-1.86h-3.95v-.56h5.53S20 18.1 20 14.02s-2.28-3.95-2.28-3.95h-1.36v1.9s.07 2.28-2.24 2.28h-3.86s-2.17-.04-2.17 2.1v3.66S7.76 22 11.95 22Zm2.18-1.23a.72.72 0 1 1 0-1.45.72.72 0 0 1 0 1.45Z"/></svg>
-                              }
-                              @case ('spring') {
-                                <svg viewBox="0 0 24 24"><path d="M20.24 6.65c-.65.3-1.34.5-2.03.63.73-.44 1.29-1.13 1.55-1.96-.69.41-1.45.71-2.25.87A3.53 3.53 0 0 0 15 5c-1.95 0-3.52 1.58-3.52 3.52 0 .28.03.54.09.8-2.93-.15-5.52-1.55-7.26-3.68-.3.52-.48 1.13-.48 1.77 0 1.22.62 2.3 1.57 2.93-.58-.02-1.12-.18-1.6-.44v.05c0 1.7 1.21 3.12 2.82 3.44-.3.08-.6.12-.93.12-.22 0-.45-.02-.66-.06.45 1.4 1.75 2.42 3.29 2.44A7.1 7.1 0 0 1 3 18.47 9.98 9.98 0 0 0 8.4 20c6.48 0 10.03-5.37 10.03-10.03l-.01-.46c.7-.5 1.3-1.12 1.78-1.83h.04Z"/></svg>
-                              }
-                              @case ('react') {
-                                <svg viewBox="0 0 24 24"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6a2.8 2.8 0 0 0 0-5.6Zm0-6.2c1.5 0 2.92 1.05 4.03 2.8 1.4-.22 2.7-.25 3.73-.03 1.47.3 2.24.93 2.24 1.83 0 1.06-1.06 2.08-2.8 2.9.15.56.23 1.13.23 1.7 0 .57-.08 1.14-.23 1.7 1.74.82 2.8 1.84 2.8 2.9 0 .9-.77 1.53-2.24 1.83-1.03.21-2.33.19-3.73-.03C14.92 19.95 13.5 21 12 21c-1.5 0-2.92-1.05-4.03-2.8-1.4.22-2.7.24-3.73.03C2.77 17.93 2 17.3 2 16.4c0-1.06 1.06-2.08 2.8-2.9A6.71 6.71 0 0 1 4.57 12c0-.57.08-1.14.23-1.7C3.06 9.48 2 8.46 2 7.4c0-.9.77-1.53 2.24-1.83 1.03-.22 2.33-.19 3.73.03C9.08 4.05 10.5 3 12 3Zm-3.08 3.7c-.45.93-.8 2-1.02 3.15.72-.14 1.47-.25 2.26-.32.22-.76.51-1.46.86-2.08-.72-.38-1.43-.64-2.1-.75Zm6.16 0c-.67.11-1.38.37-2.1.75.35.62.64 1.32.86 2.08.79.07 1.54.18 2.26.32-.22-1.15-.57-2.22-1.02-3.15Zm-3.08 1.3c-.33.46-.62 1-.84 1.6.56-.02 1.13-.02 1.69 0-.22-.6-.51-1.14-.85-1.6Zm-6.05-.61c-.97.2-1.41.54-1.41.83 0 .39.72 1.01 1.98 1.57.25-.79.57-1.54.96-2.23-.59-.1-1.12-.14-1.53-.17Zm12.1 0c.39.69.71 1.44.96 2.23 1.26-.56 1.98-1.18 1.98-1.57 0-.29-.44-.63-1.41-.83-.41.03-.94.07-1.53.17Zm-6.05 4.18c-.72 0-1.44.03-2.14.1-.08.7-.12 1.44-.12 2.13 0 .69.04 1.43.12 2.13.7.07 1.42.1 2.14.1s1.44-.03 2.14-.1c.08-.7.12-1.44.12-2.13 0-.69-.04-1.43-.12-2.13-.7-.07-1.42-.1-2.14-.1Zm-4.24.25c-.12.65-.19 1.31-.19 1.98 0 .67.07 1.33.19 1.98.64-.14 1.32-.26 2.03-.34-.05-.53-.07-1.08-.07-1.64 0-.56.02-1.11.07-1.64-.71-.08-1.39-.2-2.03-.34Zm8.48 0c.05.53.07 1.08.07 1.64 0 .56-.02 1.11-.07 1.64.71.08 1.39.2 2.03.34.12-.65.19-1.31.19-1.98 0-.67-.07-1.33-.19-1.98-.64.14-1.32.26-2.03.34Zm-7.32 5.53c.67.11 1.38.37 2.1.75-.35-.62-.64-1.32-.86-2.08-.79-.07-1.54-.18-2.26-.32.22 1.15.57 2.22 1.02 3.15Zm4.92-2.33c-.56.02-1.13.02-1.69 0 .22.6.51 1.14.84 1.6.34-.46.63-1 .85-1.6Zm2.4-.82c-.22.76-.51 1.46-.86 2.08.72-.38 1.43-.64 2.1-.75.45-.93.8-2 1.02-3.15-.72.14-1.47.25-2.26.32Zm-9.57 1.58C3.31 15.99 2.59 16.61 2.59 17c0 .29.44.63 1.41.83.41-.03.94-.07 1.53-.17-.39-.69-.71-1.44-.96-2.23Zm13.34 0c-.25.79-.57 1.54-.96 2.23.59.1 1.12.14 1.53.17.97-.2 1.41-.54 1.41-.83 0-.39-.72-1.01-1.98-1.57Z"/></svg>
-                              }
-                              @case ('openstack') {
-                                <svg viewBox="0 0 24 24"><path d="M5.5 7.3A2.3 2.3 0 0 1 7.8 5h8.4a2.3 2.3 0 0 1 2.3 2.3v1.2h-2V7.4a.4.4 0 0 0-.4-.4H7.9a.4.4 0 0 0-.4.4v9.2c0 .22.18.4.4.4h4.1v2H7.8a2.3 2.3 0 0 1-2.3-2.3V7.3Zm5.1 5.2c0-.77.63-1.4 1.4-1.4h5.6c.77 0 1.4.63 1.4 1.4v3.1c0 .77-.63 1.4-1.4 1.4H12c-.77 0-1.4-.63-1.4-1.4v-3.1Zm1.9.5v2.1h4.8V13h-4.8Z"/></svg>
-                              }
-                              @case ('nodejs') {
-                                <svg viewBox="0 0 24 24"><path d="M11.98 2 4.5 6.32v11.36L11.98 22l7.52-4.32V6.32L11.98 2Zm4.6 13.43c0 1.56-.92 2.47-2.26 2.47-.99 0-1.57-.39-1.88-.91l1.03-.62c.2.35.38.64.81.64.41 0 .67-.16.67-.79v-4.28h1.63v4.49Zm-4.8 2.47c-1.4 0-2.31-.67-2.73-1.54l1.03-.6c.27.44.63.77 1.34.77.56 0 .92-.28.92-.67 0-.46-.36-.63-.98-.9l-.34-.14c-.97-.41-1.61-.93-1.61-2.03 0-1.01.77-1.77 1.98-1.77.86 0 1.48.3 1.93 1.08l-1 .64c-.22-.39-.46-.54-.93-.54-.42 0-.69.27-.69.62 0 .43.27.6.89.87l.34.15c1.14.49 1.78 1 1.78 2.14 0 1.23-.97 1.92-2.27 1.92Z"/></svg>
-                              }
-                              @case ('docker') {
-                                <svg viewBox="0 0 24 24"><path d="M7.1 10.1h2.1v2H7.1v-2Zm2.5 0h2.1v2H9.6v-2Zm2.5 0h2.1v2h-2.1v-2Zm-5-2.5h2.1v2H7.1v-2Zm2.5 0h2.1v2H9.6v-2Zm2.5 0h2.1v2h-2.1v-2Zm2.6 2.6c.34-.15.96-.2 1.43.05.6-.67.93-1.68.83-2.58.86.51 1.34 1.5 1.32 2.49.72.04 1.44-.2 2.08-.68-.08 2.63-1.8 4.58-5.15 4.58H9.05c-2.18 0-3.95-1.78-3.95-3.96 0-.02 0-.04.02-.06h11.56c.01.05.02.1.02.16 0 .46-.09.86-.26 1.21.58-.25 1.09-.67 1.43-1.21h-.16Z"/></svg>
-                              }
-                              @case ('postgresql') {
-                                <svg viewBox="0 0 24 24"><path d="M12 3c-3.46 0-6.4 2.62-6.4 5.89 0 2.1 1.22 4.02 3.03 5.08-.07.58-.36 2.03-.47 2.53-.07.34.12.45.36.32.2-.1 2.84-1.84 3.56-2.31.62.16 1.26.24 1.92.24 3.46 0 6.4-2.62 6.4-5.86C18.4 5.62 15.46 3 12 3Zm3.2 4.85c0 1.65-.75 3.61-2.4 5.03l.15 2.46h-1.25l.1-1.68c-.36.2-.74.32-1.15.32-.94 0-1.73-.61-1.73-1.76 0-1.86 1.95-3.08 3.76-3.08.44 0 .84.04 1.2.14.02-.1.03-.2.03-.3 0-.98-.49-1.57-1.51-1.57-.71 0-1.48.26-2.1.7L9.8 7c.73-.52 1.76-.86 2.95-.86 1.63 0 2.45.75 2.45 1.71Zm-2.73 2.23c-1.04 0-2.1.67-2.1 1.7 0 .52.28.78.69.78.49 0 .98-.26 1.36-.71.39-.46.67-1.05.82-1.62a3.2 3.2 0 0 0-.77-.15Z"/></svg>
-                              }
-                              @case ('aws') {
-                                <svg viewBox="0 0 24 24"><path d="M7.33 14.7c1.48 1.1 3.62 1.68 5.46 1.68 2.58 0 4.96-.95 6.74-2.53.28-.25.03-.58-.3-.39-1.93 1.13-4.3 1.8-6.75 1.8-1.63 0-3.42-.34-5.06-1.05-.25-.11-.46.16-.09.49Zm11.02.51c-.19-.24-1.26-.11-1.74-.06-.15.02-.18-.11-.04-.21.9-.63 2.37-.45 2.54-.24.17.21-.04 1.68-.89 2.38-.13.11-.26.05-.2-.09.2-.49.52-1.58.33-1.82ZM8.06 9.38c.82-.76 2.01-1.14 3.58-1.14 1.2 0 2.2.16 3.01.49.82.32 1.22.88 1.22 1.67v.43c-.61.07-1.26.15-1.96.24-.69.1-1.29.24-1.82.44a3.2 3.2 0 0 0-1.26.84c-.31.35-.47.79-.47 1.33 0 .87.27 1.54.82 2.02.55.48 1.26.72 2.13.72.74 0 1.39-.14 1.94-.42.55-.28 1.07-.7 1.57-1.25.17.25.32.46.45.65.14.19.29.39.45.61.05.08.11.12.18.12.05 0 .1-.02.17-.06.27-.23.56-.47.87-.73.32-.25.6-.49.86-.7.13-.11.19-.22.19-.33 0-.08-.03-.16-.09-.24-.28-.36-.49-.7-.62-1.03-.12-.33-.19-.78-.19-1.37V10.4c0-1.07-.45-1.88-1.35-2.45-.9-.56-2.09-.84-3.58-.84-.95 0-1.82.1-2.61.31-.78.21-1.48.51-2.09.92-.11.08-.16.16-.16.25 0 .06.01.12.04.18l.73.99c.06.08.13.11.22.11.06 0 .12-.02.18-.06Z"/></svg>
-                              }
-                              @default {
-                                <svg viewBox="0 0 24 24"><path d="M12 3 4.5 7.2v9.6L12 21l7.5-4.2V7.2L12 3Zm0 2.1 5.6 3.14v7.5L12 18.9l-5.6-3.16v-7.5L12 5.1Zm0 2.15a4.75 4.75 0 1 0 0 9.5a4.75 4.75 0 0 0 0-9.5Zm0 1.8a2.95 2.95 0 1 1 0 5.9a2.95 2.95 0 0 1 0-5.9Z"/></svg>
-                              }
-                            }
-                          </span>
-                          <span class="jihen-skill-pill__label">{{ jihenSkill.name }}</span>
-                        </span>
+                        <span class="jihen-skill-pill">{{ jihenSkill.name }}</span>
                       }
                     </div>
                   } @else {
-                    <p class="jihen-page-note mb-0">No main skills yet.</p>
+                    <p class="jihen-page-note mb-0">Aucune compétence principale pour le moment.</p>
                   }
                 </section>
               </div>
 
               <div class="col-lg-5">
-                <section class="jihen-panel jihen-dashboard-card jihen-dashboard-card--about p-4 h-100">
-                  <div class="jihen-about__layout">
-                    <div class="jihen-about__copy">
-                      <h2 class="jihen-section-title">About Me</h2>
-                      <p class="jihen-page-note mb-0">
-                        {{ jihenPortfolio.jihenBio || 'Passionate developer focused on building useful and reliable products.' }}
-                      </p>
-                      <div class="row g-3 jihen-about__facts">
-                        @for (jihenInfo of jihenAboutItems; track jihenInfo.jihenLabel) {
-                          <div class="col-sm-6">
-                            <div class="jihen-about__info">
-                              <div class="jihen-about__icon">
-                                @if (jihenInfo.jihenIcon === 'calendar') {
-                                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M7 3h2v2h6V3h2v2h1a2 2 0 0 1 2 2v11a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a2 2 0 0 1 2-2h1V3Zm11 7H6v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-8Z" />
-                                  </svg>
-                                } @else {
-                                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M12 5a7 7 0 1 0 7 7a7 7 0 0 0-7-7Zm1 3v4.2l2.7 1.6-.8 1.3L11 12.8V8h2Z" />
-                                  </svg>
-                                }
-                              </div>
-                              <div class="jihen-about__text">
-                                <span>{{ jihenInfo.jihenLabel }}</span>
-                                <strong>{{ jihenInfo.jihenValue }}</strong>
-                              </div>
-                            </div>
+                <section class="jihen-panel p-4 h-100">
+                  <h2 class="jihen-section-title">À propos de moi</h2>
+                  <p class="jihen-page-note mb-4">
+                    {{ jihenPortfolio.jihenBio || 'Développeuse passionnée par des applications robustes et utiles.' }}
+                  </p>
+                  <div class="row g-3">
+                    @for (jihenInfo of jihenAboutItems; track jihenInfo.jihenLabel) {
+                      <div class="col-sm-6">
+                        <div class="jihen-about__info">
+                          <div class="jihen-about__icon">
+                            @if (jihenInfo.jihenIcon === 'calendar') {
+                              <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M7 3h2v2h6V3h2v2h1a2 2 0 0 1 2 2v11a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a2 2 0 0 1 2-2h1V3Zm11 7H6v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-8Z" />
+                              </svg>
+                            } @else {
+                              <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 5a7 7 0 1 0 7 7a7 7 0 0 0-7-7Zm1 3v4.2l2.7 1.6-.8 1.3L11 12.8V8h2Z" />
+                              </svg>
+                            }
                           </div>
-                        }
-                      </div>
-                    </div>
-
-                    <div class="jihen-about__illustration" aria-hidden="true">
-                      <div class="jihen-about__illustration-frame">
-                        <div class="jihen-about__window jihen-about__window--top"></div>
-                        <div class="jihen-about__window jihen-about__window--floating"></div>
-                        <div class="jihen-about__device">
-                          <div class="jihen-about__device-screen">
-                            <span class="jihen-about__bar jihen-about__bar--1"></span>
-                            <span class="jihen-about__bar jihen-about__bar--2"></span>
-                            <span class="jihen-about__bar jihen-about__bar--3"></span>
+                          <div class="jihen-about__text">
+                            <span>{{ jihenInfo.jihenLabel }}</span>
+                            <strong>{{ jihenInfo.jihenValue }}</strong>
                           </div>
-                          <div class="jihen-about__device-base"></div>
                         </div>
                       </div>
-                    </div>
+                    }
                   </div>
                 </section>
               </div>
             </section>
 
-            <section class="jihen-dashboard-preview jihen-dashboard-preview--projects">
+            <section class="jihen-dashboard-preview">
               <div class="jihen-section-head">
                 <div>
                   <h2 class="jihen-section-head__title">Featured Projects</h2>
-                  <p class="jihen-page-note">A selection of the most visible work in your portfolio.</p>
+                  <p class="jihen-page-note">Aperçu rapide de vos projets les plus visibles.</p>
                 </div>
-                <button type="button" class="jihen-section-head__action" (click)="showJihenProjectsView()">View all projects</button>
+                <button type="button" class="jihen-section-head__action" (click)="showJihenProjectsView()">Voir tous les projets →</button>
               </div>
 
               @if (jihenFeaturedProjects.length > 0) {
-                <div class="row g-4 jihen-project-grid">
+                <div class="row g-4">
                   @for (jihenProject of jihenFeaturedProjects; track jihenProject.jihenId) {
                     <div class="col-xl-4 col-md-6">
-                      <article class="jihen-panel jihen-project-card h-100">
+                      <article class="jihen-panel jihen-project-card">
                         <div class="jihen-project-card__media">
-                          @if (jihenProject.jihenHasMediaPreview && jihenProject.jihenCoverMediaType === 'VIDEO' && jihenProject.jihenCoverImage) {
+                          @if (jihenProject.jihenCoverMediaType === 'VIDEO') {
                             <video class="jihen-project-card__cover" [src]="jihenProject.jihenCoverImage" muted playsinline controls></video>
-                          } @else if (jihenProject.jihenHasMediaPreview && jihenProject.jihenCoverImage) {
+                          } @else {
                             <img
                               class="jihen-project-card__cover"
                               [src]="jihenProject.jihenCoverImage"
                               [alt]="jihenProject.jihenTitle"
-                              (error)="$any($event.target).onerror = null; $any($event.target).src = jihenProjectPlaceholders[0]" />
-                          } @else {
-                            <div class="jihen-project-card__placeholder" aria-hidden="true">
-                              <svg viewBox="0 0 24 24">
-                                <path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 17.5v-11Zm2.5-.5a.5.5 0 0 0-.5.5v7.2l2.8-2.8a1 1 0 0 1 1.4 0l1.6 1.6 2.9-3a1 1 0 0 1 1.4 0l1 1V6.5a.5.5 0 0 0-.5-.5h-9Zm0 12h9a.5.5 0 0 0 .5-.5v-3.17l-1.7-1.7-2.9 3a1 1 0 0 1-1.42.01L10.5 13 7 16.5v1a.5.5 0 0 0 .5.5Zm7.25-8.25a1.25 1.25 0 1 0 0-2.5a1.25 1.25 0 0 0 0 2.5Z" />
-                              </svg>
-                              <span>No preview</span>
-                            </div>
+                              (error)="onJihenImageError($event)" />
                           }
                         </div>
 
@@ -398,14 +318,9 @@
 
                           <div class="jihen-project-card__headline">
                             <h3>{{ jihenProject.jihenTitle }}</h3>
-                            <div class="jihen-project-card__badges">
-                              <strong class="jihen-visibility-badge" [class.jihen-visibility-badge--friends]="jihenProject.jihenVisibility === 'FRIENDS_ONLY'" [class.jihen-visibility-badge--private]="jihenProject.jihenVisibility === 'PRIVATE'">
-                                {{ jihenProject.jihenVisibility }}
-                              </strong>
-                              @if (jihenProject.jihenPinned) {
-                                <span class="jihen-project-card__pin">Pinned</span>
-                              }
-                            </div>
+                            @if (jihenProject.jihenPinned) {
+                              <span class="jihen-project-card__pin">Épinglé</span>
+                            }
                           </div>
                           <p class="jihen-project-card__text">{{ jihenProject.jihenDescription }}</p>
 
@@ -418,11 +333,13 @@
                           }
 
                           <div class="jihen-project-card__footer">
-                            <p class="jihen-project-card__meta">
-                              <span class="jihen-project-card__meta-dot" aria-hidden="true"></span>
-                              <span>Project</span>
+                            <p class="jihen-project-card__visibility">
+                              <span>Visibilité:</span>
+                              <strong class="jihen-visibility" [class.jihen-visibility--friends]="jihenProject.jihenVisibility === 'FRIENDS_ONLY'">
+                                {{ jihenProject.jihenVisibility }}
+                              </strong>
                             </p>
-                            <p class="jihen-project-card__dates">Updated: {{ jihenProject.jihenUpdatedAtLabel }}</p>
+                            <p class="jihen-project-card__dates">Mis à jour: {{ jihenProject.jihenUpdatedAtLabel }}</p>
                           </div>
 
                           @if (jihenProjectActionErrors[jihenProject.jihenId]) {
@@ -445,25 +362,21 @@
               }
             </section>
 
-            <section class="jihen-dashboard-preview jihen-dashboard-preview--collections">
+            <section class="jihen-dashboard-preview">
               <div class="jihen-section-head">
                 <div>
                   <h2 class="jihen-section-head__title">Collections</h2>
-                  <p class="jihen-page-note">Organize related projects into focused groups.</p>
+                  <p class="jihen-page-note">Gardez vos regroupements visibles sans surcharger le dashboard.</p>
                 </div>
-                <button type="button" class="jihen-section-head__action" (click)="showJihenCollectionsView()">View all collections</button>
+                <button type="button" class="jihen-section-head__action" (click)="showJihenCollectionsView()">Voir toutes les collections →</button>
               </div>
 
               @if (jihenFeaturedCollections.length > 0) {
                 <div class="row g-4">
                   @for (jihenCollection of jihenFeaturedCollections; track jihenCollection.jihenId) {
                     <div class="col-xl-6">
-                      <article class="jihen-panel jihen-collection-card jihen-collection-card--management h-100">
-                        <div class="jihen-collection-card__icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24">
-                            <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H11l1.5 2H17.5A2.5 2.5 0 0 1 20 9.5v7A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" />
-                          </svg>
-                        </div>
+                      <article class="jihen-panel jihen-collection-card jihen-collection-card--management">
+                        <div class="jihen-collection-card__icon"></div>
                         <div class="jihen-project-card__body">
                           <div class="jihen-project-card__top">
                             <div class="jihen-card-actions">
@@ -516,16 +429,13 @@
                             </div>
                           </div>
 
-                          <div class="jihen-project-card__headline">
-                            <h3>{{ jihenCollection.jihenName }}</h3>
-                            <strong class="jihen-visibility-badge" [class.jihen-visibility-badge--friends]="jihenCollection.jihenVisibility === 'FRIENDS_ONLY'" [class.jihen-visibility-badge--private]="jihenCollection.jihenVisibility === 'PRIVATE'">
+                          <h3>{{ jihenCollection.jihenName }}</h3>
+                          <p class="jihen-project-card__text">{{ jihenCollection.jihenDescription }}</p>
+                          <p class="jihen-project-card__visibility">
+                            <span>Projets: {{ jihenCollection.jihenProjectCount }}</span>
+                            <strong class="jihen-visibility" [class.jihen-visibility--friends]="jihenCollection.jihenVisibility === 'FRIENDS_ONLY'">
                               {{ jihenCollection.jihenVisibility }}
                             </strong>
-                          </div>
-                          <p class="jihen-project-card__text">{{ jihenCollection.jihenDescription }}</p>
-                          <p class="jihen-project-card__meta">
-                            <span class="jihen-project-card__meta-dot" aria-hidden="true"></span>
-                            <span>{{ jihenCollection.jihenProjectCount }} projects</span>
                           </p>
 
                           @if (jihenCollection.jihenProjectSummaries.length > 0) {
@@ -615,26 +525,19 @@
               </section>
 
               @if (jihenFilteredProjects.length > 0) {
-                <div class="row g-4 jihen-project-grid">
+                <div class="row g-4">
                   @for (jihenProject of jihenFilteredProjects; track jihenProject.jihenId) {
-                    <div class="col-xl-4 col-md-6">
-                      <article class="jihen-panel jihen-project-card jihen-project-card--management h-100">
+                    <div class="col-12">
+                      <article class="jihen-panel jihen-project-card jihen-project-card--management">
                         <div class="jihen-project-card__media">
-                          @if (jihenProject.jihenHasMediaPreview && jihenProject.jihenCoverMediaType === 'VIDEO' && jihenProject.jihenCoverImage) {
+                          @if (jihenProject.jihenCoverMediaType === 'VIDEO') {
                             <video class="jihen-project-card__cover" [src]="jihenProject.jihenCoverImage" muted playsinline controls></video>
-                          } @else if (jihenProject.jihenHasMediaPreview && jihenProject.jihenCoverImage) {
+                          } @else {
                             <img
                               class="jihen-project-card__cover"
                               [src]="jihenProject.jihenCoverImage"
                               [alt]="jihenProject.jihenTitle"
-                              (error)="$any($event.target).onerror = null; $any($event.target).src = jihenProjectPlaceholders[0]" />
-                          } @else {
-                            <div class="jihen-project-card__placeholder" aria-hidden="true">
-                              <svg viewBox="0 0 24 24">
-                                <path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 17.5v-11Zm2.5-.5a.5.5 0 0 0-.5.5v7.2l2.8-2.8a1 1 0 0 1 1.4 0l1.6 1.6 2.9-3a1 1 0 0 1 1.4 0l1 1V6.5a.5.5 0 0 0-.5-.5h-9Zm0 12h9a.5.5 0 0 0 .5-.5v-3.17l-1.7-1.7-2.9 3a1 1 0 0 1-1.42.01L10.5 13 7 16.5v1a.5.5 0 0 0 .5.5Zm7.25-8.25a1.25 1.25 0 1 0 0-2.5a1.25 1.25 0 0 0 0 2.5Z" />
-                              </svg>
-                              <span>No preview</span>
-                            </div>
+                              (error)="onJihenImageError($event)" />
                           }
                         </div>
 
@@ -791,13 +694,9 @@
               @if (jihenFilteredCollections.length > 0) {
                 <div class="row g-4">
                   @for (jihenCollection of jihenFilteredCollections; track jihenCollection.jihenId) {
-                    <div class="col-xl-6 col-md-6">
-                      <article class="jihen-panel jihen-collection-card jihen-collection-card--management h-100">
-                        <div class="jihen-collection-card__icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24">
-                            <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H11l1.5 2H17.5A2.5 2.5 0 0 1 20 9.5v7A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" />
-                          </svg>
-                        </div>
+                    <div class="col-12">
+                      <article class="jihen-panel jihen-collection-card jihen-collection-card--management">
+                        <div class="jihen-collection-card__icon"></div>
                         <div class="jihen-project-card__body">
                           <div class="jihen-project-card__top">
                             <div class="jihen-card-actions">
@@ -883,22 +782,22 @@
               }
             </section>
           } @else if (jihenActiveSection === 'skills') {
-            <section class="jihen-skills-view jihen-skills-dashboard">
-              <div class="jihen-section-head jihen-skills-dashboard__header">
+            <section class="jihen-skills-view">
+              <div class="jihen-section-head">
                 <div>
-                  <h1 class="jihen-section-head__title">My Skills</h1>
-                  <p class="jihen-page-note">Manage and showcase your technical expertise.</p>
+                  <h1 class="jihen-section-head__title">Mes compétences</h1>
+                  <p class="jihen-page-note">Compétences principales de mon portfolio, organisées par catégorie.</p>
                 </div>
-                <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenSkillModal()">+ Add Skill</button>
+                <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenSkillModal()">+ Ajouter une compétence</button>
               </div>
 
               @if (jihenSelectedSkills.length > 0) {
-                <label class="jihen-field jihen-skills-search jihen-skills-search--dashboard">
-                  <span>Search skills</span>
+                <label class="jihen-field jihen-skills-search">
+                  <span>Rechercher une compétence...</span>
                   <input
                     type="search"
                     [value]="jihenPortfolioSkillSearchTerm"
-                    placeholder="Search a skill..."
+                    placeholder="Rechercher une compétence..."
                     (input)="jihenPortfolioSkillSearchTerm = $any($event.target).value" />
                 </label>
               }
@@ -906,12 +805,12 @@
               @if (jihenHasPortfolioSkillChanges || jihenSkillsSaveError || jihenSkillsSaveSuccess) {
                 <section class="jihen-panel p-4 jihen-skills-save-banner">
                   <div>
-                    <h2 class="jihen-section-title mb-1">Portfolio skills</h2>
+                    <h2 class="jihen-section-title mb-1">Compétences du portfolio</h2>
                     <p class="jihen-page-note mb-0">
                       @if (jihenHasPortfolioSkillChanges) {
-                        You have unsaved skill changes.
+                        Vous avez des modifications non enregistrées.
                       } @else {
-                        Your skills are up to date.
+                        Vos compétences sont à jour.
                       }
                     </p>
                   </div>
@@ -927,7 +826,7 @@
                       class="jihen-btn jihen-btn--primary"
                       [disabled]="jihenIsSavingSkills || !jihenHasPortfolioSkillChanges"
                       (click)="saveJihenPortfolioSkills()">
-                      {{ jihenIsSavingSkills ? 'Saving...' : 'Save skills' }}
+                      {{ jihenIsSavingSkills ? 'Enregistrement...' : 'Enregistrer les compétences' }}
                     </button>
                   </div>
                 </section>
@@ -936,56 +835,23 @@
               @if (jihenSelectedPortfolioSkillGroups.length > 0) {
                 <div class="jihen-skills-grid">
                   @for (jihenSkillGroup of jihenSelectedPortfolioSkillGroups; track jihenSkillGroup.jihenCategoryKey) {
-                    <section class="jihen-panel p-4 jihen-skill-category-card jihen-skill-category-card--dashboard">
+                    <section class="jihen-panel p-4 jihen-skill-category-card">
                       <div class="jihen-skill-category-card__head">
-                        <div class="jihen-skill-category-card__head-main">
-                          <div class="jihen-skill-category-card__icon" [attr.data-category-key]="getJihenSkillCategoryDesignKey(jihenSkillGroup.jihenCategoryKey)" aria-hidden="true">
-                            @switch (getJihenSkillCategoryDesignKey(jihenSkillGroup.jihenCategoryKey)) {
-                              @case ('frontend') {
-                                <svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7A2.5 2.5 0 0 1 17.5 16h-11A2.5 2.5 0 0 1 4 13.5v-7Zm2 0v7c0 .28.22.5.5.5h11a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0-.5.5ZM9 19h6v1.5H9V19Z"/></svg>
-                              }
-                              @case ('backend') {
-                                <svg viewBox="0 0 24 24"><path d="M6 5.5A2.5 2.5 0 0 1 8.5 3h7A2.5 2.5 0 0 1 18 5.5v3A2.5 2.5 0 0 1 15.5 11h-7A2.5 2.5 0 0 1 6 8.5v-3Zm0 10A2.5 2.5 0 0 1 8.5 13h7a2.5 2.5 0 0 1 2.5 2.5v3A2.5 2.5 0 0 1 15.5 21h-7A2.5 2.5 0 0 1 6 18.5v-3Zm2-.5v4h8v-4H8Zm0-10v4h8V5H8Z"/></svg>
-                              }
-                              @case ('database') {
-                                <svg viewBox="0 0 24 24"><path d="M12 4c4.42 0 8 1.57 8 3.5S16.42 11 12 11 4 9.43 4 7.5 7.58 4 12 4Zm-8 5.5v3c0 1.93 3.58 3.5 8 3.5s8-1.57 8-3.5v-3c-1.54 1.35-4.62 2.25-8 2.25S5.54 10.85 4 9.5Zm0 5v2.99C4 19.43 7.58 21 12 21s8-1.57 8-3.51V14.5c-1.54 1.35-4.62 2.25-8 2.25s-6.46-.9-8-2.25Z"/></svg>
-                              }
-                              @case ('devops') {
-                                <svg viewBox="0 0 24 24"><path d="M7.5 18A4.5 4.5 0 0 1 7 9.03 6 6 0 0 1 18.8 8.3 4.25 4.25 0 1 1 18 18H7.5Zm5.25-7.75-3.25 3.25 1.06 1.06 2.19-2.19V17h1.5v-4.63l2.19 2.19 1.06-1.06-3.25-3.25h-1.5Z"/></svg>
-                              }
-                              @case ('tools') {
-                                <svg viewBox="0 0 24 24"><path d="M10.2 4.8a4 4 0 0 0 5.3 5.3l3.95 3.95a1.5 1.5 0 0 1-2.12 2.12l-3.95-3.95a4 4 0 1 1-3.18-7.42Zm-.7 1.7a2.5 2.5 0 1 0 3.54 3.54A2.5 2.5 0 0 0 9.5 6.5ZM4 17h5v3H4v-3Z"/></svg>
-                              }
-                              @default {
-                                <svg viewBox="0 0 24 24"><path d="M6.5 4h4A2.5 2.5 0 0 1 13 6.5v4A2.5 2.5 0 0 1 10.5 13h-4A2.5 2.5 0 0 1 4 10.5v-4A2.5 2.5 0 0 1 6.5 4Zm7 0h4A2.5 2.5 0 0 1 20 6.5v4A2.5 2.5 0 0 1 17.5 13h-4A2.5 2.5 0 0 1 11 10.5v-4A2.5 2.5 0 0 1 13.5 4Zm-7 7h4A2.5 2.5 0 0 1 13 13.5v4A2.5 2.5 0 0 1 10.5 20h-4A2.5 2.5 0 0 1 4 17.5v-4A2.5 2.5 0 0 1 6.5 11Zm7 0h4A2.5 2.5 0 0 1 20 13.5v4A2.5 2.5 0 0 1 17.5 20h-4A2.5 2.5 0 0 1 11 17.5v-4A2.5 2.5 0 0 1 13.5 11Z"/></svg>
-                              }
-                            }
-                          </div>
-                          <div class="jihen-skill-category-card__copy">
-                            <h2 class="jihen-section-title mb-1">{{ getJihenSkillCategoryDisplayTitle(jihenSkillGroup.jihenCategoryKey) }}</h2>
-                            <p class="jihen-page-note mb-0">{{ jihenSkillGroup.jihenSkills.length }} skills</p>
-                          </div>
+                        <div class="jihen-skill-category-card__icon" aria-hidden="true">&#10022;</div>
+                        <div>
+                          <h2 class="jihen-section-title mb-1">{{ jihenSkillGroup.jihenCategoryLabel }}</h2>
+                          <p class="jihen-page-note mb-0">{{ jihenSkillGroup.jihenSkills.length }} compétence(s)</p>
                         </div>
-                        <span class="jihen-skill-category-card__menu" aria-hidden="true">
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 6.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3Zm0 7a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3Z" />
-                          </svg>
-                        </span>
                       </div>
 
-                      <p class="jihen-skill-category-card__description">{{ getJihenSkillCategoryDescription(jihenSkillGroup.jihenCategoryKey) }}</p>
-
-                      <div class="jihen-skill-selection jihen-skill-selection--dashboard">
+                      <div class="jihen-skill-selection">
                         @for (jihenSkill of jihenSkillGroup.jihenSkills; track jihenSkill.id) {
                           <button
                             type="button"
-                            class="jihen-skill-token jihen-skill-token--dashboard"
+                            class="jihen-skill-token"
                             (click)="removeJihenPortfolioSkill(jihenSkill.id)"
-                            [attr.aria-label]="'Remove ' + jihenSkill.name">
-                            <span class="jihen-skill-token__main">
-                              <span class="jihen-skill-token__logo" [attr.data-skill-logo]="getJihenSkillLogoKey(jihenSkill.name)" [innerHTML]="getJihenSkillLogoSvg(jihenSkill.name)" aria-hidden="true"></span>
-                              <span class="jihen-skill-token__label">{{ jihenSkill.name }}</span>
-                            </span>
+                            [attr.aria-label]="'Retirer ' + jihenSkill.name">
+                            <span>{{ jihenSkill.name }}</span>
                             <strong>&times;</strong>
                           </button>
                         }
@@ -1094,7 +960,7 @@
                       <p class="jihen-cover-editor__file-name">{{ jihenEditCoverFileName }}</p>
                     }
 
-                    <p class="jihen-field__hint">Vous pouvez utiliser une URL ou sélectionner une image locale pour la couverture.</p>
+                    <p class="jihen-field__hint">Le fichier local sert uniquement d'aperçu. Seule l'URL sera enregistrée.</p>
                   </div>
                 </div>
               </div>
@@ -1693,11 +1559,7 @@
                       class="jihen-collection-project-option"
                       [class.jihen-collection-project-option--selected]="hasJihenCollectionProjectSelected(jihenProject.jihenId)"
                       (click)="toggleJihenCollectionProject(jihenProject.jihenId)">
-                      <img
-                        class="jihen-collection-project-option__cover"
-                        [src]="jihenProject.jihenCoverImage || jihenProjectPlaceholders[0]"
-                        [alt]="jihenProject.jihenTitle"
-                        (error)="$any($event.target).onerror = null; $any($event.target).src = jihenProjectPlaceholders[0]" />
+                      <img class="jihen-collection-project-option__cover" [src]="jihenProject.jihenCoverImage" [alt]="jihenProject.jihenTitle" (error)="onJihenImageError($event)" />
                       <div class="jihen-collection-project-option__body">
                         <strong>{{ jihenProject.jihenTitle }}</strong>
                         <span>{{ jihenProject.jihenVisibility }}</span>
@@ -1755,160 +1617,6 @@
           <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsDeletingItem" (click)="closeJihenDeleteConfirmModal()">Annuler</button>
           <button type="button" class="jihen-btn jihen-btn--danger" [disabled]="jihenIsDeletingItem" (click)="confirmJihenDelete()">
             {{ jihenIsDeletingItem ? 'Suppression...' : 'Supprimer' }}
-          </button>
-        </div>
-      </section>
-    </div>
-  }
-
-  @if (jihenIsCvAssistantOpen) {
-    <div class="jihen-modal" (click)="closeJihenCvAssistant()">
-      <section class="jihen-modal__dialog jihen-modal__dialog--assistant" (click)="$event.stopPropagation()">
-        <div class="jihen-modal__header">
-          <div>
-            <p class="jihen-modal__eyebrow">CV Builder</p>
-            <h2>CV Assistant</h2>
-            <p class="jihen-modal__context">Ask how to improve your CV.</p>
-          </div>
-          <button type="button" class="jihen-modal__close" aria-label="Close" (click)="closeJihenCvAssistant()">&#10005;</button>
-        </div>
-
-        <div class="jihen-cv-assistant">
-          <div class="jihen-cv-assistant__prompts">
-            @for (jihenPrompt of jihenCvAssistantPrompts; track jihenPrompt) {
-              <button
-                type="button"
-                class="jihen-btn jihen-btn--soft jihen-cv-assistant__prompt"
-                [disabled]="jihenIsCvAssistantLoading"
-                (click)="sendJihenCvAssistantPrompt(jihenPrompt)">
-                {{ jihenPrompt }}
-              </button>
-            }
-          </div>
-
-          @if (jihenCvAssistantError) {
-            <p class="jihen-form__message jihen-form__message--error mb-0">{{ jihenCvAssistantError }}</p>
-          }
-
-          <div class="jihen-cv-assistant__messages">
-            @for (jihenMessage of jihenCvAssistantMessages; track $index) {
-              <article class="jihen-cv-assistant__message" [class.jihen-cv-assistant__message--user]="jihenMessage.role === 'user'">
-                <div class="jihen-cv-assistant__message-meta">
-                  <strong>{{ jihenMessage.role === 'user' ? 'You' : 'CV Assistant' }}</strong>
-                  @if (jihenMessage.role === 'assistant' && jihenMessage.score !== null && jihenMessage.score !== undefined) {
-                    <span>Score: {{ jihenMessage.score }}</span>
-                  }
-                </div>
-                <p>{{ jihenMessage.content }}</p>
-
-                @if (jihenMessage.role === 'assistant' && jihenMessage.suggestedActions && jihenMessage.suggestedActions.length > 0) {
-                  <div class="jihen-cv-assistant__actions">
-                    @for (jihenAction of jihenMessage.suggestedActions; track jihenAction) {
-                      <div class="jihen-cv-assistant__action">
-                        <span>{{ jihenAction }}</span>
-                        <button type="button" class="jihen-btn jihen-btn--neutral" disabled>Apply</button>
-                      </div>
-                    }
-                  </div>
-                }
-              </article>
-            }
-
-            @if (jihenIsCvAssistantLoading) {
-              <article class="jihen-cv-assistant__message">
-                <div class="jihen-cv-assistant__message-meta">
-                  <strong>CV Assistant</strong>
-                </div>
-                <p>Thinking...</p>
-              </article>
-            }
-          </div>
-
-          <form class="jihen-cv-assistant__composer" (ngSubmit)="sendJihenCvAssistantMessage()">
-            <label class="jihen-field">
-              <span>Message</span>
-              <textarea
-                rows="4"
-                [(ngModel)]="jihenCvAssistantInput"
-                [ngModelOptions]="{ standalone: true }"
-                placeholder="Ask how to improve your CV, structure, summary, or projects."></textarea>
-            </label>
-            <div class="jihen-modal__actions">
-              <button type="button" class="jihen-btn jihen-btn--neutral" (click)="closeJihenCvAssistant()">Close</button>
-              <button type="submit" class="jihen-btn jihen-btn--primary" [disabled]="!jihenCanSendCvAssistantMessage">
-                {{ jihenIsCvAssistantLoading ? 'Sending...' : 'Send' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
-    </div>
-  }
-
-  @if (jihenIsCvAiModalOpen) {
-    <div class="jihen-modal" (click)="closeJihenCvAiModal()">
-      <section class="jihen-modal__dialog jihen-modal__dialog--ai" (click)="$event.stopPropagation()">
-        <div class="jihen-modal__header">
-          <div>
-            <p class="jihen-modal__eyebrow">CV Builder</p>
-            <h2>AI Suggestion</h2>
-            @if (jihenCvAiTarget) {
-              <p class="jihen-modal__context">{{ formatJihenCvAiTargetLabel(jihenCvAiTarget) }}</p>
-            }
-          </div>
-          <button type="button" class="jihen-modal__close" aria-label="Close" (click)="closeJihenCvAiModal()">&#10005;</button>
-        </div>
-
-        <div class="jihen-ai-modal">
-          <label class="jihen-field">
-            <span>Tone</span>
-            <select [(ngModel)]="jihenCvAiTone" [ngModelOptions]="{ standalone: true }">
-              @for (jihenOption of jihenCvAiToneOptions; track jihenOption.value) {
-                <option [ngValue]="jihenOption.value">{{ jihenOption.label }}</option>
-              }
-            </select>
-          </label>
-
-          @if (jihenCvAiError) {
-            <p class="jihen-form__message jihen-form__message--error mb-0">{{ jihenCvAiError }}</p>
-          }
-
-          <div class="jihen-ai-modal__grid">
-            <label class="jihen-field">
-              <span>Original text</span>
-              <textarea rows="8" [value]="jihenCvAiOriginalText" readonly></textarea>
-            </label>
-
-            <label class="jihen-field">
-              <span>Suggested text</span>
-              <textarea
-                rows="8"
-                [(ngModel)]="jihenCvAiSuggestedText"
-                [ngModelOptions]="{ standalone: true }"
-                [placeholder]="jihenCvAiBusy ? 'Generating suggestion...' : 'Suggested text will appear here.'"></textarea>
-            </label>
-          </div>
-
-          @if (jihenCvAiBusy) {
-            <p class="jihen-page-note mb-0">Generating suggestion...</p>
-          }
-        </div>
-
-        <div class="jihen-modal__actions">
-          <button type="button" class="jihen-btn jihen-btn--neutral" (click)="closeJihenCvAiModal()">Cancel</button>
-          <button
-            type="button"
-            class="jihen-btn jihen-btn--soft"
-            [disabled]="jihenCvAiBusy || !jihenCvAiTarget"
-            (click)="retryJihenCvAiSuggestion()">
-            Try Again
-          </button>
-          <button
-            type="button"
-            class="jihen-btn jihen-btn--primary"
-            [disabled]="!jihenCanApplyCvAiSuggestion"
-            (click)="applyJihenCvAiSuggestion()">
-            Apply
           </button>
         </div>
       </section>

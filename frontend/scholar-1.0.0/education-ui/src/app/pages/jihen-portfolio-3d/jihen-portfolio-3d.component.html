@@ -1,37 +1,7 @@
 <section class="jihen-3d-page">
+  <div class="jihen-3d-space"></div>
   <div class="jihen-3d-stars"></div>
-
-  <header class="jihen-3d-topbar">
-    <button type="button" class="jihen-3d-back" (click)="backToPortfolio()">
-      ← Back to Portfolio
-    </button>
-
-    <nav class="jihen-3d-nav" aria-label="3D portfolio sections">
-      @for (section of sections; track section.key) {
-        <button
-          type="button"
-          class="jihen-3d-nav__item"
-          [class.jihen-3d-nav__item--active]="activeSection === section.key"
-          (click)="selectSection(section.key)">
-          {{ section.label }}
-        </button>
-      }
-    </nav>
-
-    <div class="jihen-3d-tour-controls">
-      @if (!tourRunning) {
-        <button type="button" class="jihen-3d-tour-btn" (click)="startTour()">▶ 3D Tour</button>
-      } @else {
-        @if (tourPaused) {
-          <button type="button" class="jihen-3d-tour-btn" (click)="resumeTour()">▶ Resume</button>
-        } @else {
-          <button type="button" class="jihen-3d-tour-btn" (click)="pauseTour()">Ⅱ Pause</button>
-        }
-
-        <button type="button" class="jihen-3d-tour-btn jihen-3d-tour-btn--ghost" (click)="stopTour()">Reset</button>
-      }
-    </div>
-  </header>
+  <div class="jihen-3d-grid"></div>
 
   @if (loading) {
     <section class="jihen-3d-state">
@@ -40,245 +10,295 @@
   } @else if (errorMessage) {
     <section class="jihen-3d-state jihen-3d-state--error">
       <p>{{ errorMessage }}</p>
+      <button type="button" class="jihen-3d-btn jihen-3d-btn--ghost" (click)="backToPortfolio()">Back</button>
     </section>
   } @else if (detail) {
-    <main
-      class="jihen-3d-stage"
-      (mousemove)="onSceneMove($event)"
-      (mouseleave)="resetScene()">
+    @if (!tourMode) {
+      <main class="jihen-3d-preview">
+        <section class="jihen-3d-preview__hero">
+          <article class="jihen-3d-preview-stage">
+            <header class="jihen-3d-preview-stage__topbar">
+              <button type="button" class="jihen-3d-btn jihen-3d-btn--ghost" (click)="backToPortfolio()">← Back to Portfolio</button>
+              <button type="button" class="jihen-3d-btn" (click)="startTour()">▶ 3D Tour</button>
+            </header>
 
-      <div
-        class="jihen-3d-scene"
-        [style.transform]="'rotateX(' + sceneRotateX + 'deg) rotateY(' + sceneRotateY + 'deg) translateZ(' + sceneDepth + 'px)'">
+            <div class="jihen-3d-preview-stage__scene">
+              <div class="jihen-3d-preview-ring"></div>
 
-        <article
-          class="jihen-3d-panel jihen-3d-panel--hero"
-          [class.jihen-3d-panel--active]="activeSection === 'hero'">
+              <article class="jihen-3d-preview-card">
+                <span class="jihen-3d-kicker">Interactive 3D Portfolio</span>
 
-          <span class="jihen-3d-kicker">Interactive 3D Portfolio</span>
-
-          <button type="button" class="jihen-3d-avatar" (click)="openProfile()">
-            @if (profileImage()) {
-              <img [src]="profileImage()" [alt]="displayName()" />
-            } @else {
-              <span>{{ initials() }}</span>
-            }
-          </button>
-
-          <button type="button" class="jihen-3d-name-btn" (click)="openProfile()">
-            <h1>{{ displayName() }}</h1>
-          </button>
-
-          <p class="jihen-3d-title">{{ headline() }}</p>
-          <p class="jihen-3d-subtitle">{{ aboutText() }}</p>
-          <span class="jihen-3d-location">⌖ {{ locationText() }}</span>
-
-          <div class="jihen-3d-socials">
-            @if (githubUrl()) {
-              <a [href]="githubUrl()" target="_blank" rel="noopener">GitHub</a>
-            }
-            @if (linkedinUrl()) {
-              <a [href]="linkedinUrl()" target="_blank" rel="noopener">LinkedIn</a>
-            }
-            @if (emailHref()) {
-              <a [href]="emailHref()">Email</a>
-            }
-          </div>
-        </article>
-
-        <article
-          class="jihen-3d-panel jihen-3d-panel--about"
-          [class.jihen-3d-panel--active]="activeSection === 'about'">
-          <div class="jihen-3d-panel-header">
-            <span class="jihen-3d-icon">👤</span>
-            <h2>About Me</h2>
-          </div>
-
-          <p>{{ aboutText() }}</p>
-
-          <div class="jihen-3d-mini-stats">
-            <div>
-              <strong>{{ projects.length }}</strong>
-              <span>Projects</span>
-            </div>
-            <div>
-              <strong>{{ groupedSkills.length }}</strong>
-              <span>Skill Groups</span>
-            </div>
-            <div>
-              <strong>{{ collections.length }}</strong>
-              <span>Collections</span>
-            </div>
-          </div>
-        </article>
-
-        <article
-          class="jihen-3d-panel jihen-3d-panel--skills"
-          [class.jihen-3d-panel--active]="activeSection === 'skills'">
-          <div class="jihen-3d-panel-header">
-            <span class="jihen-3d-icon">✦</span>
-            <h2>Skills</h2>
-          </div>
-
-          <div class="jihen-3d-skill-cloud">
-            @for (skill of topSkills(); track skill.id) {
-              <span class="jihen-3d-skill-pill">
-                @if (skillLogo(skill)) {
-                  <img [src]="skillLogo(skill)" [alt]="skill.name" />
-                } @else {
-                  <b>{{ skillInitial(skill) }}</b>
-                }
-                {{ skill.name }}
-              </span>
-            }
-          </div>
-        </article>
-
-        <article
-          class="jihen-3d-panel jihen-3d-panel--projects"
-          [class.jihen-3d-panel--active]="activeSection === 'projects'">
-          <div class="jihen-3d-panel-header">
-            <span class="jihen-3d-icon">▣</span>
-            <h2>Project Showcase</h2>
-          </div>
-
-          @if (activeProject(); as project) {
-            <div class="jihen-3d-showcase-card">
-              <div class="jihen-3d-showcase-media">
-                @if (projectVideo(project)) {
-                  <video [src]="projectVideo(project)" autoplay muted loop playsinline></video>
-                } @else if (projectImage(project)) {
-                  <img [src]="projectImage(project)" [alt]="project.title || 'Project preview'" />
-                } @else {
-                  <div class="jihen-3d-placeholder">Project Preview</div>
-                }
-              </div>
-
-              <div class="jihen-3d-showcase-copy">
-                <small>Project {{ activeProjectIndex + 1 }} / {{ projects.length }}</small>
-                <h3>{{ project.title || 'Untitled project' }}</h3>
-                <p>{{ shortProjectSummary(project) }}</p>
-
-                <div class="jihen-3d-chip-row">
-                  @for (keyword of projectKeywords(project); track keyword) {
-                    <span class="jihen-3d-chip">{{ keyword }}</span>
+                <div class="jihen-3d-avatar">
+                  @if (profileImage()) {
+                    <img [src]="profileImage()" [alt]="displayName()" />
+                  } @else {
+                    <span>{{ initials() }}</span>
                   }
                 </div>
-              </div>
-            </div>
-          } @else {
-            <p>No projects available yet.</p>
-          }
-        </article>
 
-        <article
-          class="jihen-3d-panel jihen-3d-panel--collections"
-          [class.jihen-3d-panel--active]="activeSection === 'collections'">
-          <div class="jihen-3d-panel-header">
-            <span class="jihen-3d-icon">▤</span>
-            <h2>Collections</h2>
-          </div>
-
-          @if (activeCollection(); as collection) {
-            <div class="jihen-3d-showcase-card jihen-3d-showcase-card--collection">
-              <div class="jihen-3d-showcase-media">
-                @if (collectionPreviewImage(collection)) {
-                  <img [src]="collectionPreviewImage(collection)" [alt]="collection.name || collection.title || 'Collection preview'" />
-                } @else {
-                  <div class="jihen-3d-placeholder">Collection</div>
-                }
-              </div>
-
-              <div class="jihen-3d-showcase-copy">
-                <small>Collection {{ activeCollectionIndex + 1 }} / {{ collections.length }}</small>
-                <h3>{{ collection.name || collection.title || 'Collection' }}</h3>
-                <p>{{ collection.description || 'Curated group of related projects.' }}</p>
-                <strong>{{ collectionProjectCount(collection) }} projects</strong>
-
-                <div class="jihen-3d-chip-row">
-                  @for (keyword of collectionKeywords(collection); track keyword) {
-                    <span class="jihen-3d-chip">{{ keyword }}</span>
-                  }
+                <div class="jihen-3d-preview-card__copy">
+                  <h1>{{ displayName() }}</h1>
+                  <p class="jihen-3d-title">{{ headline() }}</p>
+                  <p class="jihen-3d-body">{{ aboutLead() }}</p>
+                  <div class="jihen-3d-socials">
+                    @if (githubUrl()) {
+                      <a [href]="githubUrl()" target="_blank" rel="noopener">GitHub</a>
+                    }
+                    @if (linkedinUrl()) {
+                      <a [href]="linkedinUrl()" target="_blank" rel="noopener">LinkedIn</a>
+                    }
+                    @if (emailHref()) {
+                      <a [href]="emailHref()">Email</a>
+                    }
+                  </div>
                 </div>
+              </article>
+
+              <aside class="jihen-3d-preview-stage__dots" aria-label="Preview sections">
+                <span>Hero</span>
+                @for (section of sections; track section.key) {
+                  <button type="button" [class.active]="$index === 0" (click)="selectSection(section.key)"></button>
+                }
+              </aside>
+
+              <div class="jihen-3d-preview-stage__caption">
+                <strong>1&nbsp;&nbsp;HERO</strong>
+                <span>{{ previewDurationLabel('hero') }}</span>
               </div>
+
+              <div class="jihen-3d-preview-stage__autopilot">Auto rotating slowly</div>
             </div>
-          } @else {
-            <p>No collections available yet.</p>
+          </article>
+
+          <article class="jihen-3d-tour-panel">
+            <span class="jihen-3d-tour-panel__eyebrow">3D TOUR MODE</span>
+            <p class="jihen-3d-tour-panel__lead">Each section appears one by one with smooth 3D animation.</p>
+
+            <ol class="jihen-3d-tour-panel__list">
+              @for (section of sections; track section.key) {
+                <li>
+                  <span>{{ $index + 1 }}</span>
+                  <strong>{{ section.label }}</strong>
+                </li>
+              }
+            </ol>
+
+            <div class="jihen-3d-tour-panel__divider"></div>
+
+            <h3>Controls</h3>
+            <div class="jihen-3d-tour-panel__actions">
+              <button type="button" class="jihen-3d-btn" (click)="startTour()">▶ Start Tour</button>
+              <button type="button" class="jihen-3d-btn jihen-3d-btn--ghost" disabled>❚❚ Pause</button>
+              <button type="button" class="jihen-3d-btn jihen-3d-btn--ghost" (click)="resetTour()">↻ Reset</button>
+            </div>
+
+            <p class="jihen-3d-tour-panel__foot">You can still click on the dots or section cards to navigate manually.</p>
+          </article>
+        </section>
+
+        <section class="jihen-3d-flow">
+          @for (section of sections; track section.key) {
+            <button type="button" class="jihen-3d-flow-card" (click)="selectSection(section.key)">
+              <div class="jihen-3d-flow-card__mock">
+                <div class="jihen-3d-flow-card__mock-head">
+                  <span>← Back to Portfolio</span>
+                  <span>▶ 3D Tour</span>
+                </div>
+                <div class="jihen-3d-flow-card__mock-body">
+                  <div class="jihen-3d-flow-card__mock-panel">
+                    <strong>{{ section.label }}</strong>
+                    <p>{{ section.description }}</p>
+                  </div>
+                  <div class="jihen-3d-flow-card__mock-dots">
+                    @for (dot of sections; track dot.key) {
+                      <span [class.active]="dot.key === section.key"></span>
+                    }
+                  </div>
+                </div>
+                <div class="jihen-3d-flow-card__mock-ring"></div>
+              </div>
+              <div class="jihen-3d-flow-card__meta">
+                <span class="jihen-3d-flow-card__index">{{ $index + 1 }}</span>
+                <strong>{{ section.label }}</strong>
+                <small>{{ previewDurationLabel(section.key) }}</small>
+              </div>
+            </button>
           }
-        </article>
 
-        <article
-          class="jihen-3d-panel jihen-3d-panel--contact"
-          [class.jihen-3d-panel--active]="activeSection === 'contact'">
-          <div class="jihen-3d-panel-header">
-            <span class="jihen-3d-icon">✈</span>
-            <h2>Contact</h2>
+          <article class="jihen-3d-flow-card jihen-3d-flow-card--time">
+            <div class="jihen-3d-flow-card__time-pill">
+              <span>◔</span>
+              <strong>Total tour time: ~{{ totalTourTimeSeconds() }} seconds</strong>
+            </div>
+          </article>
+        </section>
+      </main>
+    } @else {
+      <main class="jihen-3d-tour" (mousemove)="onSceneMove($event)" (mouseleave)="resetScene()">
+        <button type="button" class="jihen-3d-tour__exit" (click)="exitTour()">Exit</button>
+
+        <section class="jihen-3d-tour__viewport">
+          <div class="jihen-3d-ring" [class.jihen-3d-ring--transitioning]="transitioning"></div>
+
+          <div class="jihen-3d-card-stage" [style.transform]="'rotateX(' + sceneRotateX + 'deg) rotateY(' + sceneRotateY + 'deg)'">
+            @if (renderedPrimaryStep(); as step) {
+              <ng-container
+                [ngTemplateOutlet]="tourCard"
+                [ngTemplateOutletContext]="{ step: step, variant: transitioning ? 'outgoing' : 'active' }" />
+            }
+
+            @if (renderedIncomingStep(); as step) {
+              <ng-container
+                [ngTemplateOutlet]="tourCard"
+                [ngTemplateOutletContext]="{ step: step, variant: 'incoming' }" />
+            }
           </div>
+        </section>
 
-          <div class="jihen-3d-contact-list">
-            @if (githubUrl()) {
-              <a [href]="githubUrl()" target="_blank" rel="noopener">GitHub <span>→</span></a>
-            }
-            @if (linkedinUrl()) {
-              <a [href]="linkedinUrl()" target="_blank" rel="noopener">LinkedIn <span>→</span></a>
-            }
-            @if (emailHref()) {
-              <a [href]="emailHref()">Email <span>→</span></a>
-            }
-          </div>
-        </article>
-      </div>
-
-      <aside class="jihen-3d-side-dots" aria-label="3D tour progress">
-        @for (section of sections; track section.key) {
-          <button
-            type="button"
-            [class.active]="activeSection === section.key"
-            (click)="selectSection(section.key)">
-          </button>
-        }
-      </aside>
-
-      <div class="jihen-3d-bottom-hint">
-        Move your mouse to rotate the scene
-      </div>
-    </main>
+        <aside class="jihen-3d-tour__progress" aria-label="Tour steps">
+          @for (step of tourSteps(); track step.section + '-' + ($index)) {
+            <button
+              type="button"
+              class="jihen-3d-tour__dot"
+              [class.jihen-3d-tour__dot--active]="$index === tourProgressIndex"
+              [attr.aria-label]="'Go to ' + step.label"
+              (click)="goToStep($index)">
+            </button>
+          }
+        </aside>
+      </main>
+    }
   }
+</section>
 
-  @if (profileOpen) {
-    <div class="jihen-3d-modal-backdrop" (click)="closeProfile()">
-      <section class="jihen-3d-profile-modal" (click)="$event.stopPropagation()">
-        <button type="button" class="jihen-3d-modal-close" (click)="closeProfile()">×</button>
-
-        <div class="jihen-3d-avatar jihen-3d-avatar--modal">
+<ng-template #tourCard let-step="step" let-variant="variant">
+  @switch (step.section) {
+    @case ('hero') {
+      <article class="jihen-3d-card jihen-3d-card--hero" [class.jihen-3d-card--outgoing]="variant === 'outgoing'" [class.jihen-3d-card--incoming]="variant === 'incoming'">
+        <span class="jihen-3d-kicker">Hero / Profile</span>
+        <div class="jihen-3d-avatar jihen-3d-avatar--large">
           @if (profileImage()) {
             <img [src]="profileImage()" [alt]="displayName()" />
           } @else {
             <span>{{ initials() }}</span>
           }
         </div>
-
-        <h2>{{ displayName() }}</h2>
+        <h1>{{ displayName() }}</h1>
         <p class="jihen-3d-title">{{ headline() }}</p>
-        <p>{{ aboutText() }}</p>
-        <span class="jihen-3d-location">⌖ {{ locationText() }}</span>
-
-        <div class="jihen-3d-mini-stats">
+        <p class="jihen-3d-body">{{ aboutLead() }}</p>
+        <div class="jihen-3d-meta-row">
+          <span>{{ locationText() }}</span>
+          <span>{{ projects.length }} project{{ projects.length === 1 ? '' : 's' }}</span>
+          <span>{{ collections.length }} collection{{ collections.length === 1 ? '' : 's' }}</span>
+        </div>
+      </article>
+    }
+    @case ('about') {
+      <article class="jihen-3d-card jihen-3d-card--about" [class.jihen-3d-card--outgoing]="variant === 'outgoing'" [class.jihen-3d-card--incoming]="variant === 'incoming'">
+        <span class="jihen-3d-kicker">About</span>
+        <h1>About the Portfolio</h1>
+        <p class="jihen-3d-body jihen-3d-body--wide">{{ aboutText() }}</p>
+        <div class="jihen-3d-stat-grid">
+          <div>
+            <strong>{{ groupedSkills.length }}</strong>
+            <span>Skill groups</span>
+          </div>
           <div>
             <strong>{{ projects.length }}</strong>
             <span>Projects</span>
-          </div>
-          <div>
-            <strong>{{ topSkills().length }}</strong>
-            <span>Skills</span>
           </div>
           <div>
             <strong>{{ collections.length }}</strong>
             <span>Collections</span>
           </div>
         </div>
+      </article>
+    }
+    @case ('skills') {
+      <article class="jihen-3d-card jihen-3d-card--skills" [class.jihen-3d-card--outgoing]="variant === 'outgoing'" [class.jihen-3d-card--incoming]="variant === 'incoming'">
+        <span class="jihen-3d-kicker">Skills</span>
+        <h1>Core Stack Spotlight</h1>
+        <div class="jihen-3d-skill-cloud">
+          @for (skill of previewSkills(); track skill.id) {
+            <span class="jihen-3d-skill-pill">
+              @if (skillLogo(skill)) {
+                <img [src]="skillLogo(skill)" [alt]="skill.name" />
+              } @else {
+                <b>{{ skillInitial(skill) }}</b>
+              }
+              {{ skill.name }}
+            </span>
+          }
+        </div>
+      </article>
+    }
+    @case ('projects') {
+      <article class="jihen-3d-card jihen-3d-card--showcase" [class.jihen-3d-card--outgoing]="variant === 'outgoing'" [class.jihen-3d-card--incoming]="variant === 'incoming'">
+        <span class="jihen-3d-kicker">Project Focus</span>
+        @if (projectForStep(step); as project) {
+          <div class="jihen-3d-showcase jihen-3d-showcase--project">
+            <div class="jihen-3d-showcase__media jihen-3d-showcase__media--animated" [class.jihen-3d-showcase__media--outgoing]="variant === 'outgoing'" [class.jihen-3d-showcase__media--incoming]="variant === 'incoming'">
+              @if (projectVideo(project)) {
+                <video [src]="projectVideo(project)" autoplay muted loop playsinline></video>
+              } @else if (projectImage(project)) {
+                <img [src]="projectImage(project)" [alt]="project.title || 'Project preview'" />
+              } @else {
+                <div class="jihen-3d-placeholder">Project Preview</div>
+              }
+            </div>
 
-        <div class="jihen-3d-socials">
+            <div class="jihen-3d-showcase__copy">
+              <small>Project {{ (step.projectIndex ?? 0) + 1 }} / {{ projects.length }}</small>
+              <h1>{{ project.title || 'Untitled project' }}</h1>
+              <div class="jihen-3d-chip-row">
+                @for (keyword of projectKeywords(project); track keyword) {
+                  <span class="jihen-3d-chip">{{ keyword }}</span>
+                }
+              </div>
+              <p class="jihen-3d-body">{{ shortProjectSummary(project) }}</p>
+            </div>
+          </div>
+        } @else {
+          <p class="jihen-3d-body">No projects available yet.</p>
+        }
+      </article>
+    }
+    @case ('collections') {
+      <article class="jihen-3d-card jihen-3d-card--showcase" [class.jihen-3d-card--outgoing]="variant === 'outgoing'" [class.jihen-3d-card--incoming]="variant === 'incoming'">
+        <span class="jihen-3d-kicker">Collection Focus</span>
+        @if (collectionForStep(step); as collection) {
+          <div class="jihen-3d-showcase jihen-3d-showcase--collection">
+            <div class="jihen-3d-showcase__media jihen-3d-showcase__media--animated" [class.jihen-3d-showcase__media--outgoing]="variant === 'outgoing'" [class.jihen-3d-showcase__media--incoming]="variant === 'incoming'">
+              @if (collectionPreviewImage(collection)) {
+                <img [src]="collectionPreviewImage(collection)" [alt]="collection.name || collection.title || 'Collection preview'" />
+              } @else {
+                <div class="jihen-3d-placeholder">Collection Preview</div>
+              }
+            </div>
+
+            <div class="jihen-3d-showcase__copy">
+              <small>Collection {{ (step.collectionIndex ?? 0) + 1 }} / {{ collections.length }}</small>
+              <h1>{{ collection.name || collection.title || 'Collection' }}</h1>
+              <strong>{{ collectionProjectCount(collection) }} project{{ collectionProjectCount(collection) === 1 ? '' : 's' }}</strong>
+              <div class="jihen-3d-chip-row">
+                @for (keyword of collectionKeywords(collection); track keyword) {
+                  <span class="jihen-3d-chip">{{ keyword }}</span>
+                }
+              </div>
+            </div>
+          </div>
+        } @else {
+          <p class="jihen-3d-body">No collections available yet.</p>
+        }
+      </article>
+    }
+    @case ('contact') {
+      <article class="jihen-3d-card jihen-3d-card--contact" [class.jihen-3d-card--outgoing]="variant === 'outgoing'" [class.jihen-3d-card--incoming]="variant === 'incoming'">
+        <span class="jihen-3d-kicker">Contact</span>
+        <h1>Connect After the Tour</h1>
+        <p class="jihen-3d-body">Finish the experience with the direct links already available in the portfolio data.</p>
+
+        <div class="jihen-3d-contact-list">
           @if (githubUrl()) {
             <a [href]="githubUrl()" target="_blank" rel="noopener">GitHub</a>
           }
@@ -289,7 +309,7 @@
             <a [href]="emailHref()">Email</a>
           }
         </div>
-      </section>
-    </div>
+      </article>
+    }
   }
-</section>
+</ng-template>

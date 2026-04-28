@@ -135,8 +135,10 @@ export class JihenCvComponent implements OnInit, OnDestroy {
   protected workspaceError = '';
   protected generatingDraft = false;
   protected savingDraft = false;
+  protected downloadingPdf = false;
   protected saveMessage = '';
   protected saveError = '';
+  protected downloadError = '';
   protected aiActionError = '';
   protected chatLoading = false;
   protected chatError = '';
@@ -216,7 +218,7 @@ export class JihenCvComponent implements OnInit, OnDestroy {
   }
 
   protected get canDownloadPdf(): boolean {
-    return this.hasDraft;
+    return this.hasDraft && !this.downloadingPdf;
   }
 
   protected get canCreateJobMatchedCv(): boolean {
@@ -276,6 +278,7 @@ export class JihenCvComponent implements OnInit, OnDestroy {
     this.generatingDraft = true;
     this.workspaceError = '';
     this.saveError = '';
+    this.downloadError = '';
 
     this.cvApi.generateMyCvDraft().subscribe({
       next: (response) => {
@@ -301,7 +304,29 @@ export class JihenCvComponent implements OnInit, OnDestroy {
   }
 
   protected downloadPdf(): void {
-    window.print();
+    if (this.downloadingPdf) {
+      return;
+    }
+
+    if (!this.currentDraftId) {
+      this.downloadError = 'Save or generate your CV draft before downloading the PDF.';
+      return;
+    }
+
+    this.downloadingPdf = true;
+    this.downloadError = '';
+    this.saveMessage = '';
+
+    this.cvApi.downloadDraftCv(this.currentDraftId).subscribe({
+      next: (file) => {
+        this.downloadingPdf = false;
+        this.triggerPdfDownload(file);
+      },
+      error: (err) => {
+        this.downloadingPdf = false;
+        this.downloadError = this.buildDownloadErrorMessage(err);
+      },
+    });
   }
 
   protected openJobMatchModal(): void {
@@ -1111,6 +1136,14 @@ export class JihenCvComponent implements OnInit, OnDestroy {
     return messageFromHttpError(err, 'Unable to save your CV draft.');
   }
 
+  private buildDownloadErrorMessage(err: unknown): string {
+    if (err instanceof HttpErrorResponse && err.status === 404) {
+      return 'This CV draft could not be found. Save or generate a new draft, then try again.';
+    }
+
+    return messageFromHttpError(err, 'Unable to download your CV PDF right now.');
+  }
+
   private resolveTemplate(theme: string, preferredTemplate: string): CvBuilderTemplate {
     const themeKey = theme.trim().toUpperCase();
     if (themeKey === 'MODERN' || themeKey === 'ELEGANT' || themeKey === 'CREATIVE' || themeKey === 'ATS_MINIMAL') {
@@ -1132,6 +1165,7 @@ export class JihenCvComponent implements OnInit, OnDestroy {
     this.savingDraft = true;
     this.saveError = '';
     this.saveMessage = '';
+    this.downloadError = '';
 
     forkJoin({
       draft: this.cvApi.updateMyCvDraft(draftId, this.buildDraftUpdateRequest()),
@@ -1151,6 +1185,22 @@ export class JihenCvComponent implements OnInit, OnDestroy {
         onError?.(err);
       },
     });
+  }
+
+  private triggerPdfDownload(file: Blob): void {
+    const blob = file.type ? file : new Blob([file], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+
+    anchor.href = url;
+    anchor.download = `cv-${this.selectedTemplate}.pdf`;
+    anchor.style.display = 'none';
+
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   private findDraftSection(sections: CvDraftSectionDto[], type: DraftSectionType): CvDraftSectionDto | null {

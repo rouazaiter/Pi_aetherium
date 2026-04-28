@@ -97,6 +97,7 @@
   display: grid;
   place-items: center;
   flex: 0 0 2.6rem;
+  flex-shrink: 0;
   width: 2.6rem;
   height: 2.6rem;
   border-radius: 18px;
@@ -111,12 +112,17 @@
 .jihen-sidebar__copy {
   display: grid;
   gap: 0.1rem;
+  width: 0;
   min-width: 0;
+  overflow: hidden;
+  visibility: hidden;
   opacity: 0;
   transform: translateX(-0.35rem);
   transition:
+    width 0.18s ease,
     opacity 0.18s ease,
-    transform 0.18s ease;
+    transform 0.18s ease,
+    visibility 0s linear 0.18s;
 }
 
 .jihen-sidebar__copy strong {
@@ -153,6 +159,7 @@
   font: inherit;
   font-weight: 600;
   text-align: left;
+  overflow: hidden;
   transition:
     background 0.2s ease,
     color 0.2s ease,
@@ -177,6 +184,7 @@
   display: grid;
   place-items: center;
   flex: 0 0 1.6rem;
+  flex-shrink: 0;
   width: 1.6rem;
   height: 1.6rem;
 }
@@ -188,17 +196,25 @@
 }
 
 .jihen-sidebar__label {
+  max-width: 0;
+  overflow: hidden;
+  visibility: hidden;
   opacity: 0;
   transform: translateX(-0.35rem);
   white-space: nowrap;
   transition:
+    max-width 0.18s ease,
     opacity 0.18s ease,
-    transform 0.18s ease;
+    transform 0.18s ease,
+    visibility 0s linear 0.18s;
 }
 
 .jihen-layout--sidebar-expanded .jihen-sidebar__label {
+  max-width: 10rem;
+  visibility: visible;
   opacity: 1;
   transform: translateX(0);
+  transition-delay: 0s;
 }
 
 .jihen-layout--sidebar-expanded .jihen-sidebar__item {
@@ -208,8 +224,11 @@
 }
 
 .jihen-layout--sidebar-expanded .jihen-sidebar__copy {
+  width: auto;
+  visibility: visible;
   opacity: 1;
   transform: translateX(0);
+  transition-delay: 0s;
 }
 
 .jihen-layout--sidebar-expanded .jihen-sidebar__header {
@@ -1028,6 +1047,8 @@
   min-width: 0;
   overflow: hidden;
   aspect-ratio: 16 / 9;
+  min-height: 12rem;
+  max-height: 13.75rem;
   border-radius: 24px 24px 0 0;
   background:
     linear-gradient(180deg, rgba(19, 26, 58, 0.06), rgba(19, 26, 58, 0.14)),
@@ -1040,6 +1061,7 @@
   height: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
+  object-position: center;
 }
 
 .jihen-project-card__placeholder {
@@ -1048,6 +1070,7 @@
   gap: 0.6rem;
   height: 100%;
   padding: 1.5rem;
+  border-radius: inherit;
   color: #5c678c;
   text-align: center;
 }

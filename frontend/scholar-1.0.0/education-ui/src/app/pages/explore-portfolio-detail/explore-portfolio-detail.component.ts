@@ -2,6 +2,7 @@ import { CommonModule, Location } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { resolvePresetProfilePicture } from '../../core/data/preset-avatars';
 import type {
   ExploreCollectionCardDto,
   ExplorePortfolioDetailDto,
@@ -10,6 +11,7 @@ import type {
   SkillSummaryDto,
 } from '../../core/models/api.models';
 import { ExploreService } from '../../core/services/explore.service';
+import { environment } from '../../../environments/environment';
 
 type SkillGroupView = {
   category: string;
@@ -77,8 +79,6 @@ export class ExplorePortfolioDetailComponent implements OnInit {
         this.groupedSkills = this.normalizeSkillGroups(result.detail);
         this.visibleProjects = this.normalizeProjects(result.detail);
         this.visibleCollections = this.normalizeCollections(result.detail, result.collections);
-        console.log('Loaded portfolio detail:', this.portfolio);
-        console.log('Portfolio id for 3D:', this.portfolio?.id);
         this.loading = false;
       });
   }
@@ -202,7 +202,7 @@ export class ExplorePortfolioDetailComponent implements OnInit {
       profilePicture?: string | null;
       user?: { profileImageUrl?: string | null } | null;
     } & object) | null | undefined;
-    return (
+    const raw = (
       detailWithMedia?.profileImageUrl?.trim()
       || profileWithMedia?.profileImageUrl?.trim()
       || profileWithMedia?.avatarUrl?.trim()
@@ -210,8 +210,9 @@ export class ExplorePortfolioDetailComponent implements OnInit {
       || detailWithMedia?.profileImage?.trim()
       || profileWithMedia?.profilePicture?.trim()
       || this.detail?.portfolio?.coverImage?.trim()
-      || ''
-    );
+      || '');
+
+    return this.resolveMediaUrl(raw, true);
   }
 
   githubUrl(): string {
@@ -280,7 +281,8 @@ export class ExplorePortfolioDetailComponent implements OnInit {
       mediaUrl?: string | null;
     };
 
-    return projectWithMedia.imageUrl?.trim() || projectWithMedia.thumbnailUrl?.trim() || projectWithMedia.mediaUrl?.trim() || '';
+    const raw = projectWithMedia.imageUrl?.trim() || projectWithMedia.thumbnailUrl?.trim() || projectWithMedia.mediaUrl?.trim() || '';
+    return this.resolveMediaUrl(raw);
   }
 
   projectVideo(project: ExploreProjectCardDto): string {
@@ -292,11 +294,11 @@ export class ExplorePortfolioDetailComponent implements OnInit {
     };
 
     if (projectWithMedia.videoUrl?.trim()) {
-      return projectWithMedia.videoUrl.trim();
+      return this.resolveMediaUrl(projectWithMedia.videoUrl.trim());
     }
 
     if (projectWithMedia.mediaType === 'VIDEO' && projectWithMedia.mediaUrl?.trim()) {
-      return projectWithMedia.mediaUrl.trim();
+      return this.resolveMediaUrl(projectWithMedia.mediaUrl.trim());
     }
 
     return '';
@@ -327,7 +329,7 @@ export class ExplorePortfolioDetailComponent implements OnInit {
   }
 
   collectionPreviewImage(collection: ExploreCollectionCardDto): string {
-    return collection.mediaUrl?.trim() || '';
+    return this.resolveMediaUrl(collection.mediaUrl?.trim() || '');
   }
 
   collectionProjectCount(collection: ExploreCollectionCardDto): number {
@@ -447,5 +449,38 @@ export class ExplorePortfolioDetailComponent implements OnInit {
 
   private resolveErrorMessage(status: number | undefined): string {
     return status === 403 ? 'You do not have permission to view this.' : 'Portfolio not available.';
+  }
+
+  private resolveMediaUrl(value: string | null | undefined, allowPreset = false): string {
+    const raw = value?.trim() || '';
+    if (!raw) {
+      return '';
+    }
+
+    if (allowPreset) {
+      const presetUrl = resolvePresetProfilePicture(raw);
+      if (presetUrl) {
+        return presetUrl;
+      }
+    }
+
+    if (/^https?:\/\//i.test(raw) || raw.startsWith('data:') || raw.startsWith('blob:') || raw.startsWith('assets/')) {
+      return raw;
+    }
+
+    const base = (environment.apiUrl ?? '').trim().replace(/\/$/, '');
+    if (raw.startsWith('/api/') || raw.startsWith('/uploads/')) {
+      return base ? `${base}${raw}` : raw;
+    }
+    if (raw.startsWith('api/') || raw.startsWith('uploads/')) {
+      return base ? `${base}/${raw}` : `/${raw}`;
+    }
+
+    // Prevent invalid browser URL schemes such as "skillhub-preset:4".
+    if (/^[a-z][a-z0-9+\-.]*:/i.test(raw)) {
+      return '';
+    }
+
+    return raw;
   }
 }

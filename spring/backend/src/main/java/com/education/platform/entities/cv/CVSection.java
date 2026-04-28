@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -48,6 +49,7 @@ public class CVSection {
     @Column(name = "visible", nullable = false)
     private Boolean visible;
 
-    @Column(name = "content_json", length = 20000, nullable = false)
+    @Lob
+    @Column(name = "content_json", columnDefinition = "LONGTEXT", nullable = false)
     private String contentJson;
 }

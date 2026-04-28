@@ -39,6 +39,13 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${app.frontend.base-url}")
     private String frontendBaseUrl;
 
+    private void ensureStripeApiKeyConfigured() {
+        if (stripeSecretKey == null || stripeSecretKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Stripe secret key is not configured. Please set stripe.secret-key or STRIPE_SECRET_KEY.");
+        }
+    }
+
     @Override
     @Transactional
     public CheckoutSessionResponse createCheckoutSession(Long serviceRequestId, Long requesterId) {
@@ -53,6 +60,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Service request price is required");
         }
 
+        ensureStripeApiKeyConfigured();
         Stripe.apiKey = stripeSecretKey;
 
         long amountInMinorUnits = serviceRequest.getPrice()
@@ -88,7 +96,8 @@ public class PaymentServiceImpl implements PaymentService {
             serviceRequestRepository.save(serviceRequest);
             return new CheckoutSessionResponse(session.getId(), session.getUrl());
         } catch (StripeException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to create Stripe checkout session", ex);
+            String message = ex.getMessage() != null ? ex.getMessage() : "Unable to create Stripe checkout session";
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to create Stripe checkout session: " + message, ex);
         }
     }
 
@@ -142,6 +151,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Service request price is required");
         }
 
+        ensureStripeApiKeyConfigured();
         Stripe.apiKey = stripeSecretKey;
 
         long amountInMinorUnits = serviceRequest.getPrice()
@@ -151,8 +161,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl(frontendBaseUrl + "/applications?payment=success&applicationId=" + application.getId())
-                .setCancelUrl(frontendBaseUrl + "/applications?payment=cancel&applicationId=" + application.getId())
+                .setSuccessUrl(frontendBaseUrl + "/marketplace/my/" + serviceRequest.getId() + "?payment=success&applicationId=" + application.getId())
+                .setCancelUrl(frontendBaseUrl + "/marketplace/my/" + serviceRequest.getId() + "?payment=cancel&applicationId=" + application.getId())
                 .putMetadata("applicationId", String.valueOf(application.getId()))
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
@@ -178,7 +188,8 @@ public class PaymentServiceImpl implements PaymentService {
             applicationRepository.save(application);
             return new CheckoutSessionResponse(session.getId(), session.getUrl());
         } catch (StripeException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to create Stripe checkout session", ex);
+            String message = ex.getMessage() != null ? ex.getMessage() : "Unable to create Stripe checkout session";
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Unable to create Stripe checkout session: " + message, ex);
         }
     }
 
@@ -208,5 +219,14 @@ public class PaymentServiceImpl implements PaymentService {
                 application.getId(),
                 null
         );
+    }
+
+    @Override
+    @Transactional
+    public void processMtnWebhook(java.util.Map<String, Object> payload) {
+        // TODO: map MTN webhook payload fields to your payment model.
+        // Example fields can include transactionId, status, amount, reference, msisdn, payerName.
+        // You should verify the webhook signature if MTN provides one.
+        System.out.println("Received MTN webhook payload: " + payload);
     }
 }

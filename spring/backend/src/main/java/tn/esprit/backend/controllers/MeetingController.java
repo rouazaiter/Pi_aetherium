@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.backend.dto.CalendlyEventDetailsResponse;
 import tn.esprit.backend.dto.MeetingConfigRequest;
 import tn.esprit.backend.dto.MeetingConfigResponse;
 import tn.esprit.backend.dto.MeetingReservationRequest;
@@ -18,7 +19,7 @@ import tn.esprit.backend.services.interfaces.MeetingService;
 public class MeetingController {
 
     private final MeetingService meetingService;
-
+ //calendly 
     @PutMapping("/config/{serviceRequestId}/{requester-id}")
     public ResponseEntity<MeetingConfigResponse> upsertConfig(
             @PathVariable Long serviceRequestId,
@@ -49,6 +50,11 @@ public class MeetingController {
             @PathVariable("requester-id") Long requesterId
     ) {
         return ResponseEntity.ok(meetingService.getByApplication(applicationId, requesterId));
+    }
+
+    @GetMapping("/calendly-event")
+    public ResponseEntity<CalendlyEventDetailsResponse> getCalendlyEvent(@RequestParam String eventUrl) {
+        return ResponseEntity.ok(meetingService.getCalendlyEvent(eventUrl));
     }
 
     @PatchMapping("/status/{applicationId}/{requester-id}/{status}")

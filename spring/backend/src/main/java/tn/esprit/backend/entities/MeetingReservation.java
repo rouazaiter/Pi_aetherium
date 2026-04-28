@@ -40,6 +40,9 @@ public class MeetingReservation {
     @Column(length = 500)
     private String calendlyEventUrl;
 
+    @Column(length = 500)
+    private String candidateCalendlyUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MeetingStatus status;

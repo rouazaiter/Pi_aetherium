@@ -8,4 +8,5 @@ public interface PaymentService {
     void markAsPaidFromWebhook(Long serviceRequestId, Session session);
     CheckoutSessionResponse createCheckoutSessionForApplication(Long applicationId, Long requesterId);
     void markApplicationAsPaidFromWebhook(Long applicationId, Session session);
+    void processMtnWebhook(java.util.Map<String, Object> payload);
 }

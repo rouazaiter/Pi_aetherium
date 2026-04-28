@@ -8,8 +8,19 @@ export type MeetingSource = 'SLOTS' | 'CALENDLY';
 export interface RequestSchedulingConfig {
   requestId: number;
   calendlyLink?: string;
+  durationMinutes?: number;
   availableSlots: string[];
   updatedAt: string;
+}
+
+export interface CalendlyEventDetails {
+  uri: string;
+  name: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  location?: string;
+  inviteeUrl?: string;
 }
 
 export interface MeetingReservation {
@@ -20,6 +31,8 @@ export interface MeetingReservation {
   slot: string;
   source: MeetingSource;
   calendlyEventUrl?: string;
+  candidateCalendlyUrl?: string;
+  calendlyEventDetails?: CalendlyEventDetails;
   status: MeetingStatus;
   createdAt: string;
   confirmedAt?: string;
@@ -28,6 +41,7 @@ export interface MeetingReservation {
 interface MeetingConfigApiResponse {
   serviceRequestId: number;
   calendlyLink?: string;
+  durationMinutes?: number;
   availableSlots: string[];
   updatedAt: string;
 }
@@ -41,6 +55,7 @@ interface MeetingReservationApiResponse {
   source: MeetingSource;
   slot: string;
   calendlyEventUrl?: string;
+  candidateCalendlyUrl?: string;
   status: MeetingStatus;
   createdAt: string;
   confirmedAt?: string;
@@ -58,25 +73,29 @@ export class MeetingSchedulerService {
       .pipe(map(res => ({
         requestId: res.serviceRequestId,
         calendlyLink: res.calendlyLink,
+        durationMinutes: res.durationMinutes,
         availableSlots: res.availableSlots ?? [],
         updatedAt: res.updatedAt
       })));
   }
-
+//save calendly 
   saveConfig(
     requestId: number,
     requesterId: number,
     calendlyLink: string,
+    durationMinutes: number,
     availableSlots: string[]
   ): Observable<RequestSchedulingConfig> {
     return this.http
       .put<MeetingConfigApiResponse>(`${this.base}/config/${requestId}/${requesterId}`, {
         calendlyLink: (calendlyLink ?? '').trim() || null,
-        availableSlots: this.normalizeSlots(availableSlots)
+        durationMinutes,
+        availableSlots
       })
       .pipe(map(res => ({
         requestId: res.serviceRequestId,
         calendlyLink: res.calendlyLink,
+        durationMinutes: res.durationMinutes,
         availableSlots: res.availableSlots ?? [],
         updatedAt: res.updatedAt
       })));
@@ -87,13 +106,13 @@ export class MeetingSchedulerService {
     applicantId: number,
     source: MeetingSource,
     slot: string,
-    calendlyEventUrl?: string
+    candidateCalendlyUrl?: string
   ): Observable<MeetingReservation> {
     return this.http
       .post<MeetingReservationApiResponse>(`${this.base}/reserve/${applicationId}/${applicantId}`, {
         source,
         slot,
-        calendlyEventUrl: calendlyEventUrl || null
+        candidateCalendlyUrl: candidateCalendlyUrl || null
       })
       .pipe(map(this.mapReservation));
   }
@@ -102,6 +121,12 @@ export class MeetingSchedulerService {
     return this.http
       .get<MeetingReservationApiResponse>(`${this.base}/by-application/${applicationId}/${requesterId}`)
       .pipe(map(this.mapReservation));
+  }
+
+  getCalendlyEventDetails(eventUrl: string): Observable<CalendlyEventDetails> {
+    return this.http.get<CalendlyEventDetails>(`${this.base}/calendly-event`, {
+      params: { eventUrl }
+    });
   }
 
   updateBookingStatus(applicationId: number, requesterId: number, status: MeetingStatus): Observable<MeetingReservation> {
@@ -133,6 +158,7 @@ export class MeetingSchedulerService {
       slot: response.slot,
       source: response.source,
       calendlyEventUrl: response.calendlyEventUrl,
+      candidateCalendlyUrl: response.candidateCalendlyUrl,
       status: response.status,
       createdAt: response.createdAt,
       confirmedAt: response.confirmedAt

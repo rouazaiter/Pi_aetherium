@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceRequestService } from '../../../core/services/service-request.service';
 import { CurrentUserService } from '../../../core/auth/current-user.service';
@@ -8,7 +8,7 @@ import { MeetingSchedulerService } from '../../../core/services/meeting-schedule
 @Component({
   selector: 'app-service-request-form',
   templateUrl: './service-request-form.component.html',
-  styleUrls: ['./service-request-form.component.css']
+  styleUrls: ['./service-request-form.component.scss']
 })
 export class ServiceRequestFormComponent implements OnInit {
   readonly categories = [
@@ -22,8 +22,6 @@ export class ServiceRequestFormComponent implements OnInit {
   form!: FormGroup;
   selectedFile: File | null = null;
   existingFileUrl = '';
-  slotInput = '';
-  selectedSlots: string[] = [];
   loading = false;
   error = '';
   success = '';
@@ -53,8 +51,10 @@ export class ServiceRequestFormComponent implements OnInit {
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.maxLength(2000)]],
       price: [null, [Validators.required, Validators.min(1)]],
+      duration: [null, [Validators.required, Validators.min(1)]],
       expiringDate: [null, Validators.required],
-      calendlyLink: ['', [Validators.required, Validators.maxLength(300), Validators.pattern(/^https?:\/\/.+/i)]]
+      calendlyLink: ['', [Validators.required, Validators.maxLength(300), Validators.pattern(/^https?:\/\/.+/i)]],
+      availableSlots: this.fb.array([this.fb.control('')])
     });
 
     this.requestId = this.route.snapshot.params['id'];
@@ -67,15 +67,21 @@ export class ServiceRequestFormComponent implements OnInit {
             category: sr.category,
             description: sr.description,
             price: sr.price,
-            expiringDate: sr.expiringDate ? sr.expiringDate.substring(0, 16) : null,
+            duration: null,
+            expiringDate: sr.expiringDate ? this.formatDateTimeForInput(sr.expiringDate) : null,
             calendlyLink: ''
           });
           this.existingFileUrl = sr.files || '';
 
           this.meetingSchedulerService.getConfig(sr.id).subscribe({
             next: (schedulingConfig) => {
-              this.selectedSlots = (schedulingConfig.availableSlots ?? []).slice();
+              const slots = schedulingConfig.availableSlots ?? [];
+              const slotControls = slots.length
+                ? slots.map(slot => this.fb.control(this.formatDateTimeForInput(slot)))
+                : [this.fb.control('')];
+              this.form.setControl('availableSlots', this.fb.array(slotControls));
               this.form.patchValue({
+                duration: schedulingConfig.durationMinutes ?? null,
                 calendlyLink: schedulingConfig.calendlyLink ?? ''
               });
             }
@@ -98,12 +104,7 @@ export class ServiceRequestFormComponent implements OnInit {
       return;
     }
 
-    if (this.selectedSlots.length === 0) {
-      this.error = 'Please add at least one available meeting slot from the calendar.';
-      return;
-    }
-
-    if (!this.validateExpirationAgainstSlots()) {
+    if (!this.validateExpirationDate()) {
       return;
     }
 
@@ -112,15 +113,22 @@ export class ServiceRequestFormComponent implements OnInit {
     this.success = '';
 
     const formData = new FormData();
-    const d = new Date(this.form.value.expiringDate);
-    const formatted = d.toISOString().replace('Z', '');
+    const parsedDate = this.parseDateTime(this.form.value.expiringDate);
+    if (!parsedDate) {
+      this.error = 'Invalid expiration date. Use YYYY-MM-DD HH:mm or YYYY-MM-DDTHH:mm format.';
+      this.loading = false;
+      return;
+    }
+
+    const formatted = parsedDate.toISOString().replace('Z', '');
 
     const payload = {
       name: this.form.value.name,
       category: this.form.value.category,
       description: this.form.value.description,
       expiringDate: formatted,
-      price: Number(this.form.value.price)
+      price: Number(this.form.value.price),
+      durationMinutes: Number(this.form.value.duration)
     };
 
     formData.append('payload', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
@@ -139,7 +147,8 @@ export class ServiceRequestFormComponent implements OnInit {
           targetRequestId,
           this.currentUserId,
           this.form.value.calendlyLink || '',
-          this.selectedSlots
+          Number(this.form.value.duration),
+          this.parseAvailableSlots()
         ).subscribe({
           next: () => {
             if (this.isEdit) {
@@ -166,60 +175,69 @@ export class ServiceRequestFormComponent implements OnInit {
     });
   }
 
-  addSlotFromCalendar(): void {
-    const rawSlot = (this.slotInput || '').trim();
-    if (!rawSlot) {
-      return;
-    }
-
-    const normalized = this.normalizeSlot(rawSlot);
-    if (!this.selectedSlots.includes(normalized)) {
-      this.selectedSlots = [...this.selectedSlots, normalized].sort((a, b) => a.localeCompare(b));
-    }
-
-    this.slotInput = '';
-  }
-
-  onSlotInputChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.slotInput = input.value ?? '';
-  }
-
-  removeSlot(slot: string): void {
-    this.selectedSlots = this.selectedSlots.filter(item => item !== slot);
-  }
-
-  private normalizeSlot(rawSlot: string): string {
-    // Keep a consistent human-readable format while preserving local date/time.
-    return rawSlot.replace('T', ' ');
-  }
-
-  private validateExpirationAgainstSlots(): boolean {
+  private validateExpirationDate(): boolean {
     const expiringDateRaw = this.form.value.expiringDate;
     if (!expiringDateRaw) {
       this.error = 'Expiration date is required.';
       return false;
     }
 
-    const expirationDate = new Date(expiringDateRaw);
-    if (Number.isNaN(expirationDate.getTime())) {
-      this.error = 'Invalid expiration date.';
+    const expirationDate = this.parseDateTime(expiringDateRaw);
+    if (!expirationDate) {
+      this.error = 'Invalid expiration date. Use YYYY-MM-DD HH:mm or YYYY-MM-DDTHH:mm format.';
       return false;
     }
 
-    for (const slot of this.selectedSlots) {
-      const slotDate = new Date(slot.replace(' ', 'T'));
-      if (Number.isNaN(slotDate.getTime())) {
-        this.error = `Invalid slot format: ${slot}`;
-        return false;
-      }
+    return true;
+  }
 
-      if (expirationDate <= slotDate) {
-        this.error = 'Expiration date must be later than all selected slots.';
-        return false;
-      }
+  private parseDateTime(value: string): Date | null {
+    if (!value) {
+      return null;
     }
 
-    return true;
+    const normalized = value.trim().replace('T', ' ');
+    const match = normalized.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})\s+([0-9]{2}):([0-9]{2})(?::([0-9]{2}))?$/);
+    if (!match) {
+      return null;
+    }
+
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+    const second = Number(match[6] ?? '0');
+
+    const date = new Date(year, month, day, hour, minute, second);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private formatDateTimeForInput(value: string): string {
+    const normalized = value.trim().replace('T', ' ');
+    const match = normalized.match(/^([0-9]{4}-[0-9]{2}-[0-9]{2})\s+([0-9]{2}:[0-9]{2})/);
+    return match ? `${match[1]} ${match[2]}` : normalized;
+  }
+
+  get availableSlotsFormArray(): FormArray {
+    return this.form.get('availableSlots') as FormArray;
+  }
+
+  addAvailableSlot(): void {
+    this.availableSlotsFormArray.push(this.fb.control(''));
+  }
+
+  removeAvailableSlot(index: number): void {
+    if (this.availableSlotsFormArray.length > 1) {
+      this.availableSlotsFormArray.removeAt(index);
+    } else {
+      this.availableSlotsFormArray.at(0).setValue('');
+    }
+  }
+
+  private parseAvailableSlots(): string[] {
+    return this.availableSlotsFormArray.controls
+      .map(control => (control.value || '').toString().trim().replace('T', ' '))
+      .filter(value => value.length > 0);
   }
 }

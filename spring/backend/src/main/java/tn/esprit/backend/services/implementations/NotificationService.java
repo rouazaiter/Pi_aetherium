@@ -3,6 +3,7 @@ package tn.esprit.backend.services.implementations;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.backend.dto.NotificationDto;
 import tn.esprit.backend.dto.NotificationPriority;
 import tn.esprit.backend.entities.UserNotification;
@@ -116,5 +117,10 @@ public class NotificationService {
                     notification.getCreatedAt()
             ))
             .toList();
+  }
+
+  @Transactional
+  public void clearNotifications(Long userId) {
+    userNotificationRepository.deleteByUserId(userId);
   }
 }

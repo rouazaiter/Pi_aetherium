@@ -32,7 +32,15 @@ export class NotificationRealtimeService implements OnDestroy {
   }
 
   clear(): void {
-    this.notificationsSubject.next([]);
+    if (this.activeUserId == null) {
+      this.notificationsSubject.next([]);
+      return;
+    }
+
+    this.http.delete<void>(`/skillhub/api/notifications/user/${this.activeUserId}`).subscribe({
+      next: () => this.notificationsSubject.next([]),
+      error: () => this.notificationsSubject.next([])
+    });
   }
 
   ngOnDestroy(): void {

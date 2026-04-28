@@ -12,6 +12,9 @@ import org.springframework.web.server.ResponseStatusException;
 import tn.esprit.backend.dto.CheckoutSessionResponse;
 import tn.esprit.backend.services.interfaces.PaymentService;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
@@ -36,6 +39,45 @@ public class PaymentController {
             @PathVariable("requester-id") Long requesterId
     ) {
         return ResponseEntity.ok(paymentService.createCheckoutSessionForApplication(applicationId, requesterId));
+    }
+
+    @PostMapping("/mtn-webhook")
+    public ResponseEntity<String> handleMtnWebhook(@RequestBody Map<String, Object> payload) {
+        paymentService.processMtnWebhook(payload);
+        return ResponseEntity.ok("received");
+    }
+
+    @GetMapping("/mtn-webhook/sample")
+    public ResponseEntity<Map<String, Object>> sampleMtnWebhook() {
+        Map<String, Object> sample = new LinkedHashMap<>();
+        sample.put("transactionId", "MTN123456789");
+        sample.put("status", "SUCCESS");
+        sample.put("amount", "100.00");
+        sample.put("currency", "XAF");
+        sample.put("reference", "REF123");
+        sample.put("msisdn", "+237699000000");
+        sample.put("payerName", "Jean Dupont");
+        sample.put("message", "Paiement MTN généré pour test");
+        return ResponseEntity.ok(sample);
+    }
+
+    @PostMapping("/mtn-webhook/generate")
+    public ResponseEntity<Map<String, Object>> generateMtnWebhook(@RequestBody(required = false) Map<String, Object> customPayload) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("transactionId", "MTN123456789");
+        payload.put("status", "SUCCESS");
+        payload.put("amount", "100.00");
+        payload.put("currency", "XAF");
+        payload.put("reference", "REF123");
+        payload.put("msisdn", "+237699000000");
+        payload.put("payerName", "Jean Dupont");
+        payload.put("message", "Paiement MTN généré pour test");
+
+        if (customPayload != null) {
+            payload.putAll(customPayload);
+        }
+
+        return ResponseEntity.ok(payload);
     }
 
     @PostMapping("/webhook")

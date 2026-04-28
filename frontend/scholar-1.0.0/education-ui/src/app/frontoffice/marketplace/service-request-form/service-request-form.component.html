@@ -51,13 +51,29 @@
           </div>
 
           <div class="field-block">
+            <label for="duration" class="form-label fw-semibold">Duration (minutes) <span class="text-danger">*</span></label>
+            <input
+              id="duration"
+              type="number"
+              min="1"
+              step="1"
+              class="form-control"
+              [class.is-invalid]="form.get('duration')?.invalid && form.get('duration')?.touched"
+              formControlName="duration"
+              placeholder="Ex: 60"
+            />
+            <div class="invalid-feedback">Duration is required and must be at least 1 minute.</div>
+          </div>
+
+          <div class="field-block">
             <label for="expiringDate" class="form-label fw-semibold">Expiration Date <span class="text-danger">*</span></label>
             <input
               id="expiringDate"
-              type="datetime-local"
+              type="text"
               class="form-control"
               [class.is-invalid]="form.get('expiringDate')?.invalid && form.get('expiringDate')?.touched"
               formControlName="expiringDate"
+              placeholder="YYYY-MM-DD HH:mm"
             />
             <div class="invalid-feedback">Expiration date is required.</div>
           </div>
@@ -105,35 +121,26 @@
             <div class="invalid-feedback">Valid Calendly URL is required.</div>
           </div>
 
-          <div class="field-block full-width">
-            <label for="slotInput" class="form-label fw-semibold">Available Meeting Slots <span class="text-danger">*</span></label>
-            <div class="slot-picker-row">
+          <div class="field-block full-width" formArrayName="availableSlots">
+            <label class="form-label fw-semibold">Available meeting slots</label>
+            <div class="slot-row" *ngFor="let slotControl of availableSlotsFormArray.controls; let i = index">
               <input
-                id="slotInput"
-                type="datetime-local"
+                [id]="'availableSlot-' + i"
+                type="text"
                 class="form-control"
-                [value]="slotInput"
-                (change)="onSlotInputChange($event)"
-                (keydown)="$event.preventDefault()"
-                (paste)="$event.preventDefault()"
-                (drop)="$event.preventDefault()"
+                [formControlName]="i"
+                placeholder="YYYY-MM-DD HH:mm"
               />
-              <button type="button" class="btn btn-outline-secondary" (click)="addSlotFromCalendar()">Add</button>
+              <button type="button" class="btn btn-outline-secondary btn-slot-remove" (click)="removeAvailableSlot(i)">
+                Remove
+              </button>
             </div>
-
-            <div class="slot-list" *ngIf="selectedSlots.length > 0; else emptySlots">
-              <div class="slot-item" *ngFor="let slot of selectedSlots">
-                <span>{{ slot }}</span>
-                <button type="button" class="slot-remove" (click)="removeSlot(slot)">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
-            </div>
-
-            <ng-template #emptySlots>
-              <div class="form-text text-danger">At least one slot is required.</div>
-            </ng-template>
+            <button type="button" class="btn btn-link btn-sm" (click)="addAvailableSlot()">
+              + Add another slot
+            </button>
+            <div class="form-text text-muted">Optional. Creator can add available meeting slots here; candidates will choose one when applying.</div>
           </div>
+
         </div>
 
         <div *ngIf="error" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
@@ -147,7 +154,7 @@
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="form.invalid || loading || (!selectedFile && !existingFileUrl) || selectedSlots.length === 0">
+            [disabled]="form.invalid || loading || (!selectedFile && !existingFileUrl)">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
             {{ loading ? 'Submitting...' : (isEdit ? 'Update Request' : 'Publish Request') }}
           </button>

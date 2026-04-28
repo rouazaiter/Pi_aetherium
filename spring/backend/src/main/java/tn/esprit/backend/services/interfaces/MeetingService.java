@@ -1,5 +1,6 @@
 package tn.esprit.backend.services.interfaces;
 
+import tn.esprit.backend.dto.CalendlyEventDetailsResponse;
 import tn.esprit.backend.dto.MeetingConfigRequest;
 import tn.esprit.backend.dto.MeetingConfigResponse;
 import tn.esprit.backend.dto.MeetingReservationRequest;
@@ -12,4 +13,5 @@ public interface MeetingService {
     MeetingReservationResponse reserve(Long applicationId, Long applicantId, MeetingReservationRequest request);
     MeetingReservationResponse getByApplication(Long applicationId, Long requesterId);
     MeetingReservationResponse updateStatus(Long applicationId, Long requesterId, MeetingStatus status);
+    CalendlyEventDetailsResponse getCalendlyEvent(String eventUrl);
 }

@@ -14,7 +14,7 @@ interface PopularServiceStat {
 @Component({
   selector: 'app-service-request-list',
   templateUrl: './service-request-list.component.html',
-  styleUrls: ['./service-request-list.component.css']
+  styleUrls: ['./service-request-list.component.scss']
 })
 export class ServiceRequestListComponent implements OnInit {
   myRequests: ServiceRequest[] = [];

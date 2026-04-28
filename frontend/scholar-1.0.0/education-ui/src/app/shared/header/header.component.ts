@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { CurrentUserService } from '../../core/auth/current-user.service';
 
 declare var $: any;
@@ -7,22 +6,20 @@ declare var $: any;
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
-  users$;
   currentUser$;
+  availableUsers$;
 
-  constructor(
-    private currentUserService: CurrentUserService,
-    private router: Router
-  ) {
-    this.users$ = this.currentUserService.users$;
+  constructor(private currentUserService: CurrentUserService) {
     this.currentUser$ = this.currentUserService.currentUser$;
+    this.availableUsers$ = this.currentUserService.availableUsers$;
   }
 
-  onUserChange(userIdValue: string): void {
-    this.currentUserService.switchUser(Number(userIdValue));
-    this.router.navigate(['/']);
+  onSessionChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const selectedId = Number(target.value);
+    this.currentUserService.selectUser(selectedId);
   }
 }

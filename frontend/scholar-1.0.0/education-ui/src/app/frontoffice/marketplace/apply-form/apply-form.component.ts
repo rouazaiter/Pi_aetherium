@@ -24,7 +24,7 @@ const RECOMMENDATION_STOP_WORDS = new Set([
 @Component({
   selector: 'app-apply-form',
   templateUrl: './apply-form.component.html',
-  styleUrls: ['./apply-form.component.css']
+  styleUrls: ['./apply-form.component.scss']
 })
 export class ApplyFormComponent implements OnInit {
   serviceRequest?: ServiceRequest;
@@ -32,6 +32,7 @@ export class ApplyFormComponent implements OnInit {
   loading = false;
   error = '';
   success = '';
+  reservedCalendlyLink?: string;
   alreadyApplied = false;
   currentUserId = 0;
   availableSlots: string[] = [];
@@ -60,9 +61,11 @@ export class ApplyFormComponent implements OnInit {
 
     this.form = this.fb.group({
       message: ['', [Validators.required, Validators.maxLength(2000)]],
-      meetingSlot: ['', Validators.required],
-      calendlyEventUrl: ['', [Validators.required, Validators.maxLength(500), Validators.pattern(/^https?:\/\/.+/i)]]
+      meetingSlot: [''],
+      candidateCalendlyUrl: ['', [Validators.required, Validators.maxLength(500), Validators.pattern(/^https?:\/\/.+/i)]]
     });
+
+    this.updateSchedulingValidators(false);
 
     this.currentUserService.currentUser$.subscribe(user => {
       if (user.id <= 0) {
@@ -85,6 +88,7 @@ export class ApplyFormComponent implements OnInit {
           this.meetingSchedulerService.getConfig(sr.id).subscribe({
             next: (schedulingConfig) => {
               this.availableSlots = schedulingConfig.availableSlots ?? [];
+              this.updateSchedulingValidators(this.hasSchedulingOptions());
             }
           });
 
@@ -109,17 +113,30 @@ export class ApplyFormComponent implements OnInit {
 
     this.appService.apply(this.currentUserId, this.serviceRequest.id, this.form.value.message).subscribe({
       next: (application) => {
+        if (!this.hasSchedulingOptions()) {
+          this.alreadyApplied = true;
+          this.loading = false;
+          this.success = 'Application submitted successfully.';
+          return;
+        }
+
         this.meetingSchedulerService.reserveSlot(
           application.id,
           this.currentUserId,
           'SLOTS',
           this.form.value.meetingSlot,
-          this.form.value.calendlyEventUrl
+          this.form.value.candidateCalendlyUrl
         ).subscribe({
-          next: () => {
-            this.success = 'Application submitted successfully.';
+          next: (reservation) => {
             this.alreadyApplied = true;
             this.loading = false;
+            if (reservation.calendlyEventUrl) {
+              this.reservedCalendlyLink = reservation.calendlyEventUrl;
+              this.success = 'Application submitted successfully. Complete the Calendly booking using the link below.';
+            } else {
+              this.reservedCalendlyLink = undefined;
+              this.success = 'Application submitted successfully.';
+            }
           },
           error: (err) => {
             this.error = err?.error?.message || 'Application submitted, but meeting reservation failed.';
@@ -190,6 +207,31 @@ export class ApplyFormComponent implements OnInit {
 
   hasSchedulingOptions(): boolean {
     return this.availableSlots.length > 0;
+  }
+
+  private updateSchedulingValidators(enabled: boolean): void {
+    const meetingSlotControl = this.form.get('meetingSlot');
+    const candidateCalendlyControl = this.form.get('candidateCalendlyUrl');
+
+    if (!meetingSlotControl || !candidateCalendlyControl) {
+      return;
+    }
+
+    if (enabled) {
+      meetingSlotControl.setValidators([Validators.required]);
+    } else {
+      meetingSlotControl.clearValidators();
+      meetingSlotControl.setValue('');
+    }
+
+    candidateCalendlyControl.setValidators([
+      Validators.required,
+      Validators.maxLength(500),
+      Validators.pattern(/^https?:\/\/.+/i)
+    ]);
+
+    meetingSlotControl.updateValueAndValidity();
+    candidateCalendlyControl.updateValueAndValidity();
   }
 
   private loadRecommendations(currentRequest: ServiceRequest): void {
@@ -296,21 +338,17 @@ export class ApplyFormComponent implements OnInit {
   }
 
   private validateMeetingChoice(): boolean {
-    if (!this.availableSlots.length) {
-      this.error = 'No available slots are configured for this request yet.';
-      return false;
-    }
-
-    if (!this.form.value.meetingSlot) {
-      this.error = 'Please choose one available meeting slot.';
-      return false;
-    }
-
-    if (!this.form.value.calendlyEventUrl?.trim()) {
+    if (!this.form.value.candidateCalendlyUrl?.trim()) {
       this.error = 'Please provide your Calendly link.';
       return false;
     }
 
+    if (this.hasSchedulingOptions() && !this.form.value.meetingSlot) {
+      this.error = 'Please choose one available meeting slot.';
+      return false;
+    }
+
+    this.error = '';
     return true;
   }
 }

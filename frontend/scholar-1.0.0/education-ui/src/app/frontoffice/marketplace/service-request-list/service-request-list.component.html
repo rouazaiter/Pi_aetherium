@@ -15,16 +15,6 @@
           <app-notification-bar></app-notification-bar>
         </div>
 
-        <div class="sidebar-block">
-          <div class="sidebar-block-head">
-            <span>Shortcuts</span>
-          </div>
-          <a routerLink="/marketplace/new" class="sidebar-link">Post a Request</a>
-          <a routerLink="/marketplace/leaderboard" class="sidebar-link">Leaderboard</a>
-          <a href="#my-requests" class="sidebar-link">My Requests</a>
-          <a href="#available-requests" class="sidebar-link">Available Requests</a>
-        </div>
-
         <div class="sidebar-block" *ngIf="topApplicantOfWeek || topCreatorOfWeek">
           <div class="sidebar-block-head">
             <span>Top Performers</span>

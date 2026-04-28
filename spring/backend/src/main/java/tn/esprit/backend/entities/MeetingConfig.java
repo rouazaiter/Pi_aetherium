@@ -25,6 +25,9 @@ public class MeetingConfig {
     @Column(length = 500)
     private String calendlyLink;
 
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
     @Lob
     @Column(name = "available_slots_text")
     private String availableSlotsText;

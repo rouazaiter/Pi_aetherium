@@ -58,6 +58,22 @@
       <p class="meeting-slot" *ngIf="meeting.calendlyEventUrl">
         Event link: <a [href]="meeting.calendlyEventUrl" target="_blank" rel="noopener noreferrer">Open event</a>
       </p>
+      <p class="meeting-slot" *ngIf="meeting.candidateCalendlyUrl">
+        Candidate Calendly: <a [href]="meeting.candidateCalendlyUrl" target="_blank" rel="noopener noreferrer">Open candidate profile</a>
+      </p>
+      <div class="meeting-calendly-details" *ngIf="meeting.calendlyEventDetails">
+        <p><strong>Calendly event:</strong> {{ meeting.calendlyEventDetails.name }}</p>
+        <p>
+          <strong>Start:</strong> {{ meeting.calendlyEventDetails.startTime | date:'short' }}
+          · <strong>End:</strong> {{ meeting.calendlyEventDetails.endTime | date:'short' }}
+        </p>
+        <p *ngIf="meeting.calendlyEventDetails.location">
+          <strong>Location:</strong> {{ meeting.calendlyEventDetails.location }}
+        </p>
+        <p *ngIf="meeting.calendlyEventDetails.inviteeUrl">
+          Invitee page: <a [href]="meeting.calendlyEventDetails.inviteeUrl" target="_blank" rel="noopener noreferrer">Open invite</a>
+        </p>
+      </div>
       <div class="meeting-actions" *ngIf="meeting.status === 'PENDING'">
         <button class="btn-accept" (click)="confirmMeeting(app.id)">Confirm meeting</button>
         <button class="btn-reject" (click)="declineMeeting(app.id)">Decline</button>

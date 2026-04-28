@@ -12,9 +12,6 @@ const STORAGE_KEY = 'skillhub.currentUserId';
 
 @Injectable({ providedIn: 'root' })
 export class CurrentUserService {
-  private readonly usersSubject = new BehaviorSubject<CurrentSessionUser[]>([]);
-  readonly users$ = this.usersSubject.asObservable();
-
   private readonly currentUserSubject = new BehaviorSubject<CurrentSessionUser>({
     id: 0,
     username: 'loading...',
@@ -22,30 +19,30 @@ export class CurrentUserService {
   });
 
   readonly currentUser$ = this.currentUserSubject.asObservable();
+  private readonly availableUsersSubject = new BehaviorSubject<CurrentSessionUser[]>([]);
+  readonly availableUsers$ = this.availableUsersSubject.asObservable();
 
   get currentUser(): CurrentSessionUser {
     return this.currentUserSubject.value;
   }
 
-  constructor(private http: HttpClient) {
-    this.loadUsers();
-  }
-
-  switchUser(userId: number): void {
-    const nextUser = this.usersSubject.value.find(user => user.id === userId);
-    if (!nextUser) {
-      return;
+  selectUser(userId: number): void {
+    const currentUsers = this.availableUsersSubject.value;
+    const selected = currentUsers.find(user => user.id === userId);
+    if (selected) {
+      sessionStorage.setItem(STORAGE_KEY, String(selected.id));
+      this.currentUserSubject.next(selected);
     }
-
-    sessionStorage.setItem(STORAGE_KEY, String(nextUser.id));
-    this.currentUserSubject.next(nextUser);
   }
 
-  private loadUsers(): void {
+  constructor(private http: HttpClient) {
+    this.loadCurrentUser();
+  }
+
+  private loadCurrentUser(): void {
     this.http.get<CurrentSessionUser[]>('/skillhub/api/users').subscribe({
       next: (users) => {
         const availableUsers = (users ?? []).filter(user => !!user?.id);
-        this.usersSubject.next(availableUsers);
 
         if (availableUsers.length === 0) {
           this.currentUserSubject.next({ id: 0, username: 'No user', email: '' });
@@ -53,14 +50,15 @@ export class CurrentUserService {
         }
 
         const storedId = Number(sessionStorage.getItem(STORAGE_KEY));
+        this.availableUsersSubject.next(availableUsers);
         const selected = availableUsers.find(user => user.id === storedId) ?? availableUsers[0];
 
         sessionStorage.setItem(STORAGE_KEY, String(selected.id));
         this.currentUserSubject.next(selected);
       },
       error: () => {
-        this.usersSubject.next([]);
         this.currentUserSubject.next({ id: 0, username: 'No user', email: '' });
+        this.availableUsersSubject.next([]);
       }
     });
   }

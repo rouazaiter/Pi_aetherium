@@ -6,12 +6,13 @@ import { ServiceRequest } from '../../../core/models/service-request.model';
 import { Application, ApplicationStatus } from '../../../core/models/application.model';
 import { CurrentUserService } from '../../../core/auth/current-user.service';
 import { MeetingReservation, MeetingSchedulerService } from '../../../core/services/meeting-scheduler.service';
-import { catchError, forkJoin, map, of } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-service-request-detail',
   templateUrl: './service-request-detail.component.html',
-  styleUrls: ['./service-request-detail.component.css']
+  styleUrls: ['./service-request-detail.component.scss']
 })
 export class ServiceRequestDetailComponent implements OnInit {
   serviceRequest?: ServiceRequest;
@@ -150,7 +151,21 @@ export class ServiceRequestDetailComponent implements OnInit {
     forkJoin(
       this.applications.map(app =>
         this.meetingSchedulerService.getBookingByApplication(app.id, this.currentUserId).pipe(
-          map(reservation => ({ applicationId: app.id, reservation })),
+          switchMap(reservation => {
+            if (!reservation || !reservation.calendlyEventUrl || reservation.source === 'SLOTS') {
+              return of({ applicationId: app.id, reservation });
+            }
+            return this.meetingSchedulerService.getCalendlyEventDetails(reservation.calendlyEventUrl).pipe(
+              map(details => ({
+                applicationId: app.id,
+                reservation: {
+                  ...reservation,
+                  calendlyEventDetails: details
+                }
+              })),
+              catchError(() => of({ applicationId: app.id, reservation }))
+            );
+          }),
           catchError(() => of({ applicationId: app.id, reservation: null }))
         )
       )

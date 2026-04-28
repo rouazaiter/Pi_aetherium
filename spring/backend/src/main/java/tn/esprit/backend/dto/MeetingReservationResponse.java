@@ -11,6 +11,7 @@ public record MeetingReservationResponse(
         String source,
         String slot,
         String calendlyEventUrl,
+        String candidateCalendlyUrl,
         String status,
         LocalDateTime createdAt,
         LocalDateTime confirmedAt

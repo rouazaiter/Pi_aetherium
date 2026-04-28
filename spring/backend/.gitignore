@@ -12,7 +12,7 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
+diff-temp.txt
 ### IntelliJ IDEA ###
 .idea
 *.iws

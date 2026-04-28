@@ -6,7 +6,7 @@ import { NotificationRealtimeService } from '../../core/services/notification-re
 @Component({
   selector: 'app-notification-bar',
   templateUrl: './notification-bar.component.html',
-  styleUrls: ['./notification-bar.component.css']
+  styleUrls: ['./notification-bar.component.scss']
 })
 export class NotificationBarComponent {
   notifications$;

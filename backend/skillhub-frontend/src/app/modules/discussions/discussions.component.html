@@ -1,0 +1,237 @@
+<div class="page-banner">
+  <h2>Discussions</h2>
+  <p>Join the conversation with the community</p>
+</div>
+
+<section class="disc-section">
+  <div class="container">
+    <div class="toolbar">
+      <h5>{{ filteredDiscussions.length }} Discussion{{ filteredDiscussions.length !== 1 ? 's' : '' }}</h5>
+      <button class="btn-primary-custom" (click)="showCreateForm = true">
+        <i class="fa fa-plus"></i> New Discussion
+      </button>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar">
+      <i class="fa fa-search"></i>
+      <input
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearch()"
+        placeholder="Search by theme or creator...">
+      <button class="clear-search" *ngIf="searchQuery" (click)="searchQuery=''; onSearch()">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+
+    <div class="spinner-wrap" *ngIf="loading"><div class="spinner"></div></div>
+
+    <div class="empty-state" *ngIf="!loading && discussions.length === 0">
+      <i class="fa fa-comments"></i>
+      <p>No discussions yet. Start one!</p>
+    </div>
+
+    <div class="disc-list" *ngIf="!loading">
+      <div class="disc-card card-custom" *ngFor="let d of paginatedDiscussions" (click)="openDiscussion(d)">
+        <div class="disc-info">
+          <div class="disc-icon"><i class="fa fa-comments"></i></div>
+          <div>
+            <h5>{{ d.theme }}</h5>
+            <p class="disc-meta">
+              <i class="fa fa-user"></i> {{ d.creator?.username || 'User' }}
+              &nbsp;·&nbsp; {{ formatDate(d.createdAt) }}
+            </p>
+          </div>
+        </div>
+        <div class="disc-right">
+          <span class="status-badge" [ngClass]="d.status">{{ d.status }}</span>
+          <button class="btn-icon" *ngIf="d.creator?.id === CURRENT_USER" (click)="openEditDiscussion(d, $event)" title="Edit"><i class="fa fa-pencil"></i></button>
+          <button class="btn-icon danger" *ngIf="d.creator?.id === CURRENT_USER" (click)="deleteDiscussion(d, $event)"><i class="fa fa-trash"></i></button>
+          <i class="fa fa-chevron-right arrow"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+      <button
+        class="page-btn"
+        *ngFor="let p of pages"
+        [class.active]="p === currentPage"
+        (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- Thread Modal -->
+<div class="modal-overlay" *ngIf="activeDiscussion" (click)="closeDiscussion()">
+  <div class="modal-box large thread-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4><i class="fa fa-comments"></i> {{ activeDiscussion.theme }}
+        <span class="solved-badge" *ngIf="activeDiscussion.status === 'ARCHIVED' && activeDiscussion.solvedMessageId">
+          ✅ Solved
+        </span>
+      </h4>
+      <div class="thread-header-actions">
+        <button class="btn-ai-summary" (click)="generateSummary()" [disabled]="aiSummaryLoading"
+          title="Generate AI solution summary">
+          <i class="fa" [class.fa-robot]="!aiSummaryLoading" [class.fa-spinner]="aiSummaryLoading" [class.fa-spin]="aiSummaryLoading"></i>
+          {{ aiSummaryLoading ? 'Generating...' : '🤖 AI Summary' }}
+        </button>
+        <button (click)="closeDiscussion()"><i class="fa fa-times"></i></button>
+      </div>
+    </div>
+
+    <!-- AI Summary Panel -->
+    <div class="ai-summary-panel" *ngIf="showAiSummary">
+      <div class="ai-summary-loading" *ngIf="aiSummaryLoading">
+        <i class="fa fa-robot fa-spin"></i>
+        <span>Analyzing discussion with AI...</span>
+      </div>
+      <div class="ai-summary-result" *ngIf="aiSummaryResult && !aiSummaryLoading">
+        <div class="ai-summary-header">
+          <span>🤖 AI Solution Summary</span>
+          <button class="close-summary" (click)="closeAiSummary()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="ai-summary-section">
+          <p class="ai-section-label">📋 Summary</p>
+          <p class="ai-summary-text">{{ aiSummaryResult.summary }}</p>
+        </div>
+        <div class="ai-summary-section" *ngIf="aiSummaryResult.keySteps.length > 0">
+          <p class="ai-section-label">🔑 Key Steps</p>
+          <ul class="ai-steps">
+            <li *ngFor="let step of aiSummaryResult.keySteps">{{ step }}</li>
+          </ul>
+        </div>
+        <div class="ai-summary-section" *ngIf="aiSummaryResult.codeSnippet">
+          <p class="ai-section-label">💻 Code</p>
+          <pre class="ai-code">{{ aiSummaryResult.codeSnippet }}</pre>
+        </div>
+      </div>
+    </div>
+    <div class="messages-area">
+      <div class="spinner-wrap small" *ngIf="loadingMessages"><div class="spinner"></div></div>
+      <div class="empty-state small" *ngIf="!loadingMessages && messages.length === 0">
+        <p>No messages yet. Start the conversation!</p>
+      </div>
+      <div class="message-item" *ngFor="let msg of messages">
+        <div class="msg-header">
+          <span class="msg-sender"><i class="fa fa-user-circle"></i> {{ msg.sender?.username || 'User' }}</span>
+          <span class="msg-date">{{ formatDate(msg.createdAt) }}</span>
+        </div>
+        <div *ngIf="editingMessageId === msg.id; else msgView">
+          <textarea class="edit-textarea" [(ngModel)]="editingMessageText" rows="2"></textarea>
+          <div class="edit-actions">
+            <button class="btn-primary-custom small" (click)="saveEditMessage()">Save</button>
+            <button class="btn-outline-custom small" (click)="editingMessageId = null">Cancel</button>
+          </div>
+        </div>
+        <ng-template #msgView>
+          <p class="msg-text">{{ msg.content }}</p>
+        </ng-template>
+        <div class="reaction-bar">
+          <button class="reaction-btn" (click)="react(msg, 'LIKE')" title="LIKE"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14/assets/svg/1f44d.svg" class="emoji-icon"> <span *ngIf="msg.reactionMap['LIKE']">{{ msg.reactionMap['LIKE'] }}</span></button>
+          <button class="reaction-btn" (click)="react(msg, 'LOVE')" title="LOVE"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14/assets/svg/2764.svg" class="emoji-icon"> <span *ngIf="msg.reactionMap['LOVE']">{{ msg.reactionMap['LOVE'] }}</span></button>
+          <button class="reaction-btn" (click)="react(msg, 'LAUGH')" title="LAUGH"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14/assets/svg/1f602.svg" class="emoji-icon"> <span *ngIf="msg.reactionMap['LAUGH']">{{ msg.reactionMap['LAUGH'] }}</span></button>
+          <button class="reaction-btn" (click)="react(msg, 'WOW')" title="WOW"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14/assets/svg/1f62e.svg" class="emoji-icon"> <span *ngIf="msg.reactionMap['WOW']">{{ msg.reactionMap['WOW'] }}</span></button>
+          <button class="reaction-btn" (click)="react(msg, 'SAD')" title="SAD"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14/assets/svg/1f622.svg" class="emoji-icon"> <span *ngIf="msg.reactionMap['SAD']">{{ msg.reactionMap['SAD'] }}</span></button>
+          <button class="reaction-btn" (click)="react(msg, 'ANGRY')" title="ANGRY"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14/assets/svg/1f621.svg" class="emoji-icon"> <span *ngIf="msg.reactionMap['ANGRY']">{{ msg.reactionMap['ANGRY'] }}</span></button>
+        </div>
+        <div class="msg-actions">
+          <button class="action-btn" (click)="openReply(msg)"><i class="fa fa-reply"></i> Reply</button>
+          <button class="action-btn" (click)="msg.showReplies = !msg.showReplies" *ngIf="msg.replies?.length">
+            <i class="fa fa-chevron-down"></i> {{ msg.replies.length }} repl{{ msg.replies.length === 1 ? 'y' : 'ies' }}
+          </button>
+          <button class="action-btn solve-btn"
+            *ngIf="activeDiscussion?.creator?.id === CURRENT_USER"
+            (click)="markSolved(msg)"
+            title="Mark as accepted answer">
+            <i class="fa fa-check-circle"></i> Mark as Solution
+          </button>
+          <button class="action-btn" *ngIf="msg.sender?.id === CURRENT_USER" (click)="openEditMessage(msg)"><i class="fa fa-pencil"></i> Edit</button>
+          <button class="action-btn danger" *ngIf="msg.sender?.id === CURRENT_USER" (click)="deleteMessage(msg)"><i class="fa fa-trash"></i></button>
+        </div>
+        <div class="replies" *ngIf="msg.showReplies && msg.replies?.length">
+          <div class="reply-item" *ngFor="let r of msg.replies">
+            <span class="msg-sender small"><i class="fa fa-reply"></i> {{ r.sender?.username || 'User' }}</span>
+            <p class="msg-text">{{ r.content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="send-bar">
+      <input [(ngModel)]="newMessage" placeholder="Write a message or use the mic..." (keyup.enter)="sendMessage()">
+      <app-mic-button (textReceived)="appendToMessage($event)"></app-mic-button>
+      <button class="btn-primary-custom" (click)="sendMessage()"><i class="fa fa-paper-plane"></i></button>
+    </div>
+    <div class="moderation-warning" *ngIf="moderationWarning">
+      <i class="fa fa-shield-halved"></i> {{ moderationWarning }}
+    </div>
+  </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal-overlay" *ngIf="replyingTo" (click)="replyingTo=null">
+  <div class="modal-box small-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Reply to {{ replyingTo.sender?.username }}</h4>
+      <button (click)="replyingTo=null"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="reply-context"><p>"{{ replyingTo.content }}"</p></div>
+    <div class="form-group">
+      <textarea [(ngModel)]="replyText" rows="3" placeholder="Your reply..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" (click)="replyingTo=null">Cancel</button>
+      <button class="btn-primary-custom" (click)="submitReply()">Reply</button>
+    </div>
+    <div class="moderation-warning" *ngIf="moderationWarning">
+      <i class="fa fa-shield-halved"></i> {{ moderationWarning }}
+    </div>
+  </div>
+</div>
+
+<!-- Edit Discussion Modal -->
+<div class="modal-overlay" *ngIf="editingDiscussion" (click)="editingDiscussion=null">
+  <div class="modal-box small-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Edit Discussion</h4>
+      <button (click)="editingDiscussion=null"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="form-group">
+      <label>Theme / Topic</label>
+      <input [(ngModel)]="editDiscussionTheme" placeholder="Discussion theme" (keyup.enter)="saveEditDiscussion()">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" (click)="editingDiscussion=null">Cancel</button>
+      <button class="btn-primary-custom" (click)="saveEditDiscussion()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Discussion Modal -->
+<div class="modal-overlay" *ngIf="showCreateForm" (click)="showCreateForm=false">
+  <div class="modal-box small-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>New Discussion</h4>
+      <button (click)="showCreateForm=false"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="form-group">
+      <label>Theme / Topic</label>
+      <input [(ngModel)]="newTheme" placeholder="What do you want to discuss?" (keyup.enter)="createDiscussion()">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" (click)="showCreateForm=false">Cancel</button>
+      <button class="btn-primary-custom" (click)="createDiscussion()">Create</button>
+    </div>
+  </div>
+</div>

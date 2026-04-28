@@ -1,0 +1,514 @@
+<div class="page-banner">
+  <h2>Blog Posts</h2>
+  <p>Explore the latest articles from our community</p>
+</div>
+
+<section class="blog-section">
+  <div class="container">
+
+    <!-- Urgent posts alert bar -->
+    <div class="urgent-alert-bar" *ngIf="urgentPosts.length > 0">
+      <span class="urgent-alert-icon">🚨</span>
+      <span><strong>{{ urgentPosts.length }} urgent post{{ urgentPosts.length > 1 ? 's' : '' }}</strong> need{{ urgentPosts.length === 1 ? 's' : '' }} immediate attention</span>
+      <div class="urgent-post-pills">
+        <button class="urgent-pill" *ngFor="let p of urgentPosts" (click)="openPost(p)">
+          {{ urgencyIcon(p.urgencyLevel) }} {{ p.title | slice:0:30 }}{{ p.title.length > 30 ? '...' : '' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="filters">
+        <button [class.active]="filter==='ALL'" (click)="onFilterChange('ALL')">All</button>
+        <button [class.active]="filter==='PUBLISHED'" (click)="onFilterChange('PUBLISHED')">Published</button>
+        <button [class.active]="filter==='DRAFT'" (click)="onFilterChange('DRAFT')">Drafts</button>
+        <button [class.active]="filter==='ARCHIVED'" (click)="onFilterChange('ARCHIVED')">Archived</button>
+      </div>
+      <button class="btn-primary-custom" (click)="openCreatePost()">
+        <i class="fa fa-plus"></i> New Post
+      </button>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar">
+      <i class="fa fa-search"></i>
+      <input
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearch()"
+        placeholder="Search by title, content or author..."
+      >
+      <button class="clear-search" *ngIf="searchQuery" (click)="searchQuery=''; onSearch()">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Results count -->
+    <p class="results-info" *ngIf="!loading">
+      {{ filteredPosts.length }} post{{ filteredPosts.length !== 1 ? 's' : '' }} found
+      <span *ngIf="searchQuery"> for "<strong>{{ searchQuery }}</strong>"</span>
+    </p>
+
+    <div class="spinner-wrap" *ngIf="loading"><div class="spinner"></div></div>
+
+    <div class="empty-state" *ngIf="!loading && filteredPosts.length === 0">
+      <i class="fa fa-newspaper"></i>
+      <p>No posts yet. Be the first to write one!</p>
+    </div>
+
+    <div class="posts-grid" *ngIf="!loading && filteredPosts.length > 0">
+      <div class="card-custom post-card" *ngFor="let post of paginatedPosts"
+           [appPostTooltip]="post"
+           (click)="openPost(post)">
+        <div class="post-img">
+          <img [src]="coverImg(post)" [alt]="post.title" onerror="this.src='course-01.jpg'">
+          <div class="post-badges">
+            <span class="badge-status" [ngClass]="post.status">{{ post.status }}</span>
+            <span class="badge-visibility" [ngClass]="post.visibility">{{ post.visibility }}</span>
+            <span class="badge-urgency" [ngClass]="post.urgencyLevel"
+              *ngIf="post.urgencyLevel !== 'NONE'">
+              {{ urgencyIcon(post.urgencyLevel) }} {{ urgencyLabel(post.urgencyLevel) }}
+            </span>
+          </div>
+        </div>
+        <div class="post-body">
+          <h4>{{ post.title }}</h4>
+          <p class="meta">
+            <i class="fa fa-user"></i> {{ post.author?.username || 'Unknown' }}
+            &nbsp;·&nbsp;
+            <i class="fa fa-calendar"></i> {{ formatDate(post.createdAt) }}
+          </p>
+          <p class="excerpt">{{ truncate(post.content) }}</p>
+          <div class="post-actions">
+            <button class="btn-primary-custom small" (click)="$event.stopPropagation(); openPost(post)">Read More</button>
+            <button class="btn-bookmark" [class.bookmarked]="bookmarks.isBookmarked(post.id)"
+              (click)="toggleBookmark(post, $event)" title="Save to library">
+              <i [class]="bookmarks.isBookmarked(post.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+            </button>
+            <button class="btn-live-session" *ngIf="post.urgencyLevel === 'CRITICAL' || post.urgencyLevel === 'HIGH'"
+              (click)="requestLiveSession(post, $event)" title="Request live session">
+              📡 Live Session
+            </button>
+            <ng-container *ngIf="post.author?.id === CURRENT_USER">
+              <button class="btn-icon" (click)="openEditPost(post, $event)" title="Edit"><i class="fa fa-edit"></i></button>
+              <button class="btn-icon danger" (click)="deletePost(post, $event)" title="Delete"><i class="fa fa-trash"></i></button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+      <button
+        class="page-btn"
+        *ngFor="let p of pages"
+        [class.active]="p === currentPage"
+        (click)="goToPage(p)">
+        {{ p }}
+      </button>
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- Post Detail Modal -->
+<div class="modal-overlay" *ngIf="selectedPost" (click)="closePost()">
+  <div class="modal-box large" #modalBox (scroll)="onModalScroll($event)" (click)="$event.stopPropagation()">
+
+    <!-- Reading progress bar -->
+    <div class="reading-progress-bar">
+      <div class="reading-progress-fill" [style.width.%]="readingProgress"></div>
+    </div>
+
+    <div class="modal-header">
+      <h4>{{ selectedPost.title }}</h4>
+      <div class="modal-header-actions">
+        <button class="btn-bookmark modal-bookmark" [class.bookmarked]="bookmarks.isBookmarked(selectedPost.id)"
+          (click)="toggleBookmark(selectedPost, $event)" title="Save to library">
+          <i [class]="bookmarks.isBookmarked(selectedPost.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+          {{ bookmarks.isBookmarked(selectedPost.id) ? 'Saved' : 'Save' }}
+        </button>
+        <button class="btn-report" *ngIf="selectedPost.author?.id !== CURRENT_USER"
+          (click)="openReport('POST', selectedPost.id, selectedPost.title, $event)"
+          title="Report this post">
+          <i class="fa fa-flag"></i> Report
+        </button>
+        <button (click)="closePost()"><i class="fa fa-times"></i></button>
+      </div>
+    </div>
+    <!-- Cover image in detail view -->
+    <div class="modal-cover">
+      <img
+        [src]="selectedPost.coverImage || coverImg(selectedPost)"
+        [alt]="selectedPost.title"
+        (click)="openLightbox(selectedPost.coverImage || coverImg(selectedPost))"
+        class="cover-img-clickable"
+      >
+      <!-- Image actions — only visible to post owner -->
+      <div class="cover-img-actions" *ngIf="selectedPost.author?.id === CURRENT_USER">
+        <label class="cover-action-btn" title="Change image">
+          <i class="fa fa-camera"></i> Change
+          <input type="file" accept="image/*" (change)="onDetailImageSelected($event)" hidden>
+        </label>
+        <button class="cover-action-btn danger" *ngIf="selectedPost.coverImage" (click)="removeDetailCoverImage()" title="Remove image">
+          <i class="fa fa-trash"></i> Remove
+        </button>
+      </div>
+    </div>
+    <p class="post-meta">
+      <i class="fa fa-user"></i> {{ selectedPost.author?.username }}
+      &nbsp;·&nbsp; {{ formatDate(selectedPost.createdAt) }}
+      &nbsp;·&nbsp;
+      <span class="badge-visibility" [ngClass]="selectedPost.visibility">{{ selectedPost.visibility }}</span>
+    </p>
+
+    <!-- Why This Failed button — only for urgent posts -->
+    <div class="why-failed-trigger" *ngIf="selectedPost.urgencyLevel === 'CRITICAL' || selectedPost.urgencyLevel === 'HIGH'">
+      <button class="btn-why-failed" (click)="explainFailure()" [disabled]="failureLoading">
+        <i class="fa" [class.fa-circle-question]="!failureLoading" [class.fa-spinner]="failureLoading" [class.fa-spin]="failureLoading"></i>
+        {{ failureLoading ? 'Analyzing...' : '🔍 Why Did This Fail?' }}
+      </button>
+    </div>
+
+    <!-- Failure Explanation Panel -->
+    <div class="failure-panel" *ngIf="showFailurePanel">
+      <div class="failure-loading" *ngIf="failureLoading">
+        <i class="fa fa-robot fa-spin"></i> AI is analyzing the root cause...
+      </div>
+      <div class="failure-result" *ngIf="failureExplanation && !failureLoading">
+        <div class="failure-header">
+          <span>🔍 Why This Failed</span>
+          <button (click)="closeFailurePanel()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="failure-section">
+          <p class="failure-label">💥 Root Cause</p>
+          <p class="failure-text">{{ failureExplanation.rootCause }}</p>
+        </div>
+        <div class="failure-section">
+          <p class="failure-label">⚠️ Common Causes</p>
+          <ul class="failure-list">
+            <li *ngFor="let c of failureExplanation.commonCauses">{{ c }}</li>
+          </ul>
+        </div>
+        <div class="failure-section">
+          <p class="failure-label">🛡️ How to Prevent It</p>
+          <ul class="failure-list prevention">
+            <li *ngFor="let p of failureExplanation.prevention">{{ p }}</li>
+          </ul>
+        </div>
+        <div class="failure-analogy" *ngIf="failureExplanation.analogy">
+          <i class="fa fa-lightbulb"></i>
+          <p>{{ failureExplanation.analogy }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="post-full-content">{{ selectedPost.content }}</div>
+    <div class="like-row">
+      <button class="btn-like" [class.liked]="liked" (click)="toggleLike()">
+        <i class="fa fa-heart"></i> {{ liked ? 'Liked' : 'Like' }}
+      </button>
+      <span class="like-count">{{ likeCount }} likes</span>
+    </div>
+    <hr>
+    <h5 class="comments-title"><i class="fa fa-comments"></i> Comments</h5>
+    <div class="spinner-wrap small" *ngIf="loadingComments"><div class="spinner"></div></div>
+    <div class="comments-list" *ngIf="!loadingComments">
+
+      <!-- Sentiment summary + filter -->
+      <div class="sentiment-bar" *ngIf="comments.length > 0">
+        <div class="sentiment-filters">
+          <button class="sentiment-filter-btn" [class.active]="sentimentFilter==='ALL'" (click)="sentimentFilter='ALL'">
+            All ({{ comments.length }})
+          </button>
+          <button class="sentiment-filter-btn positive" [class.active]="sentimentFilter==='POSITIVE'" (click)="sentimentFilter='POSITIVE'">
+            😊 Positive ({{ positiveCount }})
+          </button>
+          <button class="sentiment-filter-btn neutral" [class.active]="sentimentFilter==='NEUTRAL'" (click)="sentimentFilter='NEUTRAL'">
+            😐 Neutral ({{ neutralCount }})
+          </button>
+          <button class="sentiment-filter-btn negative" [class.active]="sentimentFilter==='NEGATIVE'" (click)="sentimentFilter='NEGATIVE'">
+            😡 Negative ({{ negativeCount }})
+          </button>
+        </div>
+        <div class="sort-toggle">
+          <button class="sort-btn" [class.active]="commentSort==='DATE'" (click)="commentSort='DATE'">
+            <i class="fa fa-clock"></i> Recent
+          </button>
+          <button class="sort-btn" [class.active]="commentSort==='BEST'" (click)="commentSort='BEST'">
+            <i class="fa fa-star"></i> Best first
+          </button>
+        </div>
+      </div>
+
+      <!-- Top comment spotlight -->
+      <div class="top-comment-spotlight" *ngIf="topComment && sentimentFilter === 'ALL' && commentSort === 'DATE'">
+        <div class="spotlight-label"><i class="fa fa-star"></i> Top Comment</div>
+        <div class="spotlight-author"><i class="fa fa-user-circle"></i> {{ topComment.author?.username }}</div>
+        <p class="spotlight-text">"{{ topComment.content }}"</p>
+      </div>
+
+      <div class="empty-state small" *ngIf="filteredComments.length === 0"><p>No comments match this filter.</p></div>
+      <div class="comment-item" *ngFor="let c of filteredComments"
+           [class.comment-positive]="c.sentiment === 'POSITIVE'"
+           [class.comment-negative]="c.sentiment === 'NEGATIVE'">
+        <div class="comment-header">
+          <span class="comment-author"><i class="fa fa-user-circle"></i> {{ c.author?.username || 'User' }}</span>
+          <div class="comment-header-right">
+            <span class="sentiment-badge" [class]="'sentiment-' + (c.sentiment || 'NEUTRAL')">
+              {{ sentimentEmoji(c.sentiment || 'NEUTRAL') }} {{ sentimentLabel(c.sentiment || 'NEUTRAL') }}
+            </span>
+            <span class="comment-date">{{ formatDate(c.createdAt) }}</span>
+          </div>
+        </div>
+
+        <!-- View mode -->
+        <ng-container *ngIf="editingCommentId !== c.id">
+          <p class="comment-text">{{ c.content }}</p>
+          <div class="comment-actions-row">
+            <div class="comment-actions" *ngIf="c.author?.id === CURRENT_USER">
+              <button class="btn-icon small" (click)="startEditComment(c)" title="Edit">
+                <i class="fa fa-edit"></i>
+              </button>
+              <button class="btn-icon danger small" (click)="deleteComment(c.id)" title="Delete">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+            <button class="btn-report-small" *ngIf="c.author?.id !== CURRENT_USER"
+              (click)="openReport('COMMENT', c.id, 'comment by ' + c.author?.username, $event)"
+              title="Report comment">
+              <i class="fa fa-flag"></i>
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- Edit mode -->
+        <ng-container *ngIf="editingCommentId === c.id">
+          <textarea class="edit-textarea" [(ngModel)]="editingCommentText" rows="2"></textarea>
+          <div class="comment-actions">
+            <button class="btn-primary-custom small" (click)="saveEditComment(c.id)">
+              <i class="fa fa-check"></i> Save
+            </button>
+            <button class="btn-outline-custom small" (click)="cancelEditComment()">
+              Cancel
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+    <div class="comment-form">
+      <input [(ngModel)]="newComment" placeholder="Write a comment or use the mic..." (keyup.enter)="submitComment()">
+      <app-mic-button (textReceived)="appendToComment($event)"></app-mic-button>
+      <button class="btn-primary-custom" (click)="submitComment()">Post</button>
+    </div>
+    <div class="moderation-warning" *ngIf="moderationWarning">
+      <i class="fa fa-shield-halved"></i> {{ moderationWarning }}
+    </div>
+
+    <!-- Related posts -->
+    <div class="related-posts" *ngIf="relatedPosts.length > 0">
+      <h6 class="related-title"><i class="fa fa-link"></i> Related Posts</h6>
+      <div class="related-grid">
+        <div class="related-card" *ngFor="let r of relatedPosts" (click)="openPost(r)">
+          <div class="related-img">
+            <img [src]="coverImg(r)" [alt]="r.title">
+            <span class="related-urgency" *ngIf="r.urgencyLevel !== 'NONE'">
+              {{ urgencyIcon(r.urgencyLevel) }}
+            </span>
+          </div>
+          <div class="related-body">
+            <p class="related-post-title">{{ r.title }}</p>
+            <span class="related-author"><i class="fa fa-user"></i> {{ r.author?.username }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox-overlay" *ngIf="lightboxOpen" (click)="closeLightbox()">
+  <button class="lightbox-close" (click)="closeLightbox()"><i class="fa fa-times"></i></button>
+  <img [src]="lightboxSrc" alt="Full size" (click)="$event.stopPropagation()">
+</div>
+
+<div class="modal-overlay" *ngIf="showPostForm" (click)="showPostForm=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>{{ editingPost ? 'Edit Post' : 'New Post' }}</h4>
+      <button (click)="showPostForm=false"><i class="fa fa-times"></i></button>
+    </div>
+
+    <!-- Cover Image Picker -->
+    <div class="form-group">
+      <label>Cover Image <span class="optional">(optional)</span></label>
+      <div class="image-picker" *ngIf="!coverImagePreview" (click)="imageInput.click()">
+        <i class="fa fa-image"></i>
+        <p>Click to upload an image</p>
+        <span>PNG, JPG, WEBP — max 2MB</span>
+        <input #imageInput type="file" accept="image/*" (change)="onImageSelected($event)" hidden>
+      </div>
+      <div class="image-preview" *ngIf="coverImagePreview">
+        <img [src]="coverImagePreview" alt="Cover preview">
+        <button class="remove-img" (click)="removeCoverImage()" title="Remove image">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Title</label>
+      <div class="input-with-mic">
+        <input [(ngModel)]="postForm.title" (input)="autoSlug()" placeholder="Post title">
+        <app-mic-button (textReceived)="appendToTitle($event)"></app-mic-button>
+      </div>
+    </div>
+    <!-- slug is auto-generated from title, hidden from user -->
+    <div class="form-group">
+      <label>Content</label>
+      <div class="input-with-mic textarea-mic">
+        <textarea [(ngModel)]="postForm.content" rows="6" placeholder="Write your content or use the mic..."></textarea>
+        <app-mic-button (textReceived)="appendToContent($event)"></app-mic-button>
+      </div>
+    </div>
+    <!-- Real-time urgency warning -->
+    <div class="urgency-form-warning" *ngIf="liveUrgency.level !== 'NONE'">
+      <span *ngIf="liveUrgency.level === 'CRITICAL'">🚨 <strong>CRITICAL</strong> — This post will be flagged as urgent and experts will be notified.</span>
+      <span *ngIf="liveUrgency.level === 'HIGH'">⚠️ <strong>HIGH PRIORITY</strong> — This post will be highlighted for quick attention.</span>
+      <small>Detected: {{ liveUrgency.matchedKeywords.join(', ') }}</small>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Status</label>
+        <select [(ngModel)]="postForm.status">
+          <option value="PUBLISHED">Published</option>
+          <option value="DRAFT">Draft</option>
+          <option value="ARCHIVED">Archived</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Visibility</label>
+        <select [(ngModel)]="postForm.visibility">
+          <option value="PUBLIC">Public</option>
+          <option value="PRIVATE">Private</option>
+          <option value="FRIENDS_ONLY">Friends Only</option>
+          <option value="RESTRICTED">Restricted</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" (click)="showPostForm=false">Cancel</button>
+      <button class="btn-primary-custom" (click)="submitPost()">{{ editingPost ? 'Update' : 'Publish' }}</button>
+    </div>
+    <!-- Moderation warning -->
+    <div class="moderation-warning" *ngIf="moderationWarning">
+      <i class="fa fa-shield-halved"></i> {{ moderationWarning }}
+    </div>
+  </div>
+</div>
+
+<!-- Live Session Modal -->
+<div class="modal-overlay" *ngIf="showLiveSession" (click)="closeLiveSession()">
+  <div class="modal-box small-modal live-session-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>📡 Request Live Session</h4>
+      <button (click)="closeLiveSession()"><i class="fa fa-times"></i></button>
+    </div>
+
+    <div class="live-session-urgency" *ngIf="liveSessionPost">
+      <span class="urgency-badge-large" [ngClass]="liveSessionPost.urgencyLevel">
+        {{ urgencyIcon(liveSessionPost.urgencyLevel) }} {{ urgencyLabel(liveSessionPost.urgencyLevel) }}
+      </span>
+      <p class="live-post-title">"{{ liveSessionPost.title }}"</p>
+    </div>
+
+    <p class="live-session-desc">
+      This post has been flagged as urgent. Request a live session with an expert to resolve it immediately.
+    </p>
+
+    <div class="live-session-options">
+      <div class="live-option">
+        <i class="fa fa-video"></i>
+        <div>
+          <strong>Video Call</strong>
+          <p>Start a video session with an available expert</p>
+        </div>
+        <a href="https://meet.google.com/new" target="_blank" class="btn-primary-custom small">
+          Join Now
+        </a>
+      </div>
+      <div class="live-option">
+        <i class="fa fa-comments"></i>
+        <div>
+          <strong>Live Chat</strong>
+          <p>Open a priority discussion thread</p>
+        </div>
+        <a routerLink="/discussions" (click)="closeLiveSession()" class="btn-primary-custom small">
+          Open Chat
+        </a>
+      </div>
+      <div class="live-option">
+        <i class="fa fa-envelope"></i>
+        <div>
+          <strong>Notify Experts</strong>
+          <p>Send an alert to all available experts</p>
+        </div>
+        <button class="btn-primary-custom small" (click)="closeLiveSession()">
+          Send Alert
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal-overlay" *ngIf="showReportModal" (click)="showReportModal=false">
+  <div class="modal-box small-modal report-modal" (click)="$event.stopPropagation()">
+
+    <!-- Success state -->
+    <div class="report-success" *ngIf="reportSubmitted">
+      <i class="fa fa-check-circle"></i>
+      <h5>Report Submitted</h5>
+      <p>Thank you. Our team will review this content shortly.</p>
+    </div>
+
+    <!-- Form state -->
+    <ng-container *ngIf="!reportSubmitted">
+      <div class="modal-header">
+        <h4><i class="fa fa-flag"></i> Report Content</h4>
+        <button (click)="showReportModal=false"><i class="fa fa-times"></i></button>
+      </div>
+      <p class="report-target-label">
+        Reporting: <strong>{{ reportTarget?.type === 'POST' ? '📄 Post' : '💬 Comment' }}</strong>
+        — "{{ reportTarget?.label | slice:0:50 }}{{ (reportTarget?.label?.length || 0) > 50 ? '...' : '' }}"
+      </p>
+      <div class="form-group">
+        <label>Reason</label>
+        <div class="reason-grid">
+          <button class="reason-btn" *ngFor="let r of reportReasons"
+            [class.active]="reportReason === r.value"
+            (click)="reportReason = r.value">
+            {{ r.label }}
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Additional details <span class="optional">(optional)</span></label>
+        <textarea [(ngModel)]="reportDetails" rows="3" placeholder="Describe the issue..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline-custom" (click)="showReportModal=false">Cancel</button>
+        <button class="btn-report-submit" (click)="submitReport()">
+          <i class="fa fa-flag"></i> Submit Report
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>SkillHub - Discussions</title>
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-scholar.css">
+  <style>
+    .discussion-card { background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.08); padding:24px; margin-bottom:24px; transition:transform 0.3s; }
+    .discussion-card:hover { transform:translateY(-4px); }
+    .discussion-card h5 { font-weight:600; margin-bottom:6px; }
+    .discussion-card .meta { font-size:12px; color:#aaa; margin-bottom:12px; }
+    .status-badge { font-size:11px; padding:3px 10px; border-radius:20px; }
+    .status-ACTIVE { background:#d4edda; color:#155724; }
+    .status-ARCHIVED { background:#e2e3e5; color:#383d41; }
+    .status-DELETED { background:#f8d7da; color:#721c24; }
+    .btn-open { background:#f35525; color:#fff; border:none; border-radius:20px; padding:6px 18px; font-size:13px; cursor:pointer; }
+    .btn-open:hover { background:#d44010; }
+    .btn-new { background:#f35525; color:#fff; border:none; border-radius:20px; padding:8px 22px; font-size:14px; cursor:pointer; }
+    .message-item { background:#f9f9f9; border-radius:8px; padding:12px 16px; margin-bottom:10px; }
+    .message-item .sender { font-weight:600; font-size:13px; color:#333; }
+    .message-item .msg-text { font-size:14px; color:#555; margin-top:4px; }
+    .message-item .msg-actions { font-size:12px; color:#aaa; margin-top:6px; display:flex; gap:12px; }
+    .message-item .msg-actions span { cursor:pointer; }
+    .message-item .msg-actions span:hover { color:#f35525; }
+    .reply-item { margin-left:30px; border-left:3px solid #f35525; padding-left:12px; }
+    .reaction-bar { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .reaction-btn { background:none; border:1px solid #ddd; border-radius:20px; padding:2px 10px; font-size:12px; cursor:pointer; transition:all 0.2s; }
+    .reaction-btn:hover { border-color:#f35525; color:#f35525; }
+  </style>
+</head>
+<body>
+
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <nav class="main-nav">
+            <a href="index.html" class="logo"><h1>SkillHub</h1></a>
+            <ul class="nav">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="blog.html">Blog</a></li>
+              <li><a href="discussions.html" class="active">Discussions</a></li>
+            </ul>
+            <a class='menu-trigger'><span>Menu</span></a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div style="background:linear-gradient(135deg,#f35525,#ef2f96);padding:120px 0 60px;text-align:center;color:#fff;">
+    <h2 style="font-weight:700;">Discussions</h2>
+    <p style="opacity:0.85;">Join the conversation with the community</p>
+  </div>
+
+  <section class="section" style="background:#f9f9f9;">
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-12 text-end">
+          <button class="btn-new" onclick="openCreateDiscussion()">+ New Discussion</button>
+        </div>
+      </div>
+      <div id="discussions-list">
+        <p class="text-center" style="color:#aaa;">Loading discussions...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DISCUSSION THREAD MODAL ===== -->
+  <div class="modal fade" id="discussionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalDiscTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="messages-list" class="mb-3"></div>
+          <div class="d-flex gap-2">
+            <input type="text" id="msg-input" class="form-control" placeholder="Write a message...">
+            <button class="btn-open" onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CREATE DISCUSSION MODAL ===== -->
+  <div class="modal fade" id="createDiscModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">New Discussion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="disc-theme" class="form-control" placeholder="Discussion theme...">
+        </div>
+        <div class="modal-footer">
+          <button class="btn-open" onclick="submitCreateDiscussion()">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REPLY MODAL ===== -->
+  <div class="modal fade" id="replyModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Reply to message</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="reply-input" class="form-control" placeholder="Your reply...">
+        </div>
+        <div class="modal-footer">
+          <button class="btn-open" onclick="submitReply()">Reply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>Copyright © 2026 SkillHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/custom.js"></script>
+
+  <script>
+    const API = 'http://localhost:8080/api';
+    const CURRENT_USER_ID = 1;
+
+    let currentDiscussionId = null;
+    let replyToMessageId = null;
+
+    const REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+    const REACTION_TYPES = ['LIKE', 'LOVE', 'LAUGH', 'WOW', 'SAD', 'ANGRY'];
+
+    // ── Load discussions ────────────────────────────────────────────────────
+    async function loadDiscussions() {
+      const res = await fetch(`${API}/discussions/user/${CURRENT_USER_ID}`);
+      const discussions = await res.json();
+      const list = document.getElementById('discussions-list');
+
+      if (!discussions.length) {
+        list.innerHTML = '<p class="text-center" style="color:#aaa;">No discussions yet. Start one!</p>';
+        return;
+      }
+
+      list.innerHTML = discussions.map(d => `
+        <div class="discussion-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5>${d.theme}</h5>
+              <div class="meta">
+                <i class="fa fa-user"></i> Creator #${d.creator?.id ?? '?'} &nbsp;|&nbsp;
+                <i class="fa fa-calendar"></i> ${formatDate(d.createdAt)}
+              </div>
+            </div>
+            <span class="status-badge status-${d.status}">${d.status}</span>
+          </div>
+          <button class="btn-open" onclick="openDiscussion(${d.id}, '${escapeHtml(d.theme)}')">
+            <i class="fa fa-comments"></i> Open Thread
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // ── Open discussion thread ──────────────────────────────────────────────
+    async function openDiscussion(discId, theme) {
+      currentDiscussionId = discId;
+      document.getElementById('modalDiscTitle').textContent = theme;
+      await loadMessages(discId);
+      new bootstrap.Modal(document.getElementById('discussionModal')).show();
+    }
+
+    // ── Load messages ───────────────────────────────────────────────────────
+    async function loadMessages(discId) {
+      const res = await fetch(`${API}/discussions/${discId}/messages`);
+      const messages = await res.json();
+      const list = document.getElementById('messages-list');
+
+      if (!messages.length) {
+        list.innerHTML = '<p style="color:#aaa;font-size:13px;">No messages yet. Start the conversation!</p>';
+        return;
+      }
+
+      const items = await Promise.all(messages.map(async m => {
+        const repliesRes = await fetch(`${API}/discussions/${discId}/messages/${m.id}/replies`);
+        const replies = await repliesRes.json();
+        const reactionsRes = await fetch(`${API}/messages/${m.id}/reactions`);
+        const reactions = await reactionsRes.json();
+
+        const reactionCounts = {};
+        reactions.forEach(r => { reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1; });
+
+        const reactionBar = REACTIONS.map((emoji, i) => {
+          const type = REACTION_TYPES[i];
+          const count = reactionCounts[type] || 0;
+          return `<button class="reaction-btn" onclick="reactToMessage(${m.id}, '${type}')" title="${type}">
+            ${emoji} ${count > 0 ? count : ''}
+          </button>`;
+        }).join('');
+
+        const repliesHtml = replies.map(r => `
+          <div class="message-item reply-item">
+            <div class="sender"><i class="fa fa-reply"></i> User #${r.sender?.id ?? '?'}</div>
+            <div class="msg-text">${r.content}</div>
+            <div class="msg-actions">
+              <span style="color:#bbb;">${formatDate(r.createdAt)}</span>
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="message-item">
+            <div class="sender"><i class="fa fa-user-circle"></i> User #${m.sender?.id ?? '?'}</div>
+            <div class="msg-text">${m.content}</div>
+            <div class="reaction-bar">${reactionBar}</div>
+            <div class="msg-actions">
+              <span onclick="openReply(${m.id})"><i class="fa fa-reply"></i> Reply</span>
+              <span onclick="deleteMessage(${m.id})"><i class="fa fa-trash"></i> Delete</span>
+              <span style="color:#bbb;">${formatDate(m.createdAt)}</span>
+            </div>
+          </div>
+          ${repliesHtml}
+        `;
+      }));
+
+      list.innerHTML = items.join('');
+    }
+
+    // ── Send message ────────────────────────────────────────────────────────
+    async function sendMessage() {
+      const input = document.getElementById('msg-input');
+      const content = input.value.trim();
+      if (!content) return;
+      await fetch(`${API}/discussions/${currentDiscussionId}/messages?senderId=${CURRENT_USER_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+      });
+      input.value = '';
+      await loadMessages(currentDiscussionId);
+    }
+
+    // ── Reply to message ────────────────────────────────────────────────────
+    function openReply(messageId) {
+      replyToMessageId = messageId;
+      new bootstrap.Modal(document.getElementById('replyModal')).show();
+    }
+
+    async function submitReply() {
+      const input = document.getElementById('reply-input');
+      const content = input.value.trim();
+      if (!content) return;
+      await fetch(`${API}/discussions/${currentDiscussionId}/messages?senderId=${CURRENT_USER_ID}&parentId=${replyToMessageId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+      });
+      input.value = '';
+      bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+      await loadMessages(currentDiscussionId);
+    }
+
+    // ── Delete message ──────────────────────────────────────────────────────
+    async function deleteMessage(messageId) {
+      await fetch(`${API}/discussions/${currentDiscussionId}/messages/${messageId}?requesterId=${CURRENT_USER_ID}`, { method: 'DELETE' });
+      await loadMessages(currentDiscussionId);
+    }
+
+    // ── React to message ────────────────────────────────────────────────────
+    async function reactToMessage(messageId, type) {
+      await fetch(`${API}/messages/${messageId}/reactions?userId=${CURRENT_USER_ID}&type=${type}`, { method: 'POST' });
+      await loadMessages(currentDiscussionId);
+    }
+
+    // ── Create discussion ───────────────────────────────────────────────────
+    function openCreateDiscussion() {
+      new bootstrap.Modal(document.getElementById('createDiscModal')).show();
+    }
+
+    async function submitCreateDiscussion() {
+      const theme = document.getElementById('disc-theme').value.trim();
+      if (!theme) return;
+      await fetch(`${API}/discussions?creatorId=${CURRENT_USER_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme })
+      });
+      bootstrap.Modal.getInstance(document.getElementById('createDiscModal')).hide();
+      loadDiscussions();
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+    function formatDate(dt) {
+      if (!dt) return '';
+      return new Date(dt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/'/g, "\\'");
+    }
+
+    loadDiscussions();
+  </script>
+</body>
+</html>

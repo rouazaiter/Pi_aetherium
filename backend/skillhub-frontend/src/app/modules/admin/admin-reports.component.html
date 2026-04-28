@@ -1,0 +1,65 @@
+<div class="page-banner">
+  <h2>🛡️ Admin — Content Reports</h2>
+  <p>Review and moderate flagged posts and comments</p>
+</div>
+
+<section class="admin-section">
+  <div class="container">
+
+    <!-- Filter tabs -->
+    <div class="admin-filters">
+      <button *ngFor="let s of ['PENDING','REVIEWED','ACTION_TAKEN','DISMISSED','ALL']"
+        class="filter-tab" [class.active]="filter === s"
+        (click)="filter = $any(s); load()">
+        {{ s === 'ACTION_TAKEN' ? 'Action Taken' : s === 'ALL' ? 'All' : s | titlecase }}
+        <span class="filter-count" *ngIf="s === 'PENDING'">{{ filteredReports.length }}</span>
+      </button>
+    </div>
+
+    <div class="spinner-wrap" *ngIf="loading"><div class="spinner"></div></div>
+
+    <div class="empty-state" *ngIf="!loading && filteredReports.length === 0">
+      <i class="fa fa-shield-halved"></i>
+      <p>No reports in this category.</p>
+    </div>
+
+    <div class="reports-list" *ngIf="!loading && filteredReports.length > 0">
+      <div class="report-card" *ngFor="let r of filteredReports" [class]="statusClass(r.status)">
+        <div class="report-header">
+          <div class="report-info">
+            <span class="report-reason">{{ reasonIcon(r.reason) }} {{ r.reason }}</span>
+            <span class="report-type" [class.post-type]="r.targetType === 'POST'" [class.comment-type]="r.targetType === 'COMMENT'">
+              {{ r.targetType === 'POST' ? '📄 Post' : '💬 Comment' }} #{{ r.targetId }}
+            </span>
+          </div>
+          <span class="report-status-badge" [class]="statusClass(r.status)">{{ r.status }}</span>
+        </div>
+
+        <div class="report-body" *ngIf="r.details">
+          <p class="report-details">"{{ r.details }}"</p>
+        </div>
+
+        <div class="report-footer">
+          <span class="report-meta">
+            <i class="fa fa-user"></i> {{ r.reporter?.username }}
+            &nbsp;·&nbsp; {{ formatDate(r.createdAt) }}
+          </span>
+          <div class="report-actions" *ngIf="r.status === 'PENDING'">
+            <button class="action-btn-admin reviewed" (click)="updateStatus(r, 'REVIEWED')">
+              <i class="fa fa-eye"></i> Mark Reviewed
+            </button>
+            <button class="action-btn-admin action" (click)="updateStatus(r, 'ACTION_TAKEN')">
+              <i class="fa fa-gavel"></i> Take Action
+            </button>
+            <button class="action-btn-admin dismiss" (click)="updateStatus(r, 'DISMISSED')">
+              <i class="fa fa-times"></i> Dismiss
+            </button>
+          </div>
+          <span class="reviewed-at" *ngIf="r.reviewedAt">
+            Reviewed: {{ formatDate(r.reviewedAt) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

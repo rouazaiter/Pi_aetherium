@@ -1,0 +1,66 @@
+<div class="page-title">Dashboard</div>
+
+<div class="spinner-wrap" *ngIf="loading"><div class="spinner"></div></div>
+
+<ng-container *ngIf="!loading">
+
+  <!-- Stat cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <i class="fa fa-users"></i>
+      <div><p class="stat-value">{{ stats.users }}</p><p class="stat-label">Users</p></div>
+    </div>
+    <div class="stat-card">
+      <i class="fa fa-newspaper"></i>
+      <div><p class="stat-value">{{ stats.posts }}</p><p class="stat-label">Posts</p></div>
+    </div>
+    <div class="stat-card">
+      <i class="fa fa-comments"></i>
+      <div><p class="stat-value">{{ stats.discussions }}</p><p class="stat-label">Discussions</p></div>
+    </div>
+    <div class="stat-card warn">
+      <i class="fa fa-flag"></i>
+      <div><p class="stat-value">{{ stats.pendingReports }}</p><p class="stat-label">Pending Reports</p></div>
+    </div>
+    <div class="stat-card">
+      <i class="fa fa-book"></i>
+      <div><p class="stat-value">{{ stats.kbArticles }}</p><p class="stat-label">KB Articles</p></div>
+    </div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h4>Content Overview</h4>
+      <canvas #overviewChart></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>Post Status</h4>
+      <canvas #postStatusChart></canvas>
+    </div>
+  </div>
+
+  <!-- Charts row 2 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h4>Report Status</h4>
+      <canvas #reportStatusChart></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>Discussion Status</h4>
+      <canvas #discussionStatusChart></canvas>
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <div class="quick-links">
+    <h3>Quick Actions</h3>
+    <div class="links-grid">
+      <a routerLink="/admin/reports" class="quick-card warn"><i class="fa fa-flag"></i><span>Review Reports</span></a>
+      <a routerLink="/admin/users" class="quick-card"><i class="fa fa-users"></i><span>Manage Users</span></a>
+      <a routerLink="/admin/posts" class="quick-card"><i class="fa fa-newspaper"></i><span>Manage Posts</span></a>
+      <a routerLink="/admin/discussions" class="quick-card"><i class="fa fa-comments"></i><span>Manage Discussions</span></a>
+    </div>
+  </div>
+
+</ng-container>

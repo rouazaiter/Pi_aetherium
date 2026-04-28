@@ -1,0 +1,36 @@
+<div class="admin-page">
+  <div class="admin-page-header">
+    <h2>Posts</h2>
+    <input class="search-input" [(ngModel)]="search" placeholder="Search by title or author...">
+  </div>
+
+  <div class="spinner-wrap" *ngIf="loading"><div class="spinner"></div></div>
+
+  <table class="admin-table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Status</th>
+        <th>Visibility</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of filtered">
+        <td>{{ p.id }}</td>
+        <td>{{ p.title }}</td>
+        <td>{{ p.author?.username }}</td>
+        <td><span class="badge" [class]="p.status?.toLowerCase()">{{ p.status }}</span></td>
+        <td><span class="badge vis">{{ p.visibility }}</span></td>
+        <td>
+          <button class="btn-icon danger" (click)="deletePost(p)" title="Delete"><i class="fa fa-trash"></i></button>
+        </td>
+      </tr>
+      <tr *ngIf="filtered.length === 0">
+        <td colspan="6" class="empty-row">No posts found.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

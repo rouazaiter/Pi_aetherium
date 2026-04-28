@@ -1,0 +1,214 @@
+<div class="page-banner">
+  <h2>📚 My Library</h2>
+  <p>Your personal knowledge base — organized by topic and learning path</p>
+</div>
+
+<section class="library-section">
+  <div class="container">
+
+    <!-- Stats bar -->
+    <div class="stats-bar" *ngIf="bookmarks.length > 0">
+      <div class="stat-item">
+        <span class="stat-num">{{ bookmarks.length }}</span>
+        <span class="stat-label">Saved Posts</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">{{ learningPaths.length }}</span>
+        <span class="stat-label">Topics</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">{{ bookmarkService.completedCount }}</span>
+        <span class="stat-label">Completed</span>
+      </div>
+      <div class="stat-item progress-stat">
+        <span class="stat-label">Overall Progress</span>
+        <div class="overall-bar">
+          <div class="overall-fill" [style.width.%]="totalProgress" [style.background]="progressColor(totalProgress)"></div>
+        </div>
+        <span class="stat-num small">{{ totalProgress }}%</span>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="bookmarks.length === 0">
+      <i class="fa fa-bookmark"></i>
+      <p>No bookmarks yet. Click the 🔖 button on any post to save it here.</p>
+    </div>
+
+    <ng-container *ngIf="bookmarks.length > 0">
+      <!-- View toggle -->
+      <div class="view-toggle">
+        <button [class.active]="view === 'paths'" (click)="view = 'paths'">
+          <i class="fa fa-road"></i> Learning Paths
+        </button>
+        <button [class.active]="view === 'all'" (click)="view = 'all'">
+          <i class="fa fa-list"></i> All Bookmarks
+        </button>
+      </div>
+
+      <!-- Learning Paths view -->
+      <div class="paths-view" *ngIf="view === 'paths'">
+        <div class="path-card" *ngFor="let path of learningPaths">
+          <div class="path-header">
+            <span class="path-icon">{{ topicIcon(path.topic) }}</span>
+            <div class="path-info">
+              <h5>{{ path.topic }}</h5>
+              <span class="path-meta">{{ path.posts.length }} post{{ path.posts.length !== 1 ? 's' : '' }} · {{ path.completedCount }} completed</span>
+            </div>
+            <div class="path-progress-ring">
+              <svg viewBox="0 0 36 36" width="48" height="48">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f0f0f0" stroke-width="3"/>
+                <circle cx="18" cy="18" r="15.9" fill="none"
+                  [attr.stroke]="progressColor(path.posts.length ? (path.completedCount / path.posts.length) * 100 : 0)"
+                  stroke-width="3" stroke-linecap="round"
+                  [attr.stroke-dasharray]="(path.completedCount / path.posts.length * 100) + ' 100'"
+                  stroke-dashoffset="25" transform="rotate(-90 18 18)"/>
+              </svg>
+              <span class="ring-label">{{ path.posts.length ? Math.round(path.completedCount / path.posts.length * 100) : 0 }}%</span>
+            </div>
+          </div>
+          <div class="path-posts">
+            <div class="path-post-item" *ngFor="let post of path.posts; let i = index"
+            (click)="openPost(post)" style="cursor:pointer">
+              <div class="step-num" [class.done]="post.progress >= 80">
+                <i class="fa" [class.fa-check]="post.progress >= 80" [class.fa-circle]="post.progress < 80"></i>
+              </div>
+              <div class="step-content">
+                <p class="step-title">{{ post.title }}</p>
+                <div class="step-progress-bar">
+                  <div class="step-fill" [style.width.%]="post.progress" [style.background]="progressColor(post.progress)"></div>
+                </div>
+              </div>
+              <div class="step-actions">
+                <span class="step-pct">{{ post.progress }}%</span>
+                <button class="btn-icon small" (click)="remove(post.id)" title="Remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Bookmarks view -->
+      <div class="all-view" *ngIf="view === 'all'">
+        <div class="all-toolbar">
+          <div class="search-bar">
+            <i class="fa fa-search"></i>
+            <input [(ngModel)]="searchQuery" placeholder="Search bookmarks...">
+          </div>
+          <div class="topic-filters">
+            <button class="topic-chip" [class.active]="selectedTopic === ''" (click)="selectedTopic = ''">All</button>
+            <button class="topic-chip" *ngFor="let t of allTopics"
+              [class.active]="selectedTopic === t" (click)="selectedTopic = t">
+              {{ topicIcon(t) }} {{ t }}
+            </button>
+          </div>
+        </div>
+
+        <div class="bookmark-list">
+          <div class="bookmark-item" *ngFor="let b of filteredBookmarks" (click)="openPost(b)">
+            <div class="bookmark-topic-dot" [style.background]="progressColor(b.progress)"></div>
+            <div class="bookmark-body">
+              <div class="bookmark-header">
+                <span class="bookmark-topic-badge">{{ topicIcon(b.topic) }} {{ b.topic }}</span>
+                <span class="bookmark-date">{{ formatDate(b.bookmarkedAt) }}</span>
+              </div>
+              <p class="bookmark-title">{{ b.title }}</p>
+              <div class="bookmark-progress-row">
+                <div class="bookmark-bar">
+                  <div class="bookmark-fill" [style.width.%]="b.progress" [style.background]="progressColor(b.progress)"></div>
+                </div>
+                <span class="bookmark-pct">{{ b.progress }}%</span>
+              </div>
+            </div>
+            <button class="btn-icon danger small" (click)="remove(b.id)" title="Remove bookmark">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</section>
+
+<!-- Post Reader Modal -->
+<div class="modal-overlay" *ngIf="selectedPost" (click)="closePost()">
+  <div class="modal-box large reader-modal" (click)="$event.stopPropagation()">
+
+    <!-- Reading progress bar -->
+    <div class="reader-progress-bar">
+      <div class="reader-progress-fill" [style.width.%]="readingProgress" [style.background]="progressColor(readingProgress)"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="modal-header">
+      <h4>{{ selectedPost.title }}</h4>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="reader-pct" [style.color]="progressColor(readingProgress)">{{ readingProgress }}%</span>
+        <button class="btn-complete" *ngIf="readingProgress < 100" (click)="markComplete()">
+          <i class="fa fa-check"></i> Mark Complete
+        </button>
+        <span class="completed-badge" *ngIf="readingProgress >= 100">✅ Completed</span>
+        <button (click)="closePost()"><i class="fa fa-times"></i></button>
+      </div>
+    </div>
+
+    <!-- Scrollable area — everything scrolls together -->
+    <div class="reader-content-wrap" (scroll)="onContentScroll($event)">
+
+      <!-- Meta -->
+      <div class="reader-meta">
+        <span class="topic-badge">{{ topicIcon(selectedPost.topic) }} {{ selectedPost.topic }}</span>
+        <span><i class="fa fa-user"></i> {{ selectedPost.author?.username }}</span>
+        <span><i class="fa fa-calendar"></i> {{ formatDate(selectedPost.bookmarkedAt) }}</span>
+        <span class="badge-visibility" [ngClass]="selectedPost.visibility">{{ selectedPost.visibility }}</span>
+      </div>
+
+      <!-- Cover image -->
+      <div class="reader-cover" *ngIf="selectedPost.coverImage">
+        <img [src]="selectedPost.coverImage" [alt]="selectedPost.title">
+      </div>
+
+      <!-- Content -->
+      <div class="spinner-wrap small" *ngIf="loadingContent"><div class="spinner"></div></div>
+      <div class="reader-content" *ngIf="!loadingContent">{{ fullContent }}</div>
+
+      <!-- Like row -->
+      <div class="like-row" *ngIf="!loadingContent">
+        <button class="btn-like" [class.liked]="liked" (click)="toggleLike()">
+          <i class="fa fa-heart"></i> {{ liked ? 'Liked' : 'Like' }}
+        </button>
+        <span class="like-count">{{ likeCount }} likes</span>
+      </div>
+
+      <hr style="margin: 20px 0; border-color: #f0f0f0;">
+
+      <!-- Comments -->
+      <h5 class="comments-title"><i class="fa fa-comments"></i> Comments ({{ comments.length }})</h5>
+
+      <div class="spinner-wrap small" *ngIf="loadingComments"><div class="spinner"></div></div>
+
+      <ng-container *ngIf="!loadingComments">
+        <div class="empty-state small" *ngIf="comments.length === 0"><p>No comments yet. Be the first!</p></div>
+        <div class="comment-item" *ngFor="let c of comments"
+          [class.comment-positive]="c.sentiment === 'POSITIVE'"
+          [class.comment-negative]="c.sentiment === 'NEGATIVE'">
+          <div class="comment-header">
+            <span class="comment-author"><i class="fa fa-user-circle"></i> {{ c.author?.username || 'User' }}</span>
+            <div class="comment-header-right">
+              <span class="sentiment-badge" *ngIf="c.sentiment">{{ sentimentEmoji(c.sentiment) }}</span>
+              <span class="comment-date">{{ formatDate(c.createdAt) }}</span>
+            </div>
+          </div>
+          <p class="comment-text">{{ c.content }}</p>
+        </div>
+      </ng-container>
+
+      <!-- Add comment -->
+      <div class="comment-form">
+        <input [(ngModel)]="newComment" placeholder="Write a comment..." (keyup.enter)="submitComment()">
+        <button class="btn-primary-custom" (click)="submitComment()">Post</button>
+      </div>
+
+    </div>
+  </div>
+</div>

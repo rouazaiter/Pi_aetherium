@@ -1,0 +1,163 @@
+<div class="page-banner">
+  <h2>📚 Knowledge Base</h2>
+  <p>Solved discussions turned into reusable answers — your own StackOverflow</p>
+</div>
+
+<section class="kb-section">
+  <div class="container">
+    <div class="kb-layout">
+
+      <!-- Sidebar -->
+      <aside class="kb-sidebar">
+        <div class="sidebar-card">
+          <h6><i class="fa fa-tags"></i> Browse by Tag</h6>
+          <div class="tag-cloud">
+            <button class="tag-chip" *ngFor="let tag of allTags"
+              [class.active]="activeTag === tag"
+              (click)="filterByTag(tag)">
+              {{ tag }}
+            </button>
+            <button class="tag-chip clear" *ngIf="activeTag" (click)="activeTag=''; searchQuery=''; load()">
+              <i class="fa fa-times"></i> Clear
+            </button>
+          </div>
+        </div>
+        <div class="sidebar-card stats-card">
+          <h6><i class="fa fa-chart-bar"></i> Stats</h6>
+          <div class="stat-row"><span>Total Articles</span><strong>{{ articles.length }}</strong></div>
+          <div class="stat-row"><span>Total Tags</span><strong>{{ allTags.length }}</strong></div>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="kb-main">
+        <!-- Search -->
+        <div class="search-bar" style="margin-bottom: 24px;">
+          <i class="fa fa-search"></i>
+          <input [(ngModel)]="searchQuery" (ngModelChange)="onSearch()"
+            placeholder="Search questions, answers, tags...">
+          <button class="clear-search" *ngIf="searchQuery" (click)="searchQuery=''; activeTag=''; load()">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+
+        <div class="spinner-wrap" *ngIf="loading"><div class="spinner"></div></div>
+
+        <div class="empty-state" *ngIf="!loading && articles.length === 0">
+          <i class="fa fa-book-open"></i>
+          <p>No articles yet. Mark a discussion as solved to create the first one!</p>
+        </div>
+
+        <div class="kb-list" *ngIf="!loading && articles.length > 0">
+          <div class="kb-card" *ngFor="let a of articles" (click)="openArticle(a)">
+            <div class="kb-card-left">
+              <div class="kb-views"><strong>{{ a.views }}</strong><span>views</span></div>
+            </div>
+            <div class="kb-card-body">
+              <h5 class="kb-question">
+                <i class="fa fa-check-circle solved-icon"></i>
+                {{ a.question }}
+              </h5>
+              <p class="kb-answer-preview">{{ (a.answer || '') | slice:0:120 }}{{ (a.answer || '').length > 120 ? '...' : '' }}</p>
+              <div class="kb-meta">
+                <div class="kb-tags">
+                  <span class="tag-chip small" *ngFor="let tag of parseTags(a.tags)">
+                    {{ tag }}
+                  </span>
+                </div>
+                <span class="kb-date">
+                  <i class="fa fa-user"></i> {{ a.author?.username }}
+                  &nbsp;·&nbsp; {{ formatDate(a.createdAt) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- Article Detail Modal -->
+<div class="modal-overlay" *ngIf="selectedArticle" (click)="closeArticle()">
+  <div class="modal-box large kb-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4><i class="fa fa-check-circle" style="color:#4caf50;margin-right:8px;"></i>{{ selectedArticle.question }}</h4>
+      <button (click)="closeArticle()"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="kb-article-meta">
+      <span><i class="fa fa-user"></i> {{ selectedArticle.author?.username }}</span>
+      <span><i class="fa fa-eye"></i> {{ selectedArticle.views }} views</span>
+      <span><i class="fa fa-calendar"></i> {{ formatDate(selectedArticle.createdAt) }}</span>
+    </div>
+    <div class="kb-tags" style="margin-bottom:20px;">
+      <span class="tag-chip small" *ngFor="let tag of parseTags(selectedArticle.tags)">
+        {{ tag }}
+      </span>
+    </div>
+    <div class="kb-answer-section">
+      <div class="answer-label"><i class="fa fa-check"></i> Accepted Answer</div>
+      <div class="answer-body">{{ selectedArticle.answer }}</div>
+    </div>
+
+    <!-- Why This Works AI Explainer -->
+    <div class="why-it-works-section">
+      <button class="btn-why" (click)="explainWhyItWorks()" [disabled]="whyLoading">
+        <i class="fa" [class.fa-robot]="!whyLoading" [class.fa-spinner]="whyLoading" [class.fa-spin]="whyLoading"></i>
+        {{ whyLoading ? 'Analyzing...' : '🤖 Why This Works' }}
+      </button>
+
+      <div class="why-panel" *ngIf="showWhy">
+        <div class="why-loading" *ngIf="whyLoading">
+          <i class="fa fa-robot fa-spin"></i> AI is analyzing the solution...
+        </div>
+        <div class="why-content" *ngIf="whyItWorks && !whyLoading">
+          <div class="why-block">
+            <p class="why-label">💡 Why it works</p>
+            <p class="why-text">{{ whyItWorks.explanation }}</p>
+          </div>
+          <div class="why-block" *ngIf="whyItWorks.concepts.length">
+            <p class="why-label">📖 Concepts behind it</p>
+            <ul class="why-list">
+              <li *ngFor="let c of whyItWorks.concepts">{{ c }}</li>
+            </ul>
+          </div>
+          <div class="why-block" *ngIf="whyItWorks.analogy">
+            <p class="why-label">🎯 Think of it like this</p>
+            <p class="why-analogy">{{ whyItWorks.analogy }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Follow-up chat (shown after Why This Works) -->
+      <div class="followup-chat" *ngIf="showWhy && !whyLoading">
+        <div class="chat-header">
+          <i class="fa fa-robot"></i> Ask a follow-up question
+        </div>
+        <div class="chat-messages" *ngIf="chatMessages.length > 0">
+          <div class="chat-msg" *ngFor="let msg of chatMessages" [class.user]="msg.role === 'user'" [class.ai]="msg.role === 'ai'">
+            <span class="chat-bubble">{{ msg.text }}</span>
+          </div>
+          <div class="chat-msg ai" *ngIf="chatLoading">
+            <span class="chat-bubble typing"><i class="fa fa-spinner fa-spin"></i> Thinking...</span>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <input [(ngModel)]="chatInput" placeholder="Ask anything about this solution..." (keyup.enter)="sendFollowUp()" [disabled]="chatLoading">
+          <button (click)="sendFollowUp()" [disabled]="!chatInput.trim() || chatLoading">
+            <i class="fa fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="kb-source" *ngIf="selectedArticle.sourceDiscussion">
+      <i class="fa fa-link"></i>
+      Source discussion:
+      <button class="source-link-btn" (click)="navigateToDiscussion()">
+        <i class="fa fa-comments"></i> {{ selectedArticle.sourceDiscussion.theme }}
+        <i class="fa fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>

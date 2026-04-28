@@ -1,0 +1,30 @@
+<div class="admin-page">
+  <div class="admin-page-header">
+    <h2>Knowledge Base</h2>
+    <input class="search-input" [(ngModel)]="search" placeholder="Search articles...">
+  </div>
+
+  <div class="spinner-wrap" *ngIf="loading"><div class="spinner"></div></div>
+
+  <table class="admin-table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Views</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let a of filtered">
+        <td>{{ a.id }}</td>
+        <td>{{ a.title }}</td>
+        <td>{{ a.viewCount ?? 0 }}</td>
+        <td>{{ formatDate(a.createdAt) }}</td>
+      </tr>
+      <tr *ngIf="filtered.length === 0">
+        <td colspan="4" class="empty-row">No articles found.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

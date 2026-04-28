@@ -1,0 +1,18 @@
+<header class="navbar-wrap">
+  <div class="container">
+    <nav class="main-nav">
+      <a routerLink="/" class="logo"><h1>SkillHub</h1></a>
+      <ul class="nav-links" [class.open]="menuOpen">
+        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a></li>
+        <li><a routerLink="/blog" routerLinkActive="active">Blog</a></li>
+        <li><a routerLink="/discussions" routerLinkActive="active">Discussions</a></li>
+        <li><a routerLink="/library" routerLinkActive="active">🔖 My Library</a></li>
+        <li><a routerLink="/knowledge-base" routerLinkActive="active">📚 Knowledge Base</a></li>
+        <li><a routerLink="/admin" routerLinkActive="active">🛡️ Admin</a></li>
+      </ul>
+      <button class="menu-toggle" (click)="menuOpen = !menuOpen">
+        <i class="fa" [class.fa-bars]="!menuOpen" [class.fa-times]="menuOpen"></i>
+      </button>
+    </nav>
+  </div>
+</header>

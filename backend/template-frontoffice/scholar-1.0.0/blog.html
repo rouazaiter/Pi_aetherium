@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>SkillHub - Blog</title>
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-scholar.css">
+  <link rel="stylesheet" href="assets/css/owl.css">
+  <link rel="stylesheet" href="assets/css/animate.css">
+  <style>
+    .blog-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px; overflow: hidden; transition: transform 0.3s; }
+    .blog-card:hover { transform: translateY(-5px); }
+    .blog-card img { width: 100%; height: 200px; object-fit: cover; }
+    .blog-card .card-body { padding: 20px; }
+    .blog-card .badge-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: #f35525; color: #fff; }
+    .blog-card h4 { font-size: 18px; font-weight: 600; margin: 10px 0 8px; }
+    .blog-card p { font-size: 14px; color: #777; }
+    .blog-card .meta { font-size: 12px; color: #aaa; margin-bottom: 10px; }
+    .blog-card .actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; }
+    .btn-like { background: none; border: 1px solid #f35525; color: #f35525; border-radius: 20px; padding: 4px 14px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .btn-like:hover, .btn-like.liked { background: #f35525; color: #fff; }
+    .btn-read { background: #f35525; color: #fff; border: none; border-radius: 20px; padding: 6px 18px; font-size: 13px; cursor: pointer; }
+    .btn-read:hover { background: #d44010; }
+    .modal-post .modal-header { border-bottom: none; }
+    .modal-post .post-content { font-size: 15px; line-height: 1.8; color: #555; }
+    .comment-item { background: #f9f9f9; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; }
+    .comment-item .comment-author { font-weight: 600; font-size: 13px; color: #333; }
+    .comment-item .comment-text { font-size: 14px; color: #555; margin-top: 4px; }
+    .comment-item .comment-actions { font-size: 12px; color: #aaa; margin-top: 6px; }
+    .comment-item .comment-actions span { cursor: pointer; margin-right: 10px; }
+    .comment-item .comment-actions span:hover { color: #f35525; }
+    #posts-container .section-heading { margin-bottom: 40px; }
+    .visibility-badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; margin-left: 6px; }
+    .visibility-PUBLIC { background: #d4edda; color: #155724; }
+    .visibility-PRIVATE { background: #f8d7da; color: #721c24; }
+    .visibility-FRIENDS_ONLY { background: #d1ecf1; color: #0c5460; }
+    .visibility-RESTRICTED { background: #fff3cd; color: #856404; }
+    .create-post-btn { margin-bottom: 30px; }
+    .like-count { font-size: 13px; color: #777; }
+  </style>
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <nav class="main-nav">
+            <a href="index.html" class="logo"><h1>SkillHub</h1></a>
+            <ul class="nav">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="blog.html" class="active">Blog</a></li>
+              <li><a href="discussions.html">Discussions</a></li>
+            </ul>
+            <a class='menu-trigger'><span>Menu</span></a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Banner -->
+  <div style="background: linear-gradient(135deg, #f35525, #ef2f96); padding: 120px 0 60px; text-align:center; color:#fff; margin-bottom: 0;">
+    <h2 style="font-weight:700;">Blog Posts</h2>
+    <p style="opacity:0.85;">Explore the latest articles from our community</p>
+  </div>
+
+  <!-- Blog Section -->
+  <section class="section" id="posts-container" style="background:#f9f9f9;">
+    <div class="container">
+
+      <!-- Create Post Button -->
+      <div class="row create-post-btn">
+        <div class="col-12 text-end">
+          <button class="btn-read" onclick="openCreatePost()">+ New Post</button>
+        </div>
+      </div>
+
+      <!-- Posts Grid -->
+      <div class="row" id="posts-grid">
+        <div class="col-12 text-center py-5">
+          <p style="color:#aaa;">Loading posts...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== POST DETAIL MODAL ===== -->
+  <div class="modal fade modal-post" id="postModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalPostTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted" id="modalPostMeta"></p>
+          <div class="post-content" id="modalPostContent"></div>
+          <hr>
+          <!-- Like button -->
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <button class="btn-like" id="modalLikeBtn" onclick="togglePostLike()">
+              <i class="fa fa-heart"></i> Like
+            </button>
+            <span class="like-count" id="modalLikeCount"></span>
+          </div>
+          <!-- Comments -->
+          <h6 style="font-weight:600;">Comments</h6>
+          <div id="comments-list" class="mb-3"></div>
+          <div class="d-flex gap-2">
+            <input type="text" id="comment-input" class="form-control" placeholder="Write a comment...">
+            <button class="btn-read" onclick="submitComment()">Post</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CREATE POST MODAL ===== -->
+  <div class="modal fade" id="createPostModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create New Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <input type="text" id="cp-title" class="form-control" placeholder="Title">
+          </div>
+          <div class="mb-3">
+            <input type="text" id="cp-slug" class="form-control" placeholder="slug-url">
+          </div>
+          <div class="mb-3">
+            <textarea id="cp-content" class="form-control" rows="5" placeholder="Write your post content..."></textarea>
+          </div>
+          <div class="mb-3">
+            <select id="cp-status" class="form-select">
+              <option value="PUBLISHED">Published</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <select id="cp-visibility" class="form-select">
+              <option value="PUBLIC">Public</option>
+              <option value="PRIVATE">Private</option>
+              <option value="FRIENDS_ONLY">Friends Only</option>
+              <option value="RESTRICTED">Restricted</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-read" onclick="submitCreatePost()">Publish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="col-lg-12">
+        <p>Copyright © 2026 SkillHub. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/custom.js"></script>
+
+  <script>
+    const API = 'http://localhost:8080/api';
+    // Simulated logged-in user — replace with real auth later
+    const CURRENT_USER_ID = 1;
+
+    let currentPostId = null;
+    let postLiked = false;
+
+    // ── Load all visible posts ──────────────────────────────────────────────
+    async function loadPosts() {
+      const res = await fetch(`${API}/posts?viewerId=${CURRENT_USER_ID}`);
+      const posts = await res.json();
+      const grid = document.getElementById('posts-grid');
+
+      if (!posts.length) {
+        grid.innerHTML = '<div class="col-12 text-center py-5"><p style="color:#aaa;">No posts yet. Be the first to write one!</p></div>';
+        return;
+      }
+
+      grid.innerHTML = posts.map(post => `
+        <div class="col-lg-4 col-md-6">
+          <div class="blog-card">
+            <img src="assets/images/course-0${(post.id % 6) + 1}.jpg" alt="${post.title}" onerror="this.src='assets/images/banner-item-01.jpg'">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <span class="badge-status">${post.status}</span>
+                <span class="visibility-badge visibility-${post.visibility}">${post.visibility}</span>
+              </div>
+              <h4>${post.title}</h4>
+              <p class="meta"><i class="fa fa-user"></i> Author #${post.author?.id ?? '?'} &nbsp;|&nbsp; <i class="fa fa-calendar"></i> ${formatDate(post.createdAt)}</p>
+              <p>${truncate(post.content, 90)}</p>
+              <div class="actions">
+                <button class="btn-read" onclick="openPost(${post.id})">Read More</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── Open post detail modal ──────────────────────────────────────────────
+    async function openPost(postId) {
+      currentPostId = postId;
+      const [postRes, likeRes] = await Promise.all([
+        fetch(`${API}/posts/${postId}`),
+        fetch(`${API}/posts/${postId}/likes/count`)
+      ]);
+      const post = await postRes.json();
+      const likeData = await likeRes.json();
+
+      document.getElementById('modalPostTitle').textContent = post.title;
+      document.getElementById('modalPostMeta').textContent =
+        `By Author #${post.author?.id ?? '?'} · ${formatDate(post.createdAt)} · ${post.visibility}`;
+      document.getElementById('modalPostContent').textContent = post.content;
+      document.getElementById('modalLikeCount').textContent = `${likeData.count} likes`;
+
+      postLiked = false;
+      document.getElementById('modalLikeBtn').classList.remove('liked');
+
+      await loadComments(postId);
+      new bootstrap.Modal(document.getElementById('postModal')).show();
+    }
+
+    // ── Like / Unlike post ──────────────────────────────────────────────────
+    async function togglePostLike() {
+      const method = postLiked ? 'DELETE' : 'POST';
+      await fetch(`${API}/posts/${currentPostId}/likes?userId=${CURRENT_USER_ID}`, { method });
+      postLiked = !postLiked;
+      document.getElementById('modalLikeBtn').classList.toggle('liked', postLiked);
+      const res = await fetch(`${API}/posts/${currentPostId}/likes/count`);
+      const data = await res.json();
+      document.getElementById('modalLikeCount').textContent = `${data.count} likes`;
+    }
+
+    // ── Load comments ───────────────────────────────────────────────────────
+    async function loadComments(postId) {
+      const res = await fetch(`${API}/posts/${postId}/comments`);
+      const comments = await res.json();
+      const list = document.getElementById('comments-list');
+      if (!comments.length) {
+        list.innerHTML = '<p style="color:#aaa;font-size:13px;">No comments yet.</p>';
+        return;
+      }
+      list.innerHTML = comments.map(c => `
+        <div class="comment-item">
+          <div class="comment-author"><i class="fa fa-user-circle"></i> User #${c.author?.id ?? '?'}</div>
+          <div class="comment-text">${c.content}</div>
+          <div class="comment-actions">
+            <span onclick="deleteComment(${c.id})"><i class="fa fa-trash"></i> Delete</span>
+            <span style="color:#bbb;">${formatDate(c.createdAt)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── Submit comment ──────────────────────────────────────────────────────
+    async function submitComment() {
+      const input = document.getElementById('comment-input');
+      const content = input.value.trim();
+      if (!content) return;
+      await fetch(`${API}/posts/${currentPostId}/comments?authorId=${CURRENT_USER_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+      });
+      input.value = '';
+      await loadComments(currentPostId);
+    }
+
+    // ── Delete comment ──────────────────────────────────────────────────────
+    async function deleteComment(commentId) {
+      await fetch(`${API}/comments/${commentId}?requesterId=${CURRENT_USER_ID}`, { method: 'DELETE' });
+      await loadComments(currentPostId);
+    }
+
+    // ── Create post modal ───────────────────────────────────────────────────
+    function openCreatePost() {
+      new bootstrap.Modal(document.getElementById('createPostModal')).show();
+    }
+
+    async function submitCreatePost() {
+      const title = document.getElementById('cp-title').value.trim();
+      const slug = document.getElementById('cp-slug').value.trim();
+      const content = document.getElementById('cp-content').value.trim();
+      const status = document.getElementById('cp-status').value;
+      const visibility = document.getElementById('cp-visibility').value;
+      if (!title || !slug || !content) return alert('Please fill all fields');
+
+      await fetch(`${API}/posts?authorId=${CURRENT_USER_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, slug, content, status, visibility })
+      });
+
+      bootstrap.Modal.getInstance(document.getElementById('createPostModal')).hide();
+      loadPosts();
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
+    function truncate(str, n) {
+      return str && str.length > n ? str.substring(0, n) + '...' : str;
+    }
+
+    function formatDate(dt) {
+      if (!dt) return '';
+      return new Date(dt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // Init
+    loadPosts();
+  </script>
+</body>
+</html>

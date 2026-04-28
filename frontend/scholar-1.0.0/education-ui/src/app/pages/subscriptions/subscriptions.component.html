@@ -1,0 +1,78 @@
+<div class="container py-4">
+  <div class="section-heading mb-4">
+    <h6>Mon espace</h6>
+    <h2>Abonnements</h2>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h3 class="h5 mb-3">Nouvel abonnement</h3>
+      @if (createError) {
+        <div class="alert alert-danger">{{ createError }}</div>
+      }
+      <form [formGroup]="createForm" (ngSubmit)="create()">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label" for="plan">Plan</label>
+            <select id="plan" class="form-select" formControlName="subscriptionPlan">
+              @for (p of plans; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="start">Date de souscription</label>
+            <input id="start" class="form-control" type="date" formControlName="dateOfSubscription" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="exp">Expiration <span class="text-danger">*</span></label>
+            <input id="exp" class="form-control" type="date" formControlName="expirationDate" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="bill">Facturation</label>
+            <input id="bill" class="form-control" type="date" formControlName="billingDate" />
+          </div>
+        </div>
+        <button class="btn text-white mt-3 border-0" type="submit" [disabled]="creating" style="background: #7a6ad8">
+          @if (creating) {
+            Envoi…
+          } @else {
+            Ajouter
+          }
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <h3 class="h5 mb-3">Mes abonnements</h3>
+  @if (loading) {
+    <p class="text-muted">Chargement…</p>
+  } @else if (loadError) {
+    <div class="alert alert-danger">{{ loadError }}</div>
+  } @else if (list.length === 0) {
+    <p class="text-muted">Aucun abonnement pour l’instant.</p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Souscription</th>
+            <th>Expiration</th>
+            <th>Facturation</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of list; track s.id) {
+            <tr>
+              <td>{{ s.subscriptionPlan }}</td>
+              <td>{{ s.dateOfSubscription ?? '—' }}</td>
+              <td>{{ s.expirationDate ?? '—' }}</td>
+              <td>{{ s.billingDate ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

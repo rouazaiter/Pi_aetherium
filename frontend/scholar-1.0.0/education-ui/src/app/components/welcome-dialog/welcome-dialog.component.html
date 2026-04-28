@@ -1,0 +1,22 @@
+@if (welcome.visible()) {
+  <div
+    class="welcome-dialog__backdrop"
+    @backdrop
+    (click)="onBackdropClick($event)"
+    role="presentation"
+    aria-hidden="true"
+  ></div>
+  <div class="welcome-dialog__wrap" role="dialog" aria-modal="true" aria-labelledby="welcome-title" aria-describedby="welcome-desc">
+    <div class="welcome-dialog__panel" @panel>
+      <div class="welcome-dialog__glow" aria-hidden="true"></div>
+      <div class="welcome-dialog__badge" aria-hidden="true">SkillHub</div>
+      <h2 id="welcome-title" class="welcome-dialog__title">Welcome to SkillHub</h2>
+      <p id="welcome-desc" class="welcome-dialog__text">
+        Great to have you here,
+        <span class="welcome-dialog__name">{{ welcome.userName() }}</span>
+        ! Your account is ready — explore courses, your profile, and more.
+      </p>
+      <button type="button" class="welcome-dialog__cta" (click)="dismiss()">Let’s go</button>
+    </div>
+  </div>
+}

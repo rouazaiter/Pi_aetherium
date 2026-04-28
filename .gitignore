@@ -1,0 +1,21 @@
+# Maven / Java
+**/target/
+*.class
+
+# Uploads locales (photos profil)
+**/uploads/
+
+# Node (si chemins hors sous-projets)
+**/node_modules/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Secrets locaux
+.env
+.env.local
+*.local.properties
+
+# IDE (racine)
+.idea/

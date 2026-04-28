@@ -1,0 +1,66 @@
+<div class="main-banner" id="top">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10 offset-lg-1">
+        <div class="header-text">
+          <span class="category">Plateforme éducative</span>
+          <h2>Votre espace profil, abonnements et réseau d’amis</h2>
+          <p>
+            Cette application Angular parle à votre API Spring Boot (JWT, profil, abonnements, amis). Démarrez le
+            backend sur le port <strong>8081</strong>, puis connectez-vous ou créez un compte.
+          </p>
+          <div class="buttons">
+            @if (auth.isLoggedIn()) {
+              <div class="main-button">
+                <a routerLink="/profile">Mon profil</a>
+              </div>
+            } @else {
+              <div class="main-button">
+                <a routerLink="/register">Créer un compte</a>
+              </div>
+              <div class="main-button">
+                <a routerLink="/login">Se connecter</a>
+              </div>
+            }
+          </div>
+          @if (!auth.isLoggedIn() && hasOAuthClients) {
+            <div class="home-social-wrap mx-auto mt-4" style="max-width: 380px">
+              <app-social-login [showGoogleHeading]="true" [flushTop]="true" />
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="services section py-5" id="services">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center mb-4">
+        <div class="section-heading">
+          <h6>Fonctionnalités</h6>
+          <h2>Ce que propose l’API</h2>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="service-item p-4 h-100 rounded-3 bg-light">
+          <h4>Profil</h4>
+          <p class="mb-0">Lecture et mise à jour via <code>/api/profile/me</code>.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="service-item p-4 h-100 rounded-3 bg-light">
+          <h4>Abonnements</h4>
+          <p class="mb-0">Plans FREE, STANDARD, PREMIUM — <code>/api/subscriptions</code>.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="service-item p-4 h-100 rounded-3 bg-light">
+          <h4>Amis</h4>
+          <p class="mb-0">Liste, ajout par nom d’utilisateur, suppression — <code>/api/friends</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

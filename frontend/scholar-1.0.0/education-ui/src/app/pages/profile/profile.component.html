@@ -1,0 +1,317 @@
+@if (verificationRequired) {
+  <div class="profile-page" @profileBackdrop>
+    <div class="profile-bg" aria-hidden="true">
+      <div class="profile-bg__blob profile-bg__blob--1"></div>
+      <div class="profile-bg__blob profile-bg__blob--2"></div>
+      <div class="profile-bg__blob profile-bg__blob--3"></div>
+      <div class="profile-bg__noise"></div>
+      <div class="profile-bg__grid"></div>
+    </div>
+    <div class="profile-verify" role="dialog" aria-modal="true" aria-labelledby="profile-verify-title">
+      <div class="profile-verify__card" @verifyLift>
+        <div class="profile-verify__shine" aria-hidden="true"></div>
+        <div class="profile-verify__logo">
+          <span class="profile-verify__logo-mark">S</span>
+          SkillHub
+        </div>
+        <p class="profile-verify__kicker">Sécurité</p>
+        <h1 id="profile-verify-title" class="profile-verify__title">Vérifiez que c’est bien vous</h1>
+        <p class="profile-verify__lead">
+          Un code à usage unique a été envoyé pour protéger l’accès à votre espace personnel.
+        </p>
+        <div class="profile-verify__account">
+          <span class="profile-verify__account-label">Compte</span>
+          <span class="profile-verify__account-value">{{ maskedEmail() }}</span>
+        </div>
+        @if (codeHint) {
+          <p class="profile-verify__hint">{{ codeHint }}</p>
+        }
+        @if (sendingCode && !codeHint) {
+          <p class="profile-verify__hint profile-verify__hint--pulse">Envoi du code…</p>
+        }
+        @if (verifyError) {
+          <div class="profile-verify__alert" @alertReveal>{{ verifyError }}</div>
+        }
+        <form [formGroup]="verifyForm" (ngSubmit)="submitVerification()" class="profile-verify__form">
+          <label class="profile-verify__label" for="pv-code">Code à 6 chiffres</label>
+          <input
+            id="pv-code"
+            class="profile-verify__code-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            formControlName="code"
+            placeholder="••••••"
+            [attr.aria-invalid]="verifyForm.controls.code.invalid && verifyForm.controls.code.touched"
+          />
+          @if (verifyForm.controls.code.invalid && verifyForm.controls.code.touched) {
+            <div class="profile-verify__field-error">Saisissez les 6 chiffres reçus par e-mail.</div>
+          }
+          <div class="profile-verify__actions">
+            <button type="button" class="profile-verify__resend" [disabled]="sendingCode" (click)="resendCode()">
+              Renvoyer le code
+            </button>
+            <button type="submit" class="profile-verify__confirm" [disabled]="verifying || verifyForm.invalid">
+              @if (verifying) {
+                <span class="profile-btn__spinner" aria-hidden="true"></span>
+                Vérification…
+              } @else {
+                Continuer
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="profile-page" @profileBackdrop>
+    <div class="profile-bg" aria-hidden="true">
+      <div class="profile-bg__blob profile-bg__blob--1"></div>
+      <div class="profile-bg__blob profile-bg__blob--2"></div>
+      <div class="profile-bg__blob profile-bg__blob--3"></div>
+      <div class="profile-bg__noise"></div>
+      <div class="profile-bg__grid"></div>
+    </div>
+
+    <div class="profile-page__inner container py-4 py-md-5">
+      @if (loading) {
+        <div class="profile-skeleton" aria-busy="true" aria-label="Chargement du profil">
+          <div class="profile-skeleton__hero">
+            <div class="profile-skeleton__avatar"></div>
+            <div class="profile-skeleton__lines">
+              <div class="profile-skeleton__line profile-skeleton__line--lg"></div>
+              <div class="profile-skeleton__line profile-skeleton__line--sm"></div>
+            </div>
+          </div>
+          <div class="profile-skeleton__cards">
+            <div class="profile-skeleton__card">
+              <div class="profile-skeleton__line"></div>
+              <div class="profile-skeleton__line"></div>
+              <div class="profile-skeleton__line"></div>
+            </div>
+            <div class="profile-skeleton__card">
+              <div class="profile-skeleton__line"></div>
+              <div class="profile-skeleton__line"></div>
+            </div>
+          </div>
+        </div>
+      } @else if (loadError) {
+        <div class="profile-error" @alertReveal>
+          <div class="profile-error__icon" aria-hidden="true">!</div>
+          <p class="profile-error__text">{{ loadError }}</p>
+        </div>
+      } @else {
+        <div @pageLayout>
+          <header class="profile-hero">
+            <div
+              class="profile-hero__flip-scene"
+              [class.profile-hero__flip-scene--open]="avatarPickerOpen()"
+            >
+              <div class="profile-hero__flip-inner">
+                <div class="profile-hero__flip-face profile-hero__flip-face--front">
+                  <button
+                    type="button"
+                    class="profile-hero__flip-trigger"
+                    (click)="toggleAvatarPicker()"
+                    [attr.aria-expanded]="avatarPickerOpen()"
+                    aria-controls="profile-avatar-picker-panel"
+                    id="profile-avatar-flip-btn"
+                  >
+                    <span class="profile-hero__avatar-wrap">
+                      <span class="profile-hero__ring" aria-hidden="true"></span>
+                      @if (resolvedProfilePictureUrl() && !avatarBroken) {
+                        <img
+                          class="profile-hero__img"
+                          [src]="resolvedProfilePictureUrl()"
+                          alt=""
+                          (error)="avatarBroken = true"
+                        />
+                      } @else {
+                        <span class="profile-hero__initials">{{ initials() }}</span>
+                      }
+                    </span>
+                    <span class="profile-hero__flip-hint">Choisir un avatar</span>
+                  </button>
+                </div>
+                <div
+                  class="profile-hero__flip-face profile-hero__flip-face--back"
+                  id="profile-avatar-picker-panel"
+                  role="group"
+                  aria-labelledby="profile-avatar-picker-title"
+                >
+                  <p class="profile-hero__picker-title" id="profile-avatar-picker-title">Votre avatar SkillHub</p>
+                  @if (presetSaving) {
+                    <p class="profile-hero__picker-saving">Enregistrement…</p>
+                  }
+                  <div class="profile-hero__picker-grid">
+                    @for (av of presetAvatars; track av.id) {
+                      <button
+                        type="button"
+                        class="profile-hero__picker-cell"
+                        [class.profile-hero__picker-cell--active]="isPresetSelected(av.id)"
+                        [disabled]="presetSaving"
+                        (click)="selectPresetAvatar(av.id)"
+                        [attr.aria-label]="'Choisir ' + av.label"
+                        [attr.aria-pressed]="isPresetSelected(av.id)"
+                      >
+                        <img [src]="presetGridImgSrc(av.id)" alt="" (error)="onPresetGridImgError(av.id)" />
+                      </button>
+                    }
+                  </div>
+                  <button
+                    type="button"
+                    class="profile-hero__picker-close"
+                    (click)="closeAvatarPicker()"
+                    [disabled]="presetSaving"
+                  >
+                    Retour à la photo
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="profile-hero__text">
+              <p class="profile-hero__kicker">Mon espace</p>
+              <h1 class="profile-hero__title">{{ displayName() }}</h1>
+              <p class="profile-hero__meta">Personnalisez votre présence sur SkillHub</p>
+            </div>
+          </header>
+
+          @if (saveAck()) {
+            <div class="profile-toast" @alertReveal role="status">
+              <span class="profile-toast__check" aria-hidden="true">✓</span>
+              Modifications enregistrées
+            </div>
+          }
+
+          @if (saveError) {
+            <div class="profile-banner profile-banner--danger" @alertReveal>{{ saveError }}</div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="save()" class="profile-form">
+            <div class="profile-card profile-card--identity">
+              <div class="profile-card__head">
+                <span class="profile-card__icon" aria-hidden="true">◇</span>
+                <div>
+                  <h2 class="profile-card__title">Identité</h2>
+                  <p class="profile-card__subtitle">Comment vous présenter aux autres</p>
+                </div>
+              </div>
+              <div class="row g-3 g-lg-4">
+                <div class="col-md-6 profile-field">
+                  <label class="profile-label" for="fn">Prénom</label>
+                  <input id="fn" class="profile-input" formControlName="firstName" autocomplete="given-name" />
+                </div>
+                <div class="col-md-6 profile-field">
+                  <label class="profile-label" for="ln">Nom</label>
+                  <input id="ln" class="profile-input" formControlName="lastName" autocomplete="family-name" />
+                </div>
+                <div class="col-12 profile-field">
+                  <label class="profile-label">Photo de profil</label>
+                  <p class="profile-photo__hint">JPEG, PNG, WebP ou GIF — maximum 3 Mo. Vous pouvez aussi coller un lien vers une image.</p>
+                  @if (photoError) {
+                    <div class="profile-photo__error" @alertReveal>{{ photoError }}</div>
+                  }
+                  <div class="profile-photo__row">
+                    <input
+                      #photoFileInput
+                      type="file"
+                      class="visually-hidden"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      (change)="onPhotoSelected($event)"
+                    />
+                    <button
+                      type="button"
+                      class="profile-photo__upload"
+                      [disabled]="photoUploading"
+                      (click)="photoFileInput.click()"
+                    >
+                      @if (photoUploading) {
+                        <span class="profile-btn__spinner profile-btn__spinner--dark" aria-hidden="true"></span>
+                        Envoi en cours…
+                      } @else {
+                        Choisir une photo
+                      }
+                    </button>
+                    @if (form.controls.profilePicture.value.trim()) {
+                      <span class="profile-photo__status">Photo enregistrée</span>
+                    }
+                  </div>
+                  <label class="profile-label profile-label--secondary mt-3" for="pic">Photo : URL ou avatar préréglé</label>
+                  <p class="profile-photo__hint profile-photo__hint--tight">
+                    Collez une adresse <code>https://…</code>, un chemin <code>/api/files/…</code>, ou laissez la valeur
+                    <code>skillhub-preset:1</code>…<code>:8</code> si vous avez choisi un avatar dans la grille ci-dessus (ce n’est pas une erreur).
+                  </p>
+                  <input
+                    id="pic"
+                    class="profile-input"
+                    formControlName="profilePicture"
+                    type="text"
+                    inputmode="url"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="https://… ou skillhub-preset:1 … :8"
+                    (input)="avatarBroken = false; photoError = ''"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-card profile-card--about">
+              <div class="profile-card__head">
+                <span class="profile-card__icon" aria-hidden="true">✦</span>
+                <div>
+                  <h2 class="profile-card__title">À propos</h2>
+                  <p class="profile-card__subtitle">Vos centres d’intérêt et votre bio</p>
+                </div>
+              </div>
+              <div class="row g-3 g-lg-4">
+                <div class="col-12 profile-field">
+                  <label class="profile-label" for="int">Centres d’intérêt</label>
+                  <input
+                    id="int"
+                    class="profile-input"
+                    formControlName="interestsText"
+                    placeholder="Séparez par des virgules"
+                  />
+                </div>
+                <div class="col-12 profile-field">
+                  <label class="profile-label" for="desc">Description</label>
+                  <textarea id="desc" class="profile-input profile-input--area" rows="4" formControlName="description"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-card profile-card--security">
+              <div class="profile-card__head">
+                <span class="profile-card__icon" aria-hidden="true">◎</span>
+                <div>
+                  <h2 class="profile-card__title">Sécurité & contact</h2>
+                  <p class="profile-card__subtitle">Récupération de compte</p>
+                </div>
+              </div>
+              <div class="row g-3 g-lg-4">
+                <div class="col-md-8 profile-field">
+                  <label class="profile-label" for="rec">E-mail de récupération</label>
+                  <input id="rec" class="profile-input" type="email" formControlName="recuperationEmail" autocomplete="email" />
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-actions profile-field">
+              <button class="profile-save" type="submit" [disabled]="saving">
+                @if (saving) {
+                  <span class="profile-btn__spinner" aria-hidden="true"></span>
+                  Enregistrement…
+                } @else {
+                  Enregistrer le profil
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  </div>
+}

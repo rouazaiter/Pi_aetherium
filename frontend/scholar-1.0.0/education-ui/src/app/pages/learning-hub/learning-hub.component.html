@@ -1,0 +1,153 @@
+<div class="learning-hub-container">
+  
+  <!-- HERO SECTION -->
+  <div class="hero-section text-center mb-5" *ngIf="!selectedFile">
+    <h1 class="display-4 fw-bold text-gradient">SkillHub AI Learning Hub</h1>
+    <p class="lead text-muted">Transformez vos sessions de mentoring en exercices interactifs.</p>
+    <div class="divider mx-auto"></div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="container mb-5" *ngIf="!selectedFile">
+    <div class="search-wrapper mx-auto" style="max-width: 600px;">
+      <div class="input-group search-group">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0" 
+               placeholder="Rechercher une session (ex: Spring, Marketing...)"
+               [(ngModel)]="searchKeyword"
+               (input)="onSearch()">
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION SELECTOR -->
+  <div class="container" *ngIf="!selectedFile">
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6" *ngFor="let file of filteredFiles">
+        <div class="session-card" 
+             [class.disabled]="!file.analyzed"
+             (click)="file.analyzed ? selectFile(file) : null">
+          <div class="card-image">
+             <!-- Cas Vidéo -->
+             <img *ngIf="file.type?.startsWith('video')" 
+                  [src]="fileService.getThumbnailUrl(file.id)" alt="Thumbnail" class="img-fluid rounded-top">
+             
+             <!-- Cas Audio (MP3) -->
+             <div *ngIf="file.type?.startsWith('audio')" class="audio-placeholder">
+                <i class="bi bi-headphones"></i>
+                <span>Audio Session</span>
+             </div>
+
+             <div class="play-hint"><i class="bi bi-play-fill"></i></div>
+          </div>
+          <div class="card-content p-4">
+            <span class="badge mb-2" [class.success]="file.analyzed" [class.warning]="!file.analyzed">
+              {{ file.analyzed ? 'AI Ready' : 'Need Summary' }}
+            </span>
+            <h3>{{ file.name }}</h3>
+            <p class="text-muted small mb-3">
+              {{ file.analyzed ? 'Testez vos connaissances sur cette session.' : 'Générez un résumé dans le Drive pour débloquer le Quizz.' }}
+            </p>
+            <button class="btn btn-primary-gradient btn-sm w-100" [disabled]="!file.analyzed">
+              {{ file.analyzed ? 'Démarrer le Quizz' : 'Indisponible' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="files.length === 0" class="text-center mt-5 p-5 empty-state">
+      <i class="bi bi-cloud-slash fs-1"></i>
+      <h4 class="mt-3">Aucune session trouvée</h4>
+      <p>Uploadez des vidéos dans votre Drive pour commencer à apprendre.</p>
+      <a routerLink="/drive" class="btn btn-outline-primary mt-3">Aller au Drive</a>
+    </div>
+  </div>
+
+  <!-- QUIZ INTERFACE -->
+  <div class="container quiz-wrapper" *ngIf="selectedFile">
+    
+    <!-- LOADING STATE -->
+    <div *ngIf="isLoading" class="text-center p-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <h4 class="mt-4">L'IA génère votre Quizz personnalisé...</h4>
+      <p>Analyse de la transcription en cours...</p>
+    </div>
+
+    <!-- QUIZ CONTENT -->
+    <div *ngIf="!isLoading && !quizFinished && quizQuestions.length > 0">
+      
+      <div class="quiz-header d-flex justify-content-between align-items-center mb-4">
+        <button class="btn btn-back" (click)="restart()">
+          <i class="bi bi-arrow-left"></i> Quitter
+        </button>
+        <div class="progress-pill">
+          Question {{ currentQuestionIndex + 1 }} / {{ quizQuestions.length }}
+        </div>
+      </div>
+
+      <div class="progress mb-4" style="height: 8px; border-radius: 10px;">
+        <div class="progress-bar progress-bar-animated" 
+             [style.width.%]="progress"></div>
+      </div>
+
+      <div class="card quiz-card p-4 p-md-5">
+        <h2 class="question-text mb-5">{{ quizQuestions[currentQuestionIndex].question }}</h2>
+
+        <div class="options-grid">
+          <div class="option-item" 
+               *ngFor="let option of quizQuestions[currentQuestionIndex].options"
+               [class.selected]="selectedOption === option"
+               [class.correct]="isAnswered && option === quizQuestions[currentQuestionIndex].answer"
+               [class.wrong]="isAnswered && selectedOption === option && option !== quizQuestions[currentQuestionIndex].answer"
+               (click)="selectedOption = option">
+            <div class="option-label">{{ option }}</div>
+            <i class="bi bi-check-circle-fill icon-correct" *ngIf="isAnswered && option === quizQuestions[currentQuestionIndex].answer"></i>
+            <i class="bi bi-x-circle-fill icon-wrong" *ngIf="isAnswered && selectedOption === option && option !== quizQuestions[currentQuestionIndex].answer"></i>
+          </div>
+        </div>
+
+        <div class="explanation-box mt-5" *ngIf="isAnswered">
+          <h5><i class="bi bi-info-circle-fill"></i> Pourquoi ?</h5>
+          <p>{{ quizQuestions[currentQuestionIndex].explanation }}</p>
+        </div>
+
+        <div class="quiz-footer mt-5 text-end">
+          <button class="btn btn-submit" 
+                  *ngIf="!isAnswered" 
+                  [disabled]="!selectedOption"
+                  (click)="submitAnswer()">Valider la réponse</button>
+          
+          <button class="btn btn-next" 
+                  *ngIf="isAnswered" 
+                  (click)="nextQuestion()">
+            {{ currentQuestionIndex < quizQuestions.length - 1 ? 'Question Suivante' : 'Voir les résultats' }}
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ RESULTS -->
+    <div *ngIf="quizFinished" class="text-center result-card p-5">
+      <div class="trophy-icon">🏆</div>
+      <h1 class="display-3 fw-bold mt-3">{{ score }} / {{ quizQuestions.length }}</h1>
+      <h2 class="mb-4">Excellent travail !</h2>
+      <p class="lead mb-5">Vous avez maîtrisé les concepts clés de cette session : <strong>{{ selectedFile.name }}</strong></p>
+      
+      <div class="d-flex justify-content-center gap-3">
+        <button class="btn btn-primary-gradient btn-lg px-4" (click)="restart()">
+           <i class="bi bi-arrow-left"></i> Retour au Drive
+        </button>
+        <button class="btn btn-outline-danger btn-lg px-4 d-flex align-items-center gap-2" (click)="downloadStudyGuide()">
+           <i class="bi bi-file-earmark-pdf-fill"></i>
+           Exporter PDF
+        </button>
+        <button class="btn btn-outline-primary btn-lg px-4" (click)="startNewQuiz(selectedFile.id)">Refaire le quizz</button>
+      </div>
+    </div>
+
+  </div>
+</div>

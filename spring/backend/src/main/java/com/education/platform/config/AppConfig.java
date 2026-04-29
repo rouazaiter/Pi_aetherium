@@ -7,7 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, OAuthClientProperties.class, UploadProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, OAuthClientProperties.class, UploadProperties.class, OllamaAiProperties.class})
 public class AppConfig {
 
     @Bean

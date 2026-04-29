@@ -5,6 +5,7 @@ import com.education.platform.repositories.certifications.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/analytics")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class AnalyticsController {
 
     private final EnrollmentRepository enrollmentRepo;

@@ -1,48 +1,178 @@
-.shell { display: flex; min-height: 100vh; }
+$sidebar-bg:     #0f1e3c;   // dark navy
+$sidebar-hover:  #1a2f55;
+$sidebar-active: #1e3a6e;
+$sidebar-accent: #4f8ef7;   // bright blue for active indicator
+$sidebar-text:   rgba(255,255,255,.75);
+$sidebar-muted:  rgba(255,255,255,.35);
+$sidebar-border: rgba(255,255,255,.07);
+$sidebar-w:      230px;
+$nav-h:          72px;
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+.cert-shell {
+  display: flex;
+  min-height: calc(100vh - #{$nav-h});
+
+  // When sidebar is hidden (regular users), content fills full width
+  &--no-sidebar .cert-main {
+    max-width: 100%;
+  }
+}
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
-.sidebar {
-  width: 240px; flex-shrink: 0;
-  background: #0f172a; color: #fff;
-  display: flex; flex-direction: column;
-  padding: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
-}
-.brand {
-  display: flex; align-items: center; gap: .6rem;
-  padding: 1.4rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,.06);
-}
-.brand-icon { font-size: 1.3rem; }
-.brand-name { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -.01em; }
+.cert-sidebar {
+  width: $sidebar-w;
+  flex-shrink: 0;
+  background: $sidebar-bg;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: $nav-h;
+  height: calc(100vh - #{$nav-h});
+  overflow-y: auto;
+  overflow-x: hidden;
 
-.nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
-.nav-section {
-  padding: .9rem 1.5rem .3rem;
-  font-size: .68rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .08em; color: rgba(255,255,255,.3);
-}
-.nav-item {
-  display: flex; align-items: center; gap: .75rem;
-  padding: .65rem 1.5rem; color: rgba(255,255,255,.65);
-  text-decoration: none; font-size: .875rem; font-weight: 500;
-  border-left: 3px solid transparent; transition: all .15s;
-  &:hover { background: rgba(255,255,255,.05); color: #fff; }
-  &.active { background: rgba(99,102,241,.15); color: #a5b4fc; border-left-color: #6366f1; }
-}
-.nav-icon { font-size: 1rem; width: 20px; text-align: center; }
-
-// ── Content area ──────────────────────────────────────────────────────────────
-.content-area { flex: 1; margin-left: 240px; display: flex; flex-direction: column; min-height: 100vh; }
-
-.topbar {
-  height: 56px; background: #fff; border-bottom: 1px solid #f1f5f9;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 2rem; position: sticky; top: 0; z-index: 50;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-}
-.topbar-title { font-size: .875rem; font-weight: 600; color: #64748b; }
-.topbar-badge {
-  background: #ede9fe; color: #4c1d95; padding: .2rem .6rem;
-  border-radius: 20px; font-size: .72rem; font-weight: 700;
+  // Thin scrollbar
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
 }
 
-.main { flex: 1; padding: 2rem; background: #f8fafc; }
+// Brand / header inside sidebar — fused with the nav feel
+.cert-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1.4rem 1.25rem 1.2rem;
+  border-bottom: 1px solid $sidebar-border;
+}
+.cert-sidebar__brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #4f8ef7 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(79,142,247,.4);
+}
+.cert-sidebar__title {
+  font-size: .95rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+}
+.cert-sidebar__subtitle {
+  font-size: .68rem;
+  color: $sidebar-muted;
+  font-weight: 500;
+  margin-top: .1rem;
+}
+
+// Nav
+.cert-sidebar__nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .05rem;
+  padding: .75rem .75rem 1.5rem;
+}
+
+.cert-sidebar__section {
+  display: block;
+  padding: 1rem .5rem .3rem;
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: $sidebar-muted;
+}
+
+.cert-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .6rem .75rem;
+  border-radius: 8px;
+  font-size: .875rem;
+  font-weight: 500;
+  color: $sidebar-text;
+  text-decoration: none;
+  transition: background .12s, color .12s;
+  position: relative;
+
+  &:hover {
+    background: $sidebar-hover;
+    color: #fff;
+
+    .cert-sidebar__link-icon { color: #fff; }
+  }
+
+  &--active {
+    background: $sidebar-active;
+    color: #fff;
+    font-weight: 600;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 20%; bottom: 20%;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: $sidebar-accent;
+    }
+
+    .cert-sidebar__link-icon { color: $sidebar-accent; }
+  }
+}
+
+.cert-sidebar__link-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  color: $sidebar-muted;
+  transition: color .12s;
+}
+
+// ── Main content ──────────────────────────────────────────────────────────────
+.cert-main {
+  flex: 1;
+  min-width: 0;
+  background: #f8fafc;
+  overflow-y: auto;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .cert-shell { flex-direction: column; }
+
+  .cert-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0;
+
+    .cert-sidebar__brand { padding: .75rem 1rem; border-bottom: none; border-right: 1px solid $sidebar-border; }
+    .cert-sidebar__subtitle { display: none; }
+    .cert-sidebar__nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: .4rem .5rem;
+      gap: .2rem;
+      flex: 1;
+    }
+    .cert-sidebar__section { display: none; }
+    .cert-sidebar__link {
+      padding: .4rem .7rem;
+      font-size: .8rem;
+      border-radius: 6px;
+      &::before { display: none; }
+    }
+  }
+}

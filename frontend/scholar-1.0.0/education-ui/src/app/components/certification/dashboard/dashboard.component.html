@@ -1,86 +1,146 @@
 <div class="dashboard">
-  <div class="dash-header">
-    <div>
-      <h2>Dashboard</h2>
-      <p class="dash-sub">Welcome back — here's what's happening.</p>
+
+  <!-- ── Hero header ─────────────────────────────────────────────────────── -->
+  <div class="dash-hero">
+    <div class="dash-hero__left">
+      <h1 class="dash-hero__title">Dashboard</h1>
+      <p class="dash-hero__sub">Welcome back — here's what's happening today.</p>
     </div>
-    <a routerLink="/certifications/create" class="btn btn-primary">+ New Certification</a>
+    <a routerLink="/skillhub/certifications/create" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" class="btn-icon" aria-hidden="true">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+      </svg>
+      New Certification
+    </a>
   </div>
 
-  <!-- Skeleton stats -->
+  <!-- ── Stats ───────────────────────────────────────────────────────────── -->
   <div *ngIf="loading" class="stats-grid">
     <div *ngFor="let i of [1,2,3,4]" class="stat-card skel-card">
-      <div class="skel skel-val"></div>
-      <div class="skel skel-lbl"></div>
+      <div class="skel" style="height:14px;width:40%;border-radius:4px;margin-bottom:.75rem"></div>
+      <div class="skel" style="height:36px;width:55%;border-radius:6px;margin-bottom:.4rem"></div>
+      <div class="skel" style="height:10px;width:65%;border-radius:4px"></div>
     </div>
   </div>
 
-  <!-- Stats -->
   <div *ngIf="!loading" class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">📦</div>
-      <div class="stat-value">{{ total }}</div>
-      <div class="stat-label">Total</div>
+    <div class="stat-card stat-card--indigo">
+      <div class="stat-card__top">
+        <span class="stat-card__label">Total</span>
+        <span class="stat-card__icon-wrap stat-card__icon-wrap--indigo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.36C18 2.53 15.48 0 12.36 0c-1.7 0-3.2.9-4.1 2.24L7 3.5 5.74 2.24C4.84.9 3.34 0 1.64 0H1v2h.64c.9 0 1.7.46 2.18 1.16L5.5 5H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" fill="currentColor"/></svg>
+        </span>
+      </div>
+      <div class="stat-card__value">{{ total }}</div>
+      <div class="stat-card__trend">All certifications</div>
     </div>
-    <div class="stat-card stat-green">
-      <div class="stat-icon">✅</div>
-      <div class="stat-value">{{ published }}</div>
-      <div class="stat-label">Published</div>
+
+    <div class="stat-card stat-card--emerald">
+      <div class="stat-card__top">
+        <span class="stat-card__label">Published</span>
+        <span class="stat-card__icon-wrap stat-card__icon-wrap--emerald">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>
+        </span>
+      </div>
+      <div class="stat-card__value">{{ published }}</div>
+      <div class="stat-card__trend">Live &amp; visible</div>
     </div>
-    <div class="stat-card stat-yellow">
-      <div class="stat-icon">📝</div>
-      <div class="stat-value">{{ drafts }}</div>
-      <div class="stat-label">Drafts</div>
+
+    <div class="stat-card stat-card--amber">
+      <div class="stat-card__top">
+        <span class="stat-card__label">Drafts</span>
+        <span class="stat-card__icon-wrap stat-card__icon-wrap--amber">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
+        </span>
+      </div>
+      <div class="stat-card__value">{{ drafts }}</div>
+      <div class="stat-card__trend">Work in progress</div>
     </div>
-    <div class="stat-card stat-gray">
-      <div class="stat-icon">🗄</div>
-      <div class="stat-value">{{ archived }}</div>
-      <div class="stat-label">Archived</div>
+
+    <div class="stat-card stat-card--slate">
+      <div class="stat-card__top">
+        <span class="stat-card__label">Archived</span>
+        <span class="stat-card__icon-wrap stat-card__icon-wrap--slate">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z" fill="currentColor"/></svg>
+        </span>
+      </div>
+      <div class="stat-card__value">{{ archived }}</div>
+      <div class="stat-card__trend">No longer active</div>
     </div>
   </div>
 
-  <!-- Quick actions -->
+  <!-- ── Quick Actions ───────────────────────────────────────────────────── -->
   <div class="section">
     <h3 class="section-title">Quick Actions</h3>
     <div class="action-grid">
-      <a routerLink="/certifications/create" class="action-card">
-        <span class="ac-icon">✏️</span>
-        <span class="ac-label">Create Manually</span>
-        <span class="ac-arrow">→</span>
+      <a routerLink="/skillhub/certifications/create" class="action-card">
+        <div class="action-card__icon action-card__icon--indigo">✏️</div>
+        <div class="action-card__body">
+          <div class="action-card__name">Create Manually</div>
+          <div class="action-card__desc">Build from scratch</div>
+        </div>
+        <svg class="action-card__arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" fill="currentColor"/>
+        </svg>
       </a>
-      <a routerLink="/certifications/create" [queryParams]="{mode:'llm'}" class="action-card action-ai">
-        <span class="ac-icon">🤖</span>
-        <span class="ac-label">Generate with AI</span>
-        <span class="ac-arrow">→</span>
+
+      <a routerLink="/skillhub/certifications/create" [queryParams]="{mode:'llm'}" class="action-card">
+        <div class="action-card__icon action-card__icon--violet">🤖</div>
+        <div class="action-card__body">
+          <div class="action-card__name">Generate with AI</div>
+          <div class="action-card__desc">Auto-generate content</div>
+        </div>
+        <svg class="action-card__arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" fill="currentColor"/>
+        </svg>
       </a>
-      <a routerLink="/certifications/create" [queryParams]="{mode:'pdf'}" class="action-card action-pdf">
-        <span class="ac-icon">📄</span>
-        <span class="ac-label">Import from PDF</span>
-        <span class="ac-arrow">→</span>
+
+      <a routerLink="/skillhub/certifications/create" [queryParams]="{mode:'pdf'}" class="action-card">
+        <div class="action-card__icon action-card__icon--amber">📄</div>
+        <div class="action-card__body">
+          <div class="action-card__name">Import from PDF</div>
+          <div class="action-card__desc">Upload a document</div>
+        </div>
+        <svg class="action-card__arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" fill="currentColor"/>
+        </svg>
       </a>
-      <a routerLink="/store" class="action-card action-store">
-        <span class="ac-icon">🛒</span>
-        <span class="ac-label">View Store</span>
-        <span class="ac-arrow">→</span>
+
+      <a routerLink="/skillhub/certifications/analytics" class="action-card">
+        <div class="action-card__icon action-card__icon--emerald">📈</div>
+        <div class="action-card__body">
+          <div class="action-card__name">View Analytics</div>
+          <div class="action-card__desc">Scores &amp; trends</div>
+        </div>
+        <svg class="action-card__arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" fill="currentColor"/>
+        </svg>
       </a>
     </div>
   </div>
 
-  <!-- Recent -->
+  <!-- ── Recent Certifications ───────────────────────────────────────────── -->
   <div class="section" *ngIf="!loading && recent.length > 0">
     <div class="section-header">
       <h3 class="section-title">Recent Certifications</h3>
-      <a routerLink="/certifications" class="view-all">View all →</a>
+      <a routerLink="/skillhub/certifications" class="view-all">View all →</a>
     </div>
-    <div class="recent-table-wrap">
+    <div class="table-card">
       <table class="table">
-        <thead><tr>
-          <th>Title</th><th>Category</th><th>Status</th><th>Price</th><th>Created</th><th></th>
-        </tr></thead>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Price</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
         <tbody>
           <tr *ngFor="let cert of recent">
             <td class="fw-600">{{ cert.title }}</td>
-            <td class="muted">{{ cert.category }}</td>
+            <td class="muted">{{ cert.category || '—' }}</td>
             <td>
               <span class="badge"
                 [class.badge-success]="cert.status === 'PUBLISHED'"
@@ -91,10 +151,21 @@
             </td>
             <td class="fw-600">{{ cert.price | currency }}</td>
             <td class="muted">{{ cert.createdAt | date:'mediumDate' }}</td>
-            <td><a [routerLink]="['/certifications', cert.id]" class="btn btn-sm btn-outline">View</a></td>
+            <td>
+              <a [routerLink]="['/skillhub/certifications', cert.id]" class="btn btn-sm btn-outline">View</a>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && certifications.length === 0" class="empty-state">
+    <div class="empty-state__icon">🎓</div>
+    <h3>No certifications yet</h3>
+    <p>Create your first certification to get started.</p>
+    <a routerLink="/skillhub/certifications/create" class="btn btn-primary">+ Create Certification</a>
+  </div>
+
 </div>

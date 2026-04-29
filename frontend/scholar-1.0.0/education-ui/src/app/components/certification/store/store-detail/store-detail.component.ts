@@ -113,7 +113,7 @@ export class StoreDetailComponent implements OnInit {
   // CTA actions
   clickEnroll(): void {
     if (!this.userName) { this.showNameModal = true; return; }
-    this.router.navigate(['/store', this.cert!.id, 'checkout']);
+    this.router.navigate(['/skillhub/store', this.cert!.id, 'checkout']);
   }
 
   confirmName(name: string): void {
@@ -121,12 +121,12 @@ export class StoreDetailComponent implements OnInit {
     this.userName = name.trim();
     this.enrollService.setUser(this.userName);
     this.showNameModal = false;
-    this.router.navigate(['/store', this.cert!.id, 'checkout']);
+    this.router.navigate(['/skillhub/store', this.cert!.id, 'checkout']);
   }
 
-  startExam():     void { this.router.navigate(['/store', this.cert!.id, 'exam']); }
-  startPractice(): void { this.router.navigate(['/store', this.cert!.id, 'practice']); }
-  viewResult():    void { this.router.navigate(['/store', this.cert!.id, 'result']); }
+  startExam():     void { this.router.navigate(['/skillhub/store', this.cert!.id, 'exam']); }
+  startPractice(): void { this.router.navigate(['/skillhub/store', this.cert!.id, 'practice']); }
+  viewResult():    void { this.router.navigate(['/skillhub/store', this.cert!.id, 'result']); }
 
   get difficultyConfig(): { label: string; color: string; bg: string; icon: string } {
     const map: Record<string, any> = {

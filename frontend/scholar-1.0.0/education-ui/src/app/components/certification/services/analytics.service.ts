@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FeedbackInsights, FeedbackService } from './feedback.service';
 
@@ -34,7 +34,6 @@ export interface AnalyticsFilters {
   dateTo?:          string;
 }
 
-export { FeedbackInsights };
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {

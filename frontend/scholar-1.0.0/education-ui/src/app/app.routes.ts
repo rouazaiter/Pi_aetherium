@@ -1,14 +1,22 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
+import { frontofficeGuard } from './core/guards/frontoffice.guard';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { JihenCvComponent } from './pages/jihen-cv/jihen-cv.component';
+import { JihenPortfolioComponent } from './pages/jihen-portfolio/jihen-portfolio.component';
+import { PortfolioMentorComponent } from './pages/portfolio-mentor/portfolio-mentor.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { RoomListComponent } from './components/room-session/room-list/room-list.component';
+import { RoomSessionComponent } from './components/room-session/room-session/room-session.component';
 
 export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/home/home.component').then((m) => m.HomeComponent),
   },
+  { path: 'rooms', component: RoomListComponent },
+  { path: 'rooms/:roomId', component: RoomSessionComponent },
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
@@ -57,34 +65,73 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/admin-reclamations/admin-reclamations.component').then((m) => m.AdminReclamationsComponent),
   },
+  {
+    path: 'explore',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/explore/explore.component').then((m) => m.ExploreComponent),
+  },
+  {
+    path: 'explore/portfolios/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/explore-portfolio-detail/explore-portfolio-detail.component').then((m) => m.ExplorePortfolioDetailComponent),
+  },
+  {
+    path: 'explore/projects/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/explore-project-detail/explore-project-detail.component').then((m) => m.ExploreProjectDetailComponent),
+  },
+  {
+    path: 'explore/collections/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/explore-collection-detail/explore-collection-detail.component').then((m) => m.ExploreCollectionDetailComponent),
+  },
+  {
+    path: 'jihen-portfolio-3d/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/jihen-portfolio-3d/jihen-portfolio-3d.component').then((m) => m.JihenPortfolio3dComponent),
+  },
+  {
+    path: 'jihen-portfolio',
+    canActivate: [authGuard],
+    component: JihenPortfolioComponent,
+  },
+  {
+    path: 'portfolio-mentor',
+    canActivate: [authGuard],
+    component: PortfolioMentorComponent,
+  },
+  {
+    path: 'cv',
+    canActivate: [authGuard],
+    component: JihenCvComponent,
+  },
+  {
+    path: 'admin-jihen-portfolio',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/jihen-portfolio-admin/jihen-portfolio-admin.component').then((m) => m.JihenPortfolioAdminComponent),
+  },
 
   // ── SkillHub Certification routes (isolated under /skillhub) ────────────
-  // These load inside their own LayoutComponent (sidebar) — completely
-  // separate from app.component's navbar/footer. No merge conflicts.
   {
     path: 'skillhub',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./components/certification/layout/layout.component').then(
         (m) => m.LayoutComponent
       ),
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./components/certification/dashboard/dashboard.component').then(
-            (m) => m.DashboardComponent
-          ),
-      },
-      {
-        path: 'certifications',
-        loadChildren: () =>
-          import('./components/certification/certifications/certifications.module').then(
-            (m) => m.CertificationsModule
-          ),
-      },
+      // Default: users → store, admins → dashboard (frontofficeGuard handles the redirect)
+      { path: '', redirectTo: 'store', pathMatch: 'full' },
+
+      // ── Frontoffice — regular users only (admins are redirected to /skillhub/dashboard) ──
       {
         path: 'store',
+        canActivate: [frontofficeGuard],
         loadChildren: () =>
           import('./components/certification/store/store.module').then(
             (m) => m.StoreModule
@@ -92,9 +139,28 @@ export const routes: Routes = [
       },
       {
         path: 'verify',
+        canActivate: [frontofficeGuard],
         loadChildren: () =>
           import('./components/certification/verify/verify.module').then(
             (m) => m.VerifyModule
+          ),
+      },
+
+      // ── Backoffice — admin only ───────────────────────────────────────
+      {
+        path: 'dashboard',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./components/certification/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent
+          ),
+      },
+      {
+        path: 'certifications',
+        canActivate: [adminGuard],
+        loadChildren: () =>
+          import('./components/certification/certifications/certifications.module').then(
+            (m) => m.CertificationsModule
           ),
       },
     ],

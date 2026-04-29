@@ -1,0 +1,494 @@
+<section class="detail-page">
+  <div class="detail-shell">
+    <button type="button" class="detail-back" (click)="backToExplore()">Back to Explore</button>
+
+    @if (loading) {
+      <section class="detail-card detail-state">
+        <p>Loading portfolio...</p>
+      </section>
+    } @else if (errorMessage) {
+      <section class="detail-card detail-state">
+        <p class="detail-error">{{ errorMessage }}</p>
+      </section>
+    } @else if (detail) {
+      <section class="detail-hero">
+        <div class="detail-hero__gradient"></div>
+        <div class="detail-hero__content">
+          <div class="detail-hero__main">
+            <div class="detail-avatar detail-avatar--hero">
+              @if (profileImage()) {
+                <img [src]="profileImage()" [alt]="displayName()" />
+              } @else {
+                <span>{{ displayName().slice(0, 2).toUpperCase() }}</span>
+              }
+            </div>
+
+            <div class="detail-hero__copy">
+              <h1>{{ displayName() }}</h1>
+              <p class="detail-title">{{ headline() }}</p>
+              <div class="detail-meta-row">
+                <span>{{ locationText() }}</span>
+                @if (username()) {
+                  <span>{{ username() }}</span>
+                }
+              </div>
+
+              <div class="detail-badge-row">
+                @if (isOpenToWork()) {
+                  <span class="detail-pill detail-pill--success">Open to work</span>
+                }
+                <span [class]="visibilityBadgeClass(detail.visibility ?? detail.portfolio?.visibility)">
+                  {{ visibilityBadge(detail.visibility ?? detail.portfolio?.visibility) }}
+                </span>
+              </div>
+
+              <div class="detail-actions">
+                @if (githubUrl()) {
+                  <a class="detail-secondary" [href]="githubUrl()" target="_blank" rel="noopener">GitHub</a>
+                }
+                @if (linkedinUrl()) {
+                  <a class="detail-secondary" [href]="linkedinUrl()" target="_blank" rel="noopener">LinkedIn</a>
+                }
+                @if (emailHref()) {
+                  <a class="detail-secondary" [href]="emailHref()">Email</a>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-hero__cta-group">
+            @if (portfolio?.id) {
+              <button type="button" class="detail-3d-btn" (click)="open3dPortfolio()">🚀 Explore in 3D</button>
+            }
+            @if (emailHref()) {
+              <a class="detail-primary" [href]="emailHref()">Message</a>
+            } @else {
+              <button type="button" class="detail-primary">Connect</button>
+            }
+          </div>
+        </div>
+      </section>
+
+      <nav class="detail-tabs" aria-label="Portfolio sections">
+        <button type="button" class="detail-tab" [class.detail-tab--active]="activeSection === 'overview'" (click)="selectSection('overview')">
+          Overview
+        </button>
+        <button type="button" class="detail-tab" [class.detail-tab--active]="activeSection === 'projects'" (click)="selectSection('projects')">
+          Projects ({{ projectCount() }})
+        </button>
+        <button type="button" class="detail-tab" [class.detail-tab--active]="activeSection === 'collections'" (click)="selectSection('collections')">
+          Collections ({{ collectionCount() }})
+        </button>
+        <button type="button" class="detail-tab" [class.detail-tab--active]="activeSection === 'skills'" (click)="selectSection('skills')">
+          Skills
+        </button>
+        <button type="button" class="detail-tab" [class.detail-tab--active]="activeSection === 'activity'" (click)="selectSection('activity')">
+          Activity
+        </button>
+      </nav>
+
+      @if (activeSection === 'overview') {
+        <section class="detail-overview">
+          <div class="detail-overview__main">
+            <section class="detail-card detail-card--about">
+              <div class="detail-card__head">
+                <div>
+                  <h2>About</h2>
+                  <p>Professional summary and profile context</p>
+                </div>
+              </div>
+
+              <p class="detail-body detail-body--large">{{ aboutText() || 'No bio available yet.' }}</p>
+
+              @if (topSkillChips().length > 0) {
+                <div class="detail-chip-row">
+                  @for (skill of topSkillChips(); track skill.id) {
+                    <span class="detail-chip">{{ skill.name }}</span>
+                  }
+                </div>
+              }
+            </section>
+
+            <section class="detail-card">
+              <div class="detail-card__head">
+                <div>
+                  <h2>Skills</h2>
+                  <p>Grouped by professional focus</p>
+                </div>
+                <button type="button" class="detail-link-btn" (click)="selectSection('skills')">View all skills</button>
+              </div>
+
+              @if (groupedSkills.length > 0) {
+                <div class="detail-skill-groups">
+                  @for (group of groupedSkills.slice(0, 3); track group.category) {
+                    <section class="detail-skill-group">
+                      <h3>{{ group.category }}</h3>
+                      <div class="detail-chip-row">
+                        @for (skill of group.skills.slice(0, 8); track skill.id) {
+                          <span class="detail-chip">{{ skill.name }}</span>
+                        }
+                      </div>
+                    </section>
+                  }
+                </div>
+              } @else {
+                <p class="detail-body">No visible skills yet.</p>
+              }
+            </section>
+          </div>
+
+          <aside class="detail-overview__side">
+            <section class="detail-card">
+              <div class="detail-card__head">
+                <div>
+                  <h2>Stats</h2>
+                  <p>Profile performance at a glance</p>
+                </div>
+              </div>
+
+              <div class="detail-stats-grid">
+                <article class="detail-stat-card">
+                  <span class="detail-stat-card__icon">VW</span>
+                  <strong>{{ totalViews() }}</strong>
+                  <span>Views</span>
+                </article>
+                <article class="detail-stat-card">
+                  <span class="detail-stat-card__icon">PR</span>
+                  <strong>{{ projectCount() }}</strong>
+                  <span>Projects</span>
+                </article>
+                <article class="detail-stat-card">
+                  <span class="detail-stat-card__icon">CL</span>
+                  <strong>{{ collectionCount() }}</strong>
+                  <span>Collections</span>
+                </article>
+                <article class="detail-stat-card">
+                  <span class="detail-stat-card__icon">LK</span>
+                  <strong>{{ totalLikes() }}</strong>
+                  <span>Likes</span>
+                </article>
+              </div>
+            </section>
+
+            <section class="detail-card">
+              <div class="detail-card__head">
+                <div>
+                  <h2>Highlights</h2>
+                  <p>Core strengths inferred from the profile</p>
+                </div>
+              </div>
+
+              <div class="detail-list">
+                @for (item of highlightItems(); track item) {
+                  <div class="detail-list__item">
+                    <span class="detail-list__dot"></span>
+                    <span>{{ item }}</span>
+                  </div>
+                }
+              </div>
+            </section>
+
+            <section class="detail-card">
+              <div class="detail-card__head">
+                <div>
+                  <h2>Availability</h2>
+                  <p>Collaboration and work preferences</p>
+                </div>
+              </div>
+
+              <div class="detail-list">
+                @for (item of availabilityItems(); track item) {
+                  <div class="detail-list__item">
+                    <span class="detail-list__dot detail-list__dot--success"></span>
+                    <span>{{ item }}</span>
+                  </div>
+                }
+              </div>
+            </section>
+          </aside>
+        </section>
+
+        @if (featuredProject(); as featured) {
+          <section
+            class="detail-card detail-pinned"
+            role="button"
+            tabindex="0"
+            (click)="openProject(featured.projectId)"
+            (keydown)="onProjectKeydown($event, featured.projectId)">
+            <div class="detail-pinned__media">
+              @if (projectVideo(featured)) {
+                <video [src]="projectVideo(featured)" autoplay muted loop playsinline></video>
+              } @else if (projectImage(featured)) {
+                <img [src]="projectImage(featured)" [alt]="featured.title || 'Pinned project'" />
+              } @else {
+                <div class="detail-media-fallback">
+                  <span class="detail-media-fallback__icon">PR</span>
+                  <strong>Pinned project</strong>
+                </div>
+              }
+            </div>
+
+            <div class="detail-pinned__copy">
+              <div class="detail-card__head">
+                <div>
+                  <span class="detail-section-label">Pinned Project</span>
+                  <h2>{{ featured.title || 'Untitled project' }}</h2>
+                </div>
+                <span [class]="visibilityBadgeClass(featured.visibility)">{{ visibilityBadge(featured.visibility) }}</span>
+              </div>
+
+              <p class="detail-body detail-body--large">{{ projectDescription(featured) }}</p>
+
+              <div class="detail-chip-row">
+                @for (skill of projectSkills(featured); track skill.id) {
+                  <span class="detail-chip">{{ skill.name }}</span>
+                }
+              </div>
+
+              <div class="detail-inline-stats">
+                @if (projectLikes(featured) !== null) {
+                  <span>{{ projectLikes(featured) }} likes</span>
+                }
+                @if (projectViews(featured) !== null) {
+                  <span>{{ projectViews(featured) }} views</span>
+                }
+              </div>
+            </div>
+          </section>
+        }
+
+        <section class="detail-section">
+          <div class="detail-section__head">
+            <div>
+              <h2>Recent Projects</h2>
+              <p>Latest public work from this portfolio</p>
+            </div>
+          </div>
+
+          @if (visibleProjects.length > 0) {
+            <div class="detail-project-grid detail-project-grid--dense">
+              @for (project of visibleProjects; track project.projectId) {
+                <article
+                  class="detail-subcard detail-subcard--project"
+                  role="button"
+                  tabindex="0"
+                  (click)="openProject(project.projectId)"
+                  (keydown)="onProjectKeydown($event, project.projectId)">
+                  <div class="detail-subcard__media">
+                    @if (projectVideo(project)) {
+                      <video [src]="projectVideo(project)" autoplay muted loop playsinline></video>
+                    } @else if (projectImage(project)) {
+                      <img [src]="projectImage(project)" [alt]="project.title || 'Project preview'" />
+                    } @else {
+                      <div class="detail-media-fallback detail-media-fallback--small">
+                        <span class="detail-media-fallback__icon">PR</span>
+                        <strong>No preview available</strong>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="detail-subcard__body">
+                    <div class="detail-subcard__top">
+                      <h3>{{ project.title || 'Untitled project' }}</h3>
+                      <span [class]="visibilityBadgeClass(project.visibility)">{{ visibilityBadge(project.visibility) }}</span>
+                    </div>
+                    <p>{{ projectDescription(project) }}</p>
+                    <div class="detail-chip-row">
+                      @for (skill of projectSkills(project); track skill.id) {
+                        <span class="detail-chip">{{ skill.name }}</span>
+                      }
+                    </div>
+                    <div class="detail-subcard__meta">
+                      @if (projectLikes(project) !== null) {
+                        <span>{{ projectLikes(project) }} likes</span>
+                      }
+                      @if (projectViews(project) !== null) {
+                        <span>{{ projectViews(project) }} views</span>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <section class="detail-card detail-card--empty">
+              <p class="detail-body">No visible projects yet.</p>
+            </section>
+          }
+        </section>
+      } @else if (activeSection === 'projects') {
+        <section class="detail-section">
+          <div class="detail-section__head">
+            <div>
+              <h2>Projects</h2>
+              <p>Explore all visible projects in this portfolio</p>
+            </div>
+          </div>
+
+          @if (visibleProjects.length > 0) {
+            <div class="detail-project-grid detail-project-grid--dense">
+              @for (project of visibleProjects; track project.projectId) {
+                <article
+                  class="detail-subcard detail-subcard--project"
+                  role="button"
+                  tabindex="0"
+                  (click)="openProject(project.projectId)"
+                  (keydown)="onProjectKeydown($event, project.projectId)">
+                  <div class="detail-subcard__media">
+                    @if (projectVideo(project)) {
+                      <video [src]="projectVideo(project)" autoplay muted loop playsinline></video>
+                    } @else if (projectImage(project)) {
+                      <img [src]="projectImage(project)" [alt]="project.title || 'Project preview'" />
+                    } @else {
+                      <div class="detail-media-fallback detail-media-fallback--small">
+                        <span class="detail-media-fallback__icon">PR</span>
+                        <strong>No preview available</strong>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="detail-subcard__body">
+                    <div class="detail-subcard__top">
+                      <h3>{{ project.title || 'Untitled project' }}</h3>
+                      <span [class]="visibilityBadgeClass(project.visibility)">{{ visibilityBadge(project.visibility) }}</span>
+                    </div>
+                    <p>{{ projectDescription(project) }}</p>
+                    <div class="detail-chip-row">
+                      @for (skill of projectSkills(project); track skill.id) {
+                        <span class="detail-chip">{{ skill.name }}</span>
+                      }
+                    </div>
+                    <div class="detail-subcard__meta">
+                      @if (projectLikes(project) !== null) {
+                        <span>{{ projectLikes(project) }} likes</span>
+                      }
+                      @if (projectViews(project) !== null) {
+                        <span>{{ projectViews(project) }} views</span>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <section class="detail-card detail-card--empty">
+              <p class="detail-body">No visible projects yet.</p>
+            </section>
+          }
+        </section>
+      } @else if (activeSection === 'collections') {
+        <section class="detail-section">
+          <div class="detail-section__head">
+            <div>
+              <h2>Collections</h2>
+              <p>Grouped project showcases from this profile</p>
+            </div>
+          </div>
+
+          @if (visibleCollections.length > 0) {
+            <div class="detail-collection-grid">
+              @for (collection of visibleCollections; track collection.collectionId) {
+                <article
+                  class="detail-subcard detail-subcard--collection"
+                  role="button"
+                  tabindex="0"
+                  (click)="openCollection(collection.collectionId)"
+                  (keydown)="onCollectionKeydown($event, collection.collectionId)">
+                  <div class="detail-folder">
+                    <span class="detail-folder__tab"></span>
+                    <span class="detail-folder__body"></span>
+                  </div>
+
+                  <div class="detail-collection-preview">
+                    @if (collectionPreviewImage(collection)) {
+                      <img [src]="collectionPreviewImage(collection)" [alt]="collectionTitle(collection)" />
+                    } @else {
+                      <div class="detail-media-fallback detail-media-fallback--small">
+                        <span class="detail-media-fallback__icon">CL</span>
+                      </div>
+                    }
+                    <div class="detail-collection-preview__stack">
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+
+                  <div class="detail-subcard__body">
+                    <div class="detail-subcard__top">
+                      <h3>{{ collectionTitle(collection) }}</h3>
+                      <span [class]="visibilityBadgeClass(collection.visibility)">{{ visibilityBadge(collection.visibility) }}</span>
+                    </div>
+
+                    <p>{{ collectionDescription(collection) }}</p>
+                    <strong class="detail-collection-count">{{ collectionProjectCount(collection) }} projects</strong>
+
+                    <div class="detail-chip-row">
+                      @for (skill of collectionSkills(collection); track skill.id) {
+                        <span class="detail-chip">{{ skill.name }}</span>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <section class="detail-card detail-card--empty">
+              <p class="detail-body">No visible collections yet.</p>
+            </section>
+          }
+        </section>
+      } @else if (activeSection === 'skills') {
+        <section class="detail-card">
+          <div class="detail-card__head">
+            <div>
+              <h2>Skills</h2>
+              <p>Complete skill map by category</p>
+            </div>
+          </div>
+
+          @if (groupedSkills.length > 0) {
+            <div class="detail-skill-groups detail-skill-groups--full">
+              @for (group of groupedSkills; track group.category) {
+                <section class="detail-skill-group detail-skill-group--card">
+                  <h3>{{ group.category }}</h3>
+                  <div class="detail-chip-row">
+                    @for (skill of group.skills; track skill.id) {
+                      <span class="detail-chip">{{ skill.name }}</span>
+                    }
+                  </div>
+                </section>
+              }
+            </div>
+          } @else {
+            <p class="detail-body">No visible skills yet.</p>
+          }
+        </section>
+      } @else {
+        <section class="detail-card">
+          <div class="detail-card__head">
+            <div>
+              <h2>Activity</h2>
+              <p>Recent visible movement across projects and collections</p>
+            </div>
+          </div>
+
+          @if (activityItems().length > 0) {
+            <div class="detail-activity-list">
+              @for (item of activityItems(); track item.title + item.meta) {
+                <article class="detail-activity-item">
+                  <span class="detail-activity-item__icon">AC</span>
+                  <div>
+                    <strong>{{ item.title }}</strong>
+                    <p>{{ item.meta }}</p>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="detail-body">No visible activity yet.</p>
+          }
+        </section>
+      }
+    }
+  </div>
+</section>

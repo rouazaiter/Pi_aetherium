@@ -154,7 +154,7 @@ export class StoreCatalogComponent implements OnInit, OnDestroy {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  viewCert(id: number): void { this.router.navigate(['/store', id]); }
+  viewCert(id: number): void { this.router.navigate(['/skillhub/store', id]); }
 
   difficultyClass(d: string): string {
     return { BEGINNER: 'badge-success', INTERMEDIATE: 'badge-warning', ADVANCED: 'badge-danger' }[d] ?? 'badge-secondary';

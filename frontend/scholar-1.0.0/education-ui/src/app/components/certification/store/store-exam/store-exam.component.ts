@@ -72,17 +72,17 @@ export class StoreExamComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.certId = Number(this.route.snapshot.paramMap.get('id'));
     this.userName = this.enrollService.getUser();
-    if (!this.userName) { this.router.navigate(['/store', this.certId]); return; }
+    if (!this.userName) { this.router.navigate(['/skillhub/store', this.certId]); return; }
 
     this.enrollService.getEnrollment(this.certId, this.userName).subscribe({
       next: enrollment => {
-        if (!enrollment) { this.router.navigate(['/store', this.certId]); return; }
+        if (!enrollment) { this.router.navigate(['/skillhub/store', this.certId]); return; }
         if (enrollment.status === 'COMPLETED') {
-          this.router.navigate(['/store', this.certId, 'result']); return;
+          this.router.navigate(['/skillhub/store', this.certId, 'result']); return;
         }
         this.loadExam();
       },
-      error: () => this.router.navigate(['/store', this.certId])
+      error: () => this.router.navigate(['/skillhub/store', this.certId])
     });
   }
 
@@ -502,7 +502,7 @@ export class StoreExamComponent implements OnInit, OnDestroy {
       answer: this.answers.get(q.id) ?? ''
     }));
     this.enrollService.submitExam(this.certId, { userIdentifier: this.userName, answers: answerList }).subscribe({
-      next: () => this.router.navigate(['/store', this.certId, 'result']),
+      next: () => this.router.navigate(['/skillhub/store', this.certId, 'result']),
       error: e => {
         this.error = e.message ?? 'Submission failed';
         this.toast.error(this.error);
@@ -522,7 +522,7 @@ export class StoreExamComponent implements OnInit, OnDestroy {
     return map[type] ?? type;
   }
 
-  goBack(): void { this.router.navigate(['/store', this.certId]); }
+  goBack(): void { this.router.navigate(['/skillhub/store', this.certId]); }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {

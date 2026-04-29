@@ -6,8 +6,9 @@ import { CertificationDetail } from '../../models/certification.model';
 import { loadStripe, Stripe, StripeElements, StripePaymentElement } from '@stripe/stripe-js';
 import { NgIf, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../../core/services/auth.service';
 
-type Step = 'email' | 'payment' | 'verify' | 'processing' | 'done';
+type Step = 'payment_ready' | 'payment' | 'verify' | 'processing' | 'done';
 
 const STRIPE_PK = 'pk_test_51TP7oSEUQLDnJdgCUyw9qPhJ096VRn16pQbfyzyr7piAEvHC060Rqr1dKjc72aVtTfUO6YacLt3VLt1lq3y6kzkQ00BjlA2jnY';
 
@@ -27,7 +28,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   loading = true;
   error = '';
 
-  step: Step = 'email';
+  step: Step = 'payment_ready';
   userIdentifier = '';
   fullName = '';
   phoneNumber = '';
@@ -49,17 +50,45 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     public router: Router,
     private route: ActivatedRoute,
     private enrollService: EnrollmentService,
-    private toast: ToastService
+    private toast: ToastService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.certId = Number(this.route.snapshot.paramMap.get('id'));
-    const stored = this.enrollService.getUser();
-    if (stored) this.userIdentifier = stored;
+
+    // Auto-populate from Pi_aetherium session — no manual entry needed
+    const session = this.authService.auth();
+    this.userIdentifier = session?.email ?? '';
+    this.fullName       = session?.username ?? '';
 
     this.enrollService.getStoreDetail(this.certId).subscribe({
-      next: data => { this.cert = data; this.loading = false; },
-      error: () => this.router.navigate(['/store'])
+      next: data => {
+        this.cert = data;
+        this.loading = false;
+        // Skip the email step — user is already authenticated
+        if (this.userIdentifier) {
+          this.step = 'payment_ready'; // will be handled in initiatePayment
+          this.checkExistingEnrollment();
+        }
+      },
+      error: () => this.router.navigate(['/skillhub/store'])
+    });
+  }
+
+  private checkExistingEnrollment(): void {
+    this.processing = true;
+    this.enrollService.getEnrollment(this.certId, this.userIdentifier).subscribe({
+      next: e => {
+        this.processing = false;
+        if (e?.isVerified) {
+          this.toast.info('You are already enrolled!');
+          this.router.navigate(['/skillhub/store', this.certId]);
+          return;
+        }
+        this.initiatePayment();
+      },
+      error: () => { this.processing = false; this.initiatePayment(); }
     });
   }
 
@@ -72,38 +101,10 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     return this.cert?.exams.reduce((s, e) => s + e.questions.length, 0) ?? 0;
   }
 
-  isValidEmail(e: string): boolean { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-
-  // ── Step 1: Email ─────────────────────────────────────────────────────────
-
-  confirmEmail(): void {
-    if (!this.fullName.trim())          { this.error = 'Please enter your full name'; return; }
-    if (!this.userIdentifier.trim())    { this.error = 'Please enter your email'; return; }
-    if (!this.isValidEmail(this.userIdentifier)) { this.error = 'Please enter a valid email'; return; }
-    // Phone is optional but if provided must be valid E.164 format
-    if (this.phoneNumber.trim() && !this.isValidPhone(this.phoneNumber)) {
-      this.error = 'Phone number must be in international format, e.g. +21612345678'; return;
-    }
-    this.error = '';
-    this.enrollService.setUser(this.userIdentifier);
-    this.processing = true;
-
-    this.enrollService.getEnrollment(this.certId, this.userIdentifier).subscribe({
-      next: e => {
-        this.processing = false;
-        if (e?.isVerified) {
-          this.toast.info('You are already enrolled!');
-          this.router.navigate(['/store', this.certId]);
-          return;
-        }
-        this.initiatePayment();
-      },
-      error: () => { this.processing = false; this.initiatePayment(); }
-    });
-  }
+  // ── Step 1 is now skipped — user comes from session ──────────────────────
+  // confirmEmail() is no longer needed; checkExistingEnrollment() handles it
 
   isValidPhone(p: string): boolean {
-    // E.164: + followed by 7-15 digits
     return /^\+[1-9]\d{6,14}$/.test(p.replace(/\s/g, ''));
   }
 
@@ -122,7 +123,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
           this.startCooldown();
           this.toast.success(`Verification code sent to ${this.userIdentifier}`);
         },
-        error: e => { this.processing = false; this.step = 'email'; this.error = e.message || 'Failed to send code'; }
+        error: e => { this.processing = false; this.step = 'payment_ready'; this.error = e.message || 'Failed to send code'; }
       });
       return;
     }
@@ -139,7 +140,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       },
       error: e => {
         this.stripeLoading = false;
-        this.step = 'email';
+        this.step = 'payment_ready';
         this.error = e.message || 'Failed to initialize payment';
       }
     });
@@ -175,7 +176,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       if (el && this.paymentElement) {
         this.paymentElement.mount(el);
       }
-    }, 100);
+      // Remove the Stripe floating badge injected into <body>
+      this.removeStripeBadge();
+    }, 500);
   }
 
   // ── Step 3: Confirm Stripe payment → send email code ─────────────────────
@@ -214,6 +217,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         this.processing = false;
         this.step = 'verify';
         this.startCooldown();
+        this.removeStripeBadge();
         this.toast.success(`Payment confirmed! Check ${this.userIdentifier} for your verification code.`);
       },
       error: e => {
@@ -233,6 +237,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       next: () => {
         this.processing = false;
         this.step = 'done';
+        this.removeStripeBadge();
         this.toast.success('Certification unlocked! 🎉');
       },
       error: e => { this.processing = false; this.error = e.message || 'Invalid or expired code'; }
@@ -262,7 +267,49 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     (e.target as HTMLInputElement).value = v;
   }
 
-  startExam(): void { this.router.navigate(['/store', this.certId, 'exam']); }
-  goBack():    void { this.router.navigate(['/store', this.certId]); }
-  goToStore(): void { this.router.navigate(['/store']); }
+  startExam(): void { this.router.navigate(['/skillhub/store', this.certId, 'exam']); }
+  goBack():    void { this.router.navigate(['/skillhub/store', this.certId]); }
+  goToStore(): void { this.router.navigate(['/skillhub/store']); }
+
+  /** Remove only the Stripe floating badge — NOT the payment element iframes */
+  private removeStripeBadge(): void {
+    const removeBadge = () => {
+      // Only remove the metrics controller and cookie-settings iframes
+      document.querySelectorAll<HTMLIFrameElement>('body > iframe').forEach(iframe => {
+        const name = iframe.name || '';
+        const src  = iframe.src  || '';
+        if (
+          name.startsWith('__privateStripeMetricsController') ||
+          src.includes('stripe.com/cookie-settings')
+        ) {
+          iframe.remove();
+        }
+      });
+
+      // Remove the fixed bottom-right badge wrapper div
+      document.querySelectorAll<HTMLElement>('body > div').forEach(div => {
+        const style = div.getAttribute('style') || '';
+        const isFixed       = style.includes('position: fixed') || style.includes('position:fixed');
+        const isBottomRight = style.includes('bottom') && style.includes('right');
+        if (isFixed && isBottomRight) {
+          const inner = div.querySelector('iframe');
+          if (inner && (inner.src || '').includes('stripe')) {
+            div.remove();
+          }
+        }
+      });
+    };
+
+    // Run immediately and after delays to catch async injections
+    removeBadge();
+    setTimeout(removeBadge, 500);
+    setTimeout(removeBadge, 1500);
+    setTimeout(removeBadge, 3000);
+
+    // Also watch for Stripe re-injecting the badge after step changes
+    const observer = new MutationObserver(() => removeBadge());
+    observer.observe(document.body, { childList: true, subtree: false });
+    // Stop observing after 10s to avoid memory leaks
+    setTimeout(() => observer.disconnect(), 10000);
+  }
 }

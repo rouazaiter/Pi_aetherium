@@ -4,13 +4,13 @@
   <div class="form-page__header">
     <div>
       <nav class="breadcrumb">
-        <a routerLink="/certifications">Certifications</a>
+        <a routerLink="/skillhub/certifications">Certifications</a>
         <span>›</span>
         <span>{{ isEdit ? 'Edit' : 'New Certification' }}</span>
       </nav>
       <h2>{{ isEdit ? 'Edit Certification' : 'Create Certification' }}</h2>
     </div>
-    <a routerLink="/certifications" class="btn btn-ghost">✕ Cancel</a>
+    <a routerLink="/skillhub/certifications" class="btn btn-ghost">✕ Cancel</a>
   </div>
 
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
@@ -209,7 +209,7 @@
     </div>
 
     <div class="form-actions">
-      <a routerLink="/certifications" class="btn btn-ghost">Cancel</a>
+      <a routerLink="/skillhub/certifications" class="btn btn-ghost">Cancel</a>
       <button type="submit" class="btn btn-primary" [disabled]="loading">
         <span *ngIf="loading" class="spinner"></span>
         {{ loading ? 'Saving…' : (isEdit ? 'Update Certification' : 'Create Certification') }}
@@ -270,7 +270,7 @@
       </div>
     </div>
     <div class="form-actions">
-      <a routerLink="/certifications" class="btn btn-ghost">Cancel</a>
+      <a routerLink="/skillhub/certifications" class="btn btn-ghost">Cancel</a>
       <button type="submit" class="btn btn-primary" [disabled]="loading">
         <span *ngIf="loading" class="spinner"></span>
         {{ loading ? 'Generating…' : '🤖 Generate Certification' }}
@@ -306,7 +306,7 @@
       </div>
     </div>
     <div class="form-actions">
-      <a routerLink="/certifications" class="btn btn-ghost">Cancel</a>
+      <a routerLink="/skillhub/certifications" class="btn btn-ghost">Cancel</a>
       <button class="btn btn-primary" (click)="submitPdf()" [disabled]="loading || !selectedFile">
         <span *ngIf="loading" class="spinner"></span>
         {{ loading ? 'Importing…' : '📄 Import & Convert' }}

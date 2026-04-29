@@ -1,171 +1,214 @@
 <div class="my-page">
 
-  <!-- Email prompt (first visit) -->
-  <div *ngIf="showEmailPrompt" class="email-prompt-wrap">
-    <div class="email-prompt">
-      <div class="prompt-icon">👤</div>
-      <h2>Your Certifications</h2>
-      <p>Enter the email you used when enrolling to see your certifications.</p>
-      <div class="prompt-field">
-        <input type="email" [(ngModel)]="emailInput" class="prompt-input"
-               placeholder="you@example.com"
-               (keyup.enter)="confirmEmail()" />
-        <button class="btn-confirm" (click)="confirmEmail()" [disabled]="!emailInput.trim()">
-          View My Certifications →
-        </button>
-      </div>
-      <button class="btn-browse" (click)="goToStore()">Browse Store instead</button>
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h2>My Certifications</h2>
+      <p class="page-sub">Enrolled as <strong>{{ userName }}</strong></p>
+    </div>
+    <button class="btn-store" (click)="goToStore()">🛒 Browse More</button>
+  </div>
+
+  <!-- ── Stats row ────────────────────────────────────────────────────────── -->
+  <div *ngIf="!loading && enrollments.length > 0" class="stats-row">
+    <div class="stat-card" (click)="statusFilter='all'; resultFilter='all'; onFilterChange()" [class.stat-card--active]="statusFilter==='all' && resultFilter==='all'">
+      <span class="stat-val">{{ totalCount }}</span>
+      <span class="stat-lbl">Total</span>
+    </div>
+    <div class="stat-card stat-card--blue" (click)="statusFilter='ENROLLED'; resultFilter='all'; onFilterChange()" [class.stat-card--active]="statusFilter==='ENROLLED'">
+      <span class="stat-val">{{ enrolledCount }}</span>
+      <span class="stat-lbl">In Progress</span>
+    </div>
+    <div class="stat-card stat-card--green" (click)="statusFilter='COMPLETED'; resultFilter='all'; onFilterChange()" [class.stat-card--active]="statusFilter==='COMPLETED'">
+      <span class="stat-val">{{ completedCount }}</span>
+      <span class="stat-lbl">Completed</span>
+    </div>
+    <div class="stat-card stat-card--gold" (click)="statusFilter='all'; resultFilter='passed'; onFilterChange()" [class.stat-card--active]="resultFilter==='passed'">
+      <span class="stat-val">{{ passedCount }}</span>
+      <span class="stat-lbl">Passed</span>
     </div>
   </div>
 
-  <!-- Main content -->
-  <ng-container *ngIf="!showEmailPrompt">
+  <!-- ── Search + Filters bar ─────────────────────────────────────────────── -->
+  <div *ngIf="!loading && enrollments.length > 0" class="controls-bar">
 
-    <!-- Header -->
-    <div class="page-header">
-      <div>
-        <h2>My Certifications</h2>
-        <p class="page-sub">Enrolled as <strong>{{ userName }}</strong></p>
-      </div>
-      <button class="btn-store" (click)="goToStore()">🛒 Browse More</button>
+    <!-- Search input -->
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search certifications…"
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()"
+        autocomplete="off"
+      />
+      <button *ngIf="searchQuery" class="search-clear" (click)="clearSearch()" aria-label="Clear search">✕</button>
     </div>
 
-    <!-- Stats row -->
-    <div *ngIf="!loading && enrollments.length > 0" class="stats-row">
-      <div class="stat-card">
-        <span class="stat-val">{{ totalCount }}</span>
-        <span class="stat-lbl">Total</span>
-      </div>
-      <div class="stat-card stat-card--blue">
-        <span class="stat-val">{{ enrolledCount }}</span>
-        <span class="stat-lbl">In Progress</span>
-      </div>
-      <div class="stat-card stat-card--green">
-        <span class="stat-val">{{ completedCount }}</span>
-        <span class="stat-lbl">Completed</span>
-      </div>
-      <div class="stat-card stat-card--gold">
-        <span class="stat-val">{{ passedCount }}</span>
-        <span class="stat-lbl">Passed</span>
-      </div>
-    </div>
+    <!-- Status filter -->
+    <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+      <option value="all">All statuses</option>
+      <option value="ENROLLED">In Progress</option>
+      <option value="COMPLETED">Completed</option>
+    </select>
 
-    <!-- Filter tabs -->
-    <div *ngIf="!loading && enrollments.length > 0" class="filter-tabs">
-      <button class="tab-btn" [class.tab-btn--active]="statusFilter === 'all'"
-              (click)="statusFilter = 'all'; onFilterChange()">
-        All ({{ totalCount }})
-      </button>
-      <button class="tab-btn" [class.tab-btn--active]="statusFilter === 'ENROLLED'"
-              (click)="statusFilter = 'ENROLLED'; onFilterChange()">
-        In Progress ({{ enrolledCount }})
-      </button>
-      <button class="tab-btn" [class.tab-btn--active]="statusFilter === 'COMPLETED'"
-              (click)="statusFilter = 'COMPLETED'; onFilterChange()">
-        Completed ({{ completedCount }})
-      </button>
-    </div>
+    <!-- Result filter -->
+    <select class="filter-select" [(ngModel)]="resultFilter" (ngModelChange)="onFilterChange()">
+      <option value="all">All results</option>
+      <option value="passed">Passed ✅</option>
+      <option value="failed">Failed ❌</option>
+    </select>
 
-    <!-- Loading skeleton -->
-    <div *ngIf="loading" class="enrollment-list">
-      <div *ngFor="let i of [1,2,3]" class="enrollment-card enrollment-card--skeleton">
+    <!-- Sort -->
+    <select class="filter-select" [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()">
+      <option value="date_desc">Newest first</option>
+      <option value="date_asc">Oldest first</option>
+      <option value="score_desc">Highest score</option>
+      <option value="score_asc">Lowest score</option>
+      <option value="title_asc">A → Z</option>
+    </select>
+
+    <!-- Reset button (only when filters active) -->
+    <button *ngIf="hasActiveFilters" class="btn-reset" (click)="resetFilters()">
+      ✕ Reset
+    </button>
+  </div>
+
+  <!-- ── Results count ────────────────────────────────────────────────────── -->
+  <div *ngIf="!loading && enrollments.length > 0" class="results-meta">
+    <span *ngIf="hasActiveFilters">
+      {{ filteredCount }} result{{ filteredCount !== 1 ? 's' : '' }} found
+      <span class="results-total">of {{ totalCount }}</span>
+    </span>
+    <span *ngIf="!hasActiveFilters">{{ totalCount }} certification{{ totalCount !== 1 ? 's' : '' }}</span>
+    <span *ngIf="totalPages > 1" class="results-page">
+      — Page {{ currentPage }} of {{ totalPages }}
+    </span>
+  </div>
+
+  <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="enrollment-list">
+    <div *ngFor="let i of [1,2,3]" class="enrollment-card enrollment-card--skeleton">
+      <div class="skel skel-circle"></div>
+      <div class="skel-body">
         <div class="skel skel-title"></div>
         <div class="skel skel-meta"></div>
         <div class="skel skel-actions"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Error -->
-    <div *ngIf="error" class="alert-danger">{{ error }}</div>
+  <!-- ── Error ────────────────────────────────────────────────────────────── -->
+  <div *ngIf="error" class="alert-danger">{{ error }}</div>
 
-    <!-- Empty state -->
-    <div *ngIf="!loading && filtered.length === 0 && enrollments.length === 0" class="empty-state">
-      <div class="empty-icon">🎓</div>
-      <h3>No certifications yet</h3>
-      <p>You haven't enrolled in any certifications. Browse the store to get started.</p>
-      <button class="btn-browse-lg" (click)="goToStore()">Browse Certifications →</button>
-    </div>
+  <!-- ── Empty: no enrollments at all ────────────────────────────────────── -->
+  <div *ngIf="!loading && enrollments.length === 0" class="empty-state">
+    <div class="empty-icon">🎓</div>
+    <h3>No certifications yet</h3>
+    <p>You haven't enrolled in any certifications. Browse the store to get started.</p>
+    <button class="btn-browse-lg" (click)="goToStore()">Browse Certifications →</button>
+  </div>
 
-    <div *ngIf="!loading && filtered.length === 0 && enrollments.length > 0" class="empty-state">
-      <div class="empty-icon">🔍</div>
-      <h3>No results for this filter</h3>
-      <button class="btn-browse-lg" (click)="statusFilter = 'all'; onFilterChange()">Show All</button>
-    </div>
+  <!-- ── Empty: filters returned nothing ─────────────────────────────────── -->
+  <div *ngIf="!loading && enrollments.length > 0 && filteredCount === 0" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>No results found</h3>
+    <p>Try adjusting your search or filters.</p>
+    <button class="btn-browse-lg" (click)="resetFilters()">Clear Filters</button>
+  </div>
 
-    <!-- Enrollment cards -->
-    <div *ngIf="!loading && filtered.length > 0" class="enrollment-list">
-      <div *ngFor="let e of filtered" class="enrollment-card"
-           [class.enrollment-card--completed]="e.status === 'COMPLETED'"
-           [class.enrollment-card--enrolled]="e.status === 'ENROLLED'">
+  <!-- ── Enrollment cards ──────────────────────────────────────────────────── -->
+  <div *ngIf="!loading && paginated.length > 0" class="enrollment-list">
+    <div *ngFor="let e of paginated" class="enrollment-card"
+         [class.enrollment-card--completed]="e.status === 'COMPLETED'"
+         [class.enrollment-card--enrolled]="e.status === 'ENROLLED'">
 
-        <div class="card-left">
-          <!-- Score ring for completed -->
-          <div *ngIf="e.status === 'COMPLETED'" class="score-ring-wrap">
-            <svg viewBox="0 0 64 64" class="score-ring">
-              <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" stroke-width="6"/>
-              <circle cx="32" cy="32" r="28" fill="none"
-                      [attr.stroke]="scoreColor(e.score)"
-                      stroke-width="6" stroke-linecap="round"
-                      [attr.stroke-dasharray]="circumference"
-                      [attr.stroke-dashoffset]="dashOffset(e.score)"
-                      transform="rotate(-90 32 32)"/>
-              <text x="32" y="37" text-anchor="middle" font-size="13" font-weight="800"
-                    [attr.fill]="scoreColor(e.score)">
-                {{ e.score !== null ? (e.score | number:'1.0-0') + '%' : '—' }}
-              </text>
-            </svg>
-          </div>
-
-          <!-- Status icon for enrolled -->
-          <div *ngIf="e.status === 'ENROLLED'" class="status-icon">
-            📚
-          </div>
+      <!-- Score ring / status icon -->
+      <div class="card-left">
+        <div *ngIf="e.status === 'COMPLETED'" class="score-ring-wrap">
+          <svg viewBox="0 0 64 64" class="score-ring">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+            <circle cx="32" cy="32" r="28" fill="none"
+                    [attr.stroke]="scoreColor(e.score)"
+                    stroke-width="6" stroke-linecap="round"
+                    [attr.stroke-dasharray]="circumference"
+                    [attr.stroke-dashoffset]="dashOffset(e.score)"
+                    transform="rotate(-90 32 32)"/>
+            <text x="32" y="37" text-anchor="middle" font-size="13" font-weight="800"
+                  [attr.fill]="scoreColor(e.score)">
+              {{ e.score !== null ? (e.score | number:'1.0-0') + '%' : '—' }}
+            </text>
+          </svg>
         </div>
-
-        <div class="card-body">
-          <div class="card-header-row">
-            <h3 class="cert-name" (click)="goToCert(e)">{{ e.certificationTitle }}</h3>
-            <div class="status-badges">
-              <span class="status-badge"
-                    [class.status-badge--enrolled]="e.status === 'ENROLLED'"
-                    [class.status-badge--passed]="e.passed === true"
-                    [class.status-badge--failed]="e.passed === false">
-                {{ e.status === 'ENROLLED' ? '📚 In Progress' : e.passed ? '🏆 Passed' : '❌ Failed' }}
-              </span>
-            </div>
-          </div>
-
-          <div class="card-meta">
-            <span>💰 Paid: ${{ e.amountPaid | number:'1.2-2' }}</span>
-            <span>📅 Enrolled: {{ e.enrolledAt | date:'mediumDate' }}</span>
-            <span *ngIf="e.completedAt">✅ Completed: {{ e.completedAt | date:'mediumDate' }}</span>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <!-- In progress -->
-          <ng-container *ngIf="e.status === 'ENROLLED'">
-            <button class="action-btn action-btn--practice" (click)="goToPractice(e)">
-              🧪 Practice
-            </button>
-            <button class="action-btn action-btn--exam" (click)="goToExam(e)">
-              🚀 Take Exam
-            </button>
-          </ng-container>
-
-          <!-- Completed -->
-          <ng-container *ngIf="e.status === 'COMPLETED'">
-            <button class="action-btn action-btn--result" (click)="goToResult(e)">
-              📊 View Result
-            </button>
-            <button *ngIf="e.passed" class="action-btn action-btn--cert" (click)="goToResult(e)">
-              📥 Certificate
-            </button>
-          </ng-container>
-        </div>
-
+        <div *ngIf="e.status === 'ENROLLED'" class="status-icon">📚</div>
       </div>
-    </div>
 
-  </ng-container>
+      <!-- Body -->
+      <div class="card-body">
+        <div class="card-header-row">
+          <h3 class="cert-name" (click)="goToCert(e)">{{ e.certificationTitle }}</h3>
+          <span class="status-badge"
+                [class.status-badge--enrolled]="e.status === 'ENROLLED'"
+                [class.status-badge--passed]="e.passed === true"
+                [class.status-badge--failed]="e.passed === false">
+            {{ e.status === 'ENROLLED' ? '📚 In Progress' : e.passed ? '🏆 Passed' : '❌ Failed' }}
+          </span>
+        </div>
+        <div class="card-meta">
+          <span>💰 ${{ e.amountPaid | number:'1.2-2' }}</span>
+          <span>📅 {{ e.enrolledAt | date:'mediumDate' }}</span>
+          <span *ngIf="e.completedAt">✅ {{ e.completedAt | date:'mediumDate' }}</span>
+          <span *ngIf="e.attemptCount > 0">🔁 {{ e.attemptCount }}/{{ e.maxAttempts }} attempts</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-actions">
+        <ng-container *ngIf="e.status === 'ENROLLED'">
+          <button class="action-btn action-btn--practice" (click)="goToPractice(e)">🧪 Practice</button>
+          <button class="action-btn action-btn--exam"     (click)="goToExam(e)">🚀 Take Exam</button>
+        </ng-container>
+        <ng-container *ngIf="e.status === 'COMPLETED'">
+          <button class="action-btn action-btn--result" (click)="goToResult(e)">📊 Result</button>
+          <button *ngIf="e.passed" class="action-btn action-btn--cert" (click)="goToResult(e)">📥 Certificate</button>
+        </ng-container>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Pagination ────────────────────────────────────────────────────────── -->
+  <nav *ngIf="!loading && totalPages > 1" class="pagination" aria-label="Pagination">
+    <!-- Prev -->
+    <button class="page-btn page-btn--nav"
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1)"
+            aria-label="Previous page">
+      ‹
+    </button>
+
+    <!-- Page numbers -->
+    <ng-container *ngFor="let page of pages; let i = index">
+      <!-- Ellipsis gap -->
+      <span *ngIf="isEllipsisBefore(page, i)" class="page-ellipsis">…</span>
+      <button class="page-btn"
+              [class.page-btn--active]="page === currentPage"
+              (click)="goToPage(page)">
+        {{ page }}
+      </button>
+    </ng-container>
+
+    <!-- Next -->
+    <button class="page-btn page-btn--nav"
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1)"
+            aria-label="Next page">
+      ›
+    </button>
+  </nav>
+
 </div>

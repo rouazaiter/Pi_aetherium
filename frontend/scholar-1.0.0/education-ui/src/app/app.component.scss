@@ -1,3 +1,7 @@
+$scholar: #7a6ad8;
+$scholar-soft: #f1f0fe;
+$nav-h: 72px;
+
 .app-nav {
   position: sticky;
   top: 0;
@@ -29,16 +33,17 @@
   letter-spacing: -0.02em;
   flex-shrink: 0;
   z-index: 2;
-}
-.app-nav__brand:hover {
-  color: #7a6ad8;
+
+  &:hover {
+    color: $scholar;
+  }
 }
 
 .app-nav__brand-mark {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #7a6ad8 0%, #5f52b8 100%);
+  background: linear-gradient(135deg, $scholar 0%, #5f52b8 100%);
   color: #fff;
   display: flex;
   align-items: center;
@@ -49,7 +54,7 @@
 }
 
 .app-nav__brand-text {
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 .app-nav__toggle {
@@ -65,9 +70,10 @@
   cursor: pointer;
   z-index: 2;
   border-radius: 8px;
-}
-.app-nav__toggle:hover {
-  background: #f1f0fe;
+
+  &:hover {
+    background: $scholar-soft;
+  }
 }
 
 .app-nav__toggle-bar {
@@ -77,7 +83,9 @@
   margin: 0 auto;
   background: #333;
   border-radius: 2px;
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
 }
 
 .app-nav__toggle--open .app-nav__toggle-bar:nth-child(1) {
@@ -102,6 +110,43 @@
   gap: 0.25rem;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.app-nav__dropdown {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.app-nav__dropdown-toggle {
+  justify-content: center;
+}
+
+.app-nav__dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem;
+  background: #fff;
+  border: 1px solid rgba(122, 106, 216, 0.15);
+  border-radius: 14px;
+  box-shadow: 0 16px 42px rgba(30, 30, 30, 0.14);
+  z-index: 5;
+}
+
+.app-nav__dropdown-link {
+  gap: 0.55rem;
+}
+
+.app-nav__dropdown-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
 }
 
 .app-nav__avatar-link {
@@ -170,6 +215,7 @@
 .app-nav__link {
   display: inline-flex;
   align-items: center;
+  position: relative;
   padding: 0.5rem 0.9rem;
   font-size: 0.95rem;
   font-weight: 500;
@@ -216,6 +262,55 @@
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, #ff5a7a 0%, #ff3a57 100%);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0.9rem;
+    right: 0.9rem;
+    bottom: -0.45rem;
+    height: 2px;
+    border-radius: 999px;
+    background: $scholar;
+    opacity: 0;
+    transform: scaleX(0.4);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  &:hover {
+    color: $scholar;
+    background: rgba(122, 106, 216, 0.08);
+  }
+
+  &:hover::after {
+    opacity: 0.65;
+    transform: scaleX(1);
+  }
+
+  &--active {
+    color: $scholar;
+    background: transparent;
+    font-weight: 600;
+
+    &::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+
+  &--btn {
+    color: #b02a37;
+
+    &:hover {
+      color: #842029;
+      background: rgba(220, 53, 69, 0.08);
+    }
+  }
 }
 
 .app-nav__cta {
@@ -228,7 +323,7 @@
   color: #fff;
   text-decoration: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #7a6ad8 0%, #6b5bc9 100%);
+  background: linear-gradient(135deg, $scholar 0%, #6b5bc9 100%);
   box-shadow: 0 4px 14px rgba(122, 106, 216, 0.35);
   transition: filter 0.2s ease, transform 0.15s ease;
 }
@@ -242,6 +337,7 @@
   .app-nav__toggle {
     display: flex;
   }
+
   .app-nav__backdrop {
     display: block;
     position: fixed;
@@ -250,6 +346,7 @@
     background: rgba(0, 0, 0, 0.25);
     z-index: 0;
   }
+
   .app-nav__menu {
     display: none;
     position: absolute;
@@ -266,15 +363,28 @@
     gap: 0.15rem;
     z-index: 1;
   }
+
   .app-nav__menu--open {
     display: flex;
   }
+
   .app-nav__link,
   .app-nav__cta {
     justify-content: center;
     border-radius: 10px;
     margin-left: 0;
   }
+
+  .app-nav__link {
+    &::after {
+      display: none;
+    }
+
+    &--active {
+      background: rgba(122, 106, 216, 0.12);
+    }
+  }
+
   .app-nav__avatar-link {
     align-self: center;
     margin: 0.15rem auto 0.35rem;
@@ -282,6 +392,15 @@
   .app-nav__user-menu-wrap {
     width: 100%;
     align-items: stretch;
+  }
+  .app-nav__dropdown {
+    width: 100%;
+  }
+  .app-nav__dropdown-menu {
+    position: static;
+    min-width: 0;
+    box-shadow: none;
+    border-radius: 10px;
   }
   .app-nav__avatar-link--btn {
     align-self: center;
@@ -294,9 +413,15 @@
     border-radius: 10px;
   }
 }
+
 .page-content {
   min-height: calc(100vh - 140px);
   padding-top: 1rem;
+}
+
+.page-content--immersive {
+  min-height: 100vh;
+  padding-top: 0;
 }
 
 .app-footer {
@@ -306,4 +431,32 @@
   font-size: 0.875rem;
   color: #6c757d;
   border-top: 1px solid #eee;
+}
+
+// ── Backoffice nav link (admin only) ─────────────────────────────────────────
+.app-nav__link--backoffice {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: rgba(15, 30, 60, 0.07);
+  border-radius: 8px;
+  font-weight: 600;
+  color: #0f1e3c;
+
+  &:hover {
+    background: rgba(15, 30, 60, 0.13);
+    color: #0f1e3c;
+  }
+
+  &.app-nav__link--active {
+    background: rgba(15, 30, 60, 0.15);
+    color: #0f1e3c;
+  }
+}
+
+.app-nav__link-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: .7;
 }

@@ -167,7 +167,7 @@ export class ChatAssistantComponent implements OnInit, OnDestroy, AfterViewCheck
 
   openCert(id: number): void {
     this.close();
-    this.router.navigate(['/store', id]);
+    this.router.navigate(['/skillhub/store', id]);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

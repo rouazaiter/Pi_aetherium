@@ -70,7 +70,7 @@ export class MockExamComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.certId = Number(this.route.snapshot.paramMap.get('id'));
     const user = this.enrollService.getUser();
-    if (!user) { this.router.navigate(['/store', this.certId]); return; }
+    if (!user) { this.router.navigate(['/skillhub/store', this.certId]); return; }
 
     this.enrollService.getStoreDetail(this.certId).subscribe({
       next: cert => {
@@ -331,8 +331,8 @@ export class MockExamComponent implements OnInit, OnDestroy {
     return this.mockScore >= (this.cert?.passingScore ?? 70);
   }
 
-  goToRealExam(): void { this.router.navigate(['/store', this.certId, 'exam']); }
-  goBack():       void { this.router.navigate(['/store', this.certId]); }
+  goToRealExam(): void { this.router.navigate(['/skillhub/store', this.certId, 'exam']); }
+  goBack():       void { this.router.navigate(['/skillhub/store', this.certId]); }
 
   retryMock(): void {
     this.submitted = false;

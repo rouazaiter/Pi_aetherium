@@ -1,21 +1,23 @@
 import {
-  Component, OnInit, OnDestroy, HostListener, ElementRef, ViewChild, AfterViewInit
+  Component, OnInit, OnDestroy, HostListener,
+  ElementRef, ViewChild, ViewEncapsulation, Renderer2
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ConfirmModalService, ConfirmOptions } from './confirm-modal.service';
 import { NgIf } from '@angular/common';
 
 @Component({
-    selector: 'app-confirm-modal',
-    templateUrl: './confirm-modal.component.html',
-    styleUrls: ['./confirm-modal.component.scss'],
-    standalone: true,
-    imports: [NgIf]
+  selector: 'app-confirm-modal',
+  templateUrl: './confirm-modal.component.html',
+  styleUrls: ['./confirm-modal.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [NgIf]
 })
-export class ConfirmModalComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ConfirmModalComponent implements OnInit, OnDestroy {
 
-  visible  = false;
-  closing  = false;   // triggers close animation before hiding
+  visible = false;
+  closing = false;
 
   title         = '';
   message       = '';
@@ -24,13 +26,22 @@ export class ConfirmModalComponent implements OnInit, OnDestroy, AfterViewInit {
   variant: ConfirmOptions['variant'] = 'danger';
 
   @ViewChild('confirmBtn') confirmBtn!: ElementRef<HTMLButtonElement>;
+  @ViewChild('backdropEl') backdropEl!: ElementRef<HTMLElement>;
 
   private resolve!: (v: boolean) => void;
   private sub!: Subscription;
 
-  constructor(private svc: ConfirmModalService) {}
+  constructor(
+    private svc: ConfirmModalService,
+    private el: ElementRef,
+    private renderer: Renderer2
+  ) {}
 
   ngOnInit(): void {
+    // Move this component's host element directly into <body>
+    // so position:fixed is relative to the viewport, not any overflow:hidden ancestor
+    this.renderer.appendChild(document.body, this.el.nativeElement);
+
     this.sub = this.svc.request$.subscribe(req => {
       this.title        = req.title;
       this.message      = req.message;
@@ -43,9 +54,6 @@ export class ConfirmModalComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {}
-
-  /** Auto-focus the confirm button when modal opens so Enter/Space works. */
   onBackdropAnimated(): void {
     setTimeout(() => this.confirmBtn?.nativeElement?.focus(), 50);
   }
@@ -55,7 +63,6 @@ export class ConfirmModalComponent implements OnInit, OnDestroy, AfterViewInit {
 
   answer(value: boolean): void {
     this.closing = true;
-    // Wait for close animation then hide
     setTimeout(() => {
       this.visible = false;
       this.closing = false;

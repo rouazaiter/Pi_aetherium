@@ -47,70 +47,25 @@
       <!-- Step indicator -->
       <div class="steps" *ngIf="step !== 'processing' && step !== 'done'">
         <div class="step"
-             [class.step--active]="step === 'email'"
-             [class.step--done]="step === 'payment' || step === 'verify'">
-          <span class="step-num">{{ (step === 'payment' || step === 'verify') ? '✓' : '1' }}</span>
-          <span>Your Info</span>
-        </div>
-        <div class="step-line" *ngIf="cert.price > 0"></div>
-        <div class="step"
              [class.step--active]="step === 'payment'"
-             [class.step--done]="step === 'verify'"
-             *ngIf="cert.price > 0">
-          <span class="step-num">{{ step === 'verify' ? '✓' : '2' }}</span>
+             [class.step--done]="step === 'verify'">
+          <span class="step-num">{{ step === 'verify' ? '✓' : '1' }}</span>
           <span>Payment</span>
         </div>
         <div class="step-line"></div>
         <div class="step" [class.step--active]="step === 'verify'">
-          <span class="step-num">{{ cert.price > 0 ? '3' : '2' }}</span>
+          <span class="step-num">2</span>
           <span>Verify Email</span>
         </div>
       </div>
 
-      <div *ngIf="error" class="co-error">{{ error }}</div>
-
-      <!-- ── Step 1: Email + Name ──────────────────────────────────────── -->
-      <div *ngIf="step === 'email'" class="co-step">
-        <h3>{{ cert.price > 0 ? 'Your Information' : 'Enroll for Free' }}</h3>
-        <p class="co-step-desc">
-          {{ cert.price > 0
-            ? 'Enter your details to proceed to secure payment.'
-            : 'Enter your details to enroll instantly.' }}
-        </p>
-
-        <div class="co-field">
-          <label>Full Name</label>
-          <input type="text" [(ngModel)]="fullName" class="co-input"
-                 placeholder="e.g. John Smith"
-                 (keyup.enter)="confirmEmail()" />
-        </div>
-        <div class="co-field">
-          <label>Email Address</label>
-          <input type="email" [(ngModel)]="userIdentifier" class="co-input"
-                 placeholder="you@example.com"
-                 (keyup.enter)="confirmEmail()" />
-        </div>
-        <div class="co-field">
-          <label>
-            Phone Number
-            <span class="co-field-optional">optional — for SMS payment confirmation</span>
-          </label>
-          <div class="co-phone-wrap">
-            <span class="co-phone-prefix">📱</span>
-            <input type="tel" [(ngModel)]="phoneNumber" class="co-input co-input--phone"
-                   placeholder="+21612345678"
-                   (keyup.enter)="confirmEmail()" />
-          </div>
-          <span class="co-field-hint">International format · e.g. +1 555 000 1234 or +216 12 345 678</span>
-        </div>
-
-        <button class="co-btn co-btn--primary" (click)="confirmEmail()" [disabled]="processing">
-          <span *ngIf="!processing">
-            {{ cert.price > 0 ? 'Continue to Payment →' : '🎓 Enroll for Free' }}
-          </span>
-          <span *ngIf="processing" class="btn-loading"><span class="spinner"></span> Checking…</span>
-        </button>
+      <!-- Loading while checking enrollment -->
+      <div *ngIf="step === 'payment_ready' && processing" class="co-step co-step--center">
+        <div class="spinner spinner--lg"></div>
+        <p class="co-step-desc">Checking your enrollment…</p>
       </div>
+
+      <div *ngIf="error" class="co-error">{{ error }}</div>
 
       <!-- ── Step 2: Stripe Payment ────────────────────────────────────── -->
       <div *ngIf="step === 'payment'" class="co-step">
@@ -118,6 +73,27 @@
         <p class="co-step-desc">
           Enrolling as <strong>{{ fullName }}</strong> · <span class="email-sm">{{ userIdentifier }}</span>
         </p>
+
+        <!-- Optional phone number -->
+        <div class="co-field">
+          <label>
+            Phone Number
+            <span class="co-field-optional">optional</span>
+          </label>
+          <div class="co-phone-wrap">
+            <span class="co-phone-prefix">📱</span>
+            <input
+              type="tel"
+              class="co-input co-input--phone"
+              [(ngModel)]="phoneNumber"
+              placeholder="+1 234 567 8900"
+              autocomplete="tel"
+            />
+          </div>
+          <span class="co-field-hint">
+            If provided, you'll receive an SMS confirmation after payment.
+          </span>
+        </div>
 
         <!-- Stripe loading -->
         <div *ngIf="stripeLoading" class="stripe-loading">
@@ -149,7 +125,7 @@
           <span>· 256-bit SSL encryption</span>
         </div>
 
-        <button class="co-btn-link" (click)="step = 'email'">← Change details</button>
+        <button class="co-btn-link" (click)="goBack()">← Change details</button>
       </div>
 
       <!-- ── Step 3: Email Verification ───────────────────────────────── -->
@@ -189,7 +165,7 @@
           </button>
         </div>
 
-        <button class="co-btn-link" (click)="step = cert.price > 0 ? 'payment' : 'email'">
+        <button class="co-btn-link" (click)="step = cert.price > 0 ? 'payment' : 'verify'">
           ← Go back
         </button>
       </div>

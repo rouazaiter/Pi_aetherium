@@ -1,0 +1,102 @@
+<section class="detail-page">
+  <div class="detail-shell">
+    <button type="button" class="detail-back" (click)="backToExplore()">Back to Explore</button>
+
+    @if (loading) {
+      <section class="detail-card detail-state">
+        <p>Loading collection...</p>
+      </section>
+    } @else if (errorMessage) {
+      <section class="detail-card detail-state">
+        <p class="detail-error">{{ errorMessage }}</p>
+      </section>
+    } @else if (detail) {
+      <section class="detail-card">
+        <div class="detail-top">
+          <div>
+            <div class="detail-top__head">
+              <h1>{{ title() }}</h1>
+              <span [class]="visibilityBadgeClass(detail.visibility ?? detail.portfolio?.visibility)">
+                {{ visibilityBadge(detail.visibility ?? detail.portfolio?.visibility) }}
+              </span>
+            </div>
+            <p class="detail-body">{{ detail.description || 'No collection description available.' }}</p>
+          </div>
+
+          <div class="detail-owner">
+            <div class="detail-avatar">
+              @if (profileImage()) {
+                <img [src]="profileImage()" [alt]="ownerName()" />
+              } @else {
+                <span>{{ ownerName().slice(0, 2).toUpperCase() }}</span>
+              }
+            </div>
+            <div>
+              <strong>{{ ownerName() }}</strong>
+              <p>{{ detail.ownerUsername || detail.owner?.username }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-grid">
+        <section class="detail-card">
+          <h2>Collection details</h2>
+          <div class="detail-stats">
+            <div>
+              <strong>{{ detail.projectCount ?? projects().length }}</strong>
+              <span>Projects</span>
+            </div>
+          </div>
+
+          <div class="detail-chip-row">
+            @for (skill of skills(); track skill.id) {
+              <span class="detail-chip">{{ skill.name }}</span>
+            }
+          </div>
+
+          <div class="detail-actions">
+            <button type="button" class="detail-secondary" (click)="openOwnerPortfolio()">View owner portfolio</button>
+          </div>
+        </section>
+
+        <section class="detail-card">
+          <h2>Preview</h2>
+          <div class="detail-media">
+            @if (detail.mediaType === 'VIDEO' && detail.mediaUrl) {
+              <video [src]="detail.mediaUrl" controls playsinline></video>
+            } @else if (detail.mediaUrl) {
+              <img [src]="detail.mediaUrl" [alt]="title()" />
+            } @else {
+              <div class="detail-media__placeholder">No media preview available.</div>
+            }
+          </div>
+        </section>
+      </section>
+
+      <section class="detail-card">
+        <h2>Projects in this collection</h2>
+        @if (projects().length > 0) {
+          <div class="detail-project-grid">
+            @for (project of projects(); track project.projectId) {
+              <article class="detail-subcard">
+                <h3>{{ project.title || 'Untitled project' }}</h3>
+                <p>{{ project.description || 'No project description available.' }}</p>
+
+                <div class="detail-chip-row">
+                  @for (skill of project.topSkills; track skill.id) {
+                    <span class="detail-chip">{{ skill.name }}</span>
+                  }
+                </div>
+
+                <button type="button" class="detail-secondary" (click)="openProject(project.projectId)">View Project</button>
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="detail-body">No visible projects in this collection.</p>
+        }
+      </section>
+    }
+  </div>
+</section>

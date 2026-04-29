@@ -52,7 +52,7 @@ export class StoreResultComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.certId = Number(this.route.snapshot.paramMap.get('id'));
     const user = this.enrollService.getUser();
-    if (!user) { this.router.navigate(['/store', this.certId]); return; }
+    if (!user) { this.router.navigate(['/skillhub/store', this.certId]); return; }
 
     this.enrollService.getEnrollment(this.certId, user).subscribe({
       next: e => {
@@ -129,7 +129,7 @@ export class StoreResultComponent implements OnInit, OnDestroy {
     if (!this.enrollment || this.isCooldownActive) return;
     const user = this.enrollService.getUser();
     this.enrollService.retryExam(this.certId, user).subscribe({
-      next: () => this.router.navigate(['/store', this.certId, 'exam']),
+      next: () => this.router.navigate(['/skillhub/store', this.certId, 'exam']),
       error: e => {
         const msg: string = e?.error?.message || '';
         // Parse cooldown error: "COOLDOWN:<isoDate>:<human message>"

@@ -1,90 +1,195 @@
-<header class="app-nav">
-  <div class="container app-nav__inner">
-    <a routerLink="/" class="app-nav__brand" (click)="closeNav()">
-      <span class="app-nav__brand-mark">S</span>
-      <span class="app-nav__brand-text">SkillHub</span>
-    </a>
-
-    <button
-      type="button"
-      class="app-nav__toggle"
-      [class.app-nav__toggle--open]="navOpen()"
-      [attr.aria-expanded]="navOpen()"
-      aria-controls="app-nav-menu"
-      aria-label="Ouvrir ou fermer le menu"
-      (click)="toggleNav()"
-    >
-      <span class="app-nav__toggle-bar"></span>
-      <span class="app-nav__toggle-bar"></span>
-      <span class="app-nav__toggle-bar"></span>
-    </button>
-
-    @if (navOpen()) {
-      <div class="app-nav__backdrop" (click)="closeNav()" aria-hidden="true"></div>
-    }
-
-    <nav id="app-nav-menu" class="app-nav__menu" [class.app-nav__menu--open]="navOpen()">
-      <a
-        routerLink="/"
-        routerLinkActive="app-nav__link--active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="app-nav__link"
-        (click)="closeNav()"
-      >
-        Accueil
+@if (!isImmersiveRoute()) {
+  <header class="app-nav">
+    <div class="container app-nav__inner">
+      <a routerLink="/" class="app-nav__brand" (click)="closeNav()">
+        <span class="app-nav__brand-mark">S</span>
+        <span class="app-nav__brand-text">Scholar</span>
       </a>
 
-      @if (auth.isLoggedIn()) {
-        <div class="app-nav__user-menu-wrap">
+      <button
+        type="button"
+        class="app-nav__toggle"
+        [class.app-nav__toggle--open]="navOpen()"
+        [attr.aria-expanded]="navOpen()"
+        aria-controls="app-nav-menu"
+        aria-label="Ouvrir ou fermer le menu"
+        (click)="toggleNav()"
+      >
+        <span class="app-nav__toggle-bar"></span>
+        <span class="app-nav__toggle-bar"></span>
+        <span class="app-nav__toggle-bar"></span>
+      </button>
+
+      @if (navOpen()) {
+        <div class="app-nav__backdrop" (click)="closeNav()" aria-hidden="true"></div>
+      }
+
+      <nav id="app-nav-menu" class="app-nav__menu" [class.app-nav__menu--open]="navOpen()">
+        <a
+          routerLink="/"
+          routerLinkActive="app-nav__link--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="app-nav__link"
+          (click)="closeNav()"
+        >
+          Accueil
+        </a>
+
+        <div class="app-nav__dropdown app-nav__dropdown--portfolio">
           <button
             type="button"
-            class="app-nav__avatar-link app-nav__avatar-link--btn"
-            [attr.aria-label]="'Ouvrir le menu utilisateur'"
-            [attr.aria-expanded]="userMenuOpen()"
-            (click)="toggleUserMenu()"
+            class="app-nav__link app-nav__dropdown-toggle"
+            [class.app-nav__link--active]="isPortfolioMenuActive()"
+            [attr.aria-expanded]="portfolioMenuOpen()"
+            aria-haspopup="menu"
+            (click)="togglePortfolioMenu()"
           >
-            @if (navAvatarUrl() && !navAvatarImgError()) {
-              <img [src]="navAvatarUrl()" alt="" (error)="navAvatarImgError.set(true)" />
-            } @else {
-              <span class="app-nav__avatar-fallback">{{ navAvatarInitials() }}</span>
-            }
+            Portfolio
           </button>
 
-          @if (userMenuOpen()) {
-            <div class="app-nav__user-menu">
-              <a routerLink="/profile" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Profil</a>
-              <a routerLink="/subscriptions" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Abonnements</a>
-              <a routerLink="/friends" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Amis</a>
-              <a routerLink="/social-hub" routerLinkActive="app-nav__link--active" class="app-nav__link app-nav__social-link" (click)="closeNav()">
-                Social Hub
-                @if (mentorshipPendingCount() > 0) {
-                  <span class="app-nav__badge">{{ mentorshipPendingCount() }}</span>
-                }
+          @if (portfolioMenuOpen()) {
+            <div class="app-nav__dropdown-menu" role="menu">
+              <a routerLink="/jihen-portfolio" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                My Portfolio
               </a>
-              <a routerLink="/reclamation" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Réclamation</a>
-              @if (auth.auth()?.role === 'admin') {
-                <a routerLink="/admin/reclamations" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
-                  Admin réclamations
-                </a>
-              }
-              <button type="button" class="app-nav__link app-nav__link--btn" (click)="logout(); closeNav()">Déconnexion</button>
-            </div>
-          }
+              <a routerLink="/explore" routerLinkActive="app-nav__link--active" class="app-nav__link app-nav__dropdown-link" (click)="closeNav()">
+                <svg class="app-nav__dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M14.5 9.5 9 12l2.5 5.5L15 13l4-1.5L20.5 4 14.5 9.5Zm-2.09 3.41-.95 2.09-.95-2.09L8.41 12l2.09-.95.95-2.09.95 2.09 2.09.95-2.09.91ZM5 19l3.4-7.6L16 8l-7.4 3.4L5 19Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span>Explore</span>
+              </a>
+              <a routerLink="/portfolio-mentor" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                Portfolio Mentor
+              </a>
+              @if (myPortfolio3dLink()) {
+              <a [routerLink]="myPortfolio3dLink()" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                3D
+              </a>
+            }
+          </div>
+        }
         </div>
-      } @else {
-        <a routerLink="/login" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Connexion</a>
-        <a routerLink="/register" routerLinkActive="app-nav__link--active" class="app-nav__cta" (click)="closeNav()">Inscription</a>
-      }
-    </nav>
-  </div>
-</header>
 
-<main class="page-content">
+        <!-- ── Backoffice (admin only) ── -->
+        @if (auth.isLoggedIn() && auth.auth()?.role === 'admin') {
+          <a
+            routerLink="/skillhub/dashboard"
+            routerLinkActive="app-nav__link--active"
+            class="app-nav__link app-nav__link--backoffice"
+            (click)="closeNav()"
+          >
+            <svg viewBox="0 0 24 24" class="app-nav__link-icon" aria-hidden="true">
+              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
+            </svg>
+            Backoffice
+          </a>
+        }
+
+        <!-- ── Certifications dropdown (regular users only) ── -->
+        @if (auth.isLoggedIn() && auth.auth()?.role !== 'admin') {
+          <div class="app-nav__dropdown app-nav__dropdown--cert">
+            <button
+              type="button"
+              class="app-nav__link app-nav__dropdown-toggle"
+              [class.app-nav__link--active]="isCertMenuActive()"
+              [attr.aria-expanded]="certMenuOpen()"
+              aria-haspopup="menu"
+              (click)="toggleCertMenu()"
+            >
+              🎓 Certifications
+            </button>
+
+            @if (certMenuOpen()) {
+              <div class="app-nav__dropdown-menu" role="menu">
+                <a routerLink="/skillhub/store"
+                   routerLinkActive="app-nav__link--active"
+                   class="app-nav__link app-nav__dropdown-link"
+                   (click)="closeNav()">
+                  <svg class="app-nav__dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM5.2 5H3V3H1v2h2l3.6 7.6L5.2 15c-.1.3-.2.6-.2.9C5 17.1 5.9 18 7 18h14v-2H7.4c-.1 0-.2-.1-.2-.2l.1-.3.9-1.5H19c.8 0 1.4-.4 1.8-1l3.6-6.5c.4-.7-.1-1.5-.9-1.5H5.2z" fill="currentColor"/>
+                  </svg>
+                  <span>Store</span>
+                </a>
+                <a routerLink="/skillhub/store/my"
+                   routerLinkActive="app-nav__link--active"
+                   class="app-nav__link app-nav__dropdown-link"
+                   (click)="closeNav()">
+                  <svg class="app-nav__dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15h8v2H8zm0-4h8v2H8z" fill="currentColor"/>
+                  </svg>
+                  <span>My Certifications</span>
+                </a>
+                <a routerLink="/skillhub/verify"
+                   routerLinkActive="app-nav__link--active"
+                   class="app-nav__link app-nav__dropdown-link"
+                   (click)="closeNav()">
+                  <svg class="app-nav__dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+                  </svg>
+                  <span>Verify Certificate</span>
+                </a>
+              </div>
+            }
+          </div>
+        }
+        @if (auth.isLoggedIn()) {
+          <div class="app-nav__user-menu-wrap">
+            <button
+              type="button"
+              class="app-nav__avatar-link app-nav__avatar-link--btn"
+              [attr.aria-label]="'Ouvrir le menu utilisateur'"
+              [attr.aria-expanded]="userMenuOpen()"
+              (click)="toggleUserMenu()"
+            >
+              @if (navAvatarUrl() && !navAvatarImgError()) {
+                <img [src]="navAvatarUrl()" alt="" (error)="navAvatarImgError.set(true)" />
+              } @else {
+                <span class="app-nav__avatar-fallback">{{ navAvatarInitials() }}</span>
+              }
+            </button>
+
+            @if (userMenuOpen()) {
+              <div class="app-nav__user-menu">
+                <a routerLink="/profile" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Profil</a>
+                <a routerLink="/subscriptions" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Abonnements</a>
+                <a routerLink="/friends" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Amis</a>
+                <a routerLink="/social-hub" routerLinkActive="app-nav__link--active" class="app-nav__link app-nav__social-link" (click)="closeNav()">
+                  Social Hub
+                  @if (mentorshipPendingCount() > 0) {
+                    <span class="app-nav__badge">{{ mentorshipPendingCount() }}</span>
+                  }
+                </a>
+                <a routerLink="/reclamation" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Réclamation</a>
+                @if (auth.auth()?.role === 'admin') {
+                  <a routerLink="/admin/reclamations" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                    Admin réclamations
+                  </a>
+                }
+                <button type="button" class="app-nav__link app-nav__link--btn" (click)="logout(); closeNav()">Déconnexion</button>
+              </div>
+            }
+          </div>
+        } @else {
+          <a routerLink="/login" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Connexion</a>
+          <a routerLink="/register" routerLinkActive="app-nav__link--active" class="app-nav__cta" (click)="closeNav()">Inscription</a>
+        }
+      </nav>
+    </div>
+  </header>
+}
+
+<main class="page-content" [class.page-content--immersive]="isImmersiveRoute()">
   <router-outlet />
 </main>
 
-<footer class="app-footer">
-  <div class="container">Plateforme éducative</div>
-</footer>
+@if (!isImmersiveRoute() && !isSkillhubRoute()) {
+  <footer class="app-footer">
+    <div class="container">Plateforme éducative</div>
+  </footer>
+}
 
 <app-welcome-dialog />
+<app-confirm-modal />

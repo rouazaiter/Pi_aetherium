@@ -3,27 +3,37 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, Subscription } from 'rxjs';
 import { environment } from '../environments/environment';
 import { WelcomeDialogComponent } from './components/welcome-dialog/welcome-dialog.component';
+import { ConfirmModalComponent } from './components/certification/shared/confirm-modal/confirm-modal.component';
 import { resolvePresetProfilePicture } from './core/data/preset-avatars';
 import { AuthService } from './core/services/auth.service';
+import { JihenPortfolioService } from './core/services/jihen-portfolio.service';
 import { SocialGraphService } from './core/services/social-graph.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, WelcomeDialogComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, WelcomeDialogComponent, ConfirmModalComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit, OnDestroy {
   protected readonly auth = inject(AuthService);
   private readonly socialGraph = inject(SocialGraphService);
+  private readonly portfolioService = inject(JihenPortfolioService);
   private readonly router = inject(Router);
   private navSub?: Subscription;
+  private portfolioRouteSub?: Subscription;
+  private lastPortfolioOwnerId: number | null = null;
 
   /** Menu mobile ouvert. */
   readonly navOpen = signal(false);
+  /** Dropdown portfolio ouvert (desktop/mobile). */
+  readonly portfolioMenuOpen = signal(false);
+  /** Dropdown certifications ouvert (regular users). */
+  readonly certMenuOpen = signal(false);
   /** Dropdown utilisateur ouvert (desktop/mobile). */
   readonly userMenuOpen = signal(false);
+  readonly myPortfolio3dLink = signal<string | null>(null);
 
   /** Photo de profil dans la barre : repasse Ã  false si lâ€™URL change. */
   protected readonly navAvatarImgError = signal(false);
@@ -38,56 +48,98 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.navSub = this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
       this.navOpen.set(false);
+      this.portfolioMenuOpen.set(false);
+      this.certMenuOpen.set(false);
+      this.userMenuOpen.set(false);
       this.refreshMentorshipBadge();
+      this.refreshPortfolio3dLink();
     });
     this.refreshMentorshipBadge();
+    this.refreshPortfolio3dLink();
   }
 
   ngOnDestroy(): void {
     this.navSub?.unsubscribe();
+    this.portfolioRouteSub?.unsubscribe();
   }
 
   toggleNav(): void {
+    this.portfolioMenuOpen.set(false);
+    this.certMenuOpen.set(false);
     this.userMenuOpen.set(false);
     this.navOpen.update((v) => !v);
   }
 
   closeNav(): void {
     this.navOpen.set(false);
+    this.portfolioMenuOpen.set(false);
+    this.certMenuOpen.set(false);
     this.userMenuOpen.set(false);
   }
 
+  togglePortfolioMenu(): void {
+    this.certMenuOpen.set(false);
+    this.userMenuOpen.set(false);
+    this.portfolioMenuOpen.update((v) => !v);
+  }
+
+  closePortfolioMenu(): void { this.portfolioMenuOpen.set(false); }
+
+  toggleCertMenu(): void {
+    this.portfolioMenuOpen.set(false);
+    this.userMenuOpen.set(false);
+    this.certMenuOpen.update((v) => !v);
+  }
+
+  closeCertMenu(): void { this.certMenuOpen.set(false); }
+
   toggleUserMenu(): void {
+    this.portfolioMenuOpen.set(false);
+    this.certMenuOpen.set(false);
     this.userMenuOpen.update((v) => !v);
   }
 
-  closeUserMenu(): void {
-    this.userMenuOpen.set(false);
-  }
+  closeUserMenu(): void { this.userMenuOpen.set(false); }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.userMenuOpen()) {
-      return;
-    }
+    if (!this.userMenuOpen() && !this.portfolioMenuOpen() && !this.certMenuOpen()) return;
     const target = event.target;
     if (!(target instanceof Element)) {
-      this.closeUserMenu();
-      return;
+      this.closePortfolioMenu(); this.closeCertMenu(); this.closeUserMenu(); return;
     }
-    if (!target.closest('.app-nav__user-menu-wrap')) {
-      this.closeUserMenu();
-    }
+    if (this.portfolioMenuOpen() && !target.closest('.app-nav__dropdown--portfolio')) this.closePortfolioMenu();
+    if (this.certMenuOpen() && !target.closest('.app-nav__dropdown--cert')) this.closeCertMenu();
+    if (!target.closest('.app-nav__user-menu-wrap')) this.closeUserMenu();
   }
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    this.closeUserMenu();
+    this.closePortfolioMenu(); this.closeCertMenu(); this.closeUserMenu();
+  }
+
+  protected isCertMenuActive(): boolean {
+    return this.router.url.startsWith('/skillhub');
   }
 
   logout(): void {
     this.auth.logout();
     this.mentorshipPendingCount.set(0);
+    this.lastPortfolioOwnerId = null;
+    this.myPortfolio3dLink.set(null);
+  }
+
+  protected isPortfolioMenuActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/jihen-portfolio') || url.startsWith('/portfolio-mentor') || url.startsWith('/explore');
+  }
+
+  protected isSkillhubRoute(): boolean {
+    return this.router.url.startsWith('/skillhub');
+  }
+
+  protected isImmersiveRoute(): boolean {
+    return this.router.url.startsWith('/jihen-portfolio-3d/');
   }
 
   protected refreshMentorshipBadge(): void {
@@ -123,6 +175,32 @@ export class AppComponent implements OnInit, OnDestroy {
   protected navAvatarInitials(): string {
     const u = this.auth.auth()?.username?.trim();
     return u ? u.slice(0, 2).toUpperCase() : '?';
+  }
+
+  private refreshPortfolio3dLink(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.portfolioRouteSub?.unsubscribe();
+      this.lastPortfolioOwnerId = null;
+      this.myPortfolio3dLink.set(null);
+      return;
+    }
+
+    const ownerId = this.auth.auth()?.userId ?? null;
+    if (ownerId && ownerId === this.lastPortfolioOwnerId && this.myPortfolio3dLink()) {
+      return;
+    }
+
+    this.portfolioRouteSub?.unsubscribe();
+    this.lastPortfolioOwnerId = ownerId;
+    this.portfolioRouteSub = this.portfolioService.getMyPortfolio().subscribe({
+      next: (response) => {
+        const portfolioId = response.portfolio?.id;
+        this.myPortfolio3dLink.set(portfolioId ? `/jihen-portfolio-3d/${portfolioId}` : null);
+      },
+      error: () => {
+        this.myPortfolio3dLink.set(null);
+      },
+    });
   }
 }
 

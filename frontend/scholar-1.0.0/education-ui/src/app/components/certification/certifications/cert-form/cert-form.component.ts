@@ -199,7 +199,7 @@ export class CertFormComponent implements OnInit {
     obs.subscribe({
       next: cert => {
         this.toast.success(this.isEdit ? 'Certification updated' : 'Certification created');
-        this.router.navigate(['/certifications', cert.id]);
+        this.router.navigate(['/skillhub/certifications', cert.id]);
       },
       error: e => { this.error = e.message; this.loading = false; }
     });
@@ -214,7 +214,7 @@ export class CertFormComponent implements OnInit {
     this.certService.generateFromLlm(this.llmReq).subscribe({
       next: cert => {
         this.toast.success(`"${cert.title}" generated successfully with ${this.llmReq.numberOfQuestions} questions`);
-        this.router.navigate(['/certifications', cert.id]);
+        this.router.navigate(['/skillhub/certifications', cert.id]);
       },
       error: e => {
         this.error = e.message;
@@ -235,7 +235,7 @@ export class CertFormComponent implements OnInit {
     this.certService.importFromPdf(this.selectedFile).subscribe({
       next: cert => {
         this.toast.success(`"${cert.title}" imported successfully`);
-        this.router.navigate(['/certifications', cert.id]);
+        this.router.navigate(['/skillhub/certifications', cert.id]);
       },
       error: e => {
         this.error = e.message;

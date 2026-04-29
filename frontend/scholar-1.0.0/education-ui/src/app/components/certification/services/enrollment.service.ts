@@ -3,12 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EnrollmentDTO, ExamResultDTO, SubmitExamRequest } from '../models/enrollment.model';
 import { Certification, CertificationDetail } from '../models/certification.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class EnrollmentService {
   private base = 'http://localhost:8089/api/store';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   getStore(): Observable<Certification[]> {
     return this.http.get<Certification[]>(this.base);
@@ -84,12 +85,19 @@ export class EnrollmentService {
     });
   }
 
-  // Simple local storage for user identity (no auth)
+  // ── User identity — reads from Pi_aetherium session ──────────────────────
+  /** Returns the logged-in user's email from the Pi_aetherium JWT session. */
   getUser(): string {
-    return localStorage.getItem('skillhub_user') ?? '';
+    return this.authService.auth()?.email ?? '';
   }
 
-  setUser(name: string): void {
-    localStorage.setItem('skillhub_user', name);
+  /** Returns the logged-in user's full name from the session. */
+  getUserFullName(): string {
+    return this.authService.auth()?.username ?? '';
+  }
+
+  /** No-op — user identity now comes from the JWT session, not localStorage. */
+  setUser(_name: string): void {
+    // Identity is managed by AuthService — nothing to store manually
   }
 }

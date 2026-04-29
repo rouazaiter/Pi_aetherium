@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CertificationService } from '../../services/certification.service';
 import {
@@ -31,6 +31,7 @@ const OPTION_TYPES: QuestionType[] = ['MCQ', 'MULTI_SELECT', 'SCENARIO', 'CODE',
     selector: 'app-cert-detail',
     templateUrl: './cert-detail.component.html',
     styleUrls: ['./cert-detail.component.scss'],
+    encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [NgIf, NgFor, RouterLink, FormsModule, SlicePipe, CurrencyPipe]
 })

@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*",
-        methods = {RequestMethod.POST, RequestMethod.OPTIONS})
 public class ChatAssistantController {
 
     private final CertificationRepository certificationRepository;

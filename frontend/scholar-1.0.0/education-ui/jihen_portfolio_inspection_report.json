@@ -1,0 +1,69 @@
+{
+  "rendering": {
+    "path": "/jihen-portfolio",
+    "title": "hayacv",
+    "hasHero": true,
+    "hasSidebar": true,
+    "hasSkillsSection": false,
+    "hasProjectsSection": true,
+    "hasCollectionsSection": true,
+    "blankPanels": 0
+  },
+  "skillsPage": {
+    "title": "Mes compétences",
+    "categoryCards": 2,
+    "skillTokens": 2,
+    "searchVisible": true
+  },
+  "skillsModal": {
+    "open": false,
+    "categoryCount": 0,
+    "categories": []
+  },
+  "skillCategoryFilter": {
+    "selectedCategory": "",
+    "visibleSkills": []
+  },
+  "skillSearch": {
+    "term": "",
+    "visibleSkills": []
+  },
+  "saveFlow": {
+    "initialSkillNames": [
+      "Java",
+      "openstack"
+    ],
+    "candidateSkill": "",
+    "putBodies": [],
+    "afterSaveSkillNames": [],
+    "afterRestoreSkillNames": [],
+    "restored": false
+  },
+  "projectModal": {
+    "open": true,
+    "hasTitleField": true,
+    "hasVisibilityField": true
+  },
+  "collectionModal": {
+    "open": true,
+    "hasNameField": true,
+    "projectOptions": 7
+  },
+  "editPortfolioModal": {
+    "open": true,
+    "hasTitleField": true,
+    "hasVisibilityField": true
+  },
+  "deleteConfirmModal": {
+    "open": true,
+    "message": "Êtes-vous sûre de vouloir supprimer ce projet ?"
+  },
+  "console": {
+    "errors": [
+      "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+    ],
+    "warnings": [],
+    "failedApiCalls": [],
+    "relevantRequests": []
+  }
+}

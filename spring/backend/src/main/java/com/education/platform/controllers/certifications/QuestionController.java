@@ -9,11 +9,12 @@ import com.education.platform.services.implementations.certifications.QuestionSe
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api/questions")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class QuestionController {
 
     private final QuestionService questionService;

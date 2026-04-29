@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*",
-        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 public class FeedbackController {
 
     private final ExamFeedbackRepository feedbackRepo;

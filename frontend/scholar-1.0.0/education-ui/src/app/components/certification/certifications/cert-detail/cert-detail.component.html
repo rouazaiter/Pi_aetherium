@@ -16,7 +16,7 @@
 
   <!-- Breadcrumb -->
   <nav class="breadcrumb">
-    <a routerLink="/certifications">Certifications</a>
+    <a routerLink="/skillhub/certifications">Certifications</a>
     <span class="bc-sep">›</span>
     <span>{{ cert.title }}</span>
   </nav>
@@ -33,8 +33,8 @@
       <p class="cert-desc">{{ cert.description }}</p>
     </div>
     <div class="header-actions">
-      <a [routerLink]="['/certifications', cert.id, 'edit']" class="btn btn-outline">✏️ Edit Info</a>
-      <a routerLink="/certifications" class="btn btn-ghost">← Back</a>
+      <a [routerLink]="['/skillhub/certifications', cert.id, 'edit']" class="btn btn-outline">✏️ Edit Info</a>
+      <a routerLink="/skillhub/certifications" class="btn btn-ghost">← Back</a>
     </div>
   </div>
 

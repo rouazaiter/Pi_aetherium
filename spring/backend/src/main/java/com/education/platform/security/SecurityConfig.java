@@ -38,9 +38,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        // ── SkillHub certification endpoints (public) ──────
+
+                        // ── Certification ADMIN endpoints (require ADMIN role) ──
+                        // Mutating certifications, exams, questions → admin only
+                        .requestMatchers(HttpMethod.POST,   "/api/certifications/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/certifications/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/certifications/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,   "/api/questions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/questions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/questions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,   "/api/exams/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/exams/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/exams/**").hasRole("ADMIN")
+
+                        // ── Certification PUBLIC endpoints (store, enroll, exam, verify) ──
+                        .requestMatchers(HttpMethod.GET,  "/api/certifications/**").permitAll()
                         .requestMatchers("/api/store/**").permitAll()
-                        .requestMatchers("/api/certifications/**").permitAll()
                         .requestMatchers("/api/enrollments/**").permitAll()
                         .requestMatchers("/api/analytics/**").permitAll()
                         .requestMatchers("/api/feedback/**").permitAll()
@@ -49,9 +62,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/chat/**").permitAll()
                         .requestMatchers("/api/questions/**").permitAll()
                         .requestMatchers("/api/webhooks/**").permitAll()
-                        // ─────────────────────────────────────────────────
+
+                        // ── Static files ──────────────────────────────────
                         .requestMatchers(HttpMethod.GET, "/api/files/profile-pictures/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/files/voice-messages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/files/portfolio-media/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )

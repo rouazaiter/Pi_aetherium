@@ -1,0 +1,419 @@
+<!-- Jihen Portfolio Admin -->
+
+<section class="admin-page">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar__brand">
+      <span class="admin-sidebar__badge">JP</span>
+      <div>
+        <h1>Jihen Portfolio Admin</h1>
+        <p>Portfolio ecosystem control</p>
+      </div>
+    </div>
+
+    <nav class="admin-sidebar__nav">
+      @for (item of sidebarItems; track item.label) {
+        <button
+          type="button"
+          class="admin-sidebar__link"
+          [class.admin-sidebar__link--active]="item.tab === activeTab"
+          [class.admin-sidebar__link--muted]="!item.tab"
+          (click)="selectTab(item.tab)">
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+  </aside>
+
+  <section class="admin-content">
+    <header class="admin-header">
+      <div>
+        <h2>{{ activeTab === 'overview' ? 'Portfolio Admin Dashboard' : 'Projects' }}</h2>
+        <p>
+          {{
+            activeTab === 'overview'
+              ? 'Manage and monitor the portfolio ecosystem'
+              : 'Review, moderate, and manage portfolio projects.'
+          }}
+        </p>
+      </div>
+
+      <div class="admin-header__tools">
+        <label class="admin-search">
+          <span>Q</span>
+          @if (activeTab === 'overview') {
+            <input type="search" placeholder="Search recent items..." [(ngModel)]="overviewSearch" />
+          } @else {
+            <input type="search" placeholder="Search projects..." [(ngModel)]="projectSearch" />
+          }
+        </label>
+        <button type="button" class="admin-icon-btn">N</button>
+        <div class="admin-avatar">JA</div>
+      </div>
+    </header>
+
+    @if (activeTab === 'overview') {
+      @if (overviewError) {
+        <section class="admin-card admin-state">
+          <p>{{ overviewError }}</p>
+        </section>
+      } @else if (overviewLoading) {
+        <section class="admin-card admin-state">
+          <p>Loading overview...</p>
+        </section>
+      } @else {
+        <section class="admin-stats">
+          @for (card of statCards(); track card.label) {
+            <article class="admin-card admin-stat">
+              <div class="admin-stat__top">
+                <span class="admin-stat__icon">{{ card.icon }}</span>
+                @if (card.growth !== null) {
+                  <span class="admin-stat__growth">{{ card.growth }}%</span>
+                }
+              </div>
+              <strong>{{ card.value }}</strong>
+              <h3>{{ card.label }}</h3>
+              <p>vs last month</p>
+            </article>
+          }
+        </section>
+
+        <section class="admin-grid admin-grid--overview">
+          <article class="admin-card admin-card--chart">
+            <div class="admin-card__head">
+              <div>
+                <h3>Activity Overview</h3>
+                <p>Portfolios, projects, and collections over time</p>
+              </div>
+
+              <select [(ngModel)]="activityRange" (ngModelChange)="onActivityRangeChange($event)">
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+              </select>
+            </div>
+
+            @if (activityRows.length > 0) {
+              <div class="admin-chart">
+                <svg viewBox="0 0 640 220" preserveAspectRatio="none" aria-label="Activity overview chart">
+                  <path class="admin-chart__line admin-chart__line--portfolios" [attr.d]="linePath('portfolios')"></path>
+                  <path class="admin-chart__line admin-chart__line--projects" [attr.d]="linePath('projects')"></path>
+                  <path class="admin-chart__line admin-chart__line--collections" [attr.d]="linePath('collections')"></path>
+
+                  @for (point of activityRows; track point.label; let i = $index) {
+                    <circle class="admin-chart__dot admin-chart__dot--portfolios" [attr.cx]="chartPointX(i)" [attr.cy]="chartPointY(point.portfolios)" r="3"></circle>
+                    <circle class="admin-chart__dot admin-chart__dot--projects" [attr.cx]="chartPointX(i)" [attr.cy]="chartPointY(point.projects)" r="3"></circle>
+                    <circle class="admin-chart__dot admin-chart__dot--collections" [attr.cx]="chartPointX(i)" [attr.cy]="chartPointY(point.collections)" r="3"></circle>
+                  }
+                </svg>
+
+                <div class="admin-chart__labels">
+                  @for (point of activityRows; track point.label) {
+                    <span>{{ point.label }}</span>
+                  }
+                </div>
+
+                <div class="admin-legend">
+                  <span><i class="admin-legend__dot admin-legend__dot--portfolios"></i>Portfolios</span>
+                  <span><i class="admin-legend__dot admin-legend__dot--projects"></i>Projects</span>
+                  <span><i class="admin-legend__dot admin-legend__dot--collections"></i>Collections</span>
+                </div>
+              </div>
+            } @else {
+              <p class="admin-empty-copy">No activity data available yet.</p>
+            }
+          </article>
+
+          <article class="admin-card">
+            <div class="admin-card__head">
+              <div>
+                <h3>Content Visibility</h3>
+                <p>Public, friends-only, and private split</p>
+              </div>
+            </div>
+
+            <div class="admin-visibility">
+              <div class="admin-donut" [style.background]="donutStyle()">
+                <div class="admin-donut__center">
+                  <strong>{{ totalVisibilityCount() }}</strong>
+                  <span>Total</span>
+                </div>
+              </div>
+
+              <div class="admin-visibility__list">
+                <div><i class="tone-public"></i>Public <strong>{{ overview?.publicPortfolios ?? 0 }}</strong></div>
+                <div><i class="tone-friends"></i>Friends only <strong>{{ overview?.friendsOnlyPortfolios ?? 0 }}</strong></div>
+                <div><i class="tone-private"></i>Private <strong>{{ overview?.privatePortfolios ?? 0 }}</strong></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="admin-grid admin-grid--overview-bottom">
+          <article class="admin-card">
+            <div class="admin-card__head">
+              <div>
+                <h3>Recent Items</h3>
+                <p>Latest portfolio ecosystem activity</p>
+              </div>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Owner</th>
+                    <th>Visibility</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of recentItemsForView(); track item.id ?? item.title) {
+                    <tr>
+                      <td>{{ item.title }}</td>
+                      <td>{{ item.type }}</td>
+                      <td>{{ item.owner }}</td>
+                      <td><span class="admin-badge" [class]="visibilityTone(item.visibility)">{{ item.visibility }}</span></td>
+                      <td><span class="admin-badge" [class]="moderationTone(item.status)">{{ item.status }}</span></td>
+                      <td>{{ item.views }}</td>
+                      <td>{{ item.createdAt ? (item.createdAt | date: 'mediumDate') : '-' }}</td>
+                      <td><button type="button" class="admin-inline-btn">Inspect</button></td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="8" class="admin-table__empty">No recent items found.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="admin-card">
+            <div class="admin-card__head">
+              <div>
+                <h3>Trending Skills</h3>
+                <p>Top 5 skills gaining traction</p>
+              </div>
+            </div>
+
+            <div class="admin-skill-list">
+              @for (skill of trendingSkills; track skill.rank) {
+                <div class="admin-skill-row">
+                  <div class="admin-skill-row__head">
+                    <span>#{{ skill.rank }}</span>
+                    <strong>{{ skill.name }}</strong>
+                    <small>{{ skill.usageCount }} uses</small>
+                  </div>
+                  <div class="admin-progress">
+                    <div class="admin-progress__bar" [style.width.%]="skill.progress"></div>
+                  </div>
+                </div>
+              } @empty {
+                <p class="admin-empty-copy">No trending skills data available yet.</p>
+              }
+            </div>
+          </article>
+        </section>
+      }
+    } @else {
+      <section class="admin-card admin-card--filters">
+        <div class="admin-filters">
+          <label class="admin-field">
+            <span>Search projects</span>
+            <input type="search" [(ngModel)]="projectSearch" placeholder="Search by title, owner, or keyword..." />
+          </label>
+
+          <label class="admin-field">
+            <span>Visibility</span>
+            <select [(ngModel)]="selectedVisibility">
+              <option value="">All visibility</option>
+              <option value="PUBLIC">Public</option>
+              <option value="FRIENDS_ONLY">Friends only</option>
+              <option value="PRIVATE">Private</option>
+            </select>
+          </label>
+
+          <label class="admin-field">
+            <span>Status</span>
+            <select [(ngModel)]="selectedStatus">
+              <option value="">All statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="UNDER_REVIEW">Under review</option>
+              <option value="BLOCKED">Blocked</option>
+            </select>
+          </label>
+
+          <label class="admin-field">
+            <span>Date range</span>
+            <select [(ngModel)]="selectedDateRange">
+              <option value="all">All time</option>
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+          </label>
+
+          <div class="admin-filters__actions">
+            <button type="button" class="admin-primary-btn" (click)="applyProjectFilters()">Apply</button>
+            <button type="button" class="admin-secondary-btn" (click)="resetProjectFilters()">Reset</button>
+            <button type="button" class="admin-secondary-btn" (click)="exportProjectsCsv()">Export</button>
+          </div>
+        </div>
+      </section>
+
+      @if (projectsError) {
+        <section class="admin-card admin-state">
+          <p>{{ projectsError }}</p>
+        </section>
+      } @else if (projectsLoading) {
+        <section class="admin-card admin-state">
+          <p>Loading projects...</p>
+        </section>
+      } @else {
+        <section class="admin-card">
+          <div class="admin-card__head admin-card__head--projects">
+            <div>
+              <h3>Projects table</h3>
+              <p>{{ projectSummary() }}</p>
+            </div>
+
+            <label class="admin-sort">
+              <span>Sort</span>
+              <select [(ngModel)]="selectedSort" (ngModelChange)="applyProjectFilters()">
+                <option value="createdAt,desc">Most recent</option>
+                <option value="views,desc">Most viewed</option>
+                <option value="likes,desc">Most liked</option>
+                <option value="title,asc">Title A-Z</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-table--projects">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" /></th>
+                  <th>Project</th>
+                  <th>Owner</th>
+                  <th>Portfolio</th>
+                  <th>Visibility</th>
+                  <th>Status</th>
+                  <th>Views</th>
+                  <th>Likes</th>
+                  <th>Skills</th>
+                  <th>Created At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (project of filteredProjectRows(); track project.id) {
+                  <tr>
+                    <td><input type="checkbox" /></td>
+                    <td>
+                      <div class="admin-project-cell">
+                        <div class="admin-project-thumb">
+                          @if (project.thumbnailUrl) {
+                            <img [src]="project.thumbnailUrl" [alt]="project.title" />
+                          } @else {
+                            <span>PR</span>
+                          }
+                        </div>
+                        <div>
+                          <strong>{{ project.title }}</strong>
+                          <p>{{ project.description }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ project.owner }}</td>
+                    <td>{{ project.portfolio }}</td>
+                    <td><span class="admin-badge" [class]="visibilityTone(project.visibility)">{{ project.visibility }}</span></td>
+                    <td><span class="admin-badge" [class]="moderationTone(project.status)">{{ project.status }}</span></td>
+                    <td>{{ project.views }}</td>
+                    <td>{{ project.likes }}</td>
+                    <td>
+                      <div class="admin-skill-chips">
+                        @for (skill of project.skills; track skill) {
+                          <span>{{ skill }}</span>
+                        } @empty {
+                          <span>-</span>
+                        }
+                      </div>
+                    </td>
+                    <td>{{ project.createdAt ? (project.createdAt | date: 'mediumDate') : '-' }}</td>
+                    <td>
+                      <div class="admin-actions">
+                        <button type="button" class="admin-inline-btn" (click)="toggleActionMenu(project.id)">Manage</button>
+                        @if (openActionMenuId === project.id) {
+                          <div class="admin-action-menu">
+                            <button type="button" (click)="openProject(project.id)">View project</button>
+                            <button type="button" (click)="setProjectVisibility(project, 'PUBLIC')">Set visibility: Public</button>
+                            <button type="button" (click)="setProjectVisibility(project, 'FRIENDS_ONLY')">Set visibility: Friends</button>
+                            <button type="button" (click)="setProjectVisibility(project, 'PRIVATE')">Set visibility: Private</button>
+                            <button type="button" (click)="setModeration(project, 'ACTIVE')">Mark active</button>
+                            <button type="button" (click)="setModeration(project, 'UNDER_REVIEW')">Mark under review</button>
+                            <button type="button" class="admin-action-menu__danger" (click)="setModeration(project, 'BLOCKED')">Block project</button>
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="11" class="admin-table__empty">No projects found.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="admin-pagination">
+            <p>{{ projectSummary() }}</p>
+            <div>
+              <button type="button" class="admin-secondary-btn" [disabled]="projectPage === 0" (click)="changeProjectPage(projectPage - 1)">
+                Previous
+              </button>
+              <button
+                type="button"
+                class="admin-secondary-btn"
+                [disabled]="projectTotalPages === 0 || projectPage + 1 >= projectTotalPages"
+                (click)="changeProjectPage(projectPage + 1)">
+                Next
+              </button>
+            </div>
+          </div>
+        </section>
+      }
+    }
+  </section>
+
+  @if (blockModalOpen && blockTarget) {
+    <div class="admin-modal-backdrop" (click)="closeBlockModal()"></div>
+    <section class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="block-project-title">
+      <div class="admin-card">
+        <div class="admin-card__head">
+          <div>
+            <h3 id="block-project-title">Block project</h3>
+            <p>{{ blockTarget.title }}</p>
+          </div>
+        </div>
+
+        <label class="admin-field">
+          <span>Reason</span>
+          <textarea [(ngModel)]="blockReason" rows="5" placeholder="Why is this project being blocked?"></textarea>
+        </label>
+
+        <div class="admin-modal__actions">
+          <button type="button" class="admin-secondary-btn" (click)="closeBlockModal()">Cancel</button>
+          <button type="button" class="admin-primary-btn" [disabled]="actionLoadingId === blockTarget.id" (click)="confirmBlockProject()">
+            Confirm block
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+</section>

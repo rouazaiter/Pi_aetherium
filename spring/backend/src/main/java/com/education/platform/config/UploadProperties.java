@@ -14,4 +14,5 @@ public class UploadProperties {
 
     /** Répertoire local pour les messages vocaux. */
     private String voiceMessagesDir = "uploads/voice-messages";
+    private String portfolioMediaDir = "uploads/portfolio-media";
 }

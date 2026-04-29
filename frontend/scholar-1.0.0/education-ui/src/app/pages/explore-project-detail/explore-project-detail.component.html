@@ -1,0 +1,181 @@
+<section class="detail-page">
+  <div class="detail-shell">
+    <button type="button" class="detail-back" (click)="backToExplore()">Back to Explore</button>
+
+    @if (loading) {
+      <section class="detail-card detail-state">
+        <p>Loading project...</p>
+      </section>
+    } @else if (errorMessage) {
+      <section class="detail-card detail-state">
+        <p class="detail-error">{{ errorMessage }}</p>
+      </section>
+    } @else if (detail) {
+      <section class="detail-card detail-hero">
+        <div class="detail-hero__content">
+          <div class="detail-hero__copy">
+            <div class="detail-hero__head">
+              <h1>{{ title() }}</h1>
+              <span [class]="visibilityBadgeClass(detail.visibility ?? detail.project?.visibility)">
+                {{ visibilityBadge(detail.visibility ?? detail.project?.visibility) }}
+              </span>
+            </div>
+
+            <div class="detail-owner detail-owner--hero">
+              <div class="detail-avatar">
+                @if (profileImage()) {
+                  <img [src]="profileImage()" [alt]="ownerName()" />
+                } @else {
+                  <span>{{ ownerName().slice(0, 2).toUpperCase() }}</span>
+                }
+              </div>
+              <div>
+                <strong>{{ ownerName() }}</strong>
+                <p>{{ ownerJob() }}</p>
+              </div>
+            </div>
+
+            <p class="detail-body">{{ shortDescription() }}</p>
+
+            <div class="detail-meta-row">
+              @if (createdAt()) {
+                <span>Created {{ createdAt() | date: 'mediumDate' }}</span>
+              }
+              @if (updatedAt()) {
+                <span>Updated {{ updatedAt() | date: 'mediumDate' }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            @if (projectUrl()) {
+              <a class="detail-secondary" [href]="projectUrl()" target="_blank" rel="noopener">Open Project</a>
+            }
+            <button type="button" class="detail-secondary" (click)="openOwnerPortfolio()">View owner portfolio</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-layout">
+        <div class="detail-main">
+          <section class="detail-card">
+            <h2>Media preview</h2>
+            @if (activeMedia(); as media) {
+              <div class="detail-media">
+                @if (media.type === 'VIDEO') {
+                  <video [src]="media.url" controls playsinline></video>
+                } @else {
+                  <img [src]="media.url" [alt]="title()" />
+                }
+              </div>
+
+              @if (mediaItems().length > 1) {
+                <div class="detail-thumbs">
+                  @for (item of mediaItems(); track item.url; let i = $index) {
+                    <button
+                      type="button"
+                      class="detail-thumb"
+                      [class.detail-thumb--active]="i === activeMediaIndex"
+                      (click)="selectMedia(i)">
+                      @if (item.type === 'VIDEO') {
+                        <span class="detail-thumb__video">Video</span>
+                      } @else {
+                        <img [src]="item.url" [alt]="title() + ' media ' + (i + 1)" />
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            } @else {
+              <div class="detail-media detail-media--empty">
+                <div class="detail-media__placeholder">
+                  <span class="detail-media__icon">PR</span>
+                  <strong>No media added yet</strong>
+                  <p>This project does not have screenshots or demos yet.</p>
+                </div>
+              </div>
+            }
+          </section>
+
+          <section class="detail-card">
+            <h2>Full description</h2>
+            <p class="detail-description">{{ fullDescription() }}</p>
+          </section>
+
+          <section class="detail-card">
+            <h2>Skills used</h2>
+            @if (skills().length > 0) {
+              <div class="detail-chip-row">
+                @for (skill of skills(); track skill.id) {
+                  <span class="detail-chip">{{ skill.name }}</span>
+                }
+              </div>
+            } @else {
+              <p class="detail-body">No skills were listed for this project yet.</p>
+            }
+          </section>
+        </div>
+
+        <aside class="detail-sidebar">
+          <section class="detail-card">
+            <h2>Stats</h2>
+            <div class="detail-stats detail-stats--stack">
+              <div>
+                <strong>{{ views() }}</strong>
+                <span>Views</span>
+              </div>
+              <div>
+                <strong>{{ likes() }}</strong>
+                <span>Likes</span>
+              </div>
+              <div>
+                <strong>{{ visibilityBadge(detail.visibility ?? detail.project?.visibility) }}</strong>
+                <span>Visibility</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="detail-card">
+            <h2>Owner</h2>
+            <div class="detail-owner detail-owner--card">
+              <div class="detail-avatar">
+                @if (profileImage()) {
+                  <img [src]="profileImage()" [alt]="ownerName()" />
+                } @else {
+                  <span>{{ ownerName().slice(0, 2).toUpperCase() }}</span>
+                }
+              </div>
+              <div>
+                <strong>{{ ownerName() }}</strong>
+                <p>{{ ownerJob() }}</p>
+              </div>
+            </div>
+            <button type="button" class="detail-secondary detail-secondary--full" (click)="openOwnerPortfolio()">View portfolio</button>
+          </section>
+
+          <section class="detail-card">
+            <h2>Metadata</h2>
+            <dl class="detail-metadata">
+              <div>
+                <dt>Created</dt>
+                <dd>{{ createdAt() ? (createdAt() | date: 'mediumDate') : '—' }}</dd>
+              </div>
+              <div>
+                <dt>Updated</dt>
+                <dd>{{ updatedAt() ? (updatedAt() | date: 'mediumDate') : '—' }}</dd>
+              </div>
+              <div>
+                <dt>Skills</dt>
+                <dd>{{ skillCount() }}</dd>
+              </div>
+              <div>
+                <dt>Media</dt>
+                <dd>{{ mediaCount() }}</dd>
+              </div>
+            </dl>
+          </section>
+        </aside>
+      </section>
+    }
+  </div>
+</section>

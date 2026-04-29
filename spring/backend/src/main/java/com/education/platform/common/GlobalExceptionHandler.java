@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, String>> handleMaxUpload(MaxUploadSizeExceededException ex) {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                .body(Map.of("error", "Fichier trop volumineux (maximum 3 Mo)."));
+                .body(Map.of("error", "Fichier trop volumineux (maximum 50 Mo)."));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

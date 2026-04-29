@@ -1262,12 +1262,19 @@
   color: #6366f1;
 }
 
-.pc-summary-card p {
+.pc-summary-text {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: #334155;
   white-space: pre-line;
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+.pc-summary-meta {
+  display: block;
+  margin-top: 0.45rem;
+  color: #64748b;
+  font-size: 0.72rem;
 }
 
 .pc-summary-error {

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -11,11 +11,14 @@ import { NgIf, NgFor, NgClass, DecimalPipe } from '@angular/common';
 
 type SortField = 'title' | 'category' | 'difficulty' | 'status' | 'price' | 'createdAt';
 type SortDir   = 'asc' | 'desc';
+type StatusFilter     = 'all' | 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+type DifficultyFilter = 'all' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 
 @Component({
     selector: 'app-cert-list',
     templateUrl: './cert-list.component.html',
     styleUrls: ['./cert-list.component.scss'],
+    encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [FormsModule, NgIf, NgFor, NgClass, DecimalPipe]
 })
@@ -34,6 +37,21 @@ export class CertListComponent implements OnInit, OnDestroy {
   searchQuery = '';
   private search$ = new Subject<string>();
 
+  // ── Filters ───────────────────────────────────────────────────────────
+  statusFilter: StatusFilter = 'all';
+  difficultyFilter: DifficultyFilter = 'all';
+  categoryFilter = 'all';
+  get availableCategories(): string[] {
+    const cats = [...new Set(this.all.map(c => c.category).filter(Boolean))].sort();
+    return cats;
+  }
+  get hasActiveFilters(): boolean {
+    return this.searchQuery.trim() !== '' ||
+           this.statusFilter !== 'all' ||
+           this.difficultyFilter !== 'all' ||
+           this.categoryFilter !== 'all';
+  }
+
   // ── Sort ──────────────────────────────────────────────────────────────
   sortField: SortField = 'createdAt';
   sortDir: SortDir = 'desc';
@@ -42,7 +60,16 @@ export class CertListComponent implements OnInit, OnDestroy {
   page = 1;
   pageSize = 8;
   get totalPages(): number { return Math.max(1, Math.ceil(this.filtered.length / this.pageSize)); }
-  get pageNumbers(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i + 1); }
+  get pageNumbers(): number[] {
+    const total = this.totalPages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const p = this.page;
+    const set = new Set([1, total, p - 1, p, p + 1].filter(n => n >= 1 && n <= total));
+    return Array.from(set).sort((a, b) => a - b);
+  }
+  isEllipsisBefore(page: number, idx: number, pages: number[]): boolean {
+    return idx > 0 && page - pages[idx - 1] > 1;
+  }
 
   // ── Modal: create/edit ────────────────────────────────────────────────
   showFormModal = false;
@@ -98,14 +125,33 @@ export class CertListComponent implements OnInit, OnDestroy {
 
   private applyFilter(q: string): void {
     const term = q.toLowerCase().trim();
-    this.filtered = term
-      ? this.all.filter(c =>
-          c.title.toLowerCase().includes(term) ||
-          c.category?.toLowerCase().includes(term) ||
-          c.difficulty?.toLowerCase().includes(term) ||
-          c.status?.toLowerCase().includes(term))
-      : [...this.all];
+    this.filtered = this.all.filter(c => {
+      // Text search
+      if (term && !(
+        c.title.toLowerCase().includes(term) ||
+        c.category?.toLowerCase().includes(term) ||
+        c.difficulty?.toLowerCase().includes(term) ||
+        c.status?.toLowerCase().includes(term)
+      )) return false;
+      // Status filter
+      if (this.statusFilter !== 'all' && c.status !== this.statusFilter) return false;
+      // Difficulty filter
+      if (this.difficultyFilter !== 'all' && c.difficulty !== this.difficultyFilter) return false;
+      // Category filter
+      if (this.categoryFilter !== 'all' && c.category !== this.categoryFilter) return false;
+      return true;
+    });
     this.applySort();
+  }
+
+  onFilterChange(): void { this.applyFilter(this.searchQuery); }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.statusFilter = 'all';
+    this.difficultyFilter = 'all';
+    this.categoryFilter = 'all';
+    this.applyFilter('');
   }
 
   // ── Sort ──────────────────────────────────────────────────────────────
@@ -187,7 +233,7 @@ export class CertListComponent implements OnInit, OnDestroy {
     });
   }
 
-  viewDetail(id: number): void { this.router.navigate(['/certifications', id]); }
+  viewDetail(id: number): void { this.router.navigate(['/skillhub/certifications', id]); }
 
   // ── AI & PDF ───────────────────────────────────────────────────────────
   generateAi(): void {

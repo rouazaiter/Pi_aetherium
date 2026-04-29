@@ -4,7 +4,8 @@ import {
 } from '@angular/core';
 import { Chart, registerables, ChartOptions } from 'chart.js';
 import { CertificationService } from '../../services/certification.service';
-import { AnalyticsService, AnalyticsData, AnalyticsFilters, FeedbackInsights } from '../../services/analytics.service';
+import { AnalyticsService, AnalyticsData, AnalyticsFilters } from '../../services/analytics.service';
+import { FeedbackInsights } from '../../services/feedback.service';
 import { Certification } from '../../models/certification.model';
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';

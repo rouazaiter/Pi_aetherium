@@ -1,0 +1,429 @@
+<div class="proconnect-shell">
+  <div class="pc-layout">
+    <aside class="pc-sidebar">
+      <div class="pc-userbox">
+        <div class="pc-avatar">{{ currentUserName.slice(0, 2).toUpperCase() }}</div>
+        <div>
+          <h4>{{ currentUserName }}</h4>
+          <p>{{ currentUserEmail }}</p>
+        </div>
+      </div>
+      <nav class="pc-sidemenu">
+        <a>Home</a>
+        <a [class.active]="currentTopTab === 'network'" (click)="topTab('network')">Network</a>
+        <a [class.active]="currentTopTab === 'messages'" (click)="topTab('messages')">Messages</a>
+        <a [class.active]="currentTopTab === 'invitations'" (click)="topTab('invitations')">Invitations</a>
+      </nav>
+    </aside>
+
+    <main class="pc-main">
+      @if (successMessage) {
+        <div class="alert alert-success">{{ successMessage }}</div>
+      }
+      @if (searchError || requestError || loadError) {
+        <div class="alert alert-danger">{{ searchError || requestError || loadError }}</div>
+      }
+
+      @if (currentTopTab === 'network') {
+        <section class="pc-section pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>✨ Suggested for You</h3>
+          </div>
+          <div class="pc-suggest-grid">
+            @for (r of filteredResults.slice(0, 4); track r.id) {
+              <article class="pc-suggest-card">
+                @if (profilePictureUrl(r.profilePicture)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(r.profilePicture)" [alt]="r.username" />
+                } @else {
+                  <div class="pc-card-avatar">{{ initials(r) }}</div>
+                }
+                <h4>{{ r.username }}</h4>
+                <p>{{ fullName(r) }}</p>
+                <button type="button" class="pc-btn-primary" [disabled]="requestingId === r.id || r.relation !== 'NONE'" (click)="sendRequest(r.id)">
+                  {{ r.relation === 'NONE' ? 'Connect' : relationLabel(r.relation) }}
+                </button>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="pc-section pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>🟢 My Connections</h3>
+            <div class="pc-toggle">
+              <button [class.active]="selectedNetworkSection === 'all'" (click)="setNetworkSection('all')">All</button>
+              <button [class.active]="selectedNetworkSection === 'online'" (click)="setNetworkSection('online')">Online</button>
+            </div>
+          </div>
+          <div class="pc-connection-list">
+            @for (f of visibleConnections; track f.id) {
+              <article class="pc-connection-item">
+                <div class="pc-conn-left">
+                  @if (profilePictureUrl(f.profilePicture)) {
+                    <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(f.profilePicture)" [alt]="f.username" />
+                  } @else {
+                    <div class="pc-card-avatar">{{ initials(f) }}</div>
+                  }
+                  <div>
+                    <h4>
+                      {{ f.username }}
+                      @if (f.activeNow === true) {
+                        <span class="pc-online-dot"></span>
+                      }
+                    </h4>
+                    <p>{{ activityLabel(f) }}</p>
+                  </div>
+                </div>
+                <div class="pc-conn-actions">
+                  <button type="button" (click)="openChatWithFriend(f.id)">💬</button>
+                  <button type="button" (click)="openFriendProfile(f.id)">👁</button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      @if (currentTopTab === 'invitations') {
+        <section class="pc-section pc-section--invitations pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>📨 Received Invitations</h3>
+            <span class="pc-pill">{{ pendingRequestsCount }} new</span>
+          </div>
+          <p class="pc-section-subtitle">People who want to connect with you right now.</p>
+          <div class="pc-invite-grid">
+            @for (req of incomingRequests; track req.id) {
+              <article class="pc-invite-card pc-invite-card--incoming">
+                @if (profilePictureUrl(req.sender.profilePicture)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(req.sender.profilePicture)" [alt]="req.sender.username" />
+                } @else {
+                  <div class="pc-card-avatar">{{ initials(req.sender) }}</div>
+                }
+                <div class="pc-invite-main">
+                  <h4>{{ req.sender.username }}</h4>
+                  <p>{{ fullName(req.sender) }}</p>
+                  <small>{{ req.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+                <div class="pc-invite-actions">
+                  <button type="button" class="pc-btn-primary" [disabled]="acceptingId === req.id" (click)="accept(req.id)">✅ Accept</button>
+                  <button type="button" class="pc-btn-ghost" [disabled]="decliningId === req.id" (click)="decline(req.id)">❌ Decline</button>
+                </div>
+              </article>
+            }
+            @if (incomingRequests.length === 0) {
+              <article class="pc-empty-state">
+                <div class="pc-empty-state__icon">📩</div>
+                <h4>No pending invitations</h4>
+                <p>When someone sends you a request, it will appear here.</p>
+              </article>
+            }
+  </div>
+        </section>
+
+        <section class="pc-section pc-section--invitations pc-section--vivid">
+          <div class="pc-section-head">
+            <h3>🚀 Sent Requests</h3>
+          </div>
+          <p class="pc-section-subtitle">Requests waiting for acceptance from other users.</p>
+          <div class="pc-sent-list">
+            @for (req of sentRequests; track req.id) {
+              <article class="pc-sent-item pc-sent-item--rich">
+                @if (profilePictureUrl(req.profilePicture)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="profilePictureUrl(req.profilePicture)" [alt]="req.username" />
+                } @else {
+                  <div class="pc-card-avatar">{{ initials(req) }}</div>
+                }
+                <div>
+                  <h4>{{ req.username }}</h4>
+                  <p>{{ fullName(req) }}</p>
+                </div>
+                <span class="pc-waiting">Pending</span>
+              </article>
+            }
+            @if (sentRequests.length === 0) {
+              <article class="pc-empty-state pc-empty-state--soft">
+                <div class="pc-empty-state__icon">✨</div>
+                <h4>No sent requests yet</h4>
+                <p>Go to Network and invite people to start growing your circle.</p>
+              </article>
+            }
+          </div>
+        </section>
+      }
+
+      @if (currentTopTab === 'messages') {
+        <section class="pc-messages-layout pc-messages-layout--vivid">
+          <aside class="pc-chat-list">
+            <div class="pc-chat-list-head">
+              <h3>Messages</h3>
+              <button type="button" class="pc-chat-compose">✎</button>
+            </div>
+            <div class="pc-chat-filters">
+              <button class="active" type="button">Focused</button>
+              <button type="button">Other</button>
+            </div>
+            @if (conversations.length === 0) {
+              <p class="pc-empty-note">No conversation yet. Start by connecting with friends.</p>
+            }
+            @for (thread of conversations; track thread.id) {
+              <article class="pc-thread" [class.active]="selectedConversationId === thread.id" (click)="selectConversation(thread.id)">
+                @if (conversationPictureUrl(thread)) {
+                  <img class="pc-card-avatar pc-card-avatar--image" [src]="conversationPictureUrl(thread)" [alt]="displayConversationName(thread)" />
+                } @else {
+                  <div class="pc-card-avatar">{{ displayConversationName(thread).slice(0, 2).toUpperCase() }}</div>
+                }
+                <div class="pc-thread-main">
+                  <h4>{{ displayConversationName(thread) }}</h4>
+                  <p>{{ thread.lastMessage || 'Start a conversation' }}</p>
+                </div>
+                <div class="pc-thread-meta">
+                  <small>{{ thread.lastMessageAt ? (thread.lastMessageAt | date: 'dd/MM HH:mm') : '' }}</small>
+                  @if (thread.unreadCount > 0 && !isConversationMuted(thread)) {
+                    <span>{{ thread.unreadCount }}</span>
+                  }
+                </div>
+              </article>
+            }
+          </aside>
+
+          <div class="pc-chat-window" [class.pc-chat-window--with-conversation]="!!selectedConversation">
+            @if (selectedConversation) {
+              <header class="pc-chat-window-head">
+                <div class="pc-chat-person">
+                  @if (conversationPictureUrl(selectedConversation)) {
+                    <img class="pc-card-avatar pc-card-avatar--image" [src]="conversationPictureUrl(selectedConversation)" [alt]="displayConversationName(selectedConversation)" />
+                  } @else {
+                    <div class="pc-card-avatar">{{ displayConversationName(selectedConversation).slice(0, 2).toUpperCase() }}</div>
+                  }
+                  <div>
+                    <h4>{{ displayConversationName(selectedConversation) }}</h4>
+                    <p>{{ selectedConversation.otherActiveNow ? 'Online' : 'Offline' }}</p>
+                  </div>
+                </div>
+              </header>
+              <div class="pc-chat-messages-shell">
+              <div class="pc-bubbles">
+                @for (bubble of currentMessages; track bubble.id) {
+                  <div class="pc-bubble-wrap" [class.me]="bubble.senderId === currentUserId">
+                    @if (bubble.replyToSnippet) {
+                      <div class="pc-reply-meta" [class.me]="bubble.senderId === currentUserId">
+                        ↩ {{ replyMetaText(bubble) }}
+                      </div>
+                    }
+                    @if (bubble.senderId !== currentUserId) {
+                      <div class="pc-bubble-avatar">
+                        {{ bubble.senderUsername.slice(0, 1).toUpperCase() }}
+                      </div>
+                    }
+                    @if (bubble.replyToSnippet) {
+                      <div class="pc-reply-quote" [class.me]="bubble.senderId === currentUserId">{{ bubble.replyToSnippet }}</div>
+                    }
+                    <div class="pc-bubble" [class.me]="bubble.senderId === currentUserId">
+                      @if (bubble.voiceUrl) {
+                        <audio class="pc-voice-player" controls [src]="messageVoiceUrl(bubble.voiceUrl)"></audio>
+                      } @else if (isGifMessage(bubble)) {
+                        <img class="pc-gif-message" [src]="gifUrlFromMessage(bubble)" alt="GIF message" />
+                      } @else {
+                        {{ bubble.content }}
+                      }
+                      @if (bubble.reactionEmoji) {
+                        <span class="pc-reaction-chip">{{ bubble.reactionEmoji }}</span>
+                      }
+                    </div>
+                    <div class="pc-bubble-actions">
+                      <button type="button" title="React" (click)="reactToMessage(bubble, '🙂')">🙂</button>
+                      <button type="button" title="Reply" (click)="setReplyTarget(bubble)">↩</button>
+                      <button type="button" title="Delete" (click)="toggleDeleteMenu(bubble)">⋮</button>
+                    </div>
+                    @if (deleteMenuMessageId === bubble.id) {
+                      <div class="pc-delete-menu">
+                        @if (canDeleteForEveryone(bubble)) {
+                          <button type="button" (click)="deleteMessage(bubble, 'EVERYONE')">Delete for everyone</button>
+                        }
+                        <button type="button" (click)="deleteMessage(bubble, 'ME')">Delete for you</button>
+                        <button type="button" class="pc-delete-menu__cancel" (click)="closeDeleteMenu()">Cancel</button>
+                      </div>
+                    }
+                    <small>{{ bubble.sentAt | date: 'HH:mm' }}</small>
+                  </div>
+                }
+              </div>
+                @if (gifPickerOpen) {
+                  <div class="pc-gif-picker" role="dialog" aria-label="Choose a GIF">
+                    <div class="pc-gif-picker__backdrop" (click)="closeGifPicker()"></div>
+                    <div class="pc-gif-picker__panel" (click)="$event.stopPropagation()">
+                      <div class="pc-gif-picker__head">
+                        <h4>GIF</h4>
+                        <button type="button" class="pc-gif-picker__close" (click)="closeGifPicker()">✕</button>
+                      </div>
+                      <p class="pc-gif-picker__esc-hint">Trending GIFs load from Giphy automatically. Type a word and tap Search to refine. Esc or outside closes.</p>
+                      <div class="pc-gif-picker__search">
+                        <input type="text" name="gifSearch" placeholder="Search Giphy (optional)…" [(ngModel)]="gifSearchQuery" (keyup.enter)="searchGifs()" />
+                        <button type="button" [disabled]="gifLoading" (click)="searchGifs()">{{ gifLoading ? '…' : 'Search' }}</button>
+                        <button type="button" class="pc-gif-picker__trending" [disabled]="gifLoading" (click)="loadGiphyTrending()">Trending</button>
+                      </div>
+                      @if (gifLoading && gifResults.length === 0) {
+                        <p class="pc-gif-picker__hint">Loading…</p>
+                      }
+                      @if (gifInfo) {
+                        <p class="pc-gif-picker__hint">{{ gifInfo }}</p>
+                      }
+                      @if (gifError) {
+                        <p class="pc-gif-picker__error">{{ gifError }}</p>
+                      }
+                      @if (!gifLoading && !gifError && gifResults.length === 0) {
+                        <p class="pc-gif-picker__hint">No GIFs yet. Try Search or Trending.</p>
+                      }
+                      <div class="pc-gif-picker__grid">
+                        @for (g of gifResults; track g.id) {
+                          <button type="button" class="pc-gif-picker__tile" (click)="selectGifFromPicker(g.url)">
+                            <img [src]="g.previewUrl" alt="" loading="lazy" />
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <footer class="pc-composer">
+                @if (replyingToMessage) {
+                  <div class="pc-composer-reply">
+                    Replying to: {{ replyingToMessage.content }}
+                    <button type="button" (click)="clearReplyTarget()">✕</button>
+                  </div>
+                }
+                <div class="pc-input-tools">
+                  <button
+                    type="button"
+                    class="pc-composer-icon pc-composer-icon--voice"
+                    title="Voice message"
+                    [class.pc-composer-icon--voice-active]="recordingVoice"
+                    (click)="toggleVoiceRecording()"
+                  >
+                    @if (recordingVoice) {
+                      <svg class="pc-composer-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor" />
+                      </svg>
+                    } @else {
+                      <svg class="pc-composer-icon__svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                        <path
+                          d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z"
+                          stroke="currentColor"
+                          stroke-width="1.85"
+                          stroke-linejoin="round"
+                        />
+                        <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v3M8 21h8" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" />
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="pc-composer-icon pc-composer-icon--gif"
+                    title="GIF"
+                    aria-label="Search and send a GIF"
+                    (click)="onGifButtonActivate($event)"
+                  >
+                    <span class="pc-composer-gif-text" aria-hidden="true">GIF</span>
+                  </button>
+        </div>
+                <input
+                  #composerInput
+                  class="pc-composer-input"
+                  name="composerMessage"
+                  type="text"
+                  [placeholder]="composerPlaceholder()"
+                  [(ngModel)]="messageDraft"
+                  (focus)="closeGifPicker()"
+                  (click)="$event.stopPropagation()"
+                  (keyup.enter)="sendCurrentMessage()"
+                />
+                <button type="button" class="pc-send-text" title="Send" [disabled]="sendingMessage || !messageDraft.trim()" (click)="sendCurrentMessage()">
+                  Send
+                </button>
+              </footer>
+            } @else {
+              <header class="pc-chat-window-head">
+                <h4>Select a conversation</h4>
+                <p>Choose a contact from the list</p>
+              </header>
+            }
+          </div>
+
+          @if (selectedConversation) {
+            <aside class="pc-chat-info">
+              @if (conversationPictureUrl(selectedConversation)) {
+                <img class="pc-card-avatar pc-card-avatar--image" [src]="conversationPictureUrl(selectedConversation)" [alt]="displayConversationName(selectedConversation)" />
+              } @else {
+                <div class="pc-card-avatar">{{ displayConversationName(selectedConversation).slice(0, 2).toUpperCase() }}</div>
+              }
+              <h4>{{ displayConversationName(selectedConversation) }}</h4>
+              <p>{{ fullNameFromConversation(selectedConversation) }}</p>
+              <div class="pc-chat-info-actions">
+                <button type="button" class="pc-btn-ghost" (click)="openSelectedConversationProfile()">Profile</button>
+                <button type="button" class="pc-btn-ghost" [class.pc-btn-ghost--danger]="isConversationMuted(selectedConversation)" (click)="toggleMuteSelectedConversation()">
+                  {{ isConversationMuted(selectedConversation) ? 'Unmute' : 'Mute' }}
+          </button>
+        </div>
+              <button type="button" class="pc-btn-ghost pc-ai-summary-btn" [disabled]="summarizingConversation" (click)="summarizeSelectedConversation()">
+                {{ summarizingConversation ? 'Generating summary...' : 'AI Summary (no voice)' }}
+              </button>
+              @if (conversationSummaryError) {
+                <div class="pc-summary-error">{{ conversationSummaryError }}</div>
+              }
+              @if (conversationSummary) {
+                <div class="pc-summary-card">
+                  <h5>Conversation Summary</h5>
+                  <p class="pc-summary-text">{{ conversationSummary }}</p>
+                  @if (conversationSummaryAnalyzedCount !== null) {
+                    <small class="pc-summary-meta">Analyzed text messages: {{ conversationSummaryAnalyzedCount }}</small>
+                  }
+    </div>
+              }
+              <div class="pc-chat-info-card">
+                <h5>Contact Info</h5>
+                <p>✉ {{ selectedConversation.otherUsername }}</p>
+                <p>🟢 {{ selectedConversation.otherActiveNow ? 'Online now' : 'Last seen recently' }}</p>
+                @if (isConversationMuted(selectedConversation)) {
+                  <p>🔕 Muted</p>
+                }
+  </div>
+            </aside>
+          }
+        </section>
+      }
+
+      @if (selectedFriendProfile) {
+        <div class="pc-profile-backdrop" (click)="closeFriendProfile()"></div>
+        <section class="pc-profile-modal">
+          <button type="button" class="pc-profile-close" (click)="closeFriendProfile()">✕</button>
+          @if (profileLoadError) {
+            <div class="pc-profile-inline-error">{{ profileLoadError }}</div>
+          }
+          @if (profilePictureUrl(selectedFriendProfile.profilePicture)) {
+            <img class="pc-profile-photo" [src]="profilePictureUrl(selectedFriendProfile.profilePicture)" [alt]="selectedFriendProfile.username" />
+  } @else {
+            <div class="pc-profile-photo pc-profile-photo--fallback">{{ initials(selectedFriendProfile) }}</div>
+          }
+          <h3>{{ profileDisplayName(selectedFriendProfile) }}</h3>
+          <p>&#64;{{ selectedFriendProfile.username }}</p>
+          <small>{{ activityLabel(selectedFriendProfile) }}</small>
+          <div class="pc-profile-about">
+            <h4>About</h4>
+            <p>{{ selectedFriendProfile.description || 'No description yet.' }}</p>
+          </div>
+          <div class="pc-profile-interests">
+            <h4>Interests</h4>
+            <div class="pc-interest-list">
+              @for (interest of selectedFriendProfile.interests; track interest) {
+                <span>{{ interest }}</span>
+              }
+              @if (selectedFriendProfile.interests.length === 0) {
+                <span>No interests yet</span>
+              }
+            </div>
+    </div>
+        </section>
+  }
+    </main>
+  </div>
+</div>

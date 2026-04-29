@@ -1,0 +1,118 @@
+<div class="recl-wrap container">
+  <div class="recl-grid">
+    <section class="recl-main">
+      <header class="recl-head">
+        <h1>Nouvelle réclamation</h1>
+        <p class="recl-lead">
+          Décrivez clairement votre problème pour que notre équipe puisse vous répondre rapidement après vérification.
+        </p>
+      </header>
+
+      <form class="recl-form" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="recl-field">
+          <span class="recl-label">Sujet</span>
+          <input
+            type="text"
+            class="recl-input"
+            formControlName="subject"
+            placeholder="ex. Problème d’accès au cours — réf. #4402"
+            autocomplete="off"
+          />
+          @if (form.controls.subject.touched && form.controls.subject.errors?.['required']) {
+            <span class="recl-field-err">Le sujet est obligatoire.</span>
+          }
+        </label>
+
+        <label class="recl-field">
+          <span class="recl-label">Description détaillée</span>
+          <textarea
+            class="recl-textarea"
+            formControlName="description"
+            rows="8"
+            placeholder="Expliquez la situation (dates, captures si besoin décrites en texte, numéros de transaction…)"
+          ></textarea>
+          @if (form.controls.description.touched && form.controls.description.errors?.['required']) {
+            <span class="recl-field-err">La description est obligatoire.</span>
+          }
+        </label>
+
+        <div class="recl-notice" role="status">
+          <span class="recl-notice-icon" aria-hidden="true">i</span>
+          <p>Votre message est transmis aux administrateurs pour examen. Vous verrez la réponse de l’équipe ci-dessous une fois le dossier traité.</p>
+        </div>
+
+        @if (submitError()) {
+          <p class="recl-alert recl-alert--err">{{ submitError() }}</p>
+        }
+        @if (submitOk()) {
+          <p class="recl-alert recl-alert--ok">Réclamation envoyée. Merci.</p>
+        }
+
+        <button type="submit" class="recl-submit" [disabled]="submitting()">
+          @if (submitting()) {
+            Envoi…
+          } @else {
+            Envoyer la réclamation
+            <span class="recl-submit-arrow" aria-hidden="true">›</span>
+          }
+        </button>
+      </form>
+
+      <section class="recl-history" aria-labelledby="recl-history-title">
+        <h2 id="recl-history-title">Mes réclamations</h2>
+        @if (loadError()) {
+          <p class="recl-alert recl-alert--err">{{ loadError() }}</p>
+        } @else if (items().length === 0) {
+          <p class="recl-empty">Aucune réclamation pour le moment.</p>
+        } @else {
+          <ul class="recl-list">
+            @for (r of items(); track r.id) {
+              <li class="recl-card">
+                <div class="recl-card-head">
+                  <span class="recl-card-subject">{{ r.subject }}</span>
+                  <span class="recl-badge" [attr.data-status]="r.status">{{ statusLabel(r.status) }}</span>
+                </div>
+                <p class="recl-card-meta">Envoyée le {{ r.createdAt | date: 'medium' }}</p>
+                <p class="recl-card-desc">{{ r.description }}</p>
+                @if (r.adminResponse) {
+                  <div class="recl-reply">
+                    <strong>Réponse de l’équipe</strong>
+                    <p>{{ r.adminResponse }}</p>
+                    @if (r.reviewedAt) {
+                      <p class="recl-card-meta">Mis à jour le {{ r.reviewedAt | date: 'medium' }}</p>
+                    }
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </section>
+
+    <aside class="recl-aside">
+      <div class="recl-side-card">
+        <h3>Consignes</h3>
+        <ul class="recl-checklist">
+          <li><span class="recl-check">✓</span> Soyez précis : identifiants de transaction, dates, noms.</li>
+          <li><span class="recl-check">✓</span> Les pièces jointes (captures, PDF) pourront être ajoutées dans une prochaine version.</li>
+          <li><span class="recl-check">✓</span> Délai indicatif : prise en compte sous 24 h ouvrées dans la majorité des cas.</li>
+        </ul>
+      </div>
+
+      <div class="recl-side-card recl-side-card--dark">
+        <p class="recl-side-kicker">Support</p>
+        <h3>Besoin d’aide immédiate ?</h3>
+        <p class="recl-side-muted">Échangez avec vos formateurs ou amis via la messagerie de la plateforme (Social Hub, Amis).</p>
+        <a routerLink="/social-hub" class="recl-side-btn">Ouvrir le Social Hub</a>
+      </div>
+
+      <div class="recl-side-card recl-side-card--secure">
+        <div class="recl-secure-icon" aria-hidden="true">🛡</div>
+        <h3>Traitement sécurisé</h3>
+        <p>Vos données sont transmises de façon chiffrée (HTTPS) et traitées conformément aux usages de la plateforme.</p>
+        <a routerLink="/profile" class="recl-side-link">Paramètres du compte</a>
+      </div>
+    </aside>
+  </div>
+</div>

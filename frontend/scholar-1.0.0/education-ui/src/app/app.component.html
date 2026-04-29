@@ -1,0 +1,132 @@
+@if (!isImmersiveRoute()) {
+  <header class="app-nav">
+    <div class="container app-nav__inner">
+      <a routerLink="/" class="app-nav__brand" (click)="closeNav()">
+        <span class="app-nav__brand-mark">S</span>
+        <span class="app-nav__brand-text">Scholar</span>
+      </a>
+
+      <button
+        type="button"
+        class="app-nav__toggle"
+        [class.app-nav__toggle--open]="navOpen()"
+        [attr.aria-expanded]="navOpen()"
+        aria-controls="app-nav-menu"
+        aria-label="Ouvrir ou fermer le menu"
+        (click)="toggleNav()"
+      >
+        <span class="app-nav__toggle-bar"></span>
+        <span class="app-nav__toggle-bar"></span>
+        <span class="app-nav__toggle-bar"></span>
+      </button>
+
+      @if (navOpen()) {
+        <div class="app-nav__backdrop" (click)="closeNav()" aria-hidden="true"></div>
+      }
+
+      <nav id="app-nav-menu" class="app-nav__menu" [class.app-nav__menu--open]="navOpen()">
+        <a
+          routerLink="/"
+          routerLinkActive="app-nav__link--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="app-nav__link"
+          (click)="closeNav()"
+        >
+          Accueil
+        </a>
+
+        <div class="app-nav__dropdown">
+          <button
+            type="button"
+            class="app-nav__link app-nav__dropdown-toggle"
+            [class.app-nav__link--active]="isPortfolioMenuActive()"
+            [attr.aria-expanded]="portfolioMenuOpen()"
+            aria-haspopup="menu"
+            (click)="togglePortfolioMenu()"
+          >
+            Portfolio
+          </button>
+
+          @if (portfolioMenuOpen()) {
+            <div class="app-nav__dropdown-menu" role="menu">
+              <a routerLink="/jihen-portfolio" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                My Portfolio
+              </a>
+              <a routerLink="/explore" routerLinkActive="app-nav__link--active" class="app-nav__link app-nav__dropdown-link" (click)="closeNav()">
+                <svg class="app-nav__dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M14.5 9.5 9 12l2.5 5.5L15 13l4-1.5L20.5 4 14.5 9.5Zm-2.09 3.41-.95 2.09-.95-2.09L8.41 12l2.09-.95.95-2.09.95 2.09 2.09.95-2.09.91ZM5 19l3.4-7.6L16 8l-7.4 3.4L5 19Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span>Explore</span>
+              </a>
+              <a routerLink="/portfolio-mentor" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                Portfolio Mentor
+              </a>
+              @if (myPortfolio3dLink()) {
+              <a [routerLink]="myPortfolio3dLink()" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                3D
+              </a>
+            }
+          </div>
+        }
+        </div>
+
+        @if (auth.isLoggedIn()) {
+          <div class="app-nav__user-menu-wrap">
+            <button
+              type="button"
+              class="app-nav__avatar-link app-nav__avatar-link--btn"
+              [attr.aria-label]="'Ouvrir le menu utilisateur'"
+              [attr.aria-expanded]="userMenuOpen()"
+              (click)="toggleUserMenu()"
+            >
+              @if (navAvatarUrl() && !navAvatarImgError()) {
+                <img [src]="navAvatarUrl()" alt="" (error)="navAvatarImgError.set(true)" />
+              } @else {
+                <span class="app-nav__avatar-fallback">{{ navAvatarInitials() }}</span>
+              }
+            </button>
+
+            @if (userMenuOpen()) {
+              <div class="app-nav__user-menu">
+                <a routerLink="/profile" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Profil</a>
+                <a routerLink="/subscriptions" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Abonnements</a>
+                <a routerLink="/friends" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Amis</a>
+                <a routerLink="/social-hub" routerLinkActive="app-nav__link--active" class="app-nav__link app-nav__social-link" (click)="closeNav()">
+                  Social Hub
+                  @if (mentorshipPendingCount() > 0) {
+                    <span class="app-nav__badge">{{ mentorshipPendingCount() }}</span>
+                  }
+                </a>
+                <a routerLink="/reclamation" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Réclamation</a>
+                @if (auth.auth()?.role === 'admin') {
+                  <a routerLink="/admin/reclamations" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">
+                    Admin réclamations
+                  </a>
+                }
+                <button type="button" class="app-nav__link app-nav__link--btn" (click)="logout(); closeNav()">Déconnexion</button>
+              </div>
+            }
+          </div>
+        } @else {
+          <a routerLink="/login" routerLinkActive="app-nav__link--active" class="app-nav__link" (click)="closeNav()">Connexion</a>
+          <a routerLink="/register" routerLinkActive="app-nav__link--active" class="app-nav__cta" (click)="closeNav()">Inscription</a>
+        }
+      </nav>
+    </div>
+  </header>
+}
+
+<main class="page-content" [class.page-content--immersive]="isImmersiveRoute()">
+  <router-outlet />
+</main>
+
+@if (!isImmersiveRoute()) {
+  <footer class="app-footer">
+    <div class="container">Plateforme éducative</div>
+  </footer>
+}
+
+<app-welcome-dialog />

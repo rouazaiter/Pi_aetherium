@@ -1,0 +1,259 @@
+@if (verificationRequired) {
+  <div class="profile-page" @profileBackdrop>
+    <div class="profile-bg" aria-hidden="true">
+      <div class="profile-bg__blob profile-bg__blob--1"></div>
+      <div class="profile-bg__blob profile-bg__blob--2"></div>
+      <div class="profile-bg__blob profile-bg__blob--3"></div>
+      <div class="profile-bg__noise"></div>
+      <div class="profile-bg__grid"></div>
+    </div>
+    <div class="profile-verify" role="dialog" aria-modal="true" aria-labelledby="profile-verify-title">
+      <div class="profile-verify__card" @verifyLift>
+        <div class="profile-verify__shine" aria-hidden="true"></div>
+        <div class="profile-verify__logo">
+          <span class="profile-verify__logo-mark">S</span>
+          SkillHub
+        </div>
+        <p class="profile-verify__kicker">Sécurité</p>
+        <h1 id="profile-verify-title" class="profile-verify__title">Vérifiez que c’est bien vous</h1>
+        <p class="profile-verify__lead">
+          Un code à usage unique a été envoyé pour protéger l’accès à votre espace personnel.
+        </p>
+        <div class="profile-verify__account">
+          <span class="profile-verify__account-label">Compte</span>
+          <span class="profile-verify__account-value">{{ primaryEmail() || maskedEmail() }}</span>
+        </div>
+        @if (codeHint) {
+          <p class="profile-verify__hint">{{ codeHint }}</p>
+        }
+        @if (sendingCode && !codeHint) {
+          <p class="profile-verify__hint profile-verify__hint--pulse">Envoi du code…</p>
+        }
+        @if (verifyError) {
+          <div class="profile-verify__alert" @alertReveal>{{ verifyError }}</div>
+        }
+        <form [formGroup]="verifyForm" (ngSubmit)="submitVerification()" class="profile-verify__form">
+          <label class="profile-verify__label" for="pv-code">Code à 6 chiffres</label>
+          <input
+            id="pv-code"
+            class="profile-verify__code-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            formControlName="code"
+            placeholder="••••••"
+            [attr.aria-invalid]="verifyForm.controls.code.invalid && verifyForm.controls.code.touched"
+          />
+          @if (verifyForm.controls.code.invalid && verifyForm.controls.code.touched) {
+            <div class="profile-verify__field-error">Saisissez les 6 chiffres reçus par e-mail.</div>
+          }
+          <div class="profile-verify__actions">
+            <button type="button" class="profile-verify__resend" [disabled]="sendingCode" (click)="resendCode()">
+              Renvoyer le code
+            </button>
+            <button type="submit" class="profile-verify__confirm" [disabled]="verifying || verifyForm.invalid">
+              @if (verifying) {
+                <span class="profile-btn__spinner" aria-hidden="true"></span>
+                Vérification…
+              } @else {
+                Continuer
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="profilehub-page">
+      @if (loading) {
+      <div class="profilehub-loading">Loading profile...</div>
+      } @else if (loadError) {
+      <div class="profilehub-error">{{ loadError }}</div>
+      } @else {
+      @if (saveError) {
+        <div class="profilehub-error">{{ saveError }}</div>
+      }
+      @if (saveAck()) {
+        <div class="profilehub-success">Profile saved successfully.</div>
+      }
+      <form [formGroup]="form" (ngSubmit)="save()" class="profilehub-layout">
+        <aside class="profilehub-sidebar">
+          <div class="brand">ProfileHub</div>
+          <div class="user-mini-card">
+            <div class="user-mini-avatar-wrap">
+                      @if (resolvedProfilePictureUrl() && !avatarBroken) {
+                <img class="user-mini-avatar" [src]="resolvedProfilePictureUrl()" alt="" (error)="avatarBroken = true" />
+                      } @else {
+                <div class="user-mini-avatar user-mini-avatar--fallback">{{ initials() }}</div>
+              }
+              @if (activeStatusVisible()) {
+                <span class="profile-presence-dot" aria-label="Active"></span>
+              }
+            </div>
+            <div class="user-mini-name">{{ displayName() }}</div>
+            <div class="user-mini-plan">Professional Plan</div>
+          </div>
+          <nav class="menu">
+            <a class="menu-item active">Overview</a>
+            <a class="menu-item">Account Security</a>
+            <a class="menu-item">Privacy Settings</a>
+          </nav>
+        </aside>
+
+        <main class="profilehub-main">
+          <header class="main-top">
+            <div>
+              <h2>Your Personal Space</h2>
+              <p>Shape your profile, protect your account, and control your privacy in one elegant dashboard.</p>
+            </div>
+          </header>
+
+          <section class="row-grid">
+            <div class="left-stack card">
+              <div class="avatar-panel">
+                <div class="big-avatar-wrap">
+                  @if (resolvedProfilePictureUrl() && !avatarBroken) {
+                    <img class="big-avatar" [src]="resolvedProfilePictureUrl()" alt="" (error)="avatarBroken = true" />
+                  } @else {
+                    <div class="big-avatar big-avatar--fallback">{{ initials() }}</div>
+                  }
+                  @if (activeStatusVisible()) {
+                    <span class="profile-presence-dot profile-presence-dot--lg" aria-label="Active"></span>
+                  }
+                </div>
+              </div>
+
+              <input #photoFileInput type="file" class="visually-hidden" accept="image/jpeg,image/png,image/webp,image/gif" (change)="onPhotoSelected($event)" />
+              <button type="button" class="secondary-btn" [disabled]="photoUploading" (click)="photoFileInput.click()">
+                @if (photoUploading) { Uploading... } @else { Upload Photo }
+              </button>
+              <button type="button" class="secondary-btn ghost" (click)="toggleAvatarPicker()">Choose Avatar</button>
+
+              @if (avatarPickerOpen()) {
+                <div class="avatars-grid">
+                  @for (av of presetAvatars; track av.id) {
+                    <button type="button" class="avatar-choice" [class.selected]="isPresetSelected(av.id)" [disabled]="presetSaving" (click)="selectPresetAvatar(av.id)">
+                      <img [src]="presetGridImgSrc(av.id)" alt="" (error)="onPresetGridImgError(av.id)" />
+                    </button>
+                  }
+                </div>
+              }
+
+              <div class="premium-box">
+                <h4>Premium Status</h4>
+                <p>Your professional plan expires in 45 days.</p>
+              </div>
+            </div>
+
+            <div class="right-stack">
+              <section class="card">
+                <h3>General Information</h3>
+                <div class="field-grid">
+                  <div class="field">
+                    <label>Full Name</label>
+                    <input class="profile-input" formControlName="firstName" placeholder="First name" />
+                  </div>
+                  <div class="field">
+                    <label>Last Name</label>
+                    <input class="profile-input" formControlName="lastName" placeholder="Last name" />
+                  </div>
+                  <div class="field full">
+                    <label>Bio / Description</label>
+                    <textarea class="profile-input profile-input--area" rows="4" formControlName="description"></textarea>
+                  </div>
+                  <div class="field full">
+                    <label>Skills / Interests</label>
+                    <input class="profile-input" formControlName="interestsText" placeholder="Product Design, UX, ..." />
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <h3>Account Security</h3>
+                <div class="field-grid">
+                  <div class="field">
+                    <label>Primary Email</label>
+                    <input class="profile-input" [value]="primaryEmail()" disabled />
+                    <div class="security-status">Email verified</div>
+              </div>
+                  <div class="field">
+                    <label>Recovery Email</label>
+                    <input class="profile-input" type="email" formControlName="recuperationEmail" placeholder="Recovery email" />
+                    <div class="security-caption">Used for account recovery in case of lockout.</div>
+                </div>
+                </div>
+                <div class="security-feature-row">
+                  <div class="security-feature-icon">🔐</div>
+                  <div class="security-feature-text">
+                    <h4>Two-Factor Authentication</h4>
+                    <p>Keep your account safer with an extra verification step at sign-in.</p>
+              </div>
+                  <button type="button" class="security-toggle" [class.security-toggle--on]="twoFactorEnabled()" [disabled]="twoFactorSaving" (click)="toggleTwoFactor()" [attr.aria-pressed]="twoFactorEnabled()">
+                    <span class="security-toggle__knob"></span>
+                  </button>
+                </div>
+                <div class="security-feature-row security-feature-row--clickable" (click)="toggleLoginActivity()">
+                  <div class="security-feature-icon">🕒</div>
+                  <div class="security-feature-text">
+                    <h4>Login Activity</h4>
+                    <p>Track your recent sessions and quickly spot unfamiliar device access.</p>
+              </div>
+                  <button type="button" class="activity-link-btn" (click)="$event.stopPropagation(); toggleLoginActivity()">
+                    @if (showLoginActivity()) { Hide Log } @else { View Log }
+                  </button>
+                </div>
+                @if (showLoginActivity()) {
+                  <div class="login-activity-panel">
+                    <div class="login-activity-head">
+                      <span>Recent Sessions</span>
+                      <button type="button" class="activity-link-btn" (click)="refreshLoginActivity()">Refresh</button>
+                    </div>
+                    @if (loginActivityLoading) {
+                      <div class="login-activity-status">Loading login activity...</div>
+                    } @else if (loginActivityError) {
+                      <div class="login-activity-status login-activity-status--error">{{ loginActivityError }}</div>
+                    } @else if (loginActivities().length === 0) {
+                      <div class="login-activity-status">No login activity yet.</div>
+                    } @else {
+                      @for (activity of loginActivities(); track activity.loggedAt + (activity.ipAddress ?? '')) {
+                        <div class="login-activity-row">
+                          <div>{{ formatActivityDate(activity.loggedAt) }}</div>
+                          <div>{{ activity.ipAddress || 'Unknown IP' }}</div>
+                          <div>{{ activity.userAgent || 'Unknown device' }}</div>
+              </div>
+                      }
+                    }
+            </div>
+                }
+              </section>
+
+              <section class="card">
+                <h3>Privacy Settings</h3>
+                <div class="security-feature-row">
+                  <div class="security-feature-icon">🟢</div>
+                  <div class="security-feature-text">
+                    <h4>Active Status</h4>
+                    <p>Let friends see when you are online and your last seen, just like modern messaging apps.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="security-toggle"
+                    [class.security-toggle--on]="activeStatusVisible()"
+                    [disabled]="activeStatusSaving"
+                    (click)="toggleActiveStatusVisibility()"
+                    [attr.aria-pressed]="activeStatusVisible()"
+                  >
+                    <span class="security-toggle__knob"></span>
+              </button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+        </main>
+          </form>
+      }
+  </div>
+}

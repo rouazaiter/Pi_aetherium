@@ -1,0 +1,130 @@
+<div class="signin-page">
+  <div class="signin-bg" aria-hidden="true">
+    <div class="signin-blob signin-blob--1"></div>
+    <div class="signin-blob signin-blob--2"></div>
+    <div class="signin-blob signin-blob--3"></div>
+    <div class="signin-noise"></div>
+  </div>
+
+  <div class="signin-shell" @shellEnter>
+    <div class="signin-brand-mark" aria-hidden="true">
+      <svg class="signin-brand-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="signinGrad" x1="8" y1="4" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#a599ff" />
+            <stop offset="0.5" stop-color="#7a6ad8" />
+            <stop offset="1" stop-color="#5f52b8" />
+          </linearGradient>
+        </defs>
+        <rect x="4" y="8" width="40" height="32" rx="8" stroke="url(#signinGrad)" stroke-width="2.5" fill="rgba(122,106,216,0.08)" />
+        <path
+          d="M16 22h16M16 28h10"
+          stroke="url(#signinGrad)"
+          stroke-width="2.5"
+          stroke-linecap="round"
+        />
+        <circle cx="32" cy="18" r="4" fill="url(#signinGrad)" opacity="0.9" />
+      </svg>
+    </div>
+
+    <p class="signin-kicker">Welcome back</p>
+    <h1 class="signin-title">
+      <span class="signin-title-gradient">Sign in</span> to your account
+    </h1>
+    <p class="signin-sub">
+      Don’t have an account?
+      <a routerLink="/register" class="signin-link">Join here</a>
+    </p>
+
+    @if (infoMsg) {
+      <div class="signin-success signin-alert-anim" @alertEnter role="status">{{ infoMsg }}</div>
+    }
+    @if (errorMsg) {
+      <div class="signin-error signin-alert-anim" @alertEnter role="alert">{{ errorMsg }}</div>
+    }
+
+    <div class="signin-card-inner">
+      <app-sign-in-providers (emailContinue)="showEmailForm = true" />
+
+      <p class="signin-forgot-global">
+        <a routerLink="/forgot-password" class="signin-forgot-prominent">Forgot your password?</a>
+      </p>
+
+      @if (showEmailForm) {
+        <form class="signin-form" [formGroup]="form" (ngSubmit)="submit()" @fadeSlideUp>
+          <div class="signin-form-divider" role="separator">
+            <span>Email sign-in</span>
+          </div>
+
+          <label class="signin-field-label" for="u">Email or username</label>
+          <div class="signin-input-wrap">
+            <input
+              id="u"
+              class="signin-field"
+              type="text"
+              formControlName="usernameOrEmail"
+              autocomplete="username"
+              placeholder="you@school.edu or username"
+              [class.signin-field--invalid]="form.controls.usernameOrEmail.invalid && form.controls.usernameOrEmail.touched"
+            />
+          </div>
+          @if (form.controls.usernameOrEmail.errors?.['required'] && form.controls.usernameOrEmail.touched) {
+            <p class="signin-field-error">This field is required.</p>
+          }
+
+          <label class="signin-field-label" for="p">Password</label>
+          <div class="signin-input-wrap signin-input-wrap--password">
+            <input
+              id="p"
+              class="signin-field signin-field--with-action"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              [class.signin-field--invalid]="form.controls.password.invalid && form.controls.password.touched"
+            />
+            <button
+              type="button"
+              class="signin-password-toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-pressed]="showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              @if (showPassword) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              } @else {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              }
+            </button>
+          </div>
+          @if (form.controls.password.errors?.['required'] && form.controls.password.touched) {
+            <p class="signin-field-error">Password is required.</p>
+          }
+
+          <div class="signin-forgot-row">
+            <a routerLink="/forgot-password" class="signin-link signin-forgot">Forgot password?</a>
+          </div>
+
+          <button class="signin-submit" type="submit" [disabled]="loading" [class.signin-submit--loading]="loading">
+            @if (loading) {
+              <span class="signin-submit__shimmer" aria-hidden="true"></span>
+              <span class="signin-dots" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </span>
+              <span>Signing in…</span>
+            } @else {
+              <span class="signin-submit__label">Sign in</span>
+              <span class="signin-submit__arrow" aria-hidden="true">→</span>
+            }
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+</div>

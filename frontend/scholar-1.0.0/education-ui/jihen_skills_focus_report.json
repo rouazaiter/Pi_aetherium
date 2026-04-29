@@ -1,0 +1,50 @@
+{
+  "skillsButtons": [],
+  "clickResult": {
+    "found": true,
+    "text": "+ Ajouter une compétence"
+  },
+  "modalState": {
+    "open": true,
+    "categoryCount": 70,
+    "bodyText": "CompétencesAjouter une compétenceSélectionnez une catégorie pour voir les compétences existantes du catalogue.✕Rechercher une compétence...Catégories Frontend Development  Backend Development  Mobile Development  Full Stack Development  Game Development  Desktop Development  Embedded Systems  Cloud Computing  Containerization  Ci Cd  Infrastructure As Code  Monitoring  Devops  Devsecops  Machine L"
+  },
+  "afterCategory": {
+    "selectedCategory": "Frontend Development",
+    "visibleSkills": []
+  },
+  "relevant": [
+    {
+      "requestId": "27492.163",
+      "url": "http://localhost:4200/api/portfolio/skills/categories",
+      "method": "GET",
+      "postData": null,
+      "status": 200
+    },
+    {
+      "requestId": "27492.164",
+      "url": "http://localhost:4200/api/portfolio/skills",
+      "method": "GET",
+      "postData": null,
+      "status": 500
+    },
+    {
+      "requestId": "27492.165",
+      "url": "http://localhost:4200/api/portfolio/me",
+      "method": "GET",
+      "postData": null,
+      "status": 200
+    }
+  ],
+  "failures": [
+    {
+      "url": "http://localhost:4200/api/portfolio/skills",
+      "method": "GET",
+      "status": 500
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ]
+}

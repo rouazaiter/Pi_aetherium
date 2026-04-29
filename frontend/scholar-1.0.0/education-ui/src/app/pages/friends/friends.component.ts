@@ -205,7 +205,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loading = false;
-        this.loadError = messageFromHttpError(err, 'Impossible de charger la liste dâ€™amis.');
+        this.loadError = messageFromHttpError(err, 'Unable to load the friends list.');
       },
     });
   }
@@ -238,7 +238,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.searching = false;
-        this.searchError = messageFromHttpError(err, 'Recherche impossible.');
+        this.searchError = messageFromHttpError(err, 'Search failed.');
       },
     });
   }
@@ -252,7 +252,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.searching = false;
-        this.searchError = messageFromHttpError(err, 'Impossible de charger les comptes utilisateurs.');
+        this.searchError = messageFromHttpError(err, 'Unable to load user accounts.');
       },
     });
   }
@@ -285,7 +285,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loadingIncoming = false;
-        this.loadError = messageFromHttpError(err, 'Impossible de charger les demandes recues.');
+        this.loadError = messageFromHttpError(err, 'Unable to load received requests.');
       },
     });
   }
@@ -1081,7 +1081,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loadingConversations = false;
-        this.loadError = messageFromHttpError(err, 'Impossible de charger les conversations.');
+        this.loadError = messageFromHttpError(err, 'Unable to load conversations.');
       },
     });
   }
@@ -1095,7 +1095,7 @@ export class FriendsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.loadingMessages = false;
-        this.loadError = messageFromHttpError(err, 'Impossible de charger les messages.');
+        this.loadError = messageFromHttpError(err, 'Unable to load messages.');
       },
     });
   }

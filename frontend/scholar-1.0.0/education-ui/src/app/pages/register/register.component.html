@@ -1,20 +1,20 @@
 <section class="register-split register-split--motion">
-  <aside class="register-split__brand" aria-label="Pourquoi nous rejoindre">
+  <aside class="register-split__brand" aria-label="Why join us">
     <div class="register-split__brand-blobs" aria-hidden="true"></div>
     <div class="register-split__brand-inner">
-      <h2 class="register-split__headline">Votre réussite commence ici</h2>
+      <h2 class="register-split__headline">Your success starts here</h2>
       <ul class="register-split__checks">
         <li>
           <span class="register-split__check-icon" aria-hidden="true">✓</span>
-          Parcours éducatifs et ressources pour progresser à votre rythme
+          Learning paths and resources to grow at your own pace
         </li>
         <li>
           <span class="register-split__check-icon" aria-hidden="true">✓</span>
-          Profil personnalisable et suivi de vos centres d’intérêt
+          Customizable profile and interest tracking
         </li>
         <li>
           <span class="register-split__check-icon" aria-hidden="true">✓</span>
-          Connexion sécurisée : Google, Facebook ou adresse e-mail
+          Secure sign-in: Google, Facebook, or email address
         </li>
       </ul>
     </div>
@@ -23,7 +23,7 @@
         src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80"
         width="1200"
         height="800"
-        alt="Apprenants collaborant autour d’un ordinateur portable"
+        alt="Learners collaborating around a laptop"
         loading="eager"
         fetchpriority="high"
         decoding="async"
@@ -35,11 +35,11 @@
     <div class="register-split__panel-inner">
       <header class="register-split__header">
         <h1 class="register-split__title">
-          <span class="register-split__title-gradient">Créer un compte</span>
+          <span class="register-split__title-gradient">Create an account</span>
         </h1>
         <p class="register-split__sub">
-          Déjà inscrit ?
-          <a routerLink="/login" class="register-split__inline-link">Se connecter</a>
+          Already have an account?
+          <a routerLink="/login" class="register-split__inline-link">Sign in</a>
         </p>
       </header>
 
@@ -49,11 +49,11 @@
         </div>
 
         <div class="register-split__divider register-split__divider--lowercase" role="separator">
-          <span>ou</span>
+          <span>or</span>
         </div>
 
         <p class="register-split__fine-print">
-          Des vérifications complémentaires pourront vous être demandées ultérieurement.
+          Additional verification steps may be requested later.
         </p>
 
         <button type="button" class="register-split__email-cta register-split__email-cta--pulse" (click)="openEmailForm()">
@@ -63,7 +63,7 @@
               <path d="m22 6-10 7L2 6" />
             </svg>
           </span>
-          Inscrivez-vous avec votre <span class="register-split__email-cta-under">e-mail</span>
+          Sign up with your <span class="register-split__email-cta-under">email</span>
           <span class="register-split__email-cta-arrow" aria-hidden="true">→</span>
         </button>
       }
@@ -76,7 +76,7 @@
         <div id="register-email-section" class="register-split__form-wrap register-split__form-wrap--wizard">
           <div class="register-stepper" aria-live="polite">
             <div class="register-stepper__meta">
-              <span class="register-stepper__badge">Étape {{ emailWizardStep }} / {{ emailWizardTotalSteps }}</span>
+              <span class="register-stepper__badge">Step {{ emailWizardStep }} / {{ emailWizardTotalSteps }}</span>
               <h2 class="register-stepper__heading">{{ wizardStepTitle }}</h2>
             </div>
             <div class="register-stepper__track" role="progressbar" [attr.aria-valuenow]="emailWizardStep" aria-valuemin="1" [attr.aria-valuemax]="emailWizardTotalSteps" [attr.aria-valuetext]="wizardStepTitle">
@@ -95,48 +95,48 @@
 
           <form [formGroup]="form" novalidate class="register-form register-form--wizard">
             <div class="register-honeypot" aria-hidden="true">
-              <label for="companyWebsite">Site web de l’entreprise</label>
+              <label for="companyWebsite">Company website</label>
               <input id="companyWebsite" type="text" formControlName="companyWebsite" tabindex="-1" autocomplete="off" />
             </div>
 
             @if (emailWizardStep === 1) {
               <div [@wizardPane] class="register-wizard-step">
                 <label class="register-wizard-label" for="fn">
-                  Prénom <span class="register-wizard-req" aria-hidden="true">*</span>
+                  First name <span class="register-wizard-req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="fn"
                   class="register-input register-input--wizard"
                   formControlName="firstName"
                   maxlength="120"
-                  placeholder="Votre prénom"
+                  placeholder="Your first name"
                   autocomplete="given-name"
                   (keydown.enter)="$event.preventDefault(); continueWizard()"
                   [class.register-input--invalid]="form.controls.firstName.invalid && form.controls.firstName.touched"
                 />
                 @if (form.controls.firstName.errors?.['required'] && form.controls.firstName.touched) {
-                  <p class="register-hint register-hint--error">Ce champ est obligatoire.</p>
+                  <p class="register-hint register-hint--error">This field is required.</p>
                 }
 
-                <label class="register-wizard-label register-wizard-label--spaced" for="ln">Nom</label>
+                <label class="register-wizard-label register-wizard-label--spaced" for="ln">Last name</label>
                 <input
                   id="ln"
                   class="register-input register-input--wizard"
                   formControlName="lastName"
                   maxlength="120"
-                  placeholder="Votre nom (facultatif)"
+                  placeholder="Your last name (optional)"
                   autocomplete="family-name"
                   (keydown.enter)="$event.preventDefault(); continueWizard()"
                 />
 
-                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continuer</button>
+                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continue</button>
               </div>
             }
 
             @if (emailWizardStep === 2) {
               <div [@wizardPane] class="register-wizard-step">
                 <label class="register-wizard-label" for="email">
-                  E-mail <span class="register-wizard-req" aria-hidden="true">*</span>
+                  Email <span class="register-wizard-req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="email"
@@ -144,26 +144,26 @@
                   type="email"
                   formControlName="email"
                   autocomplete="email"
-                  placeholder="nom@exemple.com"
+                  placeholder="name@example.com"
                   (keydown.enter)="$event.preventDefault(); continueWizard()"
                   [class.register-input--invalid]="form.controls.email.invalid && form.controls.email.touched"
                 />
                 @if (form.controls.email.errors?.['required'] && form.controls.email.touched) {
-                  <p class="register-hint register-hint--error">Une adresse e-mail est obligatoire.</p>
+                  <p class="register-hint register-hint--error">An email address is required.</p>
                 }
                 @if (form.controls.email.errors?.['email'] && form.controls.email.touched) {
-                  <p class="register-hint register-hint--error">Format d’e-mail invalide.</p>
+                  <p class="register-hint register-hint--error">Invalid email format.</p>
                 }
 
-                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continuer</button>
-                <button type="button" class="register-wizard-back" (click)="prevWizard()">Retour</button>
+                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continue</button>
+                <button type="button" class="register-wizard-back" (click)="prevWizard()">Back</button>
               </div>
             }
 
             @if (emailWizardStep === 3) {
               <div [@wizardPane] class="register-wizard-step">
                 <label class="register-wizard-label" for="username">
-                  Nom d’utilisateur <span class="register-wizard-req" aria-hidden="true">*</span>
+                  Username <span class="register-wizard-req" aria-hidden="true">*</span>
                 </label>
                 <input
                   id="username"
@@ -171,28 +171,28 @@
                   formControlName="username"
                   autocomplete="username"
                   maxlength="64"
-                  placeholder="ex. marie_dupont"
+                  placeholder="e.g. marie_dupont"
                   (keydown.enter)="$event.preventDefault(); continueWizard()"
                   [class.register-input--invalid]="form.controls.username.invalid && form.controls.username.touched"
                 />
                 @if (form.controls.username.errors?.['required'] && form.controls.username.touched) {
-                  <p class="register-hint register-hint--error">Obligatoire.</p>
+                  <p class="register-hint register-hint--error">Required.</p>
                 }
                 @if (form.controls.username.errors?.['usernamePattern'] && form.controls.username.touched) {
                   <p class="register-hint register-hint--error">
-                    3–64 caractères : lettres, chiffres, <span class="text-nowrap">. _ -</span> uniquement.
+                    3–64 characters: letters, numbers, <span class="text-nowrap">. _ -</span> only.
                   </p>
                 }
 
-                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continuer</button>
-                <button type="button" class="register-wizard-back" (click)="prevWizard()">Retour</button>
+                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continue</button>
+                <button type="button" class="register-wizard-back" (click)="prevWizard()">Back</button>
               </div>
             }
 
             @if (emailWizardStep === 4) {
               <div [@wizardPane] class="register-wizard-step">
                 <label class="register-wizard-label" for="password">
-                  Mot de passe <span class="register-wizard-req" aria-hidden="true">*</span>
+                  Password <span class="register-wizard-req" aria-hidden="true">*</span>
                 </label>
                 <div class="register-input-wrap">
                   <input
@@ -210,9 +210,9 @@
                     class="register-input-action"
                     (click)="showPassword = !showPassword"
                     [attr.aria-pressed]="showPassword"
-                    [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                    [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
                   >
-                    {{ showPassword ? 'Masquer' : 'Afficher' }}
+                    {{ showPassword ? 'Hide' : 'Show' }}
                   </button>
                 </div>
                 @if (form.controls.password.value) {
@@ -224,13 +224,13 @@
                     ></div>
                   </div>
                   <p class="register-password-level">
-                    Force :
+                    Strength:
                     <span class="register-strength" [attr.data-level]="passwordStrengthLabel()">
                       {{ passwordStrengthLabel() | titlecase }}
                     </span>
                   </p>
                 }
-                <p class="password-criteria__title">Votre mot de passe doit contenir :</p>
+                <p class="password-criteria__title">Your password must contain:</p>
                 <div class="password-criteria" role="list">
                   @let c = passwordChecks();
                   <div
@@ -239,7 +239,7 @@
                     role="listitem"
                   >
                     <span class="password-criteria__dot" [class.password-criteria__dot--met]="c.minLength" aria-hidden="true"></span>
-                    <span class="password-criteria__text">de 8 à 128 caractères</span>
+                    <span class="password-criteria__text">8 to 128 characters</span>
                   </div>
                   <div
                     class="password-criteria__row"
@@ -247,7 +247,7 @@
                     role="listitem"
                   >
                     <span class="password-criteria__dot" [class.password-criteria__dot--met]="c.hasLower" aria-hidden="true"></span>
-                    <span class="password-criteria__text">une lettre minuscule</span>
+                    <span class="password-criteria__text">one lowercase letter</span>
                   </div>
                   <div
                     class="password-criteria__row"
@@ -255,7 +255,7 @@
                     role="listitem"
                   >
                     <span class="password-criteria__dot" [class.password-criteria__dot--met]="c.hasUpper" aria-hidden="true"></span>
-                    <span class="password-criteria__text">une lettre majuscule</span>
+                    <span class="password-criteria__text">one uppercase letter</span>
                   </div>
                   <div
                     class="password-criteria__row"
@@ -263,7 +263,7 @@
                     role="listitem"
                   >
                     <span class="password-criteria__dot" [class.password-criteria__dot--met]="c.hasDigit" aria-hidden="true"></span>
-                    <span class="password-criteria__text">un chiffre</span>
+                    <span class="password-criteria__text">one number</span>
                   </div>
                   <div
                     class="password-criteria__row"
@@ -271,12 +271,12 @@
                     role="listitem"
                   >
                     <span class="password-criteria__dot" [class.password-criteria__dot--met]="c.hasSpecial" aria-hidden="true"></span>
-                    <span class="password-criteria__text">un symbole parmi ! &#64; # $ % &amp; …</span>
+                    <span class="password-criteria__text">one symbol such as ! &#64; # $ % &amp; …</span>
                   </div>
                 </div>
 
                 <label class="register-wizard-label register-wizard-label--spaced" for="confirmPassword">
-                  Confirmer le mot de passe <span class="register-wizard-req" aria-hidden="true">*</span>
+                  Confirm password <span class="register-wizard-req" aria-hidden="true">*</span>
                 </label>
                 <div class="register-input-wrap">
                   <input
@@ -296,36 +296,36 @@
                     class="register-input-action"
                     (click)="showConfirmPassword = !showConfirmPassword"
                     [attr.aria-pressed]="showConfirmPassword"
-                    [attr.aria-label]="showConfirmPassword ? 'Masquer la confirmation' : 'Afficher la confirmation'"
+                    [attr.aria-label]="showConfirmPassword ? 'Hide confirmation' : 'Show confirmation'"
                   >
-                    {{ showConfirmPassword ? 'Masquer' : 'Afficher' }}
+                    {{ showConfirmPassword ? 'Hide' : 'Show' }}
                   </button>
                 </div>
                 @if (form.controls.confirmPassword.errors?.['required'] && form.controls.confirmPassword.touched) {
-                  <p class="register-hint register-hint--error">Confirmez votre mot de passe.</p>
+                  <p class="register-hint register-hint--error">Please confirm your password.</p>
                 }
                 @if (form.errors?.['passwordMismatch'] && form.controls.confirmPassword.touched) {
-                  <p class="register-hint register-hint--error">Les mots de passe ne correspondent pas.</p>
+                  <p class="register-hint register-hint--error">Passwords do not match.</p>
                 }
 
-                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continuer</button>
-                <button type="button" class="register-wizard-back" (click)="prevWizard()">Retour</button>
+                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continue</button>
+                <button type="button" class="register-wizard-back" (click)="prevWizard()">Back</button>
               </div>
             }
 
             @if (emailWizardStep === 5) {
               <div [@wizardPane] class="register-wizard-step">
-                <p class="register-wizard-intro">Facultatif — vous pourrez modifier ces informations plus tard.</p>
+                <p class="register-wizard-intro">Optional — you can update this information later.</p>
 
-                <label class="register-wizard-label" for="dob">Date de naissance</label>
+                <label class="register-wizard-label" for="dob">Date of birth</label>
                 <input id="dob" class="register-input register-input--wizard" type="date" formControlName="dateOfBirth" />
 
-                <label class="register-wizard-label register-wizard-label--spaced" for="int">Centres d’intérêt</label>
+                <label class="register-wizard-label register-wizard-label--spaced" for="int">Interests</label>
                 <input
                   id="int"
                   class="register-input register-input--wizard"
                   formControlName="interestsText"
-                  placeholder="Séparés par des virgules"
+                  placeholder="Separated by commas"
                 />
 
                 <label class="register-wizard-label register-wizard-label--spaced" for="desc">Description</label>
@@ -335,24 +335,24 @@
                   rows="3"
                   formControlName="description"
                   maxlength="2000"
-                  placeholder="Quelques mots sur vous…"
+                  placeholder="A few words about yourself..."
                 ></textarea>
 
-                <label class="register-wizard-label register-wizard-label--spaced" for="rec">E-mail de récupération</label>
+                <label class="register-wizard-label register-wizard-label--spaced" for="rec">Recovery email</label>
                 <input
                   id="rec"
                   class="register-input register-input--wizard"
                   type="email"
                   formControlName="recuperationEmail"
-                  placeholder="Différent de votre e-mail de connexion"
+                  placeholder="Different from your sign-in email"
                   [class.register-input--invalid]="form.errors?.['recoverySameAsLogin'] && form.controls.recuperationEmail.touched"
                 />
                 @if (form.errors?.['recoverySameAsLogin'] && form.controls.recuperationEmail.touched) {
-                  <p class="register-hint register-hint--error">Doit être différent de l’e-mail de connexion.</p>
+                  <p class="register-hint register-hint--error">Must be different from your sign-in email.</p>
                 }
 
-                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continuer</button>
-                <button type="button" class="register-wizard-back" (click)="prevWizard()">Retour</button>
+                <button type="button" class="register-wizard-continue" (click)="continueWizard()">Continue</button>
+                <button type="button" class="register-wizard-back" (click)="prevWizard()">Back</button>
               </div>
             }
 
@@ -362,24 +362,23 @@
                   <div class="register-terms">
                     <input class="register-checkbox" type="checkbox" id="terms" formControlName="acceptTerms" />
                     <label class="register-terms__label" for="terms">
-                      J’accepte les <span class="register-terms__accent">conditions d’utilisation</span> et la politique de traitement des
-                      données.
+                      I accept the <span class="register-terms__accent">terms of use</span> and the data processing policy.
                     </label>
                   </div>
                   @if (form.controls.acceptTerms.invalid && form.controls.acceptTerms.touched) {
-                    <p class="register-hint register-hint--error mb-0">Vous devez accepter pour continuer.</p>
+                    <p class="register-hint register-hint--error mb-0">You must accept to continue.</p>
                   }
                 </fieldset>
 
                 <button type="button" class="register-wizard-continue" [disabled]="loading" (click)="submit()">
                   @if (loading) {
                     <span class="register-submit__spinner" aria-hidden="true"></span>
-                    Création du compte…
+                    Creating account...
                   } @else {
-                    Créer mon compte
+                    Create my account
                   }
                 </button>
-                <button type="button" class="register-wizard-back" (click)="prevWizard()">Retour</button>
+                <button type="button" class="register-wizard-back" (click)="prevWizard()">Back</button>
               </div>
             }
           </form>

@@ -55,6 +55,16 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/reclamation/reclamation.component').then((m) => m.ReclamationComponent),
   },
   {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./pages/admin-dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
+  },
+  {
+    path: 'admin/dashboard',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./pages/admin-dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
+  },
+  {
     path: 'admin/reclamations',
     canActivate: [adminGuard],
     loadComponent: () =>
@@ -106,7 +116,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin-jihen-portfolio',
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./pages/jihen-portfolio-admin/jihen-portfolio-admin.component').then((m) => m.JihenPortfolioAdminComponent),
   },

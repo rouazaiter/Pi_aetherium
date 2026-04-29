@@ -1,6 +1,6 @@
 import { CommonModule, Location } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import type {
   ExploreCollectionCardDto,
@@ -19,7 +19,7 @@ type JihenSkillGroupView = {
 
 type TourStep = {
   section: Jihen3dSection;
-  label: string;
+  label?: string;
   projectIndex?: number;
   collectionIndex?: number;
 };
@@ -27,14 +27,11 @@ type TourStep = {
 @Component({
   selector: 'app-jihen-portfolio-3d',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './jihen-portfolio-3d.component.html',
   styleUrl: './jihen-portfolio-3d.component.scss',
 })
 export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
-  private static readonly TOUR_STEP_DURATION_MS = 5000;
-  private static readonly TOUR_TRANSITION_MS = 900;
-
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly api = inject(ExploreService);
@@ -46,30 +43,29 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
   protected projects: ExploreProjectCardDto[] = [];
   protected groupedSkills: JihenSkillGroupView[] = [];
 
-  protected tourMode = false;
-  protected tourRunning = false;
-  protected tourPaused = false;
-  protected tourProgressIndex = 0;
   protected activeSection: Jihen3dSection = 'hero';
   protected activeProjectIndex = 0;
   protected activeCollectionIndex = 0;
+
+  protected sceneRotateX = -7;
+  protected sceneRotateY = 10;
+  protected sceneDepth = 0;
+
+  protected profileOpen = false;
+  protected tourRunning = false;
+  protected tourPaused = false;
+  protected tourProgressIndex = 0;
   protected transitioning = false;
-  protected transitionFromStep: TourStep | null = null;
-  protected transitionToStep: TourStep | null = null;
 
-  protected sceneRotateX = -5;
-  protected sceneRotateY = 8;
+  private tourTimer: ReturnType<typeof window.setInterval> | null = null;
 
-  private tourTimer: ReturnType<typeof window.setTimeout> | null = null;
-  private transitionTimer: ReturnType<typeof window.setTimeout> | null = null;
-
-  protected readonly sections: Array<{ key: Jihen3dSection; label: string; description: string }> = [
-    { key: 'hero', label: 'Hero / Profile', description: 'Identity, role, and first impression.' },
-    { key: 'about', label: 'About', description: 'A concise story about the portfolio owner.' },
-    { key: 'skills', label: 'Skills', description: 'Core stacks and strongest tools.' },
-    { key: 'projects', label: 'Projects', description: 'Projects appear one by one in full focus.' },
-    { key: 'collections', label: 'Collections', description: 'Collections appear one by one in sequence.' },
-    { key: 'contact', label: 'Contact', description: 'Final call to connect and collaborate.' },
+  readonly sections: Array<{ key: Jihen3dSection; label: string; description: string }> = [
+    { key: 'hero', label: 'Hero', description: 'Main profile introduction and social links.' },
+    { key: 'about', label: 'About', description: 'Portfolio story and professional summary.' },
+    { key: 'skills', label: 'Skills', description: 'Core stack, grouped skills, and highlights.' },
+    { key: 'projects', label: 'Projects', description: 'Project showcase with visuals and keywords.' },
+    { key: 'collections', label: 'Collections', description: 'Grouped work collections and themes.' },
+    { key: 'contact', label: 'Contact', description: 'Direct contact links after the tour.' },
   ];
 
   ngOnInit(): void {
@@ -92,176 +88,125 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
           }).pipe(
             catchError((error) => {
               this.loading = false;
-              this.errorMessage = error?.status === 403 ? 'You do not have permission to view this.' : 'Portfolio not available.';
+              this.errorMessage =
+                error?.status === 403
+                  ? 'You do not have permission to view this.'
+                  : 'Portfolio not available.';
               return of(null);
             }),
           );
         }),
       )
       .subscribe((result) => {
-        if (!result) {
-          return;
-        }
+        if (!result) return;
 
         this.detail = result.detail;
         this.collections = result.collections.length > 0 ? result.collections : (result.detail.collections ?? []);
         this.projects = result.detail.projects ?? [];
         this.groupedSkills = this.normalizeSkillGroups(result.detail);
         this.loading = false;
-        this.applyTourStep();
       });
   }
 
   ngOnDestroy(): void {
     this.clearTourTimer();
-    this.clearTransitionTimer();
   }
 
   protected backToPortfolio(): void {
     this.location.back();
   }
 
+  protected get tourMode(): boolean {
+    return this.tourRunning;
+  }
+
+  protected selectSection(section: Jihen3dSection): void {
+    this.stopTour(false);
+    this.activeSection = section;
+    this.sceneDepth = this.sectionDepth(section);
+  }
+
+  protected openProfile(): void {
+    this.profileOpen = true;
+  }
+
+  protected closeProfile(): void {
+    this.profileOpen = false;
+  }
+
   protected startTour(): void {
-    this.tourMode = true;
     this.tourRunning = true;
     this.tourPaused = false;
     this.tourProgressIndex = 0;
     this.applyTourStep();
-    this.scheduleNextStep();
+    this.clearTourTimer();
+
+    this.tourTimer = window.setInterval(() => {
+      if (!this.tourPaused) {
+        this.nextTourStep();
+      }
+    }, 6500);
   }
 
   protected pauseTour(): void {
     this.tourPaused = true;
-    this.clearTourTimer();
   }
 
   protected resumeTour(): void {
-    if (!this.tourMode) {
-      this.startTour();
-      return;
+    this.tourPaused = false;
+  }
+
+  protected stopTour(reset = true): void {
+    this.tourRunning = false;
+    this.tourPaused = false;
+    this.clearTourTimer();
+
+    if (reset) {
+      this.tourProgressIndex = 0;
+      this.activeSection = 'hero';
+      this.activeProjectIndex = 0;
+      this.activeCollectionIndex = 0;
+      this.sceneDepth = 0;
     }
-
-    this.tourRunning = true;
-    this.tourPaused = false;
-    this.scheduleNextStep();
-  }
-
-  protected resetTour(): void {
-    this.clearTourTimer();
-    this.clearTransitionTimer();
-    this.tourMode = true;
-    this.tourRunning = false;
-    this.tourPaused = false;
-    this.transitioning = false;
-    this.transitionFromStep = null;
-    this.transitionToStep = null;
-    this.tourProgressIndex = 0;
-    this.applyTourStep();
-  }
-
-  protected exitTour(): void {
-    this.clearTourTimer();
-    this.clearTransitionTimer();
-    this.tourMode = false;
-    this.tourRunning = false;
-    this.tourPaused = false;
-    this.transitioning = false;
-    this.transitionFromStep = null;
-    this.transitionToStep = null;
-    this.tourProgressIndex = 0;
-    this.activeSection = 'hero';
-    this.activeProjectIndex = 0;
-    this.activeCollectionIndex = 0;
-    this.resetScene();
   }
 
   protected nextTourStep(): void {
-    if (this.transitioning) {
-      return;
-    }
-
     const steps = this.tourSteps();
-    if (steps.length === 0) {
-      return;
-    }
+    if (steps.length === 0) return;
 
-    if (this.tourProgressIndex >= steps.length - 1) {
-      this.pauseTour();
-      return;
-    }
-
-    this.beginTransitionToIndex(this.tourProgressIndex + 1);
+    this.tourProgressIndex = (this.tourProgressIndex + 1) % steps.length;
+    this.applyTourStep();
   }
 
   protected previousTourStep(): void {
-    if (this.transitioning) {
-      return;
-    }
-
     const steps = this.tourSteps();
-    if (steps.length === 0) {
-      return;
-    }
+    if (steps.length === 0) return;
 
-    this.clearTourTimer();
-    this.beginTransitionToIndex(Math.max(this.tourProgressIndex - 1, 0));
-  }
-
-  protected goToStep(index: number): void {
-    if (this.transitioning) {
-      return;
-    }
-
-    const steps = this.tourSteps();
-    if (index < 0 || index >= steps.length) {
-      return;
-    }
-
-    this.tourMode = true;
-    this.clearTourTimer();
-    if (index === this.tourProgressIndex) {
-      return;
-    }
-
-    this.beginTransitionToIndex(index);
-  }
-
-  protected selectSection(section: Jihen3dSection): void {
-    const index = this.tourSteps().findIndex((step) => step.section === section);
-    if (index === -1) {
-      return;
-    }
-
-    this.goToStep(index);
+    this.tourProgressIndex = this.tourProgressIndex === 0 ? steps.length - 1 : this.tourProgressIndex - 1;
+    this.applyTourStep();
   }
 
   protected onSceneMove(event: MouseEvent): void {
-    if (!this.tourMode) {
-      return;
-    }
-
     const element = event.currentTarget as HTMLElement | null;
-    if (!element) {
-      return;
-    }
+    if (!element) return;
 
     const rect = element.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
 
-    this.sceneRotateY = 8 + x * 8;
-    this.sceneRotateX = -5 - y * 7;
+    this.sceneRotateY = 10 + x * 9;
+    this.sceneRotateX = -7 - y * 7;
   }
 
   protected resetScene(): void {
-    this.sceneRotateX = -5;
-    this.sceneRotateY = 8;
+    this.sceneRotateX = -7;
+    this.sceneRotateY = 10;
   }
 
   @HostListener('window:keydown.escape')
   protected onEscape(): void {
-    if (this.tourMode) {
-      this.exitTour();
+    if (this.profileOpen) {
+      this.closeProfile();
       return;
     }
 
@@ -270,9 +215,7 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
 
   protected displayName(): string {
     const detail = this.detail;
-    if (!detail) {
-      return '';
-    }
+    if (!detail) return '';
 
     return (
       detail.displayName?.trim() ||
@@ -309,9 +252,7 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
 
   protected locationText(): string {
     const detail = this.detail;
-    if (!detail) {
-      return 'Remote';
-    }
+    if (!detail) return 'Remote';
 
     return (
       detail.location?.trim() ||
@@ -357,7 +298,7 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
 
   protected aboutLead(): string {
     const text = this.aboutText();
-    return text.length > 240 ? `${text.slice(0, 240).trim()}...` : text;
+    return text.length > 140 ? `${text.slice(0, 140).trim()}...` : text;
   }
 
   protected githubUrl(): string {
@@ -373,8 +314,12 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
     return email ? `mailto:${email}` : '';
   }
 
+  protected topSkills(): SkillSummaryDto[] {
+    return this.groupedSkills.flatMap((group) => group.skills).slice(0, 12);
+  }
+
   protected previewSkills(): SkillSummaryDto[] {
-    return this.groupedSkills.flatMap((group) => group.skills).slice(0, 8);
+    return this.topSkills();
   }
 
   protected activeProject(): ExploreProjectCardDto | null {
@@ -385,28 +330,8 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
     return this.collections[this.activeCollectionIndex] ?? this.collections[0] ?? null;
   }
 
-  protected projectForStep(step: TourStep | null): ExploreProjectCardDto | null {
-    if (!step || step.section !== 'projects') {
-      return null;
-    }
-
-    const index = typeof step.projectIndex === 'number' ? step.projectIndex : 0;
-    return this.projects[index] ?? this.projects[0] ?? null;
-  }
-
-  protected collectionForStep(step: TourStep | null): ExploreCollectionCardDto | null {
-    if (!step || step.section !== 'collections') {
-      return null;
-    }
-
-    const index = typeof step.collectionIndex === 'number' ? step.collectionIndex : 0;
-    return this.collections[index] ?? this.collections[0] ?? null;
-  }
-
   protected projectImage(project: ExploreProjectCardDto | null): string {
-    if (!project) {
-      return '';
-    }
+    if (!project) return '';
 
     const projectWithMedia = project as ExploreProjectCardDto & {
       imageUrl?: string | null;
@@ -414,13 +339,16 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
       mediaUrl?: string | null;
     };
 
-    return projectWithMedia.thumbnailUrl?.trim() || projectWithMedia.imageUrl?.trim() || projectWithMedia.mediaUrl?.trim() || '';
+    return (
+      projectWithMedia.thumbnailUrl?.trim() ||
+      projectWithMedia.imageUrl?.trim() ||
+      projectWithMedia.mediaUrl?.trim() ||
+      ''
+    );
   }
 
   protected projectVideo(project: ExploreProjectCardDto | null): string {
-    if (!project) {
-      return '';
-    }
+    if (!project) return '';
 
     const projectWithMedia = project as ExploreProjectCardDto & {
       videoUrl?: string | null;
@@ -440,64 +368,51 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
   }
 
   protected projectKeywords(project: ExploreProjectCardDto | null): string[] {
-    if (!project) {
-      return [];
-    }
+    if (!project) return [];
 
-    const projectWithSkillNames = project as ExploreProjectCardDto & { skillNames?: string[] | null };
-    const skills = (project.topSkills ?? []).map((skill) => skill.name?.trim()).filter((name): name is string => Boolean(name));
-    if (skills.length > 0) {
-      return skills.slice(0, 5);
-    }
+    const skills = (project.topSkills ?? []).map((skill) => skill.name).filter(Boolean);
+    if (skills.length > 0) return skills.slice(0, 5);
 
-    return (projectWithSkillNames.skillNames ?? []).filter(Boolean).slice(0, 5);
+    return (project.title || '')
+      .split(/\s+/)
+      .filter((word) => word.length > 2)
+      .slice(0, 5);
   }
 
   protected shortProjectSummary(project: ExploreProjectCardDto | null): string {
     const text = project?.description?.trim() || '';
-    if (!text) {
-      return 'Immersive project showcase.';
-    }
+    if (!text) return 'Visual project showcase.';
 
-    return text.length > 110 ? `${text.slice(0, 110).trim()}...` : text;
+    return text.length > 90 ? `${text.slice(0, 90).trim()}...` : text;
   }
 
   protected collectionPreviewImage(collection: ExploreCollectionCardDto | null): string {
-    if (!collection) {
-      return '';
-    }
+    if (!collection) return '';
 
     const collectionWithProjects = collection as ExploreCollectionCardDto & {
       imageUrl?: string | null;
       thumbnailUrl?: string | null;
-      mediaUrl?: string | null;
-      projects?: Array<
-        ExploreProjectCardDto & {
-          thumbnailUrl?: string | null;
-          imageUrl?: string | null;
-          mediaUrl?: string | null;
-        }
-      >;
+      projects?: Array<ExploreProjectCardDto & {
+        thumbnailUrl?: string | null;
+        imageUrl?: string | null;
+        mediaUrl?: string | null;
+      }>;
     };
 
-    if (collectionWithProjects.thumbnailUrl?.trim()) {
-      return collectionWithProjects.thumbnailUrl.trim();
-    }
-    if (collectionWithProjects.imageUrl?.trim()) {
-      return collectionWithProjects.imageUrl.trim();
-    }
-    if (collectionWithProjects.mediaUrl?.trim()) {
-      return collectionWithProjects.mediaUrl.trim();
-    }
+    if (collectionWithProjects.thumbnailUrl?.trim()) return collectionWithProjects.thumbnailUrl.trim();
+    if (collectionWithProjects.imageUrl?.trim()) return collectionWithProjects.imageUrl.trim();
 
     const firstProject = collectionWithProjects.projects?.[0];
-    return firstProject?.thumbnailUrl?.trim() || firstProject?.imageUrl?.trim() || firstProject?.mediaUrl?.trim() || '';
+    return (
+      firstProject?.thumbnailUrl?.trim() ||
+      firstProject?.imageUrl?.trim() ||
+      firstProject?.mediaUrl?.trim() ||
+      ''
+    );
   }
 
   protected collectionProjectCount(collection: ExploreCollectionCardDto | null): number {
-    if (!collection) {
-      return 0;
-    }
+    if (!collection) return 0;
 
     const withProjects = collection as ExploreCollectionCardDto & {
       projectCount?: number | null;
@@ -508,33 +423,21 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
   }
 
   protected collectionKeywords(collection: ExploreCollectionCardDto | null): string[] {
-    if (!collection) {
-      return [];
-    }
+    if (!collection) return [];
 
     const withProjects = collection as ExploreCollectionCardDto & {
-      skills?: SkillSummaryDto[] | null;
-      topSkills?: SkillSummaryDto[] | null;
-      projects?: Array<ExploreProjectCardDto & { topSkills?: SkillSummaryDto[] | null }>;
+      projects?: Array<ExploreProjectCardDto & { topSkills?: SkillSummaryDto[] }>;
     };
 
-    const keywords = new Set<string>();
-
-    for (const skill of withProjects.topSkills ?? withProjects.skills ?? []) {
-      if (skill.name?.trim()) {
-        keywords.add(skill.name.trim());
-      }
-    }
+    const names = new Set<string>();
 
     for (const project of withProjects.projects ?? []) {
       for (const skill of project.topSkills ?? []) {
-        if (skill.name?.trim()) {
-          keywords.add(skill.name.trim());
-        }
+        if (skill.name) names.add(skill.name);
       }
     }
 
-    return Array.from(keywords).slice(0, 5);
+    return Array.from(names).slice(0, 5);
   }
 
   protected skillLogo(skill: SkillSummaryDto): string {
@@ -564,32 +467,105 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
     return (skill.name || '?').charAt(0).toUpperCase();
   }
 
+  protected projectKey(project: ExploreProjectCardDto): string | number {
+    const projectWithOptionalId = project as ExploreProjectCardDto & { id?: number | null };
+    return project.projectId ?? projectWithOptionalId.id ?? project.title ?? Math.random();
+  }
+
+  protected collectionKey(collection: ExploreCollectionCardDto): string | number {
+    const collectionWithOptionalId = collection as ExploreCollectionCardDto & { id?: number | null };
+    return collection.collectionId ?? collectionWithOptionalId.id ?? collection.name ?? collection.title ?? Math.random();
+  }
+
   protected skillKey(skill: SkillSummaryDto): string {
     const skillWithSlug = skill as SkillSummaryDto & { slug?: string | null; iconKey?: string | null };
-    return (skillWithSlug.iconKey?.trim() || skillWithSlug.slug?.trim() || skill.name?.trim() || '')
+    return (
+      skillWithSlug.iconKey?.trim() ||
+      skillWithSlug.slug?.trim() ||
+      skill.name?.trim() ||
+      ''
+    )
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '');
   }
 
+  protected previewDurationLabel(section: Jihen3dSection): string {
+    const seconds = section === 'projects' || section === 'collections' ? 7 : 6;
+    return `~${seconds}s`;
+  }
+
+  protected totalTourTimeSeconds(): number {
+    return this.tourSteps().reduce((total, step) => total + (step.section === 'projects' || step.section === 'collections' ? 7 : 6), 0);
+  }
+
+  protected resetTour(): void {
+    this.stopTour(true);
+  }
+
+  protected exitTour(): void {
+    this.stopTour(true);
+  }
+
+  protected renderedPrimaryStep(): TourStep | null {
+    return this.tourSteps()[this.tourProgressIndex] ?? null;
+  }
+
+  protected renderedIncomingStep(): TourStep | null {
+    return null;
+  }
+
+  protected goToStep(index: number): void {
+    const steps = this.tourSteps();
+    if (index < 0 || index >= steps.length) {
+      return;
+    }
+    this.tourProgressIndex = index;
+    this.applyTourStep();
+  }
+
+  protected projectForStep(step: TourStep | null | undefined): ExploreProjectCardDto | null {
+    if (!step || step.section !== 'projects') {
+      return null;
+    }
+    const index = step.projectIndex ?? this.activeProjectIndex;
+    return this.projects[index] ?? this.projects[0] ?? null;
+  }
+
+  protected collectionForStep(step: TourStep | null | undefined): ExploreCollectionCardDto | null {
+    if (!step || step.section !== 'collections') {
+      return null;
+    }
+    const index = step.collectionIndex ?? this.activeCollectionIndex;
+    return this.collections[index] ?? this.collections[0] ?? null;
+  }
+
+  private applyTourStep(): void {
+    const step = this.tourSteps()[this.tourProgressIndex];
+    if (!step) return;
+
+    this.activeSection = step.section;
+    this.sceneDepth = this.sectionDepth(step.section);
+
+    if (typeof step.projectIndex === 'number') {
+      this.activeProjectIndex = step.projectIndex;
+    }
+
+    if (typeof step.collectionIndex === 'number') {
+      this.activeCollectionIndex = step.collectionIndex;
+    }
+  }
+
   protected tourSteps(): TourStep[] {
     const projectSteps: TourStep[] = this.projects.length
-      ? this.projects.map((project, index) => ({
-          section: 'projects',
-          label: project.title?.trim() || `Project ${index + 1}`,
-          projectIndex: index,
-        }))
+      ? this.projects.slice(0, 6).map((_, index) => ({ section: 'projects', label: 'Projects', projectIndex: index }))
       : [{ section: 'projects', label: 'Projects' }];
 
     const collectionSteps: TourStep[] = this.collections.length
-      ? this.collections.map((collection, index) => ({
-          section: 'collections',
-          label: collection.name?.trim() || collection.title?.trim() || `Collection ${index + 1}`,
-          collectionIndex: index,
-        }))
+      ? this.collections.slice(0, 5).map((_, index) => ({ section: 'collections', label: 'Collections', collectionIndex: index }))
       : [{ section: 'collections', label: 'Collections' }];
 
     return [
-      { section: 'hero', label: 'Hero / Profile' },
+      { section: 'hero', label: 'Hero' },
       { section: 'about', label: 'About' },
       { section: 'skills', label: 'Skills' },
       ...projectSteps,
@@ -598,151 +574,23 @@ export class JihenPortfolio3dComponent implements OnInit, OnDestroy {
     ];
   }
 
-  protected currentStep(): TourStep | null {
-    return this.tourSteps()[this.tourProgressIndex] ?? null;
-  }
+  private sectionDepth(section: Jihen3dSection): number {
+    const depthMap: Record<Jihen3dSection, number> = {
+      hero: 0,
+      about: -18,
+      skills: -36,
+      projects: -54,
+      collections: -72,
+      contact: -90,
+    };
 
-  protected renderedPrimaryStep(): TourStep | null {
-    return this.transitioning ? this.transitionFromStep : this.currentStep();
-  }
-
-  protected renderedIncomingStep(): TourStep | null {
-    return this.transitioning ? this.transitionToStep : null;
-  }
-
-  protected currentStepLabel(): string {
-    return this.currentStep()?.label || 'Hero / Profile';
-  }
-
-  protected currentStepNumber(): number {
-    return this.tourProgressIndex + 1;
-  }
-
-  protected totalSteps(): number {
-    return this.tourSteps().length;
-  }
-
-  protected currentSectionMeta(): string {
-    switch (this.activeSection) {
-      case 'hero':
-        return 'Immersive first impression';
-      case 'about':
-        return 'Personal story and positioning';
-      case 'skills':
-        return 'Core technologies and expertise';
-      case 'projects':
-        return `Project ${this.activeProjectIndex + 1} of ${Math.max(this.projects.length, 1)}`;
-      case 'collections':
-        return `Collection ${this.activeCollectionIndex + 1} of ${Math.max(this.collections.length, 1)}`;
-      case 'contact':
-        return 'How to connect';
-    }
-  }
-
-  protected sectionCardCount(section: Jihen3dSection): number {
-    if (section === 'projects') {
-      return Math.max(this.projects.length, 1);
-    }
-    if (section === 'collections') {
-      return Math.max(this.collections.length, 1);
-    }
-    return 1;
-  }
-
-  protected previewFloorLabel(): string {
-    return `${this.projects.length} projects • ${this.collections.length} collections • ${this.previewSkills().length} spotlight skills`;
-  }
-
-  protected totalTourTimeSeconds(): number {
-    return this.totalSteps() * 5;
-  }
-
-  protected previewDurationLabel(section: Jihen3dSection): string {
-    if (section === 'projects' || section === 'collections') {
-      return '5 seconds each';
-    }
-
-    return '5 seconds';
-  }
-
-  private scheduleNextStep(): void {
-    this.clearTourTimer();
-    if (!this.tourRunning || this.tourPaused) {
-      return;
-    }
-
-    this.tourTimer = window.setTimeout(() => {
-      this.nextTourStep();
-    }, JihenPortfolio3dComponent.TOUR_STEP_DURATION_MS);
-  }
-
-  private beginTransitionToIndex(nextIndex: number): void {
-    const steps = this.tourSteps();
-    const nextStep = steps[nextIndex];
-    const currentStep = this.currentStep();
-
-    if (!nextStep || !currentStep) {
-      return;
-    }
-
-    this.transitioning = true;
-    this.transitionFromStep = { ...currentStep };
-    this.transitionToStep = { ...nextStep };
-    this.primeStepState(nextStep);
-    this.clearTransitionTimer();
-
-    this.transitionTimer = window.setTimeout(() => {
-      this.tourProgressIndex = nextIndex;
-      this.applyTourStep();
-      this.transitioning = false;
-      this.transitionFromStep = null;
-      this.transitionToStep = null;
-      this.clearTransitionTimer();
-
-      if (this.tourRunning && !this.tourPaused) {
-        this.scheduleNextStep();
-      }
-    }, JihenPortfolio3dComponent.TOUR_TRANSITION_MS);
-  }
-
-  private applyTourStep(): void {
-    const step = this.currentStep();
-    if (!step) {
-      return;
-    }
-
-    this.activeSection = step.section;
-
-    if (typeof step.projectIndex === 'number') {
-      this.activeProjectIndex = step.projectIndex;
-    }
-
-    if (typeof step.collectionIndex === 'number') {
-      this.activeCollectionIndex = step.collectionIndex;
-    }
+    return depthMap[section];
   }
 
   private clearTourTimer(): void {
     if (this.tourTimer) {
-      window.clearTimeout(this.tourTimer);
+      window.clearInterval(this.tourTimer);
       this.tourTimer = null;
-    }
-  }
-
-  private clearTransitionTimer(): void {
-    if (this.transitionTimer) {
-      window.clearTimeout(this.transitionTimer);
-      this.transitionTimer = null;
-    }
-  }
-
-  private primeStepState(step: TourStep): void {
-    if (typeof step.projectIndex === 'number') {
-      this.activeProjectIndex = step.projectIndex;
-    }
-
-    if (typeof step.collectionIndex === 'number') {
-      this.activeCollectionIndex = step.collectionIndex;
     }
   }
 

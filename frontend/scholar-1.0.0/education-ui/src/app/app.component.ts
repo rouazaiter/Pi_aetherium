@@ -123,11 +123,15 @@ export class AppComponent implements OnInit, OnDestroy {
 
   protected isPortfolioMenuActive(): boolean {
     const url = this.router.url;
-    return url.startsWith('/jihen-portfolio') || url.startsWith('/portfolio-mentor') || url.startsWith('/explore');
+    return url.startsWith('/jihen-portfolio') || url.startsWith('/portfolio-mentor') || url.startsWith('/explore') || url.startsWith('/cv');
+  }
+
+  protected platformName(): string {
+    return 'SkillHub';
   }
 
   protected isImmersiveRoute(): boolean {
-    return this.router.url.startsWith('/jihen-portfolio-3d/');
+    return this.router.url.startsWith('/jihen-portfolio-3d/') || this.router.url.startsWith('/cv');
   }
 
   protected refreshMentorshipBadge(): void {

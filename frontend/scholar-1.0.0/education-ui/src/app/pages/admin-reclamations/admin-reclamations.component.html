@@ -1,7 +1,7 @@
 <div class="adm-wrap container">
   <header class="adm-head">
-    <h1>Réclamations (administration)</h1>
-    <p class="adm-lead">Examinez les demandes, passez en traitement puis clôturez avec une réponse visible par le client.</p>
+    <h1>Claims Administration</h1>
+    <p class="adm-lead">Review requests, move them into processing, then close them with a response visible to the user.</p>
   </header>
 
   @if (loadError()) {
@@ -9,7 +9,7 @@
   }
 
   @if (!loadError() && items().length === 0) {
-    <p class="adm-empty">Aucune réclamation en base.</p>
+    <p class="adm-empty">No claims found.</p>
   }
 
   <ul class="adm-list">
@@ -24,7 +24,7 @@
                 <span>{{ r.submitterUsername }}</span>
                 ·
               }
-              reçue le {{ r.createdAt | date: 'medium' }}
+              received on {{ r.createdAt | date: 'medium' }}
             </p>
           </div>
           <span class="adm-badge" [attr.data-status]="r.status">{{ statusLabel(r.status) }}</span>
@@ -40,25 +40,25 @@
                 (ngModelChange)="patchDraft(r.id, { status: $event })"
                 [ngModelOptions]="{ standalone: true }"
               >
-                <option value="IN_REVIEW">Marquer en traitement</option>
-                <option value="RESOLVED">Clôturer avec réponse</option>
+                <option value="IN_REVIEW">Mark as in review</option>
+                <option value="RESOLVED">Close with response</option>
               </select>
             </label>
             <label class="adm-field adm-field--grow">
-              <span>Message au client {{ d.status === 'RESOLVED' ? '(obligatoire pour clôturer)' : '(optionnel)' }}</span>
+              <span>Message to user {{ d.status === 'RESOLVED' ? '(required to close)' : '(optional)' }}</span>
               <textarea
                 rows="4"
                 [ngModel]="d.adminResponse"
                 (ngModelChange)="patchDraft(r.id, { adminResponse: $event })"
                 [ngModelOptions]="{ standalone: true }"
-                placeholder="Réponse après vérification…"
+                placeholder="Response after review..."
               ></textarea>
             </label>
             @if (d.error) {
               <p class="adm-alert adm-alert--err">{{ d.error }}</p>
             }
             <button type="button" class="adm-save" [disabled]="d.saving" (click)="save(r)">
-              {{ d.saving ? 'Enregistrement…' : 'Enregistrer' }}
+              {{ d.saving ? 'Saving...' : 'Save' }}
             </button>
           </div>
         }

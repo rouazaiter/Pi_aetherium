@@ -64,7 +64,7 @@ public class CVProfileServiceImpl implements CVProfileService {
             cvProfile.setLocation(request.getLocation());
         }
         if (request.getPreferredTemplate() != null) {
-            cvProfile.setPreferredTemplate(CVTemplateConstants.normalizeTemplate(request.getPreferredTemplate()));
+            cvProfile.setPreferredTemplate(CVTemplateConstants.normalizeTemplateOrAlias(request.getPreferredTemplate()));
         }
         if (request.getLanguage() != null) {
             cvProfile.setLanguage(request.getLanguage());
@@ -122,7 +122,7 @@ public class CVProfileServiceImpl implements CVProfileService {
                 .professionalSummary(cvProfile.getSummary())
                 .phone(cvProfile.getPhone())
                 .location(cvProfile.getLocation())
-                .preferredTemplate(CVTemplateConstants.normalizeTemplate(cvProfile.getPreferredTemplate()))
+                .preferredTemplate(CVTemplateConstants.normalizeTemplateOrAlias(cvProfile.getPreferredTemplate()))
                 .language(defaultIfBlank(cvProfile.getLanguage(), DEFAULT_LANGUAGE))
                 .visibility(cvProfile.getVisibility() == null ? Visibility.PRIVATE : cvProfile.getVisibility())
                 .selectedProjectIds(cvProfile.getSelectedProjectIds())

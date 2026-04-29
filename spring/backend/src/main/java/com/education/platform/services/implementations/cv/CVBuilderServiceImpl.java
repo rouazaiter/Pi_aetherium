@@ -300,7 +300,7 @@ public class CVBuilderServiceImpl implements CVBuilderService {
         if (requestedTemplate != null && !requestedTemplate.isBlank()) {
             return CVTemplateConstants.normalizeTemplate(requestedTemplate);
         }
-        return CVTemplateConstants.normalizeTemplate(cvProfile == null ? null : cvProfile.getPreferredTemplate());
+        return CVTemplateConstants.normalizeTemplateOrAlias(cvProfile == null ? null : cvProfile.getPreferredTemplate());
     }
 
     private String resolveLanguage(CVProfile cvProfile, CVPreviewOptions options) {

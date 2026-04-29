@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { resolvePresetProfilePicture } from '../../core/data/preset-avatars';
 import type { PortfolioMentorChatResponse, PortfolioMentorReplyMode } from '../../core/models/api.models';
 import { AuthService } from '../../core/services/auth.service';
 import { PortfolioMentorService } from '../../core/services/portfolio-mentor.service';
@@ -84,6 +86,7 @@ type MentorSidebarItem = {
 export class PortfolioMentorComponent implements OnInit, OnDestroy {
   private readonly mentorApi = inject(PortfolioMentorService);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   private summaryResponse: Record<string, unknown> | null = null;
   private coherenceResponse: Record<string, unknown> | null = null;
   private chatRequestSub: Subscription | null = null;
@@ -144,6 +147,39 @@ export class PortfolioMentorComponent implements OnInit, OnDestroy {
 
   protected userName(): string {
     return this.auth.auth()?.username?.trim() || '';
+  }
+
+  protected platformName(): string {
+    return 'SkillHub';
+  }
+
+  protected mentorAvatarUrl(): string {
+    const pic = this.auth.auth()?.profilePicture?.trim();
+    if (!pic) {
+      return '';
+    }
+    const preset = resolvePresetProfilePicture(pic);
+    if (preset) {
+      return preset;
+    }
+    if (/^https?:\/\//i.test(pic)) {
+      return pic;
+    }
+    if (pic.startsWith('/api/')) {
+      const base = (environment.apiUrl ?? '').trim().replace(/\/$/, '');
+      return base ? `${base}${pic}` : pic;
+    }
+    return '';
+  }
+
+  protected mentorAvatarInitials(): string {
+    const userName = this.userName();
+    return userName ? userName.slice(0, 2).toUpperCase() : 'SH';
+  }
+
+  protected isPortfolioNavActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/jihen-portfolio') || url.startsWith('/portfolio-mentor') || url.startsWith('/cv') || url.startsWith('/explore');
   }
 
   protected greeting(): string {

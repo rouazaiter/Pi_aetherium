@@ -15,6 +15,7 @@ import com.education.platform.repositories.cv.CVDraftRepository;
 import com.education.platform.repositories.portfolio.PortfolioRepository;
 import com.education.platform.services.interfaces.cv.CVBuilderService;
 import com.education.platform.services.interfaces.cv.CVDraftService;
+import com.education.platform.services.interfaces.cv.CVTemplateConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,8 +34,13 @@ import java.util.Set;
 @Service
 public class CVDraftServiceImpl implements CVDraftService {
 
-    public static final String DEFAULT_THEME = "ATS_MINIMAL";
-    private static final Set<String> SUPPORTED_THEMES = Set.of("ATS_MINIMAL", "MODERN", "ELEGANT", "CREATIVE");
+    public static final String DEFAULT_THEME = CVTemplateConstants.ATS_MINIMAL;
+    private static final Set<String> SUPPORTED_THEMES = Set.of(
+            CVTemplateConstants.ATS_MINIMAL,
+            CVTemplateConstants.MODERN,
+            CVTemplateConstants.ELEGANT,
+            CVTemplateConstants.CREATIVE
+    );
 
     private final CVDraftRepository cvDraftRepository;
     private final PortfolioRepository portfolioRepository;
@@ -62,7 +68,7 @@ public class CVDraftServiceImpl implements CVDraftService {
                 .user(user)
                 .portfolio(portfolio.orElse(null))
                 .theme(DEFAULT_THEME)
-                .settingsJson(toJson(buildSettings(preview)))
+                .settingsJson(toJson(buildSettings(preview, DEFAULT_THEME)))
                 .build();
 
         addSection(draft, CVSectionType.PROFILE, "Profile", 0, preview.getProfile());
@@ -102,7 +108,11 @@ public class CVDraftServiceImpl implements CVDraftService {
     private CVDraftResponse updateDraft(CVDraft draft, UpdateCVDraftRequest request) {
         String theme = normalizeTheme(request == null ? null : request.getTheme());
         draft.setTheme(theme);
-        draft.setSettingsJson(toJson(buildUpdatedSettings(draft.getSettingsJson(), request == null ? null : request.getSettings(), theme)));
+        draft.setSettingsJson(toJson(buildUpdatedSettings(
+                draft,
+                draft.getSettingsJson(),
+                request == null ? null : request.getSettings(),
+                theme)));
 
         if (request != null && request.getSections() != null) {
             replaceSections(draft, request.getSections());
@@ -129,10 +139,13 @@ public class CVDraftServiceImpl implements CVDraftService {
                 .build());
     }
 
-    private Map<String, Object> buildSettings(CVPreviewResponse preview) {
+    private Map<String, Object> buildSettings(CVPreviewResponse preview, String theme) {
         Map<String, Object> settings = new LinkedHashMap<>();
-        settings.put("theme", DEFAULT_THEME);
-        settings.put("showProjectImages", shouldShowProjectImages(DEFAULT_THEME));
+        settings.put("theme", theme);
+        settings.put("showProjectImages", shouldShowProjectImages(theme));
+        settings.put("showProfileImage", defaultShowProfileImage(
+                preview == null || preview.getProfile() == null ? null : preview.getProfile().getProfilePicture(),
+                theme));
         settings.put("estimatedPages", preview.getMeta() == null ? null : preview.getMeta().getEstimatedPages());
         settings.put("exceedsTwoPages", preview.getMeta() != null && preview.getMeta().isExceedsTwoPages());
         return settings;
@@ -142,7 +155,7 @@ public class CVDraftServiceImpl implements CVDraftService {
         return !"ATS_MINIMAL".equalsIgnoreCase(theme);
     }
 
-    private JsonNode buildUpdatedSettings(String existingSettingsJson, JsonNode requestedSettings, String theme) {
+    private JsonNode buildUpdatedSettings(CVDraft draft, String existingSettingsJson, JsonNode requestedSettings, String theme) {
         ObjectNode settings = objectMapper.createObjectNode();
         JsonNode baseSettings = requestedSettings != null ? requestedSettings : readJson(existingSettingsJson);
         if (baseSettings != null && baseSettings.isObject()) {
@@ -150,6 +163,7 @@ public class CVDraftServiceImpl implements CVDraftService {
         }
         settings.put("theme", theme);
         settings.put("showProjectImages", shouldShowProjectImages(theme));
+        settings.put("showProfileImage", resolveShowProfileImage(draft, baseSettings, theme));
         return settings;
     }
 
@@ -174,8 +188,43 @@ public class CVDraftServiceImpl implements CVDraftService {
         if (theme == null || theme.isBlank()) {
             return DEFAULT_THEME;
         }
-        String normalizedTheme = theme.trim().toUpperCase();
+        String normalizedTheme = CVTemplateConstants.normalizeTemplateOrAlias(theme);
         return SUPPORTED_THEMES.contains(normalizedTheme) ? normalizedTheme : DEFAULT_THEME;
+    }
+
+    private boolean resolveShowProfileImage(CVDraft draft, JsonNode baseSettings, String theme) {
+        if (CVTemplateConstants.ATS_MINIMAL.equalsIgnoreCase(theme)) {
+            return false;
+        }
+
+        JsonNode requestedValue = baseSettings == null ? null : baseSettings.get("showProfileImage");
+        if (requestedValue != null && requestedValue.isBoolean()) {
+            return requestedValue.asBoolean();
+        }
+
+        return defaultShowProfileImage(extractProfilePicture(draft), theme);
+    }
+
+    private boolean defaultShowProfileImage(String profilePicture, String theme) {
+        if (CVTemplateConstants.ATS_MINIMAL.equalsIgnoreCase(theme)) {
+            return false;
+        }
+        return profilePicture != null && !profilePicture.isBlank();
+    }
+
+    private String extractProfilePicture(CVDraft draft) {
+        if (draft == null || draft.getSections() == null) {
+            return null;
+        }
+
+        return draft.getSections().stream()
+                .filter(section -> section != null && section.getType() == CVSectionType.PROFILE)
+                .map(CVSection::getContentJson)
+                .map(this::readJson)
+                .map(node -> node == null ? null : node.path("profilePicture").asText(null))
+                .filter(value -> value != null && !value.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 
     private CVDraftResponse toResponse(CVDraft draft) {

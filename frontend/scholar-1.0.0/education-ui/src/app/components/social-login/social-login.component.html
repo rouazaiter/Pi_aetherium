@@ -3,11 +3,11 @@
     <div class="alert alert-danger small py-2 mb-2" role="alert">{{ errorMsg }}</div>
   }
   @if (loading) {
-    <p class="small text-muted mb-2">Connexion en cours…</p>
+    <p class="small text-muted mb-2">Signing in...</p>
   }
   @if (hasGoogle || hasFacebook) {
     @if (showGoogleHeading && hasGoogle) {
-      <h3 class="h6 text-center mb-2">Se connecter avec Google</h3>
+      <h3 class="h6 text-center mb-2">Sign in with Google</h3>
     } @else {
       <p class="small text-secondary mb-2 text-center">Ou continuer avec</p>
     }
@@ -26,7 +26,7 @@
           @if (!fbReady) {
             Chargement Facebook…
           } @else {
-            Continuer avec Facebook
+            Continue with Facebook
           }
         </button>
       }

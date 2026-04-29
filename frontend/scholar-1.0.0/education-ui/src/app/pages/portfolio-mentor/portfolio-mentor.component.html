@@ -1,18 +1,27 @@
 <section class="portfolio-mentor">
   <header class="mentor-topbar">
-    <div class="mentor-topbar__brand">
-      <span class="mentor-sidebar__brand-mark">S</span>
-      <strong>Scholar</strong>
-    </div>
-    <div class="mentor-topbar__title">Portfolio Mentor</div>
+    <a routerLink="/" class="mentor-topbar__brand">
+      <span class="mentor-sidebar__brand-mark" aria-hidden="true">S</span>
+      <strong>{{ platformName() }}</strong>
+    </a>
+
     <div class="mentor-topbar__actions" aria-label="Account actions">
-      <span class="mentor-topbar__bell" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 0-5 5v3.7l-1.6 2.7A1.4 1.4 0 0 0 6.6 16.5h10.8a1.4 1.4 0 0 0 1.2-2.1L17 11.7V8a5 5 0 0 0-5-5Zm-1.6 15.2a1.8 1.8 0 0 0 3.2 0h-3.2Z" /></svg>
-      </span>
-      <span class="mentor-topbar__avatar" aria-hidden="true">{{ userName() ? userName().charAt(0).toUpperCase() : 'S' }}</span>
-      <span class="mentor-topbar__chevron" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="m7 9.5 5 5 5-5 1.4 1.4-6.4 6.4-6.4-6.4L7 9.5Z" /></svg>
-      </span>
+      <nav class="mentor-topbar__nav" aria-label="Primary navigation">
+        <a routerLink="/" routerLinkActive="mentor-topbar__nav-link--active" [routerLinkActiveOptions]="{ exact: true }" class="mentor-topbar__nav-link">
+          Home
+        </a>
+        <a routerLink="/jihen-portfolio" class="mentor-topbar__nav-link" [class.mentor-topbar__nav-link--active]="isPortfolioNavActive()">
+          Portfolio
+        </a>
+      </nav>
+
+      <a routerLink="/profile" class="mentor-topbar__avatar" aria-label="Profile">
+        @if (mentorAvatarUrl()) {
+          <img [src]="mentorAvatarUrl()" alt="" />
+        } @else {
+          <span>{{ mentorAvatarInitials() }}</span>
+        }
+      </a>
     </div>
   </header>
 
@@ -81,7 +90,7 @@
       <div class="mentor-sidebar__profile">
         <span class="mentor-sidebar__avatar">{{ userName() ? userName().charAt(0).toUpperCase() : 'S' }}</span>
         <div>
-          <strong>{{ userName() || 'Scholar user' }}</strong>
+          <strong>{{ userName() || 'SkillHub user' }}</strong>
           <span>View profile</span>
         </div>
         <span class="mentor-sidebar__profile-arrow" aria-hidden="true">

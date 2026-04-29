@@ -37,4 +37,9 @@ public class AdminReclamationController {
     public ReclamationResponse update(@PathVariable Long id, @Valid @RequestBody AdminReclamationUpdateRequest request) {
         return reclamationService.updateByAdmin(currentUserService.getCurrentUser(), id, request);
     }
+
+    @PatchMapping("/{id}/status")
+    public ReclamationResponse updateStatus(@PathVariable Long id, @Valid @RequestBody AdminReclamationUpdateRequest request) {
+        return reclamationService.updateByAdmin(currentUserService.getCurrentUser(), id, request);
+    }
 }

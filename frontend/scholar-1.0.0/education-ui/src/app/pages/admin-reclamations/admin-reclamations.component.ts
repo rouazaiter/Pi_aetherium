@@ -39,7 +39,7 @@ export class AdminReclamationsComponent implements OnInit {
       case 'IN_REVIEW':
         return 'En traitement';
       case 'RESOLVED':
-        return 'Clôturée';
+        return 'Resolved';
       default:
         return s;
     }
@@ -93,7 +93,7 @@ export class AdminReclamationsComponent implements OnInit {
         next: () => this.reload(),
         error: (err) =>
           this.patchDraft(r.id, {
-            error: messageFromHttpError(err, 'Mise à jour impossible.'),
+            error: messageFromHttpError(err, 'Update failed.'),
           }),
       });
   }

@@ -64,13 +64,13 @@ export class SocialLoginComponent implements AfterViewInit, OnDestroy {
             setTimeout(() => this.renderGoogleButton(g), 0);
           });
         })
-        .catch(() => this.zone.run(() => (this.errorMsg = 'Impossible de charger Google Sign-In.')));
+        .catch(() => this.zone.run(() => (this.errorMsg = 'Unable to load Google Sign-In.')));
     }
     const f = environment.facebookAppId?.trim();
     if (f) {
       this.loadFacebookSdk(f)
         .then(() => this.zone.run(() => (this.fbReady = true)))
-        .catch(() => this.zone.run(() => (this.errorMsg = 'Impossible de charger le SDK Facebook.')));
+        .catch(() => this.zone.run(() => (this.errorMsg = 'Unable to load the Facebook SDK.')));
     }
   }
 
@@ -215,7 +215,7 @@ export class SocialLoginComponent implements AfterViewInit, OnDestroy {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMsg = messageFromHttpError(err, 'Connexion impossible.');
+        this.errorMsg = messageFromHttpError(err, 'Sign-in failed.');
       },
     });
   }

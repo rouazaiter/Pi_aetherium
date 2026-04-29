@@ -2,7 +2,10 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription, catchError, forkJoin, of, switchMap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { resolvePresetProfilePicture } from '../../core/data/preset-avatars';
 import type {
   CvAiChatRequest,
   CvAiChatResponse,
@@ -26,6 +29,7 @@ import type {
   CvProfileResponse,
   UpdateCvProfileRequest,
 } from '../../core/models/api.models';
+import { AuthService } from '../../core/services/auth.service';
 import { JihenCvService } from '../../core/services/jihen-cv.service';
 import { messageFromHttpError } from '../../core/util/http-error';
 
@@ -42,6 +46,7 @@ type EditorProfile = {
   githubUrl: string;
   linkedinUrl: string;
   summary: string;
+  profilePicture: string;
 };
 
 type EditorSkillGroup = {
@@ -122,12 +127,14 @@ type CvJobMatchForm = {
 @Component({
   selector: 'app-jihen-cv',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './jihen-cv.component.html',
   styleUrl: './jihen-cv.component.scss',
 })
 export class JihenCvComponent implements OnInit, OnDestroy {
+  protected readonly auth = inject(AuthService);
   private readonly cvApi = inject(JihenCvService);
+  private readonly router = inject(Router);
   private chatRequestSub: Subscription | null = null;
   private chatTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
@@ -154,6 +161,7 @@ export class JihenCvComponent implements OnInit, OnDestroy {
   protected previewResponse: CvPreviewResponse | null = null;
 
   protected selectedTemplate: CvBuilderTemplate = 'ATS_MINIMAL';
+  protected showProfileImage = false;
   protected profile: EditorProfile = this.buildEmptyProfile();
   protected skillGroups: EditorSkillGroup[] = [];
   protected projects: EditorProject[] = [];
@@ -442,11 +450,26 @@ export class JihenCvComponent implements OnInit, OnDestroy {
   }
 
   protected selectTemplate(template: CvBuilderTemplate): void {
+    const previousTemplate = this.selectedTemplate;
     this.selectedTemplate = template;
+    if (template === 'ATS_MINIMAL') {
+      this.showProfileImage = false;
+    } else if (previousTemplate === 'ATS_MINIMAL') {
+      this.showProfileImage = this.defaultShowProfileImage();
+    }
     this.saveMessage = '';
 
     if (this.hasDraft && this.currentDraftId && !this.savingDraft) {
       this.persistCurrentCv(this.currentDraftId, `${this.previewTemplateLabel} template applied.`);
+    }
+  }
+
+  protected onShowProfileImageChange(): void {
+    this.showProfileImage = this.canShowProfileImageToggle && this.showProfileImage && this.hasProfilePicture();
+    this.saveMessage = '';
+
+    if (this.hasDraft && this.currentDraftId && !this.savingDraft) {
+      this.persistCurrentCv(this.currentDraftId, 'Profile image visibility updated.');
     }
   }
 
@@ -694,6 +717,123 @@ export class JihenCvComponent implements OnInit, OnDestroy {
     return this.projects.find((candidate) => candidate.id === projectId)?.title || `Project #${projectId}`;
   }
 
+  protected get canShowProfileImageToggle(): boolean {
+    return this.selectedTemplate !== 'ATS_MINIMAL';
+  }
+
+  protected profileInitials(): string {
+    const fullName = this.profile.fullName.trim();
+    if (!fullName) {
+      return 'CV';
+    }
+
+    const parts = fullName.split(/\s+/).filter(Boolean);
+    return parts
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join('');
+  }
+
+  protected showPreviewAvatar(): boolean {
+    return this.selectedTemplate !== 'ATS_MINIMAL';
+  }
+
+  protected showPreviewProfileImage(): boolean {
+    return this.showPreviewAvatar() && this.showProfileImage && this.hasProfilePicture() && !!this.previewProfileImageUrl();
+  }
+
+  protected previewProfileImageUrl(): string {
+    const value = this.profile.profilePicture.trim();
+    if (!value) {
+      return '';
+    }
+    const preset = resolvePresetProfilePicture(value);
+    if (preset) {
+      return preset;
+    }
+    if (/^data:image\//i.test(value) || /^https?:\/\//i.test(value)) {
+      return value;
+    }
+    if (value.startsWith('/api/')) {
+      const base = (environment.apiUrl ?? '').trim().replace(/\/$/, '');
+      return base ? `${base}${value}` : value;
+    }
+    return '';
+  }
+
+  protected platformName(): string {
+    return 'SkillHub';
+  }
+
+  protected cvNavAvatarUrl(): string {
+    const pic = this.auth.auth()?.profilePicture?.trim();
+    if (!pic) {
+      return '';
+    }
+    const preset = resolvePresetProfilePicture(pic);
+    if (preset) {
+      return preset;
+    }
+    if (/^https?:\/\//i.test(pic)) {
+      return pic;
+    }
+    if (pic.startsWith('/api/')) {
+      const base = (environment.apiUrl ?? '').trim().replace(/\/$/, '');
+      return base ? `${base}${pic}` : pic;
+    }
+    return '';
+  }
+
+  protected cvNavAvatarInitials(): string {
+    const username = this.auth.auth()?.username?.trim();
+    if (username) {
+      return username.slice(0, 2).toUpperCase();
+    }
+    return this.profileInitials();
+  }
+
+  protected isPortfolioNavActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/jihen-portfolio') || url.startsWith('/portfolio-mentor') || url.startsWith('/cv');
+  }
+
+  protected sectionVisible(section: DraftSectionType): boolean {
+    return this.sectionMeta[section].visible;
+  }
+
+  protected languageLevelPercent(proficiency: string): number {
+    const value = proficiency.trim().toUpperCase();
+    if (!value) {
+      return 62;
+    }
+
+    if (value.includes('NATIVE') || value.includes('FLUENT') || value === 'C2') {
+      return 100;
+    }
+    if (value === 'C1' || value.includes('ADVANCED') || value.includes('PROFICIENT')) {
+      return 84;
+    }
+    if (value === 'B2' || value.includes('UPPER')) {
+      return 68;
+    }
+    if (value === 'B1' || value.includes('INTERMEDIATE')) {
+      return 52;
+    }
+    if (value === 'A2' || value.includes('ELEMENTARY')) {
+      return 36;
+    }
+    if (value === 'A1' || value.includes('BEGINNER') || value.includes('BASIC')) {
+      return 22;
+    }
+
+    return 62;
+  }
+
+  protected languageLevelLabel(proficiency: string): string {
+    const value = proficiency.trim();
+    return value ? value.toUpperCase() : 'B1';
+  }
+
   private loadWorkspace(): void {
     this.loadingWorkspace = true;
     this.workspaceError = '';
@@ -726,6 +866,19 @@ export class JihenCvComponent implements OnInit, OnDestroy {
         this.currentDraftSource = null;
         this.rawDraftSections = [];
         this.selectedTemplate = this.resolveTemplate('', preview?.profile?.preferredTemplate ?? profile?.preferredTemplate ?? '');
+        this.profile = {
+          ...this.buildEmptyProfile(),
+          fullName: preview?.profile?.fullName?.trim() || 'Your Name',
+          headline: profile?.headline?.trim() || preview?.profile?.headline?.trim() || '',
+          email: preview?.profile?.email?.trim() || '',
+          phone: profile?.phone?.trim() || preview?.profile?.phone?.trim() || '',
+          location: profile?.location?.trim() || preview?.profile?.location?.trim() || '',
+          githubUrl: preview?.profile?.githubUrl?.trim() || '',
+          linkedinUrl: preview?.profile?.linkedInUrl?.trim() || preview?.profile?.linkedinUrl?.trim() || '',
+          summary: profile?.summary?.trim() || preview?.profile?.summary?.trim() || '',
+          profilePicture: preview?.profile?.profilePicture?.trim() || '',
+        };
+        this.showProfileImage = this.selectedTemplate === 'ATS_MINIMAL' ? false : this.defaultShowProfileImage();
       },
       error: (err) => {
         this.loadingWorkspace = false;
@@ -792,7 +945,12 @@ export class JihenCvComponent implements OnInit, OnDestroy {
         profile?.summary?.trim() ||
         previewProfile.summary?.trim() ||
         '',
+      profilePicture:
+        this.readString(profileContent, ['profilePicture']) ||
+        previewProfile.profilePicture?.trim() ||
+        '',
     };
+    this.showProfileImage = this.resolveShowProfileImageSetting(draft.settings, this.selectedTemplate, this.profile.profilePicture);
 
     this.skillGroups = this.mapSkillGroups(skillsSection?.content, preview?.skillsByCategory ?? []);
     this.projects = this.mapProjects(
@@ -941,7 +1099,7 @@ export class JihenCvComponent implements OnInit, OnDestroy {
 
     return {
       theme: this.selectedTemplate,
-      settings: this.clone(this.currentDraftSource?.settings ?? null),
+      settings: this.buildDraftSettings(),
       sections,
     };
   }
@@ -953,7 +1111,7 @@ export class JihenCvComponent implements OnInit, OnDestroy {
       professionalSummary: this.profile.summary.trim() || null,
       phone: this.profile.phone.trim() || null,
       location: this.profile.location.trim() || null,
-      preferredTemplate: this.profileResponse?.preferredTemplate?.trim() || null,
+      preferredTemplate: this.selectedTemplate,
       language: this.profileResponse?.language?.trim() || null,
       visibility: this.profileResponse?.visibility ?? null,
       selectedProjectIds: this.visibleProjects.map((project) => project.id),
@@ -1000,6 +1158,7 @@ export class JihenCvComponent implements OnInit, OnDestroy {
         githubUrl: this.profile.githubUrl.trim() || null,
         linkedinUrl: this.profile.linkedinUrl.trim() || null,
         linkedInUrl: this.profile.linkedinUrl.trim() || null,
+        profilePicture: this.profile.profilePicture.trim() || null,
       },
     };
   }
@@ -1145,11 +1304,11 @@ export class JihenCvComponent implements OnInit, OnDestroy {
   }
 
   private resolveTemplate(theme: string, preferredTemplate: string): CvBuilderTemplate {
-    const themeKey = theme.trim().toUpperCase();
-    if (themeKey === 'MODERN' || themeKey === 'ELEGANT' || themeKey === 'CREATIVE' || themeKey === 'ATS_MINIMAL') {
-      return themeKey;
+    const normalizedTheme = this.normalizeTemplateName(theme);
+    if (normalizedTheme) {
+      return normalizedTheme;
     }
-    return preferredTemplate.trim().toLowerCase() === 'developer-minimal' ? 'MODERN' : 'ATS_MINIMAL';
+    return this.normalizeTemplateName(preferredTemplate) ?? 'ATS_MINIMAL';
   }
 
   private extractDraft(response: CvDraftApiResponse): CvDraftDto {
@@ -1240,6 +1399,17 @@ export class JihenCvComponent implements OnInit, OnDestroy {
       githubUrl: '',
       linkedinUrl: '',
       summary: '',
+      profilePicture: '',
+    };
+  }
+
+  private buildDraftSettings(): Record<string, unknown> {
+    const currentSettings = this.normalizeObject(this.currentDraftSource?.settings);
+    return {
+      ...currentSettings,
+      theme: this.selectedTemplate,
+      showProjectImages: this.selectedTemplate !== 'ATS_MINIMAL',
+      showProfileImage: this.selectedTemplate === 'ATS_MINIMAL' ? false : this.showProfileImage && this.hasProfilePicture(),
     };
   }
 
@@ -1357,5 +1527,42 @@ export class JihenCvComponent implements OnInit, OnDestroy {
       }
     }
     return false;
+  }
+
+  private normalizeTemplateName(value: string | null | undefined): CvBuilderTemplate | null {
+    const normalized = (value ?? '').trim().toUpperCase();
+    if (!normalized) {
+      return null;
+    }
+    if (normalized === 'ATS_MINIMAL' || normalized === 'MODERN' || normalized === 'ELEGANT' || normalized === 'CREATIVE') {
+      return normalized;
+    }
+    if (normalized === 'DEVELOPER-MINIMAL') {
+      return 'ATS_MINIMAL';
+    }
+    if (normalized === 'ACADEMIC') {
+      return 'ELEGANT';
+    }
+    return null;
+  }
+
+  private resolveShowProfileImageSetting(settings: unknown, template: CvBuilderTemplate, profilePicture: string): boolean {
+    if (template === 'ATS_MINIMAL') {
+      return false;
+    }
+
+    const data = this.normalizeObject(settings);
+    if (typeof data['showProfileImage'] === 'boolean') {
+      return Boolean(data['showProfileImage']) && !!profilePicture.trim();
+    }
+    return !!profilePicture.trim();
+  }
+
+  private defaultShowProfileImage(): boolean {
+    return this.canShowProfileImageToggle && this.hasProfilePicture();
+  }
+
+  private hasProfilePicture(): boolean {
+    return this.profile.profilePicture.trim().length > 0;
   }
 }

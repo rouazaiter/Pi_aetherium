@@ -2,68 +2,105 @@
   <div class="recl-grid">
     <section class="recl-main">
       <header class="recl-head">
-        <h1>Nouvelle réclamation</h1>
-        <p class="recl-lead">
-          Décrivez clairement votre problème pour que notre équipe puisse vous répondre rapidement après vérification.
-        </p>
+        <div class="recl-head__title">
+          <span class="recl-head__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" fill="currentColor" /></svg>
+          </span>
+          <div>
+            <h1>New Claim</h1>
+            <p class="recl-lead">
+              Clearly describe your issue so our team can respond quickly after review.
+            </p>
+          </div>
+        </div>
+        <span class="recl-head__sparkles" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m12 2 1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2Zm7 11 1.1 3 3 1.1-3 1.1-1.1 3-1.1-3-3-1.1 3-1.1L19 13Z" fill="currentColor" /></svg>
+        </span>
       </header>
 
       <form class="recl-form" [formGroup]="form" (ngSubmit)="submit()">
         <label class="recl-field">
-          <span class="recl-label">Sujet</span>
-          <input
-            type="text"
-            class="recl-input"
-            formControlName="subject"
-            placeholder="ex. Problème d’accès au cours — réf. #4402"
-            autocomplete="off"
-          />
+          <span class="recl-label">Subject</span>
+          <span class="recl-input-wrap">
+            <span class="recl-field-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" fill="currentColor" /></svg>
+            </span>
+            <input
+              type="text"
+              class="recl-input"
+              formControlName="subject"
+              placeholder="e.g. Course access issue — ref. #4402"
+              autocomplete="off"
+            />
+          </span>
           @if (form.controls.subject.touched && form.controls.subject.errors?.['required']) {
-            <span class="recl-field-err">Le sujet est obligatoire.</span>
+            <span class="recl-field-err">Subject is required.</span>
           }
         </label>
 
         <label class="recl-field">
-          <span class="recl-label">Description détaillée</span>
-          <textarea
-            class="recl-textarea"
-            formControlName="description"
-            rows="8"
-            placeholder="Expliquez la situation (dates, captures si besoin décrites en texte, numéros de transaction…)"
-          ></textarea>
+          <span class="recl-label">Detailed description</span>
+          <span class="recl-input-wrap recl-input-wrap--textarea">
+            <span class="recl-field-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" fill="currentColor" /></svg>
+            </span>
+            <textarea
+              class="recl-textarea"
+              formControlName="description"
+              rows="8"
+              placeholder="Explain the situation (dates, screenshots if needed described in text, transaction numbers...)"
+            ></textarea>
+          </span>
           @if (form.controls.description.touched && form.controls.description.errors?.['required']) {
-            <span class="recl-field-err">La description est obligatoire.</span>
+            <span class="recl-field-err">Description is required.</span>
           }
         </label>
 
         <div class="recl-notice" role="status">
-          <span class="recl-notice-icon" aria-hidden="true">i</span>
-          <p>Votre message est transmis aux administrateurs pour examen. Vous verrez la réponse de l’équipe ci-dessous une fois le dossier traité.</p>
+          <span class="recl-notice-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9a9 9 0 0 0-9-9Zm0 4a1.1 1.1 0 1 1-1.1 1.1A1.1 1.1 0 0 1 12 7Zm1.2 10h-2.4v-1.6h.4v-3.3h-.4v-1.6h2v4.9h.4Z" fill="currentColor" /></svg>
+          </span>
+          <p>Your message is sent to administrators for review. You will see the team response below once the case has been processed.</p>
         </div>
 
         @if (submitError()) {
           <p class="recl-alert recl-alert--err">{{ submitError() }}</p>
         }
         @if (submitOk()) {
-          <p class="recl-alert recl-alert--ok">Réclamation envoyée. Merci.</p>
+          <p class="recl-alert recl-alert--ok">Claim sent successfully. Thank you.</p>
         }
 
         <button type="submit" class="recl-submit" [disabled]="submitting()">
+          <span class="recl-submit__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m4.5 12 14-7-3.2 14-4-4.1-4.3 2.5 1.3-5.2L4.5 12Z" fill="currentColor" /></svg>
+          </span>
           @if (submitting()) {
-            Envoi…
+            Sending...
           } @else {
-            Envoyer la réclamation
-            <span class="recl-submit-arrow" aria-hidden="true">›</span>
+            Send claim
           }
         </button>
       </form>
 
       <section class="recl-history" aria-labelledby="recl-history-title">
-        <h2 id="recl-history-title">Mes réclamations</h2>
+        <div class="recl-history__head">
+          <span class="recl-history__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" fill="currentColor" /></svg>
+          </span>
+          <h2 id="recl-history-title">My Claims</h2>
+        </div>
         @if (loadError()) {
           <p class="recl-alert recl-alert--err">{{ loadError() }}</p>
         } @else if (items().length === 0) {
-          <p class="recl-empty">Aucune réclamation pour le moment.</p>
+          <div class="recl-empty">
+            <div class="recl-empty__box">
+              <span class="recl-empty__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" fill="currentColor" /></svg>
+              </span>
+              <p class="recl-empty__eyebrow">No claims yet.</p>
+              <p>You have not submitted any claims yet.</p>
+            </div>
+          </div>
         } @else {
           <ul class="recl-list">
             @for (r of items(); track r.id) {
@@ -72,14 +109,14 @@
                   <span class="recl-card-subject">{{ r.subject }}</span>
                   <span class="recl-badge" [attr.data-status]="r.status">{{ statusLabel(r.status) }}</span>
                 </div>
-                <p class="recl-card-meta">Envoyée le {{ r.createdAt | date: 'medium' }}</p>
+                <p class="recl-card-meta">Sent on {{ r.createdAt | date: 'medium' }}</p>
                 <p class="recl-card-desc">{{ r.description }}</p>
                 @if (r.adminResponse) {
                   <div class="recl-reply">
-                    <strong>Réponse de l’équipe</strong>
+                    <strong>Team response</strong>
                     <p>{{ r.adminResponse }}</p>
                     @if (r.reviewedAt) {
-                      <p class="recl-card-meta">Mis à jour le {{ r.reviewedAt | date: 'medium' }}</p>
+                      <p class="recl-card-meta">Updated on {{ r.reviewedAt | date: 'medium' }}</p>
                     }
                   </div>
                 }
@@ -92,26 +129,38 @@
 
     <aside class="recl-aside">
       <div class="recl-side-card">
-        <h3>Consignes</h3>
+        <div class="recl-side-card__head">
+          <span class="recl-side-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 3.75h7.1L19 8.65V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.75a2 2 0 0 1 2-2Zm6 1.8v3.2h3.2L13 5.55ZM9 11h6v1.5H9V11Zm0 3h6v1.5H9V14Zm0 3h4v1.5H9V17Z" fill="currentColor" /></svg>
+          </span>
+          <h3>Guidelines</h3>
+        </div>
         <ul class="recl-checklist">
-          <li><span class="recl-check">✓</span> Soyez précis : identifiants de transaction, dates, noms.</li>
-          <li><span class="recl-check">✓</span> Les pièces jointes (captures, PDF) pourront être ajoutées dans une prochaine version.</li>
-          <li><span class="recl-check">✓</span> Délai indicatif : prise en compte sous 24 h ouvrées dans la majorité des cas.</li>
+          <li><span class="recl-check">✓</span> Be precise: transaction IDs, dates, names.</li>
+          <li><span class="recl-check">✓</span> Attachments (screenshots, PDFs) may be added in a future version.</li>
+          <li><span class="recl-check">✓</span> Estimated response time: handled within 24 business hours in most cases.</li>
         </ul>
       </div>
 
-      <div class="recl-side-card recl-side-card--dark">
+      <div class="recl-side-card recl-side-card--support">
         <p class="recl-side-kicker">Support</p>
-        <h3>Besoin d’aide immédiate ?</h3>
-        <p class="recl-side-muted">Échangez avec vos formateurs ou amis via la messagerie de la plateforme (Social Hub, Amis).</p>
-        <a routerLink="/social-hub" class="recl-side-btn">Ouvrir le Social Hub</a>
+        <h3>Need immediate help?</h3>
+        <p class="recl-side-muted">Talk with your mentors or friends through the platform messaging area (Social Hub, Friends).</p>
+        <a routerLink="/social-hub" class="recl-side-btn">Open Social Hub</a>
       </div>
 
       <div class="recl-side-card recl-side-card--secure">
-        <div class="recl-secure-icon" aria-hidden="true">🛡</div>
-        <h3>Traitement sécurisé</h3>
-        <p>Vos données sont transmises de façon chiffrée (HTTPS) et traitées conformément aux usages de la plateforme.</p>
-        <a routerLink="/profile" class="recl-side-link">Paramètres du compte</a>
+        <div class="recl-side-card__head">
+          <span class="recl-side-card__icon recl-side-card__icon--secure" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.97 2.96 8.65 7 10c4.04-1.35 7-5.03 7-10V6l-7-3Zm0 2.2 5 2.14V11c0 3.97-2.23 6.98-5 8.17C9.23 17.98 7 14.97 7 11V7.34l5-2.14Z" fill="currentColor" /></svg>
+          </span>
+          <span class="recl-side-card__corner" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v2h1a2 2 0 0 1 2 2v8a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-8a2 2 0 0 1 2-2h1V6a3 3 0 0 1 3-3Zm0 2a1 1 0 0 0-1 1v2h2V6a1 1 0 0 0-1-1Z" fill="currentColor" /></svg>
+          </span>
+        </div>
+        <h3>Secure processing</h3>
+        <p>Your data is transmitted securely (HTTPS) and processed according to platform standards.</p>
+        <a routerLink="/profile" class="recl-side-link">Account settings</a>
       </div>
     </aside>
   </div>

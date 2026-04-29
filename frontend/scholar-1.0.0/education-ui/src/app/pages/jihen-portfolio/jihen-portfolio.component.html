@@ -18,7 +18,7 @@
           <div class="jihen-sidebar__header">
             <span class="jihen-sidebar__badge">S</span>
             <div class="jihen-sidebar__copy">
-              <strong>Scholar</strong>
+              <strong>SkillHub</strong>
               <span>Portfolio</span>
             </div>
           </div>
@@ -440,7 +440,7 @@
                 <section class="jihen-panel jihen-empty-section p-4 text-center">
                   <h2 class="jihen-section-title">Aucun projet pour le moment</h2>
                   <p class="jihen-page-note mb-4">Ajoutez un projet pour commencer à remplir votre portfolio.</p>
-                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenProjectModal()">+ Ajouter un projet</button>
+                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenProjectModal()">+ Add project</button>
                 </section>
               }
             </section>
@@ -551,7 +551,7 @@
                 <section class="jihen-panel jihen-empty-section p-4 text-center">
                   <h2 class="jihen-section-title">Aucune collection pour le moment</h2>
                   <p class="jihen-page-note mb-4">Ajoutez une collection pour organiser vos projets.</p>
-                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCollectionModal()">+ Ajouter une collection</button>
+                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCollectionModal()">+ Add collection</button>
                 </section>
               }
             </section>
@@ -560,10 +560,10 @@
               <div class="jihen-projects-view__header">
                 <div class="jihen-section-head">
                   <div>
-                    <h1 class="jihen-section-head__title">Mes projets</h1>
-                    <p class="jihen-page-note">Gérez, recherchez et organisez vos projets.</p>
+                    <h1 class="jihen-section-head__title">My Projects</h1>
+                    <p class="jihen-page-note">Manage, search, and organize your projects.</p>
                   </div>
-                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenProjectModal()">+ Ajouter un projet</button>
+                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenProjectModal()">+ Add project</button>
                 </div>
               </div>
 
@@ -588,7 +588,7 @@
                   </div>
                   <div class="col-md-4 col-lg-2">
                     <label class="jihen-field">
-                      <span>Visibilité</span>
+                      <span>Visibility</span>
                       <select [(ngModel)]="jihenProjectVisibilityFilter" [ngModelOptions]="{ standalone: true }">
                         <option value="ALL">All</option>
                         @for (jihenVisibility of jihenVisibilityOptions; track jihenVisibility) {
@@ -599,7 +599,7 @@
                   </div>
                   <div class="col-md-4 col-lg-3">
                     <label class="jihen-field">
-                      <span>Compétence</span>
+                      <span>Skill</span>
                       <select [(ngModel)]="jihenProjectSkillFilter" [ngModelOptions]="{ standalone: true }">
                         <option value="ALL">All skills</option>
                         @for (jihenSkillOption of jihenProjectSkillFilterOptions; track jihenSkillOption.jihenValue) {
@@ -610,7 +610,7 @@
                   </div>
                 </div>
                 <div class="jihen-projects-toolbar__footer">
-                  <button type="button" class="jihen-btn jihen-btn--neutral" (click)="clearJihenProjectFilters()">Réinitialiser</button>
+                  <button type="button" class="jihen-btn jihen-btn--neutral" (click)="clearJihenProjectFilters()">Reset</button>
                 </div>
               </section>
 
@@ -714,7 +714,7 @@
                           }
                           <div class="jihen-project-card__footer">
                             <p class="jihen-project-card__visibility">
-                              <span>Visibilité:</span>
+                              <span>Visibility:</span>
                               <strong class="jihen-visibility" [class.jihen-visibility--friends]="jihenProject.jihenVisibility === 'FRIENDS_ONLY'">
                                 {{ jihenProject.jihenVisibility }}
                               </strong>
@@ -736,7 +736,7 @@
                 <section class="jihen-panel jihen-empty-section p-4 p-lg-5 text-center">
                   <h2 class="jihen-section-title">Aucun projet trouvé</h2>
                   <p class="jihen-page-note mb-4">Ajustez vos filtres ou ajoutez un nouveau projet.</p>
-                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenProjectModal()">+ Ajouter un projet</button>
+                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenProjectModal()">+ Add project</button>
                 </section>
               }
             </section>
@@ -745,10 +745,10 @@
               <div class="jihen-projects-view__header">
                 <div class="jihen-section-head">
                   <div>
-                    <h1 class="jihen-section-head__title">Mes collections</h1>
+                    <h1 class="jihen-section-head__title">My Collections</h1>
                     <p class="jihen-page-note">Organisez vos projets en collections.</p>
                   </div>
-                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCollectionModal()">+ Ajouter une collection</button>
+                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCollectionModal()">+ Add collection</button>
                 </div>
               </div>
 
@@ -773,7 +773,7 @@
                   </div>
                   <div class="col-md-4 col-lg-3">
                     <label class="jihen-field">
-                      <span>Visibilité</span>
+                      <span>Visibility</span>
                       <select [(ngModel)]="jihenCollectionVisibilityFilter" [ngModelOptions]="{ standalone: true }">
                         <option value="ALL">All</option>
                         @for (jihenVisibility of jihenVisibilityOptions; track jihenVisibility) {
@@ -784,7 +784,7 @@
                   </div>
                 </div>
                 <div class="jihen-projects-toolbar__footer">
-                  <button type="button" class="jihen-btn jihen-btn--neutral" (click)="clearJihenCollectionFilters()">Réinitialiser</button>
+                  <button type="button" class="jihen-btn jihen-btn--neutral" (click)="clearJihenCollectionFilters()">Reset</button>
                 </div>
               </section>
 
@@ -878,7 +878,7 @@
                 <section class="jihen-panel jihen-empty-section p-4 p-lg-5 text-center">
                   <h2 class="jihen-section-title">Aucune collection trouvée</h2>
                   <p class="jihen-page-note mb-4">Essayez un autre filtre ou ajoutez une collection plus tard.</p>
-                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCollectionModal()">+ Ajouter une collection</button>
+                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCollectionModal()">+ Add collection</button>
                 </section>
               }
             </section>
@@ -1005,7 +1005,7 @@
                   @if (jihenSkillsSaveError) {
                     <p class="jihen-form__message jihen-form__message--error">{{ jihenSkillsSaveError }}</p>
                   }
-                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenSkillModal()">Ajouter une compétence</button>
+                  <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenSkillModal()">Add skill</button>
                 </section>
               }
             </section>
@@ -1021,7 +1021,7 @@
       <section class="jihen-empty text-center p-4 p-lg-5">
         <h1>Vous n'avez pas encore de portfolio</h1>
         <p>Créez votre portfolio pour présenter vos projets, compétences et collections.</p>
-        <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCreateModal()">Créer mon portfolio</button>
+        <button type="button" class="jihen-btn jihen-btn--primary" (click)="openJihenCreateModal()">Create my portfolio</button>
       </section>
     }
   }
@@ -1032,30 +1032,30 @@
         <div class="jihen-modal__header">
           <div>
             <p class="jihen-modal__eyebrow">Portfolio</p>
-            <h2>{{ jihenModalMode === 'create' ? 'Créer mon portfolio' : 'Modifier mon portfolio' }}</h2>
+            <h2>{{ jihenModalMode === 'create' ? 'Create my portfolio' : 'Edit my portfolio' }}</h2>
           </div>
-          <button type="button" class="jihen-modal__close" aria-label="Fermer" (click)="closeJihenEditModal()">&#10005;</button>
+          <button type="button" class="jihen-modal__close" aria-label="Close" (click)="closeJihenEditModal()">&#10005;</button>
         </div>
 
         <form class="jihen-form" [formGroup]="jihenPortfolioForm" (ngSubmit)="submitJihenPortfolio()" novalidate>
           <div class="row g-3">
             <div class="col-md-6">
               <label class="jihen-field">
-                <span>Titre</span>
+                <span>Title</span>
                 <input type="text" formControlName="title" />
               </label>
               @if (jihenFormSubmitted && jihenPortfolioForm.controls.title.invalid) {
-                <p class="jihen-field__error">Le titre est obligatoire.</p>
+                <p class="jihen-field__error">Title is required.</p>
               }
             </div>
 
             <div class="col-md-6">
               <label class="jihen-field">
-                <span>Métier</span>
+                <span>Job title</span>
                 <input type="text" formControlName="job" />
               </label>
               @if (jihenFormSubmitted && jihenPortfolioForm.controls.job.invalid) {
-                <p class="jihen-field__error">Le métier est obligatoire.</p>
+                <p class="jihen-field__error">Job title is required.</p>
               }
             </div>
 
@@ -1068,33 +1068,33 @@
 
             <div class="col-12">
               <div class="jihen-field">
-                <span>Image de couverture</span>
+                <span>Cover image</span>
                 <div class="jihen-cover-editor">
                   <div
                     class="jihen-cover-editor__preview"
                     [class.jihen-cover-editor__preview--has-image]="jihenHasEditCoverPreview"
                     [style.background-image]="jihenEditCoverBackgroundImage">
                     @if (!jihenHasEditCoverPreview) {
-                      <span>Aperçu de la couverture</span>
+                      <span>Cover preview</span>
                     }
                   </div>
 
                   <div class="jihen-cover-editor__controls">
                     <label class="jihen-field">
-                      <span>URL de l'image</span>
+                      <span>Image URL</span>
                       <input type="text" formControlName="coverImage" placeholder="https://example.com/image.jpg" (input)="onJihenCoverImageUrlInput()" />
                     </label>
 
                     <label class="jihen-upload-btn">
                       <input type="file" accept="image/*" (change)="onJihenCoverImageFileSelected($event)" />
-                      <span>Sélectionner une image</span>
+                      <span>Select an image</span>
                     </label>
 
                     @if (jihenEditCoverFileName) {
                       <p class="jihen-cover-editor__file-name">{{ jihenEditCoverFileName }}</p>
                     }
 
-                    <p class="jihen-field__hint">Vous pouvez utiliser une URL ou sélectionner une image locale pour la couverture.</p>
+                    <p class="jihen-field__hint">You can use a URL or select a local image for the cover.</p>
                   </div>
                 </div>
               </div>
@@ -1116,7 +1116,7 @@
 
             <div class="col-md-6">
               <label class="jihen-field">
-                <span>Visibilité</span>
+                <span>Visibility</span>
                 <select formControlName="visibility">
                   @for (jihenVisibility of jihenVisibilityOptions; track jihenVisibility) {
                     <option [value]="jihenVisibility">{{ jihenVisibility }}</option>
@@ -1129,24 +1129,24 @@
               <div class="jihen-check-group">
                 <label class="jihen-check">
                   <input type="checkbox" formControlName="openToWork" />
-                  <span>Ouvert au travail</span>
+                  <span>Open to work</span>
                 </label>
                 <label class="jihen-check">
                   <input type="checkbox" formControlName="availableForFreelance" />
-                  <span>Disponible en freelance</span>
+                  <span>Available for freelance</span>
                 </label>
               </div>
             </div>
 
             <div class="col-12">
               <div class="jihen-field">
-                <span>Compétences</span>
+                <span>Skills</span>
                 @if (jihenLoadingSkills) {
-                  <p class="jihen-field__hint">Chargement des compétences...</p>
+                  <p class="jihen-field__hint">Loading skills...</p>
                 } @else if (jihenSkillsError) {
                   <p class="jihen-field__error">{{ jihenSkillsError }}</p>
                 } @else if (jihenAvailableSkills.length === 0) {
-                  <p class="jihen-field__hint">Aucune compétence disponible pour le moment.</p>
+                  <p class="jihen-field__hint">No skills available at the moment.</p>
                 } @else {
                   <div class="jihen-skill-picker">
                     @for (jihenSkill of jihenAvailableSkills; track jihenSkill.id) {
@@ -1165,15 +1165,15 @@
                   <div class="row g-3">
                     <div class="col-md-5">
                       <label class="jihen-field">
-                        <span>Nouvelle compétence</span>
+                        <span>New skill</span>
                         <input type="text" [value]="jihenPortfolioSkillDraftName" placeholder="Ex: Java" (input)="jihenPortfolioSkillDraftName = $any($event.target).value" />
                       </label>
                     </div>
                     <div class="col-md-4">
                       <label class="jihen-field">
-                        <span>Catégorie</span>
+                        <span>Category</span>
                         <select [value]="jihenPortfolioSkillDraftCategory" (change)="jihenPortfolioSkillDraftCategory = $any($event.target).value">
-                          <option value="">Sélectionner</option>
+                          <option value="">Select</option>
                           @for (jihenSkillCategory of jihenSkillCategories; track jihenSkillCategory) {
                             <option [value]="jihenSkillCategory">{{ jihenFormatSkillCategory(jihenSkillCategory) }}</option>
                           }
@@ -1186,11 +1186,11 @@
                         class="jihen-btn jihen-btn--soft jihen-skill-create__action"
                         [disabled]="jihenCreatingSkillContext === 'portfolio-form'"
                         (click)="addOrCreateJihenPortfolioFormSkill()">
-                        {{ jihenCreatingSkillContext === 'portfolio-form' ? 'Ajout...' : 'Ajouter ou créer' }}
+                        {{ jihenCreatingSkillContext === 'portfolio-form' ? 'Adding...' : 'Add or create' }}
                       </button>
                     </div>
                   </div>
-                  <p class="jihen-field__hint">Si la compétence existe déjà, elle sera simplement sélectionnée.</p>
+                  <p class="jihen-field__hint">If the skill already exists, it will simply be selected.</p>
                   @if (jihenPortfolioSkillCreateError) {
                     <p class="jihen-field__error">{{ jihenPortfolioSkillCreateError }}</p>
                   }
@@ -1204,9 +1204,9 @@
           }
 
           <div class="jihen-modal__actions">
-            <button type="button" class="jihen-btn jihen-btn--neutral" (click)="closeJihenEditModal()">Annuler</button>
+            <button type="button" class="jihen-btn jihen-btn--neutral" (click)="closeJihenEditModal()">Cancel</button>
             <button type="submit" class="jihen-btn jihen-btn--primary" [disabled]="jihenIsSubmittingPortfolio">
-              {{ jihenIsSubmittingPortfolio ? 'Enregistrement...' : (jihenModalMode === 'create' ? 'Créer' : 'Enregistrer') }}
+              {{ jihenIsSubmittingPortfolio ? 'Saving...' : (jihenModalMode === 'create' ? 'Create' : 'Save') }}
             </button>
           </div>
         </form>
@@ -1219,8 +1219,8 @@
       <section class="jihen-modal__dialog jihen-modal__dialog--skill" (click)="$event.stopPropagation()">
         <div class="jihen-modal__header">
           <div>
-            <p class="jihen-modal__eyebrow">Compétences</p>
-            <h2>Ajouter une compétence</h2>
+            <p class="jihen-modal__eyebrow">Skills</p>
+            <h2>Add a skill</h2>
             <p class="jihen-modal__context">Sélectionnez une catégorie pour voir les compétences existantes du catalogue.</p>
           </div>
           <button type="button" class="jihen-modal__close" aria-label="Fermer" (click)="closeJihenSkillModal()">&#10005;</button>
@@ -1268,7 +1268,7 @@
               <div class="row g-3">
                 <div class="col-md-5">
                   <label class="jihen-field">
-                    <span>Nouvelle compétence</span>
+                    <span>New skill</span>
                     <input type="text" [value]="jihenSkillModalDraftName" placeholder="Ex: Java" (input)="jihenSkillModalDraftName = $any($event.target).value" />
                   </label>
                 </div>
@@ -1334,9 +1334,9 @@
           </div>
 
           <div class="jihen-modal__actions jihen-modal__actions--sticky">
-            <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsSavingSkills" (click)="closeJihenSkillModal()">Annuler</button>
+            <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsSavingSkills" (click)="closeJihenSkillModal()">Cancel</button>
             <button type="button" class="jihen-btn jihen-btn--primary" [disabled]="jihenIsSavingSkills" (click)="saveJihenPortfolioSkills(true)">
-              {{ jihenIsSavingSkills ? 'Enregistrement...' : 'Enregistrer les compétences' }}
+              {{ jihenIsSavingSkills ? 'Saving...' : 'Save skills' }}
             </button>
           </div>
         </div>
@@ -1349,27 +1349,27 @@
       <section class="jihen-modal__dialog jihen-modal__dialog--share" (click)="$event.stopPropagation()">
         <div class="jihen-modal__header">
           <div>
-            <p class="jihen-modal__eyebrow">Partager</p>
-            <h2>Partager le portfolio</h2>
-            <p class="jihen-share__subtitle">Toute personne avec ce lien peut voir ce portfolio selon sa visibilité.</p>
+            <p class="jihen-modal__eyebrow">Share</p>
+            <h2>Share portfolio</h2>
+            <p class="jihen-share__subtitle">Anyone with this link can view this portfolio based on its visibility.</p>
           </div>
-          <button type="button" class="jihen-modal__close" aria-label="Fermer" (click)="closeJihenShareModal()">&#10005;</button>
+          <button type="button" class="jihen-modal__close" aria-label="Close" (click)="closeJihenShareModal()">&#10005;</button>
         </div>
 
         <div class="jihen-share-card">
           <img class="jihen-share-card__avatar" [src]="jihenPortfolio.jihenAvatarImage" [alt]="jihenPortfolio.jihenTitle" (error)="onJihenImageError($event)" />
           <div>
             <strong>{{ jihenPortfolio.jihenTitle }}</strong>
-            <p class="jihen-page-note mb-0">{{ jihenPortfolio.jihenJob || 'Métier non renseigné' }}</p>
+            <p class="jihen-page-note mb-0">{{ jihenPortfolio.jihenJob || 'Role not specified' }}</p>
           </div>
         </div>
 
         <div class="jihen-share__link-box">
           <div class="jihen-share__link">{{ jihenShareUrl }}</div>
-          <button type="button" class="jihen-btn jihen-btn--primary" (click)="copyJihenShareLink()">Copier le lien</button>
+          <button type="button" class="jihen-btn jihen-btn--primary" (click)="copyJihenShareLink()">Copy link</button>
         </div>
         @if (jihenLinkCopied) {
-          <p class="jihen-share__success">Lien copié !</p>
+          <p class="jihen-share__success">Link copied!</p>
         }
 
         <div class="jihen-share__socials">
@@ -1388,13 +1388,13 @@
       <section class="jihen-modal__dialog jihen-modal__dialog--project" (click)="$event.stopPropagation()">
         <div class="jihen-modal__header">
           <div>
-            <p class="jihen-modal__eyebrow">Projet</p>
-            <h2>{{ jihenProjectModalMode === 'edit' ? 'Modifier le projet' : 'Ajouter un projet' }}</h2>
+            <p class="jihen-modal__eyebrow">Project</p>
+            <h2>{{ jihenProjectModalMode === 'edit' ? 'Edit project' : 'Add project' }}</h2>
             @if (jihenProjectModalOrigin === 'collection' && jihenProjectModalMode === 'create') {
-              <p class="jihen-modal__context">Vous ajoutez un projet pour la collection en cours. Il sera présélectionné au retour.</p>
+              <p class="jihen-modal__context">You are adding a project to the current collection. It will be preselected when you return.</p>
             }
           </div>
-          <button type="button" class="jihen-modal__close" aria-label="Fermer" (click)="closeJihenProjectModal()">&#10005;</button>
+          <button type="button" class="jihen-modal__close" aria-label="Close" (click)="closeJihenProjectModal()">&#10005;</button>
         </div>
 
         <form class="jihen-form jihen-project-form" [formGroup]="jihenProjectForm" (ngSubmit)="submitJihenProject()" novalidate>
@@ -1402,17 +1402,17 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="jihen-field">
-                  <span>Titre du projet</span>
+                  <span>Project title</span>
                   <input type="text" formControlName="title" />
                 </label>
                 @if (jihenProjectFormSubmitted && jihenProjectForm.controls.title.invalid) {
-                  <p class="jihen-field__error">Le titre du projet est obligatoire.</p>
+                  <p class="jihen-field__error">Project title is required.</p>
                 }
               </div>
 
               <div class="col-md-6">
                 <label class="jihen-field">
-                  <span>Lien du projet</span>
+                  <span>Project link</span>
                   <input type="url" formControlName="projectUrl" placeholder="https://example.com/project" />
                 </label>
               </div>
@@ -1426,15 +1426,15 @@
 
               <div class="col-md-6">
                 <label class="jihen-field">
-                  <span>Visibilité</span>
+                  <span>Visibility</span>
                   <select formControlName="visibility" (change)="onJihenProjectVisibilityChange()">
                     @for (jihenVisibility of jihenVisibilityOptions; track jihenVisibility) {
                       <option [value]="jihenVisibility" [disabled]="!isJihenProjectVisibilityAllowed(jihenVisibility)">{{ jihenVisibility }}</option>
                     }
                   </select>
                 </label>
-                <p class="jihen-field__hint">Visibilité actuelle du portfolio: {{ jihenPortfolio.jihenVisibility }}</p>
-                <p class="jihen-field__hint">Le projet doit être au même niveau ou plus privé.</p>
+                <p class="jihen-field__hint">Current portfolio visibility: {{ jihenPortfolio.jihenVisibility }}</p>
+                <p class="jihen-field__hint">The project must be at the same visibility level or more private.</p>
                 @if (jihenProjectVisibilityWarning) {
                   <p class="jihen-field__error">{{ jihenProjectVisibilityWarning }}</p>
                 }
@@ -1444,21 +1444,21 @@
                 <div class="jihen-check-group jihen-check-group--project">
                   <label class="jihen-check">
                     <input type="checkbox" formControlName="pinned" />
-                    <span>Épingler ce projet</span>
+                    <span>Pin this project</span>
                   </label>
                 </div>
               </div>
 
               <div class="col-12">
                 <div class="jihen-field">
-                  <span>Compétences</span>
+                  <span>Skills</span>
                   @if (jihenLoadingSkills) {
-                    <p class="jihen-field__hint">Chargement des compétences...</p>
+                    <p class="jihen-field__hint">Loading skills...</p>
                   } @else if (jihenSkillsError) {
                     <p class="jihen-field__error">{{ jihenSkillsError }}</p>
                   } @else if (jihenProjectSkillGroups.length === 0) {
-                    <p class="jihen-field__hint">Aucune compétence disponible</p>
-                    <p class="jihen-field__hint">Les compétences apparaîtront ici après ajout dans le catalogue.</p>
+                    <p class="jihen-field__hint">No skills available.</p>
+                    <p class="jihen-field__hint">Skills will appear here after being added to the catalog.</p>
                   } @else {
                     <div class="jihen-skill-groups">
                       @for (jihenSkillGroup of jihenProjectSkillGroups; track jihenSkillGroup.jihenCategoryKey) {
@@ -1484,15 +1484,15 @@
                     <div class="row g-3">
                       <div class="col-md-5">
                         <label class="jihen-field">
-                          <span>Nouvelle compétence</span>
+                          <span>New skill</span>
                           <input type="text" [value]="jihenProjectSkillDraftName" placeholder="Ex: Angular" (input)="jihenProjectSkillDraftName = $any($event.target).value" />
                         </label>
                       </div>
                       <div class="col-md-4">
                         <label class="jihen-field">
-                          <span>Catégorie</span>
+                          <span>Category</span>
                           <select [value]="jihenProjectSkillDraftCategory" (change)="jihenProjectSkillDraftCategory = $any($event.target).value">
-                            <option value="">Sélectionner</option>
+                            <option value="">Select</option>
                             @for (jihenSkillCategory of jihenSkillCategories; track jihenSkillCategory) {
                               <option [value]="jihenSkillCategory">{{ jihenFormatSkillCategory(jihenSkillCategory) }}</option>
                             }
@@ -1501,11 +1501,11 @@
                       </div>
                       <div class="col-md-3">
                         <button type="button" class="jihen-btn jihen-btn--soft jihen-skill-create__action" [disabled]="jihenCreatingSkillContext === 'project-form'" (click)="addOrCreateJihenProjectSkill()">
-                          {{ jihenCreatingSkillContext === 'project-form' ? 'Ajout...' : 'Ajouter ou créer' }}
+                          {{ jihenCreatingSkillContext === 'project-form' ? 'Adding...' : 'Add or create' }}
                         </button>
                       </div>
                     </div>
-                    <p class="jihen-field__hint">Si la compétence existe déjà, elle sera simplement sélectionnée.</p>
+                    <p class="jihen-field__hint">If the skill already exists, it will simply be selected.</p>
                     @if (jihenProjectSkillCreateError) {
                       <p class="jihen-field__error">{{ jihenProjectSkillCreateError }}</p>
                     }
@@ -1517,8 +1517,8 @@
                 <div class="jihen-media-section">
                   <div class="jihen-section-head jihen-section-head--compact">
                     <div>
-                      <h3 class="jihen-section-head__title">Médias du projet</h3>
-                      <p class="jihen-page-note">Le premier média sera utilisé comme image de couverture.</p>
+                      <h3 class="jihen-section-head__title">Project media</h3>
+                      <p class="jihen-page-note">The first media item will be used as the cover image.</p>
                     </div>
                   </div>
 
@@ -1539,7 +1539,7 @@
 
                   <div class="jihen-media-external">
                     <label class="jihen-field">
-                      <span>URL externe</span>
+                      <span>External URL</span>
                       <input type="url" [value]="jihenProjectExternalMediaUrl" placeholder="https://example.com/media" (input)="jihenProjectExternalMediaUrl = $any($event.target).value" />
                     </label>
                     <label class="jihen-field">
@@ -1549,7 +1549,7 @@
                         <option value="VIDEO">VIDEO</option>
                       </select>
                     </label>
-                    <button type="button" class="jihen-btn jihen-btn--soft jihen-media-external__add" (click)="addJihenExternalProjectMedia()">Ajouter</button>
+                    <button type="button" class="jihen-btn jihen-btn--soft jihen-media-external__add" (click)="addJihenExternalProjectMedia()">Add</button>
                   </div>
 
                   @if (jihenProjectMediaError) {
@@ -1562,7 +1562,7 @@
                         <section class="jihen-media-card" [formGroupName]="i">
                           <div class="jihen-media-card__head">
                             <span class="jihen-media-card__type">{{ getJihenProjectMediaType(i) }}</span>
-                            <button type="button" class="jihen-btn jihen-btn--neutral" (click)="removeJihenProjectMedia(i)">Retirer</button>
+                            <button type="button" class="jihen-btn jihen-btn--neutral" (click)="removeJihenProjectMedia(i)">Remove</button>
                           </div>
                           <div class="row g-3">
                             <div class="col-md-7">
@@ -1612,9 +1612,9 @@
           </div>
 
           <div class="jihen-modal__actions jihen-modal__actions--sticky">
-            <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsSubmittingProject" (click)="closeJihenProjectModal()">Annuler</button>
+            <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsSubmittingProject" (click)="closeJihenProjectModal()">Cancel</button>
             <button type="submit" class="jihen-btn jihen-btn--primary" [disabled]="jihenIsSubmittingProject">
-              {{ jihenIsSubmittingProject ? 'Enregistrement...' : 'Enregistrer' }}
+              {{ jihenIsSubmittingProject ? 'Saving...' : 'Save' }}
             </button>
           </div>
         </form>
@@ -1628,7 +1628,7 @@
         <div class="jihen-modal__header">
           <div>
             <p class="jihen-modal__eyebrow">Collection</p>
-            <h2>Ajouter une collection</h2>
+            <h2>Add a collection</h2>
           </div>
           <button type="button" class="jihen-modal__close" aria-label="Fermer" (click)="closeJihenCollectionModal()">&#10005;</button>
         </div>
@@ -1648,7 +1648,7 @@
 
               <div class="col-md-6">
                 <label class="jihen-field">
-                  <span>Visibilité</span>
+                  <span>Visibility</span>
                   <select formControlName="visibility" (change)="onJihenCollectionVisibilityChange()">
                     @for (jihenVisibility of jihenVisibilityOptions; track jihenVisibility) {
                       <option [value]="jihenVisibility" [disabled]="!isJihenProjectVisibilityAllowed(jihenVisibility)">{{ jihenVisibility }}</option>
@@ -1721,7 +1721,7 @@
           </div>
 
           <div class="jihen-modal__actions jihen-modal__actions--sticky">
-            <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsSubmittingCollection" (click)="closeJihenCollectionModal()">Annuler</button>
+            <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsSubmittingCollection" (click)="closeJihenCollectionModal()">Cancel</button>
             <button type="submit" class="jihen-btn jihen-btn--primary" [disabled]="jihenIsSubmittingCollection">
               {{ jihenIsSubmittingCollection ? 'Création...' : 'Créer la collection' }}
             </button>
@@ -1737,7 +1737,7 @@
         <div class="jihen-modal__header">
           <div>
             <p class="jihen-modal__eyebrow">Confirmation</p>
-            <h2>Confirmer la suppression</h2>
+            <h2>Confirm deletion</h2>
           </div>
           <button type="button" class="jihen-modal__close" aria-label="Fermer" (click)="closeJihenDeleteConfirmModal()">&#10005;</button>
         </div>
@@ -1752,9 +1752,9 @@
         }
 
         <div class="jihen-modal__actions">
-          <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsDeletingItem" (click)="closeJihenDeleteConfirmModal()">Annuler</button>
+          <button type="button" class="jihen-btn jihen-btn--neutral" [disabled]="jihenIsDeletingItem" (click)="closeJihenDeleteConfirmModal()">Cancel</button>
           <button type="button" class="jihen-btn jihen-btn--danger" [disabled]="jihenIsDeletingItem" (click)="confirmJihenDelete()">
-            {{ jihenIsDeletingItem ? 'Suppression...' : 'Supprimer' }}
+            {{ jihenIsDeletingItem ? 'Deleting...' : 'Delete' }}
           </button>
         </div>
       </section>

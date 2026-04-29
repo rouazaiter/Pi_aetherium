@@ -14,26 +14,26 @@
           <span class="profile-verify__logo-mark">S</span>
           SkillHub
         </div>
-        <p class="profile-verify__kicker">Sécurité</p>
-        <h1 id="profile-verify-title" class="profile-verify__title">Vérifiez que c’est bien vous</h1>
+        <p class="profile-verify__kicker">Security</p>
+        <h1 id="profile-verify-title" class="profile-verify__title">Verify that it’s really you</h1>
         <p class="profile-verify__lead">
-          Un code à usage unique a été envoyé pour protéger l’accès à votre espace personnel.
+          A one-time code has been sent to protect access to your personal space.
         </p>
         <div class="profile-verify__account">
-          <span class="profile-verify__account-label">Compte</span>
+          <span class="profile-verify__account-label">Account</span>
           <span class="profile-verify__account-value">{{ primaryEmail() || maskedEmail() }}</span>
         </div>
         @if (codeHint) {
           <p class="profile-verify__hint">{{ codeHint }}</p>
         }
         @if (sendingCode && !codeHint) {
-          <p class="profile-verify__hint profile-verify__hint--pulse">Envoi du code…</p>
+          <p class="profile-verify__hint profile-verify__hint--pulse">Sending code...</p>
         }
         @if (verifyError) {
           <div class="profile-verify__alert" @alertReveal>{{ verifyError }}</div>
         }
         <form [formGroup]="verifyForm" (ngSubmit)="submitVerification()" class="profile-verify__form">
-          <label class="profile-verify__label" for="pv-code">Code à 6 chiffres</label>
+          <label class="profile-verify__label" for="pv-code">6-digit code</label>
           <input
             id="pv-code"
             class="profile-verify__code-input"
@@ -46,18 +46,18 @@
             [attr.aria-invalid]="verifyForm.controls.code.invalid && verifyForm.controls.code.touched"
           />
           @if (verifyForm.controls.code.invalid && verifyForm.controls.code.touched) {
-            <div class="profile-verify__field-error">Saisissez les 6 chiffres reçus par e-mail.</div>
+            <div class="profile-verify__field-error">Enter the 6 digits received by email.</div>
           }
           <div class="profile-verify__actions">
             <button type="button" class="profile-verify__resend" [disabled]="sendingCode" (click)="resendCode()">
-              Renvoyer le code
+              Resend code
             </button>
             <button type="submit" class="profile-verify__confirm" [disabled]="verifying || verifyForm.invalid">
               @if (verifying) {
                 <span class="profile-btn__spinner" aria-hidden="true"></span>
-                Vérification…
+                Verifying...
               } @else {
-                Continuer
+                Continue
               }
             </button>
           </div>

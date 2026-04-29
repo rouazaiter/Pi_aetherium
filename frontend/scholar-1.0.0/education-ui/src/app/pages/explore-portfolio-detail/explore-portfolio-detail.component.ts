@@ -149,7 +149,7 @@ export class ExplorePortfolioDetailComponent implements OnInit {
       || [detail.profile?.firstName, detail.profile?.lastName].filter(Boolean).join(' ').trim()
       || detail.ownerUsername?.trim()
       || detail.owner?.username?.trim()
-      || 'Scholar user'
+      || 'SkillHub user'
     );
   }
 

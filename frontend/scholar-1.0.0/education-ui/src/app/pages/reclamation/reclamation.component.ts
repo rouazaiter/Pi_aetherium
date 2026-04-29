@@ -40,7 +40,7 @@ export class ReclamationComponent implements OnInit {
       case 'IN_REVIEW':
         return 'En cours de traitement';
       case 'RESOLVED':
-        return 'Clôturée';
+        return 'Resolved';
       default:
         return s;
     }
@@ -50,7 +50,7 @@ export class ReclamationComponent implements OnInit {
     this.loadError.set(null);
     this.api.mine().subscribe({
       next: (rows) => this.items.set(rows),
-      error: (err) => this.loadError.set(messageFromHttpError(err, 'Impossible de charger vos réclamations.')),
+      error: (err) => this.loadError.set(messageFromHttpError(err, 'Unable to load your claims.')),
     });
   }
 

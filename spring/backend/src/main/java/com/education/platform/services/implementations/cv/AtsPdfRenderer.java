@@ -23,6 +23,7 @@ public class AtsPdfRenderer extends AbstractHtmlCvPdfRenderer implements CVPdfRe
     public String renderHtml(CVPdfRenderData data) {
         CVPdfRenderData.Section profileSection = findSection(data, CVSectionType.PROFILE);
         JsonNode profile = profileSection == null ? null : profileSection.getContent();
+        JsonNode settings = data == null ? null : data.getSettings();
 
         String fullName = text(profile, "fullName");
         String headline = text(profile, "headline");
@@ -32,6 +33,11 @@ public class AtsPdfRenderer extends AbstractHtmlCvPdfRenderer implements CVPdfRe
         String location = text(profile, "location");
         String githubUrl = text(profile, "githubUrl");
         String linkedInUrl = firstNonBlank(text(profile, "linkedInUrl"), text(profile, "linkedinUrl"));
+        String ignoredProfilePicture = text(profile, "profilePicture");
+        boolean ignoredShowProfileImage = settings != null && settings.path("showProfileImage").asBoolean(false);
+        if (!ignoredProfilePicture.isBlank() || ignoredShowProfileImage) {
+            // ATS output stays text-only even when image data or image settings exist on the draft.
+        }
 
         StringBuilder body = new StringBuilder();
         body.append("<div class=\"cv-root\">");

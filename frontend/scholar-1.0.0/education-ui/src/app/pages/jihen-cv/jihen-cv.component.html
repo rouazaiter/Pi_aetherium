@@ -1,24 +1,70 @@
 <section class="cv-builder-page">
   <div class="cv-builder-page__inner">
+    <section class="cv-shell-bar">
+      <a routerLink="/" class="cv-shell-bar__brand">
+        <span class="cv-shell-bar__logo">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 4c3.8 0 6.88 2.13 8.12 3.2.58.49.88.73.88 1.3v6.94c0 .56-.3.81-.88 1.3C18.88 17.87 15.8 20 12 20s-6.88-2.13-8.12-3.26c-.58-.49-.88-.74-.88-1.3V8.5c0-.57.3-.81.88-1.3C5.12 6.13 8.2 4 12 4Zm0 2.2c-2.7 0-5 1.38-6.86 2.88l-.14.12.14.12c1.86 1.5 4.16 2.88 6.86 2.88s5-1.38 6.86-2.88l.14-.12-.14-.12C17 7.58 14.7 6.2 12 6.2Zm0 6.7c-2.7 0-5 1.38-6.86 2.88l-.14.12.14.12c1.86 1.5 4.16 2.88 6.86 2.88s5-1.38 6.86-2.88l.14-.12-.14-.12C17 14.28 14.7 12.9 12 12.9Z"
+              fill="currentColor" />
+          </svg>
+        </span>
+        <div>
+          <strong>{{ platformName() }}</strong>
+        </div>
+      </a>
+
+      <div class="cv-shell-bar__actions">
+        <nav class="cv-shell-bar__nav" aria-label="CV Builder navigation">
+          <a routerLink="/" routerLinkActive="cv-shell-bar__nav-link--active" [routerLinkActiveOptions]="{ exact: true }" class="cv-shell-bar__nav-link">
+            Home
+          </a>
+          <a routerLink="/jihen-portfolio" class="cv-shell-bar__nav-link" [class.cv-shell-bar__nav-link--active]="isPortfolioNavActive()">
+            Portfolio
+          </a>
+        </nav>
+
+        <a routerLink="/profile" class="cv-shell-bar__avatar" aria-label="Profile">
+          @if (cvNavAvatarUrl()) {
+            <img [src]="cvNavAvatarUrl()" alt="" />
+          } @else {
+            <span>{{ cvNavAvatarInitials() }}</span>
+          }
+        </a>
+      </div>
+    </section>
+
     <header class="cv-builder-header">
-      <div>
-        <p class="cv-builder-header__eyebrow">CV Builder</p>
+      <div class="cv-builder-header__content">
+        <p class="cv-builder-header__eyebrow">Portfolio CV</p>
         <h1>CV Builder</h1>
         <p class="cv-builder-header__subtitle">Create, improve, and download an ATS-ready CV from your portfolio.</p>
       </div>
 
       <div class="cv-builder-header__actions">
-        <button type="button" class="cv-btn cv-btn--soft" [disabled]="generatingDraft" (click)="generateDraft()">
-          {{ generatingDraft ? 'Generating...' : 'Generate CV' }}
+        <button type="button" class="cv-btn cv-btn--soft cv-btn--icon" [disabled]="generatingDraft" (click)="generateDraft()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3.75a.75.75 0 0 1 .75.75v5.77l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V4.5A.75.75 0 0 1 12 3.75ZM5 14.75a.75.75 0 0 1 .75.75v2a1 1 0 0 0 1 1h10.5a1 1 0 0 0 1-1v-2a.75.75 0 0 1 1.5 0v2A2.5 2.5 0 0 1 17.25 20H6.75A2.5 2.5 0 0 1 4.25 17.5v-2A.75.75 0 0 1 5 14.75Z" fill="currentColor" />
+          </svg>
+          <span>{{ generatingDraft ? 'Generating...' : 'Generate CV' }}</span>
         </button>
-        <button type="button" class="cv-btn cv-btn--soft" [disabled]="!canCreateJobMatchedCv" (click)="openJobMatchModal()">
-          Create Job-Matched CV
+
+        <button type="button" class="cv-btn cv-btn--soft cv-btn--icon" [disabled]="!canCreateJobMatchedCv" (click)="openJobMatchModal()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10.5 4A6.5 6.5 0 1 0 17 10.5 6.5 6.5 0 0 0 10.5 4Zm0 1.5A5 5 0 1 1 5.5 10.5a5 5 0 0 1 5-5Zm7.53 11.47a.75.75 0 0 1 1.06 0l2.69 2.69a.75.75 0 0 1-1.06 1.06l-2.69-2.69a.75.75 0 0 1 0-1.06ZM10.5 7a.75.75 0 0 1 .75.75v2h2a.75.75 0 0 1 0 1.5h-2v2a.75.75 0 0 1-1.5 0v-2h-2a.75.75 0 0 1 0-1.5h2v-2A.75.75 0 0 1 10.5 7Z" fill="currentColor" />
+          </svg>
+          <span>Create Job-Matched CV</span>
         </button>
+
         <button type="button" class="cv-btn cv-btn--primary" [disabled]="!canSaveDraft" (click)="saveDraft()">
           {{ savingDraft ? 'Saving...' : 'Save Draft' }}
         </button>
-        <button type="button" class="cv-btn cv-btn--ghost" [disabled]="!canDownloadPdf" (click)="downloadPdf()">
-          {{ downloadingPdf ? 'Downloading...' : 'Download PDF' }}
+
+        <button type="button" class="cv-btn cv-btn--ghost cv-btn--icon" [disabled]="!canDownloadPdf" (click)="downloadPdf()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3.75a.75.75 0 0 1 .75.75v7.19l2.22-2.22a.75.75 0 0 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 0 1 1.06-1.06l2.22 2.22V4.5A.75.75 0 0 1 12 3.75Zm-6.75 12a.75.75 0 0 1 .75.75v1A1.5 1.5 0 0 0 7.5 19h9a1.5 1.5 0 0 0 1.5-1.5v-1a.75.75 0 0 1 1.5 0v1A3 3 0 0 1 16.5 20.5h-9a3 3 0 0 1-3-3v-1a.75.75 0 0 1 .75-.75Z" fill="currentColor" />
+          </svg>
+          <span>{{ downloadingPdf ? 'Downloading...' : 'Download PDF' }}</span>
         </button>
       </div>
     </header>
@@ -45,111 +91,206 @@
       <section class="cv-builder-toolbar">
         <div class="cv-template-selector">
           <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'ATS_MINIMAL'" (click)="selectTemplate('ATS_MINIMAL')">
-            ATS Minimal
+            <span class="cv-template-chip__icon">
+              @if (selectedTemplate === 'ATS_MINIMAL') {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.55 16.2 5.8 12.45a.75.75 0 0 1 1.06-1.06l2.69 2.69 7.6-7.6a.75.75 0 0 1 1.06 1.06l-8.13 8.13a.75.75 0 0 1-1.06 0Z" fill="currentColor" /></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5A1.5 1.5 0 0 1 6.5 5h11A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 17.5v-11Zm1.5 0v11h11v-11h-11Zm2.25 2.25h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5Zm0 3.5h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5Z" fill="currentColor" /></svg>
+              }
+            </span>
+            <span>ATS Minimal</span>
           </button>
           <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'MODERN'" (click)="selectTemplate('MODERN')">
-            Modern
+            <span class="cv-template-chip__icon">
+              @if (selectedTemplate === 'MODERN') {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.55 16.2 5.8 12.45a.75.75 0 0 1 1.06-1.06l2.69 2.69 7.6-7.6a.75.75 0 0 1 1.06 1.06l-8.13 8.13a.75.75 0 0 1-1.06 0Z" fill="currentColor" /></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5A1.5 1.5 0 0 1 6.5 5h11A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 17.5v-11Zm1.5 0v2.75h11V6.5h-11Zm0 4.25v6.75h3.75v-6.75H6.5Zm5.25 0v6.75h5.75v-6.75h-5.75Z" fill="currentColor" /></svg>
+              }
+            </span>
+            <span>Modern</span>
           </button>
           <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'ELEGANT'" (click)="selectTemplate('ELEGANT')">
-            Elegant
+            <span class="cv-template-chip__icon">
+              @if (selectedTemplate === 'ELEGANT') {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.55 16.2 5.8 12.45a.75.75 0 0 1 1.06-1.06l2.69 2.69 7.6-7.6a.75.75 0 0 1 1.06 1.06l-8.13 8.13a.75.75 0 0 1-1.06 0Z" fill="currentColor" /></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.25c3.4 0 5.47 2.35 5.47 5.25 0 1.66-.67 3.06-1.83 4.2l1.51 5.02a.75.75 0 0 1-1.06.87L12 17.64l-4.09 1.95a.75.75 0 0 1-1.06-.87l1.51-5.02A5.78 5.78 0 0 1 6.53 9.5c0-2.9 2.07-5.25 5.47-5.25Zm0 1.5c-2.46 0-3.97 1.67-3.97 3.75 0 1.17.48 2.22 1.32 3.07a.75.75 0 0 1 .18.73l-.95 3.15 2.98-1.42a.75.75 0 0 1 .64 0l2.98 1.42-.95-3.15a.75.75 0 0 1 .18-.73 4.28 4.28 0 0 0 1.32-3.07c0-2.08-1.51-3.75-3.97-3.75Z" fill="currentColor" /></svg>
+              }
+            </span>
+            <span>Elegant</span>
           </button>
           <button type="button" class="cv-template-chip" [class.cv-template-chip--active]="selectedTemplate === 'CREATIVE'" (click)="selectTemplate('CREATIVE')">
-            Creative
+            <span class="cv-template-chip__icon">
+              @if (selectedTemplate === 'CREATIVE') {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.55 16.2 5.8 12.45a.75.75 0 0 1 1.06-1.06l2.69 2.69 7.6-7.6a.75.75 0 0 1 1.06 1.06l-8.13 8.13a.75.75 0 0 1-1.06 0Z" fill="currentColor" /></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.25 4A3.25 3.25 0 0 0 4 7.25c0 .93.4 1.81 1.08 2.42A4.47 4.47 0 0 0 3 13.5 4.5 4.5 0 0 0 7.5 18h6.64a4.86 4.86 0 0 0 4.86-4.86A4.64 4.64 0 0 0 14.36 8.5h-.33A3.75 3.75 0 0 0 7.25 4Zm0 1.5a2.25 2.25 0 0 1 2.1 3.05.75.75 0 0 0 .7 1.02h4.31a3.14 3.14 0 1 1 0 6.28H7.5a3 3 0 0 1-.8-5.89.75.75 0 0 0 .16-1.34 1.74 1.74 0 0 1-.86-1.37A2.25 2.25 0 0 1 7.25 5.5Z" fill="currentColor" /></svg>
+              }
+            </span>
+            <span>Creative</span>
           </button>
         </div>
 
-        @if (saveMessage) {
-          <p class="cv-builder-toolbar__message cv-builder-toolbar__message--success">{{ saveMessage }}</p>
+        @if (canShowProfileImageToggle) {
+          <label class="cv-builder-toggle">
+            <input type="checkbox" [ngModel]="showProfileImage" (ngModelChange)="showProfileImage = !!$event; onShowProfileImageChange()" />
+            <span>Show profile image</span>
+          </label>
         }
-        @if (saveError) {
-          <p class="cv-builder-toolbar__message cv-builder-toolbar__message--error">{{ saveError }}</p>
-        }
-        @if (downloadError) {
-          <p class="cv-builder-toolbar__message cv-builder-toolbar__message--error">{{ downloadError }}</p>
-        }
-      </section>
 
-      <section class="cv-ai-bar">
-        <div class="cv-ai-bar__intro">
-          <span class="cv-ai-bar__badge">AI</span>
-          <div>
-            <h2>AI CV Assistant</h2>
-            <p>Improve your summary, projects, and CV wording.</p>
-          </div>
-        </div>
-
-        <div class="cv-ai-bar__quick-actions">
-          <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">Improve summary</button>
-          <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">Make it professional</button>
-          <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('SHORT', 'SHORT')">Shorten summary</button>
-          <button type="button" class="cv-ai-pill" [disabled]="visibleProjects.length === 0" (click)="requestProjectImprove(visibleProjects[0].id)">Rewrite projects</button>
-          <button type="button" class="cv-ai-pill" (click)="sendAssistantPrompt('Check my CV readiness and tell me what to improve.')">Check CV readiness</button>
-        </div>
-
-        <div class="cv-ai-chat">
-          @for (message of assistantMessages; track trackByIndex($index)) {
-            <article class="cv-ai-chat__message" [class.cv-ai-chat__message--user]="message.role === 'user'">
-              <p>{{ message.content }}</p>
-              @if (message.suggestedActions?.length) {
-                <div class="cv-ai-chat__actions">
-                  @for (action of message.suggestedActions ?? []; track action) {
-                    <span>{{ action }}</span>
-                  }
-                </div>
-              }
-            </article>
+        <div class="cv-builder-toolbar__messages">
+          @if (saveMessage) {
+            <p class="cv-builder-toolbar__message cv-builder-toolbar__message--success">{{ saveMessage }}</p>
           }
-
-          @if (pendingChatMessage) {
-            <article class="cv-ai-chat__message cv-ai-chat__message--user">
-              <p>{{ pendingChatMessage }}</p>
-            </article>
+          @if (saveError) {
+            <p class="cv-builder-toolbar__message cv-builder-toolbar__message--error">{{ saveError }}</p>
           }
-
-          @if (chatLoading) {
-            <article class="cv-ai-chat__message cv-ai-chat__message--thinking">
-              <p>AI is analyzing your CV...</p>
-            </article>
+          @if (downloadError) {
+            <p class="cv-builder-toolbar__message cv-builder-toolbar__message--error">{{ downloadError }}</p>
           }
         </div>
-
-        @if (chatTimeoutMessage) {
-          <div class="cv-ai-bar__state">
-            <p>{{ chatTimeoutMessage }}</p>
-            <div class="cv-ai-bar__state-actions">
-              <button type="button" class="cv-btn cv-btn--soft" (click)="cancelAssistantChat()">Cancel</button>
-              <button type="button" class="cv-btn cv-btn--ghost" (click)="retryAssistantChat()">Retry</button>
-            </div>
-          </div>
-        }
-
-        @if (chatError || aiActionError) {
-          <p class="cv-ai-bar__error">{{ chatError || aiActionError }}</p>
-          @if (chatError && pendingChatMessage) {
-            <div class="cv-ai-bar__state-actions">
-              <button type="button" class="cv-btn cv-btn--soft" (click)="retryAssistantChat()">Retry</button>
-            </div>
-          }
-        }
-
-        <form class="cv-ai-bar__composer" (ngSubmit)="submitAssistantChat()">
-          <input type="text" name="cvAssistantMessage" [(ngModel)]="chatInput" placeholder="Ask for CV advice..." [disabled]="chatLoading" />
-          <div class="cv-ai-bar__composer-actions">
-            @if (chatLoading) {
-              <button type="button" class="cv-btn cv-btn--soft" (click)="cancelAssistantChat()">Cancel</button>
-            }
-            <button type="submit" class="cv-btn cv-btn--primary" [disabled]="chatLoading || !(pendingChatMessage.trim() || chatInput.trim())">Send</button>
-          </div>
-        </form>
       </section>
 
       <section class="cv-builder-layout">
         <div class="cv-editor-column">
+          <article class="cv-editor-card cv-editor-card--ai">
+            <div class="cv-card-head cv-card-head--plain">
+              <div class="cv-card-head__title">
+                <span class="cv-card-icon cv-card-icon--ai">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.5 6.5A2.5 2.5 0 1 1 11 9a2.5 2.5 0 0 1-2.5-2.5Zm4.5 0A2.5 2.5 0 1 1 15.5 9 2.5 2.5 0 0 1 13 6.5ZM5 13.75A2.75 2.75 0 0 1 7.75 11h8.5A2.75 2.75 0 0 1 19 13.75v2A3.25 3.25 0 0 1 15.75 19h-7.5A3.25 3.25 0 0 1 5 15.75v-2Zm2.75-1.25A1.25 1.25 0 0 0 6.5 13.75v2a1.75 1.75 0 0 0 1.75 1.75h7.5a1.75 1.75 0 0 0 1.75-1.75v-2a1.25 1.25 0 0 0-1.25-1.25h-8.5Z" fill="currentColor" />
+                  </svg>
+                </span>
+                <div>
+                  <h2>AI CV Assistant</h2>
+                  <p>Improve your summary, projects, and CV wording.</p>
+                </div>
+              </div>
+              <span class="cv-pro-badge">Pro</span>
+            </div>
+
+            <div class="cv-ai-bar__quick-actions">
+              <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">Improve summary</button>
+              <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">Make it professional</button>
+              <button type="button" class="cv-ai-pill" (click)="requestSummaryImprove('SHORT', 'SHORT')">Shorten summary</button>
+              <button type="button" class="cv-ai-pill" [disabled]="visibleProjects.length === 0" (click)="requestProjectImprove(visibleProjects[0].id)">Rewrite projects</button>
+              <button type="button" class="cv-ai-pill" (click)="sendAssistantPrompt('Check my CV readiness and tell me what to improve.')">Check CV readiness</button>
+            </div>
+
+            <div class="cv-ai-chat">
+              @for (message of assistantMessages; track trackByIndex($index)) {
+                <article class="cv-ai-chat__message" [class.cv-ai-chat__message--user]="message.role === 'user'">
+                  <p>{{ message.content }}</p>
+                  @if (message.suggestedActions?.length) {
+                    <div class="cv-ai-chat__actions">
+                      @for (action of message.suggestedActions ?? []; track action) {
+                        <span>{{ action }}</span>
+                      }
+                    </div>
+                  }
+                </article>
+              }
+
+              @if (pendingChatMessage) {
+                <article class="cv-ai-chat__message cv-ai-chat__message--user">
+                  <p>{{ pendingChatMessage }}</p>
+                </article>
+              }
+
+              @if (chatLoading) {
+                <article class="cv-ai-chat__message cv-ai-chat__message--thinking">
+                  <p>AI is analyzing your CV...</p>
+                </article>
+              }
+            </div>
+
+            @if (chatTimeoutMessage) {
+              <div class="cv-ai-bar__state">
+                <p>{{ chatTimeoutMessage }}</p>
+                <div class="cv-ai-bar__state-actions">
+                  <button type="button" class="cv-btn cv-btn--soft" (click)="cancelAssistantChat()">Cancel</button>
+                  <button type="button" class="cv-btn cv-btn--ghost" (click)="retryAssistantChat()">Retry</button>
+                </div>
+              </div>
+            }
+
+            @if (chatError || aiActionError) {
+              <p class="cv-ai-bar__error">{{ chatError || aiActionError }}</p>
+              @if (chatError && pendingChatMessage) {
+                <div class="cv-ai-bar__state-actions">
+                  <button type="button" class="cv-btn cv-btn--soft" (click)="retryAssistantChat()">Retry</button>
+                </div>
+              }
+            }
+
+            <form class="cv-ai-bar__composer" (ngSubmit)="submitAssistantChat()">
+              <input type="text" name="cvAssistantMessage" [(ngModel)]="chatInput" placeholder="Ask for CV advice..." [disabled]="chatLoading" />
+              <div class="cv-ai-bar__composer-actions">
+                @if (chatLoading) {
+                  <button type="button" class="cv-btn cv-btn--soft" (click)="cancelAssistantChat()">Cancel</button>
+                }
+                <button type="submit" class="cv-btn cv-btn--primary cv-btn--send" [disabled]="chatLoading || !(pendingChatMessage.trim() || chatInput.trim())">
+                  Send
+                </button>
+              </div>
+            </form>
+          </article>
+
           <article class="cv-editor-card">
-            <button type="button" class="cv-accordion" (click)="toggleSection('PROFILE')">
-              <span>Profile</span>
-              <span>{{ sectionOpen.PROFILE ? '−' : '+' }}</span>
-            </button>
+            <div class="cv-card-head">
+              <div class="cv-card-head__title">
+                <span class="cv-card-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a4 4 0 1 1-4 4 4 4 0 0 1 4-4Zm0 10c3.87 0 7 2.01 7 4.5a.75.75 0 0 1-1.5 0c0-1.45-2.34-3-5.5-3s-5.5 1.55-5.5 3a.75.75 0 0 1-1.5 0C5 16.01 8.13 14 12 14Z" fill="currentColor" /></svg>
+                </span>
+                <div>
+                  <h2>Profile</h2>
+                  <p>Core contact details and title used in the live preview.</p>
+                </div>
+              </div>
+              <button type="button" class="cv-card-action cv-card-action--toggle" [class.cv-card-action--active]="sectionOpen.PROFILE" (click)="toggleSection('PROFILE')">
+                <span class="cv-card-action__icon" aria-hidden="true">
+                  @if (sectionOpen.PROFILE) {
+                    <svg viewBox="0 0 24 24"><path d="M3.75 12c1.77-3.24 4.78-5.25 8.25-5.25S18.48 8.76 20.25 12c-1.77 3.24-4.78 5.25-8.25 5.25S5.52 15.24 3.75 12Zm8.25-3.75A3.75 3.75 0 1 0 15.75 12 3.76 3.76 0 0 0 12 8.25Zm0 1.5A2.25 2.25 0 1 1 9.75 12 2.25 2.25 0 0 1 12 9.75Z" fill="currentColor" /></svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24"><path d="M15.02 5.27a2.5 2.5 0 0 1 3.54 3.54l-8.6 8.6a.75.75 0 0 1-.36.2l-3.42.76a.75.75 0 0 1-.89-.89l.76-3.42a.75.75 0 0 1 .2-.36l8.77-8.43Zm2.48 2.48a1 1 0 0 0-1.41-1.41l-8.63 8.3-.42 1.87 1.87-.42 8.59-8.34Z" fill="currentColor" /></svg>
+                  }
+                </span>
+                <span>{{ sectionOpen.PROFILE ? 'Hide editor' : 'Edit' }}</span>
+              </button>
+            </div>
+
+            <div class="cv-profile-overview">
+              <div class="cv-profile-item">
+                <span class="cv-profile-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a4 4 0 1 1-4 4 4 4 0 0 1 4-4Zm0 10c3.87 0 7 2.01 7 4.5a.75.75 0 0 1-1.5 0c0-1.45-2.34-3-5.5-3s-5.5 1.55-5.5 3a.75.75 0 0 1-1.5 0C5 16.01 8.13 14 12 14Z" fill="currentColor" /></svg></span>
+                <div><strong>Full name</strong><span>{{ profile.fullName || 'Your full name' }}</span></div>
+              </div>
+              <div class="cv-profile-item">
+                <span class="cv-profile-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.75a6.25 6.25 0 0 1 6.25 6.25.75.75 0 0 1-1.5 0A4.75 4.75 0 0 0 12 7.25a.75.75 0 0 1 0-1.5ZM6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9A2.5 2.5 0 0 1 6.5 5Zm0 1.5A1 1 0 0 0 5.5 7.5v9a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-11Z" fill="currentColor" /></svg></span>
+                <div><strong>Headline</strong><span>{{ profile.headline || 'Professional headline' }}</span></div>
+              </div>
+              <div class="cv-profile-item">
+                <span class="cv-profile-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.75 6h12.5A1.75 1.75 0 0 1 20 7.75v8.5A1.75 1.75 0 0 1 18.25 18H5.75A1.75 1.75 0 0 1 4 16.25v-8.5A1.75 1.75 0 0 1 5.75 6Zm0 1.5a.25.25 0 0 0-.25.25v.23l6.25 4.13 6.25-4.13v-.23a.25.25 0 0 0-.25-.25H5.75Zm12.5 9a.25.25 0 0 0 .25-.25V9.78l-5.84 3.86a1.25 1.25 0 0 1-1.38 0L5.5 9.78v6.47a.25.25 0 0 0 .25.25h12.5Z" fill="currentColor" /></svg></span>
+                <div><strong>Email</strong><span>{{ profile.email || 'Add an email address' }}</span></div>
+              </div>
+              <div class="cv-profile-item">
+                <span class="cv-profile-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 4A2.75 2.75 0 0 1 10.5 6.75v1.09a1 1 0 0 1-.29.7L8.99 9.76a10.76 10.76 0 0 0 5.25 5.25l1.22-1.22a1 1 0 0 1 .7-.29h1.09A2.75 2.75 0 0 1 20 16.25v1a2.75 2.75 0 0 1-2.75 2.75h-.5C9.16 20 4 14.84 4 8.25v-.5A2.75 2.75 0 0 1 6.75 5h1ZM6.75 6.5a1.25 1.25 0 0 0-1.25 1.25v.5c0 5.76 4.49 10.25 10.25 10.25h.5a1.25 1.25 0 0 0 1.25-1.25v-1a1.25 1.25 0 0 0-1.25-1.25h-.78l-1.63 1.63a1.06 1.06 0 0 1-1.08.25A12.24 12.24 0 0 1 7.12 11.2a1.06 1.06 0 0 1 .25-1.08L9 8.47v-.72A1.25 1.25 0 0 0 7.75 6.5h-1Z" fill="currentColor" /></svg></span>
+                <div><strong>Phone</strong><span>{{ profile.phone || 'Add a phone number' }}</span></div>
+              </div>
+              <div class="cv-profile-item">
+                <span class="cv-profile-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.75a6 6 0 0 1 6 6c0 4.38-4.51 9.62-5.19 10.39a1 1 0 0 1-1.52 0C10.51 19.37 6 14.13 6 9.75a6 6 0 0 1 6-6Zm0 1.5A4.5 4.5 0 0 0 7.5 9.75c0 2.93 2.83 6.86 4.5 8.88 1.67-2.02 4.5-5.95 4.5-8.88A4.5 4.5 0 0 0 12 5.25Zm0 2.25a2.25 2.25 0 1 1-2.25 2.25A2.25 2.25 0 0 1 12 7.5Z" fill="currentColor" /></svg></span>
+                <div><strong>Location</strong><span>{{ profile.location || 'City, country' }}</span></div>
+              </div>
+              <div class="cv-profile-item">
+                <span class="cv-profile-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 1 0 11.25 11.25A11.25 11.25 0 0 0 12 .75Zm-.23 4.5c-3.07 0-5.55 2.48-5.55 5.55 0 2.46 1.6 4.55 3.82 5.28.28.05.38-.12.38-.27v-.95c-1.55.34-1.88-.65-1.88-.65-.25-.64-.62-.81-.62-.81-.51-.35.04-.34.04-.34.57.04.87.58.87.58.5.86 1.32.61 1.64.47.05-.37.2-.61.36-.75-1.24-.14-2.55-.62-2.55-2.76 0-.61.22-1.11.58-1.5-.06-.14-.25-.71.05-1.48 0 0 .47-.15 1.53.57a5.33 5.33 0 0 1 2.79 0c1.06-.72 1.53-.57 1.53-.57.3.77.11 1.34.05 1.48.36.39.58.89.58 1.5 0 2.14-1.31 2.61-2.56 2.75.21.18.39.53.39 1.08v1.6c0 .15.1.33.39.27A5.54 5.54 0 0 0 17.32 10.8c0-3.07-2.48-5.55-5.55-5.55Z" fill="currentColor" /></svg></span>
+                <div><strong>GitHub</strong><span>{{ profile.githubUrl || 'https://github.com/username' }}</span></div>
+              </div>
+              <div class="cv-profile-item">
+                <span class="cv-profile-item__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.94 8.5A1.44 1.44 0 1 1 5.5 7.06 1.44 1.44 0 0 1 6.94 8.5ZM5.75 10h2.38v8H5.75Zm3.75 0h2.28v1.09h.03A2.5 2.5 0 0 1 14.06 9c2.4 0 2.84 1.58 2.84 3.64v5.36h-2.37v-4.75c0-1.13-.02-2.59-1.58-2.59s-1.82 1.23-1.82 2.5V18H9.5Z" fill="currentColor" /></svg></span>
+                <div><strong>LinkedIn</strong><span>{{ profile.linkedinUrl || 'https://linkedin.com/in/username' }}</span></div>
+              </div>
+            </div>
+
             @if (sectionOpen.PROFILE) {
               <div class="cv-editor-grid">
                 <label>
@@ -176,7 +317,7 @@
                   <span>GitHub</span>
                   <input type="url" [(ngModel)]="profile.githubUrl" name="githubUrl" />
                 </label>
-                <label>
+                <label class="cv-editor-grid__full">
                   <span>LinkedIn</span>
                   <input type="url" [(ngModel)]="profile.linkedinUrl" name="linkedinUrl" />
                 </label>
@@ -185,132 +326,180 @@
           </article>
 
           <article class="cv-editor-card">
-            <button type="button" class="cv-accordion" (click)="toggleSection('SUMMARY')">
-              <span>Summary</span>
-              <span>{{ sectionOpen.SUMMARY ? '−' : '+' }}</span>
-            </button>
-            @if (sectionOpen.SUMMARY) {
-              <div class="cv-field-stack">
-                <label>
-                  <span>Professional summary</span>
-                  <div class="cv-inline-ai">
-                    <textarea rows="6" [(ngModel)]="profile.summary" name="summary"></textarea>
-                    <button type="button" class="cv-inline-ai__btn" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">
-                      Improve with AI
-                    </button>
-                  </div>
-                </label>
-
-                @if (currentSuggestion(); as suggestion) {
-                  @if (suggestion.target.kind === 'summary') {
-                  <div class="cv-suggestion-card">
-                    <div class="cv-suggestion-card__col">
-                      <h3>Current text</h3>
-                      <p>{{ suggestion.original }}</p>
-                    </div>
-                    <div class="cv-suggestion-card__col">
-                      <h3>AI suggestion</h3>
-                      @if (suggestion.loading) {
-                        <p>Generating suggestion...</p>
-                      } @else if (suggestion.error) {
-                        <p class="cv-suggestion-card__error">{{ suggestion.error }}</p>
-                      } @else {
-                        <p>{{ suggestion.suggestion }}</p>
-                      }
-                    </div>
-                    <div class="cv-suggestion-card__actions">
-                      <button type="button" class="cv-btn cv-btn--primary" [disabled]="suggestion.loading || !suggestion.suggestion" (click)="applySuggestion()">Apply</button>
-                      <button type="button" class="cv-btn cv-btn--soft" (click)="cancelSuggestion()">Cancel</button>
-                    </div>
-                  </div>
-                  }
-                }
-              </div>
-            }
-          </article>
-
-          <article class="cv-editor-card">
-            <button type="button" class="cv-accordion" (click)="toggleSection('SKILLS')">
-              <span>Skills</span>
-              <span>{{ sectionOpen.SKILLS ? '−' : '+' }}</span>
-            </button>
-            @if (sectionOpen.SKILLS) {
-              @if (skillGroups.length > 0) {
-                <div class="cv-skill-groups">
-                  @for (group of skillGroups; track trackBySkillGroup($index, group)) {
-                    <section class="cv-skill-group">
-                      <h3>{{ group.category }}</h3>
-                      <div class="cv-skill-group__chips">
-                        @for (skill of group.skills; track trackBySkill($index, skill)) {
-                          <span>{{ skill.name }}</span>
-                        }
-                      </div>
-                    </section>
-                  }
+            <div class="cv-card-head">
+              <div class="cv-card-head__title">
+                <span class="cv-card-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 4h8.5A2.75 2.75 0 0 1 19 6.75v10.5A2.75 2.75 0 0 1 16.25 20h-8.5A2.75 2.75 0 0 1 5 17.25V6.75A2.75 2.75 0 0 1 7.75 4Zm0 1.5A1.25 1.25 0 0 0 6.5 6.75v10.5a1.25 1.25 0 0 0 1.25 1.25h8.5a1.25 1.25 0 0 0 1.25-1.25V6.75a1.25 1.25 0 0 0-1.25-1.25h-8.5Zm1.5 3h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 3h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Z" fill="currentColor" /></svg>
+                </span>
+                <div>
+                  <h2>Summary</h2>
+                  <p>Shape the professional summary that anchors your CV.</p>
                 </div>
-              } @else {
-                <p class="cv-empty-note">No skills available yet.</p>
+              </div>
+              <button type="button" class="cv-card-action cv-card-action--feature" (click)="requestSummaryImprove('ATS_PROFESSIONAL', 'MEDIUM')">
+                <span class="cv-card-action__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 3.75a.75.75 0 0 1 .75.75v2.15a.75.75 0 0 1-1.5 0V4.5a.75.75 0 0 1 .75-.75Zm0 13.6a.75.75 0 0 1 .75.75v2.15a.75.75 0 0 1-1.5 0V18.1a.75.75 0 0 1 .75-.75Zm8.25-4.6a.75.75 0 0 1 0 1.5H18.1a.75.75 0 0 1 0-1.5h2.15Zm-13.6 0a.75.75 0 0 1 0 1.5H4.5a.75.75 0 0 1 0-1.5h2.15Zm9.29-5.04a.75.75 0 0 1 1.06 1.06l-1.52 1.52a.75.75 0 1 1-1.06-1.06l1.52-1.52Zm-8.4 8.4a.75.75 0 0 1 1.06 1.06l-1.52 1.52a.75.75 0 1 1-1.06-1.06l1.52-1.52Zm9.46 2.58a.75.75 0 0 1-1.06 1.06l-1.52-1.52a.75.75 0 1 1 1.06-1.06l1.52 1.52ZM8.6 9.28A.75.75 0 0 1 7.54 10.34L6.02 8.82A.75.75 0 0 1 7.08 7.76L8.6 9.28ZM12 8.25A3.75 3.75 0 1 1 8.25 12 3.75 3.75 0 0 1 12 8.25Zm0 1.5A2.25 2.25 0 1 0 14.25 12 2.25 2.25 0 0 0 12 9.75Z" fill="currentColor" /></svg>
+                </span>
+                <span>Improve with AI</span>
+              </button>
+            </div>
+
+            <div class="cv-summary-editor">
+              <textarea rows="6" [(ngModel)]="profile.summary" name="summary"></textarea>
+              <div class="cv-summary-editor__meta">
+                <span>{{ profile.summary.trim().length }}/1000</span>
+              </div>
+            </div>
+
+            @if (currentSuggestion(); as suggestion) {
+              @if (suggestion.target.kind === 'summary') {
+                <div class="cv-suggestion-card">
+                  <div class="cv-suggestion-card__col">
+                    <h3>Current text</h3>
+                    <p>{{ suggestion.original }}</p>
+                  </div>
+                  <div class="cv-suggestion-card__col">
+                    <h3>AI suggestion</h3>
+                    @if (suggestion.loading) {
+                      <p>Generating suggestion...</p>
+                    } @else if (suggestion.error) {
+                      <p class="cv-suggestion-card__error">{{ suggestion.error }}</p>
+                    } @else {
+                      <p>{{ suggestion.suggestion }}</p>
+                    }
+                  </div>
+                  <div class="cv-suggestion-card__actions">
+                    <button type="button" class="cv-btn cv-btn--primary" [disabled]="suggestion.loading || !suggestion.suggestion" (click)="applySuggestion()">Apply</button>
+                    <button type="button" class="cv-btn cv-btn--soft" (click)="cancelSuggestion()">Cancel</button>
+                  </div>
+                </div>
               }
             }
           </article>
 
           <article class="cv-editor-card">
-            <button type="button" class="cv-accordion" (click)="toggleSection('PROJECTS')">
-              <span>Projects</span>
-              <span>{{ sectionOpen.PROJECTS ? '−' : '+' }}</span>
-            </button>
-            @if (sectionOpen.PROJECTS) {
-              @if (projects.length > 0) {
-                <div class="cv-project-list">
-                  @for (project of projects; track trackByProject($index, project)) {
-                    <article class="cv-project-editor">
-                      <div class="cv-project-editor__head">
+            <div class="cv-card-head">
+              <div class="cv-card-head__title">
+                <span class="cv-card-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5a3.5 3.5 0 0 1 3.47 3h3.03A1.5 1.5 0 0 1 20 9v2.5A1.5 1.5 0 0 1 18.5 13h-1v2.5A1.5 1.5 0 0 1 16 17h-3v-1.5h3V13H8v2.5h3V17H8a1.5 1.5 0 0 1-1.5-1.5V13h-1A1.5 1.5 0 0 1 4 11.5V9a1.5 1.5 0 0 1 1.5-1.5h3.03A3.5 3.5 0 0 1 12 4.5Zm0 1.5a2 2 0 0 0-1.94 1.5h3.88A2 2 0 0 0 12 6Z" fill="currentColor" /></svg>
+                </span>
+                <div>
+                  <h2>Skills</h2>
+                  <p>Keep your strongest stack visible and grouped for recruiters.</p>
+                </div>
+              </div>
+              <button type="button" class="cv-card-action" (click)="toggleSection('SKILLS')">
+                {{ sectionOpen.SKILLS ? 'Collapse' : 'View' }}
+              </button>
+            </div>
+
+            @if (skillGroups.length > 0) {
+              <div class="cv-skill-groups cv-skill-groups--flat">
+                @for (group of skillGroups; track trackBySkillGroup($index, group)) {
+                  <section class="cv-skill-group">
+                    <h3>{{ group.category }}</h3>
+                    <div class="cv-skill-group__chips">
+                      @for (skill of group.skills; track trackBySkill($index, skill)) {
+                        <span>{{ skill.name }}</span>
+                      }
+                    </div>
+                  </section>
+                }
+              </div>
+            } @else {
+              <p class="cv-empty-note">No skills available yet.</p>
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <div class="cv-card-head">
+              <div class="cv-card-head__title">
+                <span class="cv-card-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 5h10.5A2.75 2.75 0 0 1 20 7.75v8.5A2.75 2.75 0 0 1 17.25 19H6.75A2.75 2.75 0 0 1 4 16.25v-8.5A2.75 2.75 0 0 1 6.75 5Zm0 1.5A1.25 1.25 0 0 0 5.5 7.75v8.5a1.25 1.25 0 0 0 1.25 1.25h10.5a1.25 1.25 0 0 0 1.25-1.25v-8.5a1.25 1.25 0 0 0-1.25-1.25H6.75Zm1.5 2h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Zm0 3.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 1 1 0-1.5Z" fill="currentColor" /></svg>
+                </span>
+                <div>
+                  <h2>Projects</h2>
+                  <p>Review the portfolio projects currently included in this CV draft.</p>
+                </div>
+              </div>
+              <button type="button" class="cv-card-action cv-card-action--toggle" [class.cv-card-action--active]="sectionOpen.PROJECTS" (click)="toggleSection('PROJECTS')">
+                <span class="cv-card-action__icon" aria-hidden="true">
+                  @if (sectionOpen.PROJECTS) {
+                    <svg viewBox="0 0 24 24"><path d="M3.75 12c1.77-3.24 4.78-5.25 8.25-5.25S18.48 8.76 20.25 12c-1.77 3.24-4.78 5.25-8.25 5.25S5.52 15.24 3.75 12Zm8.25-3.75A3.75 3.75 0 1 0 15.75 12 3.76 3.76 0 0 0 12 8.25Zm0 1.5A2.25 2.25 0 1 1 9.75 12 2.25 2.25 0 0 1 12 9.75Z" fill="currentColor" /></svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24"><path d="M15.02 5.27a2.5 2.5 0 0 1 3.54 3.54l-8.6 8.6a.75.75 0 0 1-.36.2l-3.42.76a.75.75 0 0 1-.89-.89l.76-3.42a.75.75 0 0 1 .2-.36l8.77-8.43Zm2.48 2.48a1 1 0 0 0-1.41-1.41l-8.63 8.3-.42 1.87 1.87-.42 8.59-8.34Z" fill="currentColor" /></svg>
+                  }
+                </span>
+                <span>{{ sectionOpen.PROJECTS ? 'Hide editor' : 'Edit' }}</span>
+              </button>
+            </div>
+
+            @if (projects.length > 0) {
+              <div class="cv-project-list cv-project-list--reference">
+                @for (project of projects; track trackByProject($index, project)) {
+                  <article class="cv-project-editor">
+                    <div class="cv-project-editor__head">
+                      <div class="cv-project-editor__title">
+                        <span class="cv-project-editor__badge">{{ $index + 1 }}</span>
                         <div>
-                          <h3>{{ project.title }}</h3>
+                          <h3>{{ project.title || 'Untitled Project' }}</h3>
                           @if (project.collectionName) {
                             <p>{{ project.collectionName }}</p>
                           }
                         </div>
-                        <label class="cv-toggle">
-                          <input type="checkbox" [(ngModel)]="project.visible" [name]="'project-visible-' + project.id" />
-                          <span>Visible</span>
-                        </label>
                       </div>
-
-                      <label>
-                        <span>Title</span>
-                        <input type="text" [(ngModel)]="project.title" [name]="'project-title-' + project.id" />
+                      <label class="cv-toggle" [class.cv-toggle--active]="project.visible">
+                        <input type="checkbox" [(ngModel)]="project.visible" [name]="'project-visible-' + project.id" />
+                        <span class="cv-toggle__icon" aria-hidden="true">
+                          @if (project.visible) {
+                            <svg viewBox="0 0 24 24"><path d="M3.75 12c1.77-3.24 4.78-5.25 8.25-5.25S18.48 8.76 20.25 12c-1.77 3.24-4.78 5.25-8.25 5.25S5.52 15.24 3.75 12Zm8.25-3.75A3.75 3.75 0 1 0 15.75 12 3.76 3.76 0 0 0 12 8.25Zm0 1.5A2.25 2.25 0 1 1 9.75 12 2.25 2.25 0 0 1 12 9.75Z" fill="currentColor" /></svg>
+                          } @else {
+                            <svg viewBox="0 0 24 24"><path d="M4.81 4.81a.75.75 0 0 1 1.06 0l13.32 13.32a.75.75 0 1 1-1.06 1.06l-2.24-2.24A10.74 10.74 0 0 1 12 17.25c-3.47 0-6.48-2.01-8.25-5.25A13.88 13.88 0 0 1 7.32 8.1L4.81 5.87a.75.75 0 0 1 0-1.06Zm8.49 8.49-2.6-2.6a2.25 2.25 0 0 0 2.6 2.6Zm4.56 2.44-1.74-1.74a3.74 3.74 0 0 0-5.12-5.12L9.3 7.14c.84-.25 1.74-.39 2.7-.39 3.47 0 6.48 2.01 8.25 5.25a13.88 13.88 0 0 1-2.39 3.74Z" fill="currentColor" /></svg>
+                          }
+                        </span>
+                        <span>Visible</span>
                       </label>
+                    </div>
 
-                      <label>
-                        <span>Description</span>
-                        <textarea rows="4" [(ngModel)]="project.description" [name]="'project-description-' + project.id"></textarea>
-                      </label>
-
-                      @if (projectHasMissingDescription(project)) {
-                        <p class="cv-warning-note">This project needs a description to look good in your CV.</p>
-                      }
-
-                      <div class="cv-project-editor__actions">
-                        <label class="cv-project-editor__url">
+                    @if (sectionOpen.PROJECTS) {
+                      <div class="cv-editor-grid">
+                        <label class="cv-editor-grid__full">
+                          <span>Title</span>
+                          <input type="text" [(ngModel)]="project.title" [name]="'project-title-' + project.id" />
+                        </label>
+                        <label class="cv-editor-grid__full">
+                          <span>Description</span>
+                          <textarea rows="4" [(ngModel)]="project.description" [name]="'project-description-' + project.id"></textarea>
+                        </label>
+                        <label class="cv-editor-grid__full">
                           <span>Project URL</span>
                           <input type="url" [(ngModel)]="project.projectUrl" [name]="'project-url-' + project.id" />
                         </label>
+                      </div>
+
+                      <div class="cv-project-editor__actions">
                         <button type="button" class="cv-btn cv-btn--soft" [disabled]="projectHasMissingDescription(project)" (click)="requestProjectImprove(project.id)">
                           Write better CV description
                         </button>
                       </div>
+                    }
 
-                      @if (project.skills.length > 0) {
-                        <div class="cv-skill-group__chips">
-                          @for (skill of project.skills; track trackBySkill($index, skill)) {
-                            <span>{{ skill.name }}</span>
-                          }
-                        </div>
-                      }
+                    @if (projectHasMissingDescription(project)) {
+                      <p class="cv-warning-note">This project needs a description to look good in your CV.</p>
+                    } @else {
+                      <p class="cv-project-editor__description">{{ project.description }}</p>
+                    }
 
-                      @if (currentSuggestion(); as suggestion) {
-                        @if (isProjectSuggestion(project.id)) {
+                    @if (project.skills.length > 0) {
+                      <div class="cv-skill-group__chips">
+                        @for (skill of project.skills; track trackBySkill($index, skill)) {
+                          <span>{{ skill.name }}</span>
+                        }
+                      </div>
+                    }
+
+                    @if (currentSuggestion(); as suggestion) {
+                      @if (isProjectSuggestion(project.id)) {
                         <div class="cv-suggestion-card">
                           <div class="cv-suggestion-card__col">
                             <h3>Current text</h3>
@@ -331,185 +520,1244 @@
                             <button type="button" class="cv-btn cv-btn--soft" (click)="cancelSuggestion()">Cancel</button>
                           </div>
                         </div>
-                        }
                       }
+                    }
+                  </article>
+                }
+              </div>
+            } @else {
+              <p class="cv-empty-note">No portfolio projects are available yet.</p>
+            }
+          </article>
+
+          <article class="cv-editor-card">
+            <div class="cv-card-head">
+              <div class="cv-card-head__title">
+                <span class="cv-card-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7h1.5A2.5 2.5 0 0 1 20 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-8A2.5 2.5 0 0 1 6.5 7H8V5.5Zm1.5 0V7h5V5.5a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1ZM6.5 8.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-11Z" fill="currentColor" /></svg>
+                </span>
+                <div>
+                  <h2>Experience, Education & Languages</h2>
+                  <p>Existing CV data is preserved here for the live preview and save flow.</p>
+                </div>
+              </div>
+            </div>
+
+            <section class="cv-detail-block">
+              <button type="button" class="cv-accordion" (click)="toggleSection('EXPERIENCE')">
+                <span>Experience</span>
+                <span class="cv-card-action cv-card-action--toggle" [class.cv-card-action--active]="sectionOpen.EXPERIENCE">
+                  <span class="cv-card-action__icon" aria-hidden="true">
+                    @if (sectionOpen.EXPERIENCE) {
+                      <svg viewBox="0 0 24 24"><path d="M3.75 12c1.77-3.24 4.78-5.25 8.25-5.25S18.48 8.76 20.25 12c-1.77 3.24-4.78 5.25-8.25 5.25S5.52 15.24 3.75 12Zm8.25-3.75A3.75 3.75 0 1 0 15.75 12 3.76 3.76 0 0 0 12 8.25Zm0 1.5A2.25 2.25 0 1 1 9.75 12 2.25 2.25 0 0 1 12 9.75Z" fill="currentColor" /></svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24"><path d="M15.02 5.27a2.5 2.5 0 0 1 3.54 3.54l-8.6 8.6a.75.75 0 0 1-.36.2l-3.42.76a.75.75 0 0 1-.89-.89l.76-3.42a.75.75 0 0 1 .2-.36l8.77-8.43Zm2.48 2.48a1 1 0 0 0-1.41-1.41l-8.63 8.3-.42 1.87 1.87-.42 8.59-8.34Z" fill="currentColor" /></svg>
+                    }
+                  </span>
+                  <span>{{ sectionOpen.EXPERIENCE ? 'Hide editor' : 'Edit' }}</span>
+                </span>
+              </button>
+              @if (sectionOpen.EXPERIENCE) {
+                <div class="cv-repeat-list">
+                  @for (item of experience; track trackByIndex($index)) {
+                    <article class="cv-repeat-card">
+                      <div class="cv-repeat-card__head">
+                        <h3>Experience {{ $index + 1 }}</h3>
+                        <button type="button" class="cv-text-btn" (click)="removeExperience($index)">Remove</button>
+                      </div>
+                      <div class="cv-editor-grid">
+                        <label><span>Company</span><input type="text" [(ngModel)]="item.company" [name]="'experience-company-' + $index" /></label>
+                        <label><span>Role</span><input type="text" [(ngModel)]="item.role" [name]="'experience-role-' + $index" /></label>
+                        <label><span>Location</span><input type="text" [(ngModel)]="item.location" [name]="'experience-location-' + $index" /></label>
+                        <label><span>Start date</span><input type="date" [(ngModel)]="item.startDate" [name]="'experience-start-' + $index" /></label>
+                        <label><span>End date</span><input type="date" [(ngModel)]="item.endDate" [name]="'experience-end-' + $index" [disabled]="item.current" /></label>
+                        <label class="cv-checkbox"><input type="checkbox" [(ngModel)]="item.current" [name]="'experience-current-' + $index" /><span>Current role</span></label>
+                        <label class="cv-editor-grid__full"><span>Summary</span><textarea rows="4" [(ngModel)]="item.summary" [name]="'experience-summary-' + $index"></textarea></label>
+                      </div>
                     </article>
                   }
                 </div>
-              } @else {
-                <p class="cv-empty-note">No portfolio projects are available yet.</p>
+                <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addExperience()">Add experience</button>
               }
-            }
-          </article>
+            </section>
 
-          <article class="cv-editor-card">
-            <button type="button" class="cv-accordion" (click)="toggleSection('EXPERIENCE')">
-              <span>Experience</span>
-              <span>{{ sectionOpen.EXPERIENCE ? '−' : '+' }}</span>
-            </button>
-            @if (sectionOpen.EXPERIENCE) {
-              <div class="cv-repeat-list">
-                @for (item of experience; track trackByIndex($index)) {
-                  <article class="cv-repeat-card">
-                    <div class="cv-repeat-card__head">
-                      <h3>Experience {{ $index + 1 }}</h3>
-                      <button type="button" class="cv-text-btn" (click)="removeExperience($index)">Remove</button>
-                    </div>
-                    <div class="cv-editor-grid">
-                      <label><span>Company</span><input type="text" [(ngModel)]="item.company" [name]="'experience-company-' + $index" /></label>
-                      <label><span>Role</span><input type="text" [(ngModel)]="item.role" [name]="'experience-role-' + $index" /></label>
-                      <label><span>Location</span><input type="text" [(ngModel)]="item.location" [name]="'experience-location-' + $index" /></label>
-                      <label><span>Start date</span><input type="date" [(ngModel)]="item.startDate" [name]="'experience-start-' + $index" /></label>
-                      <label><span>End date</span><input type="date" [(ngModel)]="item.endDate" [name]="'experience-end-' + $index" [disabled]="item.current" /></label>
-                      <label class="cv-checkbox"><input type="checkbox" [(ngModel)]="item.current" [name]="'experience-current-' + $index" /><span>Current role</span></label>
-                    </div>
-                    <label><span>Summary</span><textarea rows="4" [(ngModel)]="item.summary" [name]="'experience-summary-' + $index"></textarea></label>
-                  </article>
-                }
-              </div>
-              <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addExperience()">Add experience</button>
-            }
-          </article>
+            <section class="cv-detail-block">
+              <button type="button" class="cv-accordion" (click)="toggleSection('EDUCATION')">
+                <span>Education</span>
+                <span class="cv-card-action cv-card-action--toggle" [class.cv-card-action--active]="sectionOpen.EDUCATION">
+                  <span class="cv-card-action__icon" aria-hidden="true">
+                    @if (sectionOpen.EDUCATION) {
+                      <svg viewBox="0 0 24 24"><path d="M3.75 12c1.77-3.24 4.78-5.25 8.25-5.25S18.48 8.76 20.25 12c-1.77 3.24-4.78 5.25-8.25 5.25S5.52 15.24 3.75 12Zm8.25-3.75A3.75 3.75 0 1 0 15.75 12 3.76 3.76 0 0 0 12 8.25Zm0 1.5A2.25 2.25 0 1 1 9.75 12 2.25 2.25 0 0 1 12 9.75Z" fill="currentColor" /></svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24"><path d="M15.02 5.27a2.5 2.5 0 0 1 3.54 3.54l-8.6 8.6a.75.75 0 0 1-.36.2l-3.42.76a.75.75 0 0 1-.89-.89l.76-3.42a.75.75 0 0 1 .2-.36l8.77-8.43Zm2.48 2.48a1 1 0 0 0-1.41-1.41l-8.63 8.3-.42 1.87 1.87-.42 8.59-8.34Z" fill="currentColor" /></svg>
+                    }
+                  </span>
+                  <span>{{ sectionOpen.EDUCATION ? 'Hide editor' : 'Edit' }}</span>
+                </span>
+              </button>
+              @if (sectionOpen.EDUCATION) {
+                <div class="cv-repeat-list">
+                  @for (item of education; track trackByIndex($index)) {
+                    <article class="cv-repeat-card">
+                      <div class="cv-repeat-card__head">
+                        <h3>Education {{ $index + 1 }}</h3>
+                        <button type="button" class="cv-text-btn" (click)="removeEducation($index)">Remove</button>
+                      </div>
+                      <div class="cv-editor-grid">
+                        <label><span>School</span><input type="text" [(ngModel)]="item.school" [name]="'education-school-' + $index" /></label>
+                        <label><span>Degree</span><input type="text" [(ngModel)]="item.degree" [name]="'education-degree-' + $index" /></label>
+                        <label><span>Field of study</span><input type="text" [(ngModel)]="item.fieldOfStudy" [name]="'education-field-' + $index" /></label>
+                        <label><span>Location</span><input type="text" [(ngModel)]="item.location" [name]="'education-location-' + $index" /></label>
+                        <label><span>Start date</span><input type="date" [(ngModel)]="item.startDate" [name]="'education-start-' + $index" /></label>
+                        <label><span>End date</span><input type="date" [(ngModel)]="item.endDate" [name]="'education-end-' + $index" [disabled]="item.current" /></label>
+                        <label class="cv-checkbox"><input type="checkbox" [(ngModel)]="item.current" [name]="'education-current-' + $index" /><span>Current study</span></label>
+                        <label class="cv-editor-grid__full"><span>Description</span><textarea rows="4" [(ngModel)]="item.description" [name]="'education-description-' + $index"></textarea></label>
+                      </div>
+                    </article>
+                  }
+                </div>
+                <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addEducation()">Add education</button>
+              }
+            </section>
 
-          <article class="cv-editor-card">
-            <button type="button" class="cv-accordion" (click)="toggleSection('EDUCATION')">
-              <span>Education</span>
-              <span>{{ sectionOpen.EDUCATION ? '−' : '+' }}</span>
-            </button>
-            @if (sectionOpen.EDUCATION) {
-              <div class="cv-repeat-list">
-                @for (item of education; track trackByIndex($index)) {
-                  <article class="cv-repeat-card">
-                    <div class="cv-repeat-card__head">
-                      <h3>Education {{ $index + 1 }}</h3>
-                      <button type="button" class="cv-text-btn" (click)="removeEducation($index)">Remove</button>
-                    </div>
-                    <div class="cv-editor-grid">
-                      <label><span>School</span><input type="text" [(ngModel)]="item.school" [name]="'education-school-' + $index" /></label>
-                      <label><span>Degree</span><input type="text" [(ngModel)]="item.degree" [name]="'education-degree-' + $index" /></label>
-                      <label><span>Field of study</span><input type="text" [(ngModel)]="item.fieldOfStudy" [name]="'education-field-' + $index" /></label>
-                      <label><span>Location</span><input type="text" [(ngModel)]="item.location" [name]="'education-location-' + $index" /></label>
-                      <label><span>Start date</span><input type="date" [(ngModel)]="item.startDate" [name]="'education-start-' + $index" /></label>
-                      <label><span>End date</span><input type="date" [(ngModel)]="item.endDate" [name]="'education-end-' + $index" [disabled]="item.current" /></label>
-                      <label class="cv-checkbox"><input type="checkbox" [(ngModel)]="item.current" [name]="'education-current-' + $index" /><span>Current study</span></label>
-                    </div>
-                    <label><span>Description</span><textarea rows="4" [(ngModel)]="item.description" [name]="'education-description-' + $index"></textarea></label>
-                  </article>
-                }
-              </div>
-              <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addEducation()">Add education</button>
-            }
-          </article>
-
-          <article class="cv-editor-card">
-            <button type="button" class="cv-accordion" (click)="toggleSection('LANGUAGES')">
-              <span>Languages</span>
-              <span>{{ sectionOpen.LANGUAGES ? '−' : '+' }}</span>
-            </button>
-            @if (sectionOpen.LANGUAGES) {
-              <div class="cv-repeat-list">
-                @for (item of languages; track trackByIndex($index)) {
-                  <article class="cv-repeat-card cv-repeat-card--compact">
-                    <div class="cv-repeat-card__head">
-                      <h3>Language {{ $index + 1 }}</h3>
-                      <button type="button" class="cv-text-btn" (click)="removeLanguage($index)">Remove</button>
-                    </div>
-                    <div class="cv-editor-grid">
-                      <label><span>Name</span><input type="text" [(ngModel)]="item.name" [name]="'language-name-' + $index" /></label>
-                      <label><span>Proficiency</span><input type="text" [(ngModel)]="item.proficiency" [name]="'language-proficiency-' + $index" /></label>
-                    </div>
-                  </article>
-                }
-              </div>
-              <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addLanguage()">Add language</button>
-            }
+            <section class="cv-detail-block">
+              <button type="button" class="cv-accordion" (click)="toggleSection('LANGUAGES')">
+                <span>Languages</span>
+                <span class="cv-card-action cv-card-action--toggle" [class.cv-card-action--active]="sectionOpen.LANGUAGES">
+                  <span class="cv-card-action__icon" aria-hidden="true">
+                    @if (sectionOpen.LANGUAGES) {
+                      <svg viewBox="0 0 24 24"><path d="M3.75 12c1.77-3.24 4.78-5.25 8.25-5.25S18.48 8.76 20.25 12c-1.77 3.24-4.78 5.25-8.25 5.25S5.52 15.24 3.75 12Zm8.25-3.75A3.75 3.75 0 1 0 15.75 12 3.76 3.76 0 0 0 12 8.25Zm0 1.5A2.25 2.25 0 1 1 9.75 12 2.25 2.25 0 0 1 12 9.75Z" fill="currentColor" /></svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24"><path d="M15.02 5.27a2.5 2.5 0 0 1 3.54 3.54l-8.6 8.6a.75.75 0 0 1-.36.2l-3.42.76a.75.75 0 0 1-.89-.89l.76-3.42a.75.75 0 0 1 .2-.36l8.77-8.43Zm2.48 2.48a1 1 0 0 0-1.41-1.41l-8.63 8.3-.42 1.87 1.87-.42 8.59-8.34Z" fill="currentColor" /></svg>
+                    }
+                  </span>
+                  <span>{{ sectionOpen.LANGUAGES ? 'Hide editor' : 'Edit' }}</span>
+                </span>
+              </button>
+              @if (sectionOpen.LANGUAGES) {
+                <div class="cv-repeat-list">
+                  @for (item of languages; track trackByIndex($index)) {
+                    <article class="cv-repeat-card cv-repeat-card--compact">
+                      <div class="cv-repeat-card__head">
+                        <h3>Language {{ $index + 1 }}</h3>
+                        <button type="button" class="cv-text-btn" (click)="removeLanguage($index)">Remove</button>
+                      </div>
+                      <div class="cv-editor-grid">
+                        <label><span>Name</span><input type="text" [(ngModel)]="item.name" [name]="'language-name-' + $index" /></label>
+                        <label><span>Proficiency</span><input type="text" [(ngModel)]="item.proficiency" [name]="'language-proficiency-' + $index" /></label>
+                      </div>
+                    </article>
+                  }
+                </div>
+                <button type="button" class="cv-btn cv-btn--soft cv-btn--wide" (click)="addLanguage()">Add language</button>
+              }
+            </section>
           </article>
         </div>
 
         <aside class="cv-preview-column">
           <div class="cv-preview-frame">
             <div class="cv-preview-frame__label">
-              <span>Live Preview</span>
-              <strong>{{ previewTemplateLabel }}</strong>
+              <div class="cv-preview-frame__status">
+                <span class="cv-preview-frame__dot"></span>
+                <span>Live Preview</span>
+              </div>
+              <div class="cv-preview-frame__controls">
+                <button type="button" class="cv-preview-frame__control" aria-label="Theme">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.75 5h4.5A1.75 1.75 0 0 1 12 6.75v4.5A1.75 1.75 0 0 1 10.25 13h-4.5A1.75 1.75 0 0 1 4 11.25v-4.5A1.75 1.75 0 0 1 5.75 5Zm0 1.5a.25.25 0 0 0-.25.25v4.5a.25.25 0 0 0 .25.25h4.5a.25.25 0 0 0 .25-.25v-4.5a.25.25 0 0 0-.25-.25h-4.5Zm8 0h4.5A1.75 1.75 0 0 1 20 8.25v1.5A1.75 1.75 0 0 1 18.25 11.5h-4.5A1.75 1.75 0 0 1 12 9.75v-1.5A1.75 1.75 0 0 1 13.75 6.5Zm0 1.5a.25.25 0 0 0-.25.25v1.5a.25.25 0 0 0 .25.25h4.5a.25.25 0 0 0 .25-.25v-1.5a.25.25 0 0 0-.25-.25h-4.5ZM5.75 14h4.5A1.75 1.75 0 0 1 12 15.75v1.5A1.75 1.75 0 0 1 10.25 19h-4.5A1.75 1.75 0 0 1 4 17.25v-1.5A1.75 1.75 0 0 1 5.75 14Zm8 0h4.5A1.75 1.75 0 0 1 20 15.75v1.5A1.75 1.75 0 0 1 18.25 19h-4.5A1.75 1.75 0 0 1 12 17.25v-1.5A1.75 1.75 0 0 1 13.75 14Z" fill="currentColor" /></svg>
+                </button>
+                <button type="button" class="cv-preview-frame__template">{{ previewTemplateLabel }}</button>
+              </div>
             </div>
 
             <article class="cv-preview-paper" [attr.data-theme]="selectedTemplate" id="cv-preview-paper">
-              <header class="cv-paper-header">
-                <h1>{{ profile.fullName || 'Your Name' }}</h1>
-                @if (profile.headline) {
-                  <p class="cv-paper-header__headline">{{ profile.headline }}</p>
+              @if (selectedTemplate === 'ATS_MINIMAL') {
+                <div class="cv-ats-document">
+                  <header class="cv-ats-header">
+                    <h1>{{ profile.fullName || 'Your Name' }}</h1>
+                    <p class="cv-ats-header__headline">{{ profile.headline || 'Software Engineer' }}</p>
+
+                    @if (profile.email || profile.phone || profile.location) {
+                      <div class="cv-ats-contact-line">
+                        @if (profile.email) {
+                          <span>{{ profile.email }}</span>
+                        }
+                        @if (profile.phone) {
+                          <span>{{ profile.phone }}</span>
+                        }
+                        @if (profile.location) {
+                          <span>{{ profile.location }}</span>
+                        }
+                      </div>
+                    }
+
+                    @if (profile.githubUrl || profile.linkedinUrl) {
+                      <div class="cv-ats-contact-line">
+                        @if (profile.githubUrl) {
+                          <span>{{ profile.githubUrl }}</span>
+                        }
+                        @if (profile.linkedinUrl) {
+                          <span>{{ profile.linkedinUrl }}</span>
+                        }
+                      </div>
+                    }
+                  </header>
+
+                  <div class="cv-ats-divider"></div>
+
+                  @if (sectionVisible('PROFILE') && hasPreviewSummary) {
+                    <section class="cv-ats-section">
+                      <h2>Summary</h2>
+                      <p>{{ profile.summary }}</p>
+                    </section>
+                  }
+
+                  @if (sectionVisible('SKILLS') && skillGroups.length > 0) {
+                    <section class="cv-ats-section">
+                      <h2>Skills</h2>
+                      <div class="cv-ats-stack">
+                        @for (group of skillGroups; track trackBySkillGroup($index, group)) {
+                          @if (group.skills.length > 0) {
+                            <p>
+                              @if (group.category) {
+                                <strong>{{ group.category }}:</strong>
+                                <span> </span>
+                              }
+                              @for (skill of group.skills; track trackBySkill($index, skill); let isLast = $last) {
+                                <span>{{ skill.name }}</span>@if (!isLast) {<span>, </span>}
+                              }
+                            </p>
+                          }
+                        }
+                      </div>
+                    </section>
+                  }
+
+                  @if (sectionVisible('PROJECTS')) {
+                    <section class="cv-ats-section">
+                      <h2>Projects</h2>
+                      @if (visibleProjects.length > 0) {
+                        <div class="cv-ats-stack">
+                          @for (project of visibleProjects; track trackByProject($index, project)) {
+                            <article class="cv-ats-entry">
+                              <div class="cv-ats-entry__title-row">
+                                <h3>{{ project.title || 'Untitled Project' }}</h3>
+                                @if (project.projectUrl) {
+                                  <a [href]="project.projectUrl" target="_blank" rel="noreferrer">{{ project.projectUrl }}</a>
+                                }
+                              </div>
+                              @if (projectHasMissingDescription(project)) {
+                                <p>Project description missing.</p>
+                              } @else {
+                                <p>{{ project.description }}</p>
+                              }
+                              @if (project.skills.length > 0) {
+                                <p class="cv-ats-entry__meta">{{ skillNamesWithDots(project.skills) }}</p>
+                              }
+                            </article>
+                          }
+                        </div>
+                      } @else {
+                        <p>No visible projects selected for this CV.</p>
+                      }
+                    </section>
+                  }
+
+                  @if (sectionVisible('EXPERIENCE') && experience.length > 0) {
+                    <section class="cv-ats-section">
+                      <h2>Experience</h2>
+                      <div class="cv-ats-stack">
+                        @for (item of experience; track trackByIndex($index)) {
+                          @if (item.company || item.role || item.summary) {
+                            <article class="cv-ats-entry">
+                              <div class="cv-ats-entry__title-row">
+                                <h3>{{ item.role || 'Role' }}</h3>
+                                @if (item.startDate || item.endDate || item.current) {
+                                  <span>{{ item.startDate || 'Start' }} - {{ item.current ? 'Present' : (item.endDate || 'End') }}</span>
+                                }
+                              </div>
+                              @if (item.company || item.location) {
+                                <p class="cv-ats-entry__meta">
+                                  @if (item.company) {
+                                    <span>{{ item.company }}</span>
+                                  }
+                                  @if (item.location) {
+                                    <span>{{ item.location }}</span>
+                                  }
+                                </p>
+                              }
+                              @if (item.summary) {
+                                <p>{{ item.summary }}</p>
+                              }
+                            </article>
+                          }
+                        }
+                      </div>
+                    </section>
+                  }
+
+                  @if (sectionVisible('EDUCATION') && education.length > 0) {
+                    <section class="cv-ats-section">
+                      <h2>Education</h2>
+                      <div class="cv-ats-stack">
+                        @for (item of education; track trackByIndex($index)) {
+                          @if (item.school || item.degree || item.description) {
+                            <article class="cv-ats-entry">
+                              <div class="cv-ats-entry__title-row">
+                                <h3>{{ item.school || 'School' }}</h3>
+                                @if (item.startDate || item.endDate || item.current) {
+                                  <span>{{ item.startDate || '' }}{{ item.startDate || item.endDate || item.current ? ' - ' : '' }}{{ item.current ? 'Present' : (item.endDate || '') }}</span>
+                                }
+                              </div>
+                              @if (item.degree || item.fieldOfStudy) {
+                                <p class="cv-ats-entry__meta">
+                                  @if (item.degree) {
+                                    <span>{{ item.degree }}</span>
+                                  }
+                                  @if (item.fieldOfStudy) {
+                                    <span>{{ item.fieldOfStudy }}</span>
+                                  }
+                                </p>
+                              }
+                              @if (item.description) {
+                                <p>{{ item.description }}</p>
+                              }
+                            </article>
+                          }
+                        }
+                      </div>
+                    </section>
+                  }
+
+                  @if (sectionVisible('LANGUAGES') && languages.length > 0) {
+                    <section class="cv-ats-section">
+                      <h2>Languages</h2>
+                      <div class="cv-ats-stack">
+                        @for (item of languages; track trackByIndex($index)) {
+                          @if (item.name || item.proficiency) {
+                            <p><strong>{{ item.name || 'Language' }}</strong> @if (item.proficiency) { ({{ languageLevelLabel(item.proficiency) }}) }</p>
+                          }
+                        }
+                      </div>
+                    </section>
+                  }
+                </div>
+              } @else if (selectedTemplate === 'ELEGANT') {
+                <div class="cv-elegant-layout">
+                  <aside class="cv-elegant-sidebar">
+                    @if (showPreviewAvatar()) {
+                      <div class="cv-elegant-sidebar__avatar">
+                        @if (showPreviewProfileImage()) {
+                          <img [src]="previewProfileImageUrl()" [alt]="profile.fullName || 'Profile image'" />
+                        } @else {
+                          <span>{{ profileInitials() }}</span>
+                        }
+                      </div>
+                    }
+
+                    <div class="cv-elegant-ornament" aria-hidden="true"></div>
+
+                    @if (profile.email || profile.phone || profile.location || profile.githubUrl || profile.linkedinUrl) {
+                      <section class="cv-elegant-sidebar__section">
+                        <div class="cv-elegant-sidebar__heading">
+                          <span></span>
+                          <h3>Contact</h3>
+                          <span></span>
+                        </div>
+                        <div class="cv-elegant-sidebar__stack">
+                          @if (profile.email) {
+                            <p>{{ profile.email }}</p>
+                          }
+                          @if (profile.phone) {
+                            <p>{{ profile.phone }}</p>
+                          }
+                          @if (profile.location) {
+                            <p>{{ profile.location }}</p>
+                          }
+                          @if (profile.githubUrl) {
+                            <p>{{ profile.githubUrl }}</p>
+                          }
+                          @if (profile.linkedinUrl) {
+                            <p>{{ profile.linkedinUrl }}</p>
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('SKILLS') && skillGroups.length > 0) {
+                      <section class="cv-elegant-sidebar__section">
+                        <div class="cv-elegant-sidebar__heading">
+                          <span></span>
+                          <h3>Core Skills</h3>
+                          <span></span>
+                        </div>
+                        <div class="cv-elegant-skill-cloud">
+                          @for (group of skillGroups; track trackBySkillGroup($index, group)) {
+                            @for (skill of group.skills; track trackBySkill($index, skill)) {
+                              <span>{{ skill.name }}</span>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('EDUCATION') && education.length > 0) {
+                      <section class="cv-elegant-sidebar__section">
+                        <div class="cv-elegant-sidebar__heading">
+                          <span></span>
+                          <h3>Education</h3>
+                          <span></span>
+                        </div>
+                        <div class="cv-elegant-sidebar__stack">
+                          @for (item of education; track trackByIndex($index)) {
+                            @if (item.school || item.degree || item.description) {
+                              <article class="cv-elegant-sidebar__entry">
+                                <h4>{{ item.school || 'School' }}</h4>
+                                @if (item.degree || item.fieldOfStudy) {
+                                  <p>{{ item.degree }} @if (item.fieldOfStudy) { · {{ item.fieldOfStudy }} }</p>
+                                }
+                                @if (item.startDate || item.endDate || item.current) {
+                                  <span>{{ item.startDate || '' }} - {{ item.current ? 'Present' : (item.endDate || '') }}</span>
+                                }
+                              </article>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('LANGUAGES') && languages.length > 0) {
+                      <section class="cv-elegant-sidebar__section">
+                        <div class="cv-elegant-sidebar__heading">
+                          <span></span>
+                          <h3>Languages</h3>
+                          <span></span>
+                        </div>
+                        <div class="cv-elegant-language-list">
+                          @for (item of languages; track trackByIndex($index)) {
+                            @if (item.name || item.proficiency) {
+                              <div class="cv-elegant-language">
+                                <div class="cv-elegant-language__head">
+                                  <strong>{{ item.name || 'Language' }}</strong>
+                                  <span>{{ languageLevelLabel(item.proficiency) }}</span>
+                                </div>
+                                <div class="cv-elegant-language__track">
+                                  <span class="cv-elegant-language__fill" [style.width.%]="languageLevelPercent(item.proficiency)"></span>
+                                </div>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+                  </aside>
+
+                  <div class="cv-elegant-main">
+                    <header class="cv-elegant-main__header">
+                      <h1>{{ profile.fullName || 'Your Name' }}</h1>
+                      <div class="cv-elegant-main__crest">
+                        <span></span>
+                        <i></i>
+                        <span></span>
+                      </div>
+                      <p class="cv-elegant-main__headline">{{ profile.headline || 'Software Engineer' }}</p>
+                      @if (profile.email || profile.phone || profile.location || profile.githubUrl || profile.linkedinUrl) {
+                        <div class="cv-elegant-main__contact">
+                          @if (profile.email) {
+                            <span>{{ profile.email }}</span>
+                          }
+                          @if (profile.phone) {
+                            <span>{{ profile.phone }}</span>
+                          }
+                          @if (profile.location) {
+                            <span>{{ profile.location }}</span>
+                          }
+                          @if (profile.githubUrl) {
+                            <span>{{ profile.githubUrl }}</span>
+                          }
+                          @if (profile.linkedinUrl) {
+                            <span>{{ profile.linkedinUrl }}</span>
+                          }
+                        </div>
+                      }
+                    </header>
+
+                    @if (sectionVisible('PROFILE') && hasPreviewSummary) {
+                      <section class="cv-elegant-section">
+                        <div class="cv-elegant-section__heading">
+                          <span class="cv-elegant-section__badge">P</span>
+                          <h2>Profile</h2>
+                          <span class="cv-elegant-section__line"></span>
+                        </div>
+                        <p>{{ profile.summary }}</p>
+                      </section>
+                    }
+
+                    @if (sectionVisible('EXPERIENCE') && experience.length > 0) {
+                      <section class="cv-elegant-section">
+                        <div class="cv-elegant-section__heading">
+                          <span class="cv-elegant-section__badge">E</span>
+                          <h2>Experience</h2>
+                          <span class="cv-elegant-section__line"></span>
+                        </div>
+                        <div class="cv-elegant-main__list">
+                          @for (item of experience; track trackByIndex($index)) {
+                            @if (item.company || item.role || item.summary) {
+                              <article class="cv-elegant-main__entry">
+                                <div class="cv-elegant-main__entry-head">
+                                  <h3>{{ item.role || 'Role' }}</h3>
+                                  @if (item.startDate || item.endDate || item.current) {
+                                    <span>{{ item.startDate || 'Start' }} - {{ item.current ? 'Present' : (item.endDate || 'End') }}</span>
+                                  }
+                                </div>
+                                @if (item.company || item.location) {
+                                  <p class="cv-elegant-main__meta">{{ item.company }} @if (item.location) { · {{ item.location }} }</p>
+                                }
+                                @if (item.summary) {
+                                  <p>{{ item.summary }}</p>
+                                }
+                              </article>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('PROJECTS')) {
+                      <section class="cv-elegant-section">
+                        <div class="cv-elegant-section__heading">
+                          <span class="cv-elegant-section__badge">S</span>
+                          <h2>Selected Project</h2>
+                          <span class="cv-elegant-section__line"></span>
+                        </div>
+                        @if (visibleProjects.length > 0) {
+                          <div class="cv-elegant-main__list">
+                            @for (project of visibleProjects; track trackByProject($index, project)) {
+                              <article class="cv-elegant-main__entry">
+                                <div class="cv-elegant-main__entry-head">
+                                  <h3>{{ project.title || 'Untitled Project' }}</h3>
+                                  @if (project.projectUrl) {
+                                    <a class="cv-elegant-main__link" [href]="project.projectUrl" target="_blank" rel="noreferrer">Open</a>
+                                  }
+                                </div>
+                                @if (projectHasMissingDescription(project)) {
+                                  <p class="cv-paper-warning">Project description missing</p>
+                                } @else {
+                                  <p>{{ project.description }}</p>
+                                }
+                                @if (project.skills.length > 0) {
+                                  <div class="cv-elegant-project-tags">
+                                    @for (skill of project.skills; track trackBySkill($index, skill)) {
+                                      <span>{{ skill.name }}</span>
+                                    }
+                                  </div>
+                                }
+                              </article>
+                            }
+                          </div>
+                        } @else {
+                          <p class="cv-paper-empty">No visible projects selected for this CV.</p>
+                        }
+                      </section>
+                    }
+
+                    @if (sectionVisible('EDUCATION') && education.length > 0 || sectionVisible('LANGUAGES') && languages.length > 0) {
+                      <div class="cv-elegant-bottom-grid">
+                        @if (sectionVisible('EDUCATION') && education.length > 0) {
+                          <section class="cv-elegant-section">
+                            <div class="cv-elegant-section__heading">
+                              <span class="cv-elegant-section__badge">E</span>
+                              <h2>Education</h2>
+                              <span class="cv-elegant-section__line"></span>
+                            </div>
+                            <div class="cv-elegant-main__list">
+                              @for (item of education; track trackByIndex($index)) {
+                                @if (item.school || item.degree || item.description) {
+                                  <article class="cv-elegant-main__entry cv-elegant-main__entry--compact">
+                                    <h3>{{ item.school || 'School' }}</h3>
+                                    @if (item.degree || item.fieldOfStudy) {
+                                      <p class="cv-elegant-main__meta">{{ item.degree }} @if (item.fieldOfStudy) { · {{ item.fieldOfStudy }} }</p>
+                                    }
+                                    @if (item.startDate || item.endDate || item.current) {
+                                      <p>{{ item.startDate || '' }} - {{ item.current ? 'Present' : (item.endDate || '') }}</p>
+                                    }
+                                  </article>
+                                }
+                              }
+                            </div>
+                          </section>
+                        }
+
+                        @if (sectionVisible('LANGUAGES') && languages.length > 0) {
+                          <section class="cv-elegant-section">
+                            <div class="cv-elegant-section__heading">
+                              <span class="cv-elegant-section__badge">L</span>
+                              <h2>Languages</h2>
+                              <span class="cv-elegant-section__line"></span>
+                            </div>
+                            <div class="cv-elegant-language-list cv-elegant-language-list--light">
+                              @for (item of languages; track trackByIndex($index)) {
+                                @if (item.name || item.proficiency) {
+                                  <div class="cv-elegant-language">
+                                    <div class="cv-elegant-language__head">
+                                      <strong>{{ item.name || 'Language' }}</strong>
+                                      <span>{{ languageLevelLabel(item.proficiency) }}</span>
+                                    </div>
+                                    <div class="cv-elegant-language__track">
+                                      <span class="cv-elegant-language__fill" [style.width.%]="languageLevelPercent(item.proficiency)"></span>
+                                    </div>
+                                  </div>
+                                }
+                              }
+                            </div>
+                          </section>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else {
+              @if (selectedTemplate === 'MODERN') {
+                <div class="cv-modern-layout">
+                  <aside class="cv-modern-sidebar">
+                    @if (showPreviewAvatar()) {
+                      <div class="cv-modern-sidebar__avatar">
+                        @if (showPreviewProfileImage()) {
+                          <img [src]="previewProfileImageUrl()" [alt]="profile.fullName || 'Profile image'" />
+                        } @else {
+                          <span>{{ profileInitials() }}</span>
+                        }
+                      </div>
+                    }
+
+                    @if (profile.email || profile.phone || profile.location || profile.githubUrl || profile.linkedinUrl) {
+                      <section class="cv-modern-sidebar__section">
+                        <h3>Contact</h3>
+                        <div class="cv-modern-sidebar__line"></div>
+                        <div class="cv-modern-contact-list">
+                          @if (profile.email) {
+                            <div class="cv-modern-contact-item">
+                              <span class="cv-modern-contact-item__icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.75 6h12.5A1.75 1.75 0 0 1 20 7.75v8.5A1.75 1.75 0 0 1 18.25 18H5.75A1.75 1.75 0 0 1 4 16.25v-8.5A1.75 1.75 0 0 1 5.75 6Zm0 1.5a.25.25 0 0 0-.25.25v.23l6.25 4.13 6.25-4.13v-.23a.25.25 0 0 0-.25-.25H5.75Zm12.5 9a.25.25 0 0 0 .25-.25V9.78l-5.84 3.86a1.25 1.25 0 0 1-1.38 0L5.5 9.78v6.47a.25.25 0 0 0 .25.25h12.5Z" fill="currentColor" /></svg>
+                              </span>
+                              <span>{{ profile.email }}</span>
+                            </div>
+                          }
+                          @if (profile.phone) {
+                            <div class="cv-modern-contact-item">
+                              <span class="cv-modern-contact-item__icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 4A2.75 2.75 0 0 1 10.5 6.75v1.09a1 1 0 0 1-.29.7L8.99 9.76a10.76 10.76 0 0 0 5.25 5.25l1.22-1.22a1 1 0 0 1 .7-.29h1.09A2.75 2.75 0 0 1 20 16.25v1a2.75 2.75 0 0 1-2.75 2.75h-.5C9.16 20 4 14.84 4 8.25v-.5A2.75 2.75 0 0 1 6.75 5h1ZM6.75 6.5a1.25 1.25 0 0 0-1.25 1.25v.5c0 5.76 4.49 10.25 10.25 10.25h.5a1.25 1.25 0 0 0 1.25-1.25v-1a1.25 1.25 0 0 0-1.25-1.25h-.78l-1.63 1.63a1.06 1.06 0 0 1-1.08.25A12.24 12.24 0 0 1 7.12 11.2a1.06 1.06 0 0 1 .25-1.08L9 8.47v-.72A1.25 1.25 0 0 0 7.75 6.5h-1Z" fill="currentColor" /></svg>
+                              </span>
+                              <span>{{ profile.phone }}</span>
+                            </div>
+                          }
+                          @if (profile.location) {
+                            <div class="cv-modern-contact-item">
+                              <span class="cv-modern-contact-item__icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.75a6 6 0 0 1 6 6c0 4.38-4.51 9.62-5.19 10.39a1 1 0 0 1-1.52 0C10.51 19.37 6 14.13 6 9.75a6 6 0 0 1 6-6Zm0 1.5A4.5 4.5 0 0 0 7.5 9.75c0 2.93 2.83 6.86 4.5 8.88 1.67-2.02 4.5-5.95 4.5-8.88A4.5 4.5 0 0 0 12 5.25Zm0 2.25a2.25 2.25 0 1 1-2.25 2.25A2.25 2.25 0 0 1 12 7.5Z" fill="currentColor" /></svg>
+                              </span>
+                              <span>{{ profile.location }}</span>
+                            </div>
+                          }
+                          @if (profile.githubUrl) {
+                            <div class="cv-modern-contact-item">
+                              <span class="cv-modern-contact-item__icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 1 0 11.25 11.25A11.25 11.25 0 0 0 12 .75Zm-.23 4.5c-3.07 0-5.55 2.48-5.55 5.55 0 2.46 1.6 4.55 3.82 5.28.28.05.38-.12.38-.27v-.95c-1.55.34-1.88-.65-1.88-.65-.25-.64-.62-.81-.62-.81-.51-.35.04-.34.04-.34.57.04.87.58.87.58.5.86 1.32.61 1.64.47.05-.37.2-.61.36-.75-1.24-.14-2.55-.62-2.55-2.76 0-.61.22-1.11.58-1.5-.06-.14-.25-.71.05-1.48 0 0 .47-.15 1.53.57a5.33 5.33 0 0 1 2.79 0c1.06-.72 1.53-.57 1.53-.57.3.77.11 1.34.05 1.48.36.39.58.89.58 1.5 0 2.14-1.31 2.61-2.56 2.75.21.18.39.53.39 1.08v1.6c0 .15.1.33.39.27A5.54 5.54 0 0 0 17.32 10.8c0-3.07-2.48-5.55-5.55-5.55Z" fill="currentColor" /></svg>
+                              </span>
+                              <span>{{ profile.githubUrl }}</span>
+                            </div>
+                          }
+                          @if (profile.linkedinUrl) {
+                            <div class="cv-modern-contact-item">
+                              <span class="cv-modern-contact-item__icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.94 8.5A1.44 1.44 0 1 1 5.5 7.06 1.44 1.44 0 0 1 6.94 8.5ZM5.75 10h2.38v8H5.75Zm3.75 0h2.28v1.09h.03A2.5 2.5 0 0 1 14.06 9c2.4 0 2.84 1.58 2.84 3.64v5.36h-2.37v-4.75c0-1.13-.02-2.59-1.58-2.59s-1.82 1.23-1.82 2.5V18H9.5Z" fill="currentColor" /></svg>
+                              </span>
+                              <span>{{ profile.linkedinUrl }}</span>
+                            </div>
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('SKILLS') && skillGroups.length > 0) {
+                      <section class="cv-modern-sidebar__section">
+                        <h3>Skills</h3>
+                        <div class="cv-modern-sidebar__line"></div>
+                        <div class="cv-modern-skill-cloud">
+                          @for (group of skillGroups; track trackBySkillGroup($index, group)) {
+                            @for (skill of group.skills; track trackBySkill($index, skill)) {
+                              <span>{{ skill.name }}</span>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('EDUCATION') && education.length > 0) {
+                      <section class="cv-modern-sidebar__section">
+                        <h3>Education</h3>
+                        <div class="cv-modern-sidebar__line"></div>
+                        <div class="cv-modern-sidebar__stack">
+                          @for (item of education; track trackByIndex($index)) {
+                            @if (item.school || item.degree || item.description) {
+                              <article class="cv-modern-sidebar__entry">
+                                <h4>{{ item.school || 'School' }}</h4>
+                                @if (item.degree || item.fieldOfStudy) {
+                                  <p>{{ item.degree }} @if (item.fieldOfStudy) { · {{ item.fieldOfStudy }} }</p>
+                                }
+                                @if (item.startDate || item.endDate || item.current) {
+                                  <span>{{ item.startDate || '' }} - {{ item.current ? 'Present' : (item.endDate || '') }}</span>
+                                }
+                              </article>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('LANGUAGES') && languages.length > 0) {
+                      <section class="cv-modern-sidebar__section">
+                        <h3>Languages</h3>
+                        <div class="cv-modern-sidebar__line"></div>
+                        <div class="cv-modern-language-list">
+                          @for (item of languages; track trackByIndex($index)) {
+                            @if (item.name || item.proficiency) {
+                              <div class="cv-modern-language">
+                                <div class="cv-modern-language__head">
+                                  <strong>{{ item.name || 'Language' }}</strong>
+                                  <span>{{ languageLevelLabel(item.proficiency) }}</span>
+                                </div>
+                                <div class="cv-modern-language__track">
+                                  <span class="cv-modern-language__fill" [style.width.%]="languageLevelPercent(item.proficiency)"></span>
+                                </div>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+                  </aside>
+
+                  <div class="cv-modern-main">
+                    <header class="cv-modern-main__header">
+                      <h1>{{ profile.fullName || 'Your Name' }}</h1>
+                      <p class="cv-modern-main__headline">{{ profile.headline || 'Software Engineer' }}</p>
+                      <div class="cv-modern-main__contact">
+                        @if (profile.email) {
+                          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.75 6h12.5A1.75 1.75 0 0 1 20 7.75v8.5A1.75 1.75 0 0 1 18.25 18H5.75A1.75 1.75 0 0 1 4 16.25v-8.5A1.75 1.75 0 0 1 5.75 6Zm0 1.5a.25.25 0 0 0-.25.25v.23l6.25 4.13 6.25-4.13v-.23a.25.25 0 0 0-.25-.25H5.75Zm12.5 9a.25.25 0 0 0 .25-.25V9.78l-5.84 3.86a1.25 1.25 0 0 1-1.38 0L5.5 9.78v6.47a.25.25 0 0 0 .25.25h12.5Z" fill="currentColor" /></svg>{{ profile.email }}</span>
+                        }
+                        @if (profile.phone) {
+                          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 4A2.75 2.75 0 0 1 10.5 6.75v1.09a1 1 0 0 1-.29.7L8.99 9.76a10.76 10.76 0 0 0 5.25 5.25l1.22-1.22a1 1 0 0 1 .7-.29h1.09A2.75 2.75 0 0 1 20 16.25v1a2.75 2.75 0 0 1-2.75 2.75h-.5C9.16 20 4 14.84 4 8.25v-.5A2.75 2.75 0 0 1 6.75 5h1ZM6.75 6.5a1.25 1.25 0 0 0-1.25 1.25v.5c0 5.76 4.49 10.25 10.25 10.25h.5a1.25 1.25 0 0 0 1.25-1.25v-1a1.25 1.25 0 0 0-1.25-1.25h-.78l-1.63 1.63a1.06 1.06 0 0 1-1.08.25A12.24 12.24 0 0 1 7.12 11.2a1.06 1.06 0 0 1 .25-1.08L9 8.47v-.72A1.25 1.25 0 0 0 7.75 6.5h-1Z" fill="currentColor" /></svg>{{ profile.phone }}</span>
+                        }
+                        @if (profile.location) {
+                          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.75a6 6 0 0 1 6 6c0 4.38-4.51 9.62-5.19 10.39a1 1 0 0 1-1.52 0C10.51 19.37 6 14.13 6 9.75a6 6 0 0 1 6-6Zm0 1.5A4.5 4.5 0 0 0 7.5 9.75c0 2.93 2.83 6.86 4.5 8.88 1.67-2.02 4.5-5.95 4.5-8.88A4.5 4.5 0 0 0 12 5.25Zm0 2.25a2.25 2.25 0 1 1-2.25 2.25A2.25 2.25 0 0 1 12 7.5Z" fill="currentColor" /></svg>{{ profile.location }}</span>
+                        }
+                        @if (profile.githubUrl) {
+                          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 1 0 11.25 11.25A11.25 11.25 0 0 0 12 .75Zm-.23 4.5c-3.07 0-5.55 2.48-5.55 5.55 0 2.46 1.6 4.55 3.82 5.28.28.05.38-.12.38-.27v-.95c-1.55.34-1.88-.65-1.88-.65-.25-.64-.62-.81-.62-.81-.51-.35.04-.34.04-.34.57.04.87.58.87.58.5.86 1.32.61 1.64.47.05-.37.2-.61.36-.75-1.24-.14-2.55-.62-2.55-2.76 0-.61.22-1.11.58-1.5-.06-.14-.25-.71.05-1.48 0 0 .47-.15 1.53.57a5.33 5.33 0 0 1 2.79 0c1.06-.72 1.53-.57 1.53-.57.3.77.11 1.34.05 1.48.36.39.58.89.58 1.5 0 2.14-1.31 2.61-2.56 2.75.21.18.39.53.39 1.08v1.6c0 .15.1.33.39.27A5.54 5.54 0 0 0 17.32 10.8c0-3.07-2.48-5.55-5.55-5.55Z" fill="currentColor" /></svg>{{ profile.githubUrl }}</span>
+                        }
+                        @if (profile.linkedinUrl) {
+                          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.94 8.5A1.44 1.44 0 1 1 5.5 7.06 1.44 1.44 0 0 1 6.94 8.5ZM5.75 10h2.38v8H5.75Zm3.75 0h2.28v1.09h.03A2.5 2.5 0 0 1 14.06 9c2.4 0 2.84 1.58 2.84 3.64v5.36h-2.37v-4.75c0-1.13-.02-2.59-1.58-2.59s-1.82 1.23-1.82 2.5V18H9.5Z" fill="currentColor" /></svg>{{ profile.linkedinUrl }}</span>
+                        }
+                      </div>
+                    </header>
+
+                    @if (sectionVisible('PROFILE') && hasPreviewSummary) {
+                      <section class="cv-paper-section cv-modern-main__section">
+                        <div class="cv-paper-section__heading">
+                          <span class="cv-paper-section__icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a4 4 0 1 1-4 4 4 4 0 0 1 4-4Zm0 10c3.87 0 7 2.01 7 4.5a.75.75 0 0 1-1.5 0c0-1.45-2.34-3-5.5-3s-5.5 1.55-5.5 3a.75.75 0 0 1-1.5 0C5 16.01 8.13 14 12 14Z" fill="currentColor" /></svg>
+                          </span>
+                          <h2>Summary</h2>
+                          <span class="cv-paper-section__line"></span>
+                        </div>
+                        <p>{{ profile.summary }}</p>
+                      </section>
+                    }
+
+                    @if (sectionVisible('EXPERIENCE') && experience.length > 0) {
+                      <section class="cv-paper-section cv-modern-main__section">
+                        <div class="cv-paper-section__heading">
+                          <span class="cv-paper-section__icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7h1.5A2.5 2.5 0 0 1 20 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-8A2.5 2.5 0 0 1 6.5 7H8V5.5Z" fill="currentColor" /></svg>
+                          </span>
+                          <h2>Experience</h2>
+                          <span class="cv-paper-section__line"></span>
+                        </div>
+                        <div class="cv-modern-main__list">
+                          @for (item of experience; track trackByIndex($index)) {
+                            @if (item.company || item.role || item.summary) {
+                              <article class="cv-modern-main__entry">
+                                <div class="cv-modern-main__entry-head">
+                                  <h3>{{ item.role || 'Role' }}</h3>
+                                  @if (item.startDate || item.endDate || item.current) {
+                                    <span>{{ item.startDate || 'Start' }} - {{ item.current ? 'Present' : (item.endDate || 'End') }}</span>
+                                  }
+                                </div>
+                                @if (item.company) {
+                                  <p class="cv-modern-main__company">{{ item.company }}</p>
+                                }
+                                @if (item.summary) {
+                                  <ul class="cv-modern-bullets">
+                                    @for (line of item.summary.split('\n'); track $index) {
+                                      @if (line.trim()) {
+                                        <li>{{ line.trim() }}</li>
+                                      }
+                                    }
+                                  </ul>
+                                }
+                              </article>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('PROJECTS')) {
+                      <section class="cv-paper-section cv-modern-main__section">
+                        <div class="cv-paper-section__heading">
+                          <span class="cv-paper-section__icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 5h10.5A2.75 2.75 0 0 1 20 7.75v8.5A2.75 2.75 0 0 1 17.25 19H6.75A2.75 2.75 0 0 1 4 16.25v-8.5A2.75 2.75 0 0 1 6.75 5Zm0 1.5A1.25 1.25 0 0 0 5.5 7.75v8.5a1.25 1.25 0 0 0 1.25 1.25h10.5a1.25 1.25 0 0 0 1.25-1.25v-8.5a1.25 1.25 0 0 0-1.25-1.25H6.75Zm1.5 2h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Zm0 3.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 1 1 0-1.5Z" fill="currentColor" /></svg>
+                          </span>
+                          <h2>Projects</h2>
+                          <span class="cv-paper-section__line"></span>
+                        </div>
+                        @if (visibleProjects.length > 0) {
+                          <div class="cv-modern-main__list">
+                            @for (project of visibleProjects; track trackByProject($index, project)) {
+                              <article class="cv-modern-main__entry">
+                                <div class="cv-modern-main__entry-head">
+                                  <h3>{{ project.title || 'Untitled Project' }}</h3>
+                                  @if (project.projectUrl) {
+                                    <a class="cv-modern-main__link" [href]="project.projectUrl" target="_blank" rel="noreferrer">
+                                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5h-1.5V7.56l-6.97 6.97-1.06-1.06 6.97-6.97H14V5ZM6.75 7A1.75 1.75 0 0 0 5 8.75v8.5C5 18.22 5.78 19 6.75 19h8.5A1.75 1.75 0 0 0 17 17.25V13h1.5v4.25A3.25 3.25 0 0 1 15.25 20.5h-8.5A3.25 3.25 0 0 1 3.5 17.25v-8.5A3.25 3.25 0 0 1 6.75 5.5H11V7H6.75Z" fill="currentColor" /></svg>
+                                    </a>
+                                  }
+                                </div>
+                                @if (projectHasMissingDescription(project)) {
+                                  <p class="cv-paper-warning">Project description missing</p>
+                                } @else {
+                                  <p>{{ project.description }}</p>
+                                }
+                                @if (project.skills.length > 0) {
+                                  <div class="cv-modern-project-tags">
+                                    @for (skill of project.skills; track trackBySkill($index, skill)) {
+                                      <span>{{ skill.name }}</span>
+                                    }
+                                  </div>
+                                }
+                              </article>
+                            }
+                          </div>
+                        } @else {
+                          <p class="cv-paper-empty">No visible projects selected for this CV.</p>
+                        }
+                      </section>
+                    }
+
+                    @if (sectionVisible('EDUCATION') && education.length > 0 || sectionVisible('LANGUAGES') && languages.length > 0) {
+                      <div class="cv-modern-bottom-grid">
+                        @if (sectionVisible('EDUCATION') && education.length > 0) {
+                          <section class="cv-paper-section cv-modern-main__section">
+                            <div class="cv-paper-section__heading">
+                              <span class="cv-paper-section__icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 3 8.5 12 13l7.5-3.75V15H21V8.5L12 4Zm-6 8.26V15.5c0 2.21 2.69 4 6 4s6-1.79 6-4v-3.24L12 15l-6-2.74Z" fill="currentColor" /></svg>
+                              </span>
+                              <h2>Education</h2>
+                              <span class="cv-paper-section__line"></span>
+                            </div>
+                            <div class="cv-modern-main__list">
+                              @for (item of education; track trackByIndex($index)) {
+                                @if (item.school || item.degree || item.description) {
+                                  <article class="cv-modern-main__entry">
+                                    <h3>{{ item.school || 'School' }}</h3>
+                                    @if (item.degree || item.fieldOfStudy) {
+                                      <p class="cv-modern-main__company">{{ item.degree }} @if (item.fieldOfStudy) { · {{ item.fieldOfStudy }} }</p>
+                                    }
+                                    @if (item.startDate || item.endDate || item.current) {
+                                      <p>{{ item.startDate || '' }} - {{ item.current ? 'Present' : (item.endDate || '') }}</p>
+                                    }
+                                  </article>
+                                }
+                              }
+                            </div>
+                          </section>
+                        }
+
+                        @if (sectionVisible('LANGUAGES') && languages.length > 0) {
+                          <section class="cv-paper-section cv-modern-main__section">
+                            <div class="cv-paper-section__heading">
+                              <span class="cv-paper-section__icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5a7.5 7.5 0 1 0 7.5 7.5A7.5 7.5 0 0 0 12 4.5Zm0-1.5A9 9 0 1 1 3 12a9 9 0 0 1 9-9Zm-.75 4.25a.75.75 0 0 1 1.5 0v4.44l3.03 1.75a.75.75 0 1 1-.76 1.3l-3.4-1.97a.75.75 0 0 1-.37-.65V7.25Z" fill="currentColor" /></svg>
+                              </span>
+                              <h2>Languages</h2>
+                              <span class="cv-paper-section__line"></span>
+                            </div>
+                            <div class="cv-modern-language-list cv-modern-language-list--light">
+                              @for (item of languages; track trackByIndex($index)) {
+                                @if (item.name || item.proficiency) {
+                                  <div class="cv-modern-language">
+                                    <div class="cv-modern-language__head">
+                                      <strong>{{ item.name || 'Language' }}</strong>
+                                      <span>{{ languageLevelLabel(item.proficiency) }}</span>
+                                    </div>
+                                    <div class="cv-modern-language__track">
+                                      <span class="cv-modern-language__fill" [style.width.%]="languageLevelPercent(item.proficiency)"></span>
+                                    </div>
+                                  </div>
+                                }
+                              }
+                            </div>
+                          </section>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else if (selectedTemplate === 'CREATIVE') {
+                <div class="cv-creative-layout">
+                  <aside class="cv-creative-sidebar">
+                    <div class="cv-creative-sidebar__visual">
+                      @if (showPreviewAvatar()) {
+                        <div class="cv-creative-avatar-shell">
+                          <div class="cv-creative-avatar-ring cv-creative-avatar-ring--outer"></div>
+                          <div class="cv-creative-avatar-ring cv-creative-avatar-ring--mid"></div>
+                          <div class="cv-creative-avatar-ring cv-creative-avatar-ring--accent"></div>
+                          <div class="cv-creative-avatar-ring cv-creative-avatar-ring--dot"></div>
+                          <div class="cv-creative-avatar">
+                            @if (showPreviewProfileImage()) {
+                              <img [src]="previewProfileImageUrl()" [alt]="profile.fullName || 'Profile image'" />
+                            } @else {
+                              <span>{{ profileInitials() }}</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                      <p class="cv-creative-sidebar__quote">{{ profile.headline || 'Building scalable solutions with creativity.' }}</p>
+                    </div>
+
+                    @if (profile.email || profile.phone || profile.location || profile.githubUrl || profile.linkedinUrl) {
+                      <section class="cv-creative-contact-card">
+                        <div class="cv-creative-card-heading">
+                          <span class="cv-creative-card-heading__badge">C</span>
+                          <h3>Contact</h3>
+                          <span class="cv-creative-card-heading__line"></span>
+                        </div>
+                        <div class="cv-creative-contact-list">
+                          @if (profile.email) {
+                            <p>{{ profile.email }}</p>
+                          }
+                          @if (profile.phone) {
+                            <p>{{ profile.phone }}</p>
+                          }
+                          @if (profile.location) {
+                            <p>{{ profile.location }}</p>
+                          }
+                          @if (profile.githubUrl) {
+                            <p>{{ profile.githubUrl }}</p>
+                          }
+                          @if (profile.linkedinUrl) {
+                            <p>{{ profile.linkedinUrl }}</p>
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('EDUCATION') && education.length > 0) {
+                      <section class="cv-creative-sidebar__section">
+                        <div class="cv-creative-sidebar__heading">
+                          <span class="cv-creative-sidebar__icon">E</span>
+                          <h3>Education</h3>
+                          <span class="cv-creative-sidebar__line"></span>
+                        </div>
+                        <div class="cv-creative-sidebar__stack">
+                          @for (item of education; track trackByIndex($index)) {
+                            @if (item.school || item.degree || item.description) {
+                              <article class="cv-creative-sidebar__entry">
+                                <h4>{{ item.school || 'School' }}</h4>
+                                @if (item.degree || item.fieldOfStudy) {
+                                  <p>{{ item.degree }} @if (item.fieldOfStudy) { · {{ item.fieldOfStudy }} }</p>
+                                }
+                                @if (item.location) {
+                                  <p>{{ item.location }}</p>
+                                }
+                                @if (item.startDate || item.endDate || item.current) {
+                                  <span>{{ item.startDate || '' }} - {{ item.current ? 'Present' : (item.endDate || '') }}</span>
+                                }
+                              </article>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('LANGUAGES') && languages.length > 0) {
+                      <section class="cv-creative-sidebar__section">
+                        <div class="cv-creative-sidebar__heading">
+                          <span class="cv-creative-sidebar__icon">L</span>
+                          <h3>Languages</h3>
+                          <span class="cv-creative-sidebar__line"></span>
+                        </div>
+                        <div class="cv-creative-language-list">
+                          @for (item of languages; track trackByIndex($index)) {
+                            @if (item.name || item.proficiency) {
+                              <div class="cv-creative-language">
+                                <div class="cv-creative-language__head">
+                                  <strong>{{ item.name || 'Language' }}</strong>
+                                  <span>{{ languageLevelLabel(item.proficiency) }}</span>
+                                </div>
+                                <div class="cv-creative-language__dots">
+                                  @for (dot of [1, 2, 3, 4, 5]; track dot) {
+                                    <i [class.is-active]="languageLevelPercent(item.proficiency) >= (dot * 20)"></i>
+                                  }
+                                </div>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+                  </aside>
+
+                  <div class="cv-creative-main">
+                    <div class="cv-creative-backdrop cv-creative-backdrop--left"></div>
+                    <div class="cv-creative-backdrop cv-creative-backdrop--right"></div>
+                    <div class="cv-creative-dots cv-creative-dots--top"></div>
+                    <div class="cv-creative-dots cv-creative-dots--bottom"></div>
+                    <div class="cv-creative-orbit"></div>
+
+                    <header class="cv-creative-header">
+                      <h1>{{ profile.fullName || 'Your Name' }}</h1>
+                      <p class="cv-creative-header__headline">{{ profile.headline || 'Software Engineer' }}</p>
+                      <div class="cv-creative-header__line"></div>
+                      <div class="cv-creative-header__contact">
+                        @if (profile.email) {
+                          <span>{{ profile.email }}</span>
+                        }
+                        @if (profile.phone) {
+                          <span>{{ profile.phone }}</span>
+                        }
+                        @if (profile.location) {
+                          <span>{{ profile.location }}</span>
+                        }
+                      </div>
+                    </header>
+
+                    @if (sectionVisible('PROFILE') && hasPreviewSummary) {
+                      <section class="cv-creative-card cv-creative-card--summary">
+                        <div class="cv-creative-card__heading">
+                          <span class="cv-creative-card__icon">P</span>
+                          <h2>Summary</h2>
+                          <span class="cv-creative-card__line"></span>
+                        </div>
+                        <p>{{ profile.summary }}</p>
+                      </section>
+                    }
+
+                    @if (sectionVisible('PROJECTS')) {
+                      <section class="cv-creative-card cv-creative-card--project">
+                        <div class="cv-creative-card__heading">
+                          <span class="cv-creative-card__icon">R</span>
+                          <h2>Projects</h2>
+                          <span class="cv-creative-card__line"></span>
+                        </div>
+                        @if (visibleProjects.length > 0) {
+                          <div class="cv-creative-project-list">
+                            @for (project of visibleProjects; track trackByProject($index, project)) {
+                              <article class="cv-creative-project">
+                                <div class="cv-creative-project__content">
+                                  <div class="cv-creative-project__title">
+                                    <strong>{{ project.title || 'Untitled Project' }}</strong>
+                                    @if (project.projectUrl) {
+                                      <a [href]="project.projectUrl" target="_blank" rel="noreferrer">Open</a>
+                                    }
+                                  </div>
+                                  @if (projectHasMissingDescription(project)) {
+                                    <p class="cv-paper-warning">Project description missing</p>
+                                  } @else {
+                                    <p>{{ project.description }}</p>
+                                  }
+                                  @if (project.skills.length > 0) {
+                                    <div class="cv-creative-skill-cloud cv-creative-skill-cloud--compact">
+                                      @for (skill of project.skills; track trackBySkill($index, skill)) {
+                                        <span>{{ skill.name }}</span>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                                <div class="cv-creative-project__art" aria-hidden="true">
+                                  <span></span>
+                                  <span></span>
+                                  <span></span>
+                                </div>
+                              </article>
+                            }
+                          </div>
+                        } @else {
+                          <p class="cv-paper-empty">No visible projects selected for this CV.</p>
+                        }
+                      </section>
+                    }
+
+                    @if (sectionVisible('SKILLS') && skillGroups.length > 0) {
+                      <section class="cv-creative-card">
+                        <div class="cv-creative-card__heading">
+                          <span class="cv-creative-card__icon">&lt;/&gt;</span>
+                          <h2>Skills</h2>
+                          <span class="cv-creative-card__line"></span>
+                        </div>
+                        <div class="cv-creative-skill-cloud">
+                          @for (group of skillGroups; track trackBySkillGroup($index, group)) {
+                            @for (skill of group.skills; track trackBySkill($index, skill)) {
+                              <span>{{ skill.name }}</span>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+
+                    @if (sectionVisible('EXPERIENCE') && experience.length > 0) {
+                      <section class="cv-creative-card">
+                        <div class="cv-creative-card__heading">
+                          <span class="cv-creative-card__icon">X</span>
+                          <h2>Experience</h2>
+                          <span class="cv-creative-card__line"></span>
+                        </div>
+                        <div class="cv-creative-experience-list">
+                          @for (item of experience; track trackByIndex($index)) {
+                            @if (item.company || item.role || item.summary) {
+                              <article class="cv-creative-experience">
+                                <div class="cv-creative-experience__head">
+                                  <strong>{{ item.role || 'Role' }}</strong>
+                                  @if (item.startDate || item.endDate || item.current) {
+                                    <span>{{ item.startDate || 'Start' }} - {{ item.current ? 'Present' : (item.endDate || 'End') }}</span>
+                                  }
+                                </div>
+                                @if (item.company || item.location) {
+                                  <p class="cv-creative-experience__meta">{{ item.company }} @if (item.location) { · {{ item.location }} }</p>
+                                }
+                                @if (item.summary) {
+                                  <p>{{ item.summary }}</p>
+                                }
+                              </article>
+                            }
+                          }
+                        </div>
+                      </section>
+                    }
+                  </div>
+                </div>
+              } @else {
+              <header class="cv-paper-hero">
+                @if (showPreviewAvatar()) {
+                  <div class="cv-paper-hero__avatar">
+                    @if (showPreviewProfileImage()) {
+                      <img [src]="previewProfileImageUrl()" [alt]="profile.fullName || 'Profile image'" />
+                    } @else {
+                      <span>{{ profileInitials() }}</span>
+                    }
+                  </div>
                 }
-                <div class="cv-paper-header__meta">
-                  @if (profile.email) {
-                    <span>{{ profile.email }}</span>
-                  }
-                  @if (profile.phone) {
-                    <span>{{ profile.phone }}</span>
-                  }
-                  @if (profile.location) {
-                    <span>{{ profile.location }}</span>
-                  }
-                  @if (profile.githubUrl) {
-                    <span>{{ profile.githubUrl }}</span>
-                  }
-                  @if (profile.linkedinUrl) {
-                    <span>{{ profile.linkedinUrl }}</span>
-                  }
+
+                <div class="cv-paper-hero__content">
+                  <h1>{{ profile.fullName || 'Your Name' }}</h1>
+                  <p class="cv-paper-header__headline">{{ profile.headline || 'Software Engineer' }}</p>
+                  <div class="cv-paper-header__meta">
+                    @if (profile.email) {
+                      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.75 6h12.5A1.75 1.75 0 0 1 20 7.75v8.5A1.75 1.75 0 0 1 18.25 18H5.75A1.75 1.75 0 0 1 4 16.25v-8.5A1.75 1.75 0 0 1 5.75 6Zm0 1.5a.25.25 0 0 0-.25.25v.23l6.25 4.13 6.25-4.13v-.23a.25.25 0 0 0-.25-.25H5.75Zm12.5 9a.25.25 0 0 0 .25-.25V9.78l-5.84 3.86a1.25 1.25 0 0 1-1.38 0L5.5 9.78v6.47a.25.25 0 0 0 .25.25h12.5Z" fill="currentColor" /></svg>{{ profile.email }}</span>
+                    }
+                    @if (profile.phone) {
+                      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 4A2.75 2.75 0 0 1 10.5 6.75v1.09a1 1 0 0 1-.29.7L8.99 9.76a10.76 10.76 0 0 0 5.25 5.25l1.22-1.22a1 1 0 0 1 .7-.29h1.09A2.75 2.75 0 0 1 20 16.25v1a2.75 2.75 0 0 1-2.75 2.75h-.5C9.16 20 4 14.84 4 8.25v-.5A2.75 2.75 0 0 1 6.75 5h1ZM6.75 6.5a1.25 1.25 0 0 0-1.25 1.25v.5c0 5.76 4.49 10.25 10.25 10.25h.5a1.25 1.25 0 0 0 1.25-1.25v-1a1.25 1.25 0 0 0-1.25-1.25h-.78l-1.63 1.63a1.06 1.06 0 0 1-1.08.25A12.24 12.24 0 0 1 7.12 11.2a1.06 1.06 0 0 1 .25-1.08L9 8.47v-.72A1.25 1.25 0 0 0 7.75 6.5h-1Z" fill="currentColor" /></svg>{{ profile.phone }}</span>
+                    }
+                    @if (profile.location) {
+                      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.75a6 6 0 0 1 6 6c0 4.38-4.51 9.62-5.19 10.39a1 1 0 0 1-1.52 0C10.51 19.37 6 14.13 6 9.75a6 6 0 0 1 6-6Zm0 1.5A4.5 4.5 0 0 0 7.5 9.75c0 2.93 2.83 6.86 4.5 8.88 1.67-2.02 4.5-5.95 4.5-8.88A4.5 4.5 0 0 0 12 5.25Zm0 2.25a2.25 2.25 0 1 1-2.25 2.25A2.25 2.25 0 0 1 12 7.5Z" fill="currentColor" /></svg>{{ profile.location }}</span>
+                    }
+                    @if (profile.githubUrl) {
+                      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .75a11.25 11.25 0 1 0 11.25 11.25A11.25 11.25 0 0 0 12 .75Zm-.23 4.5c-3.07 0-5.55 2.48-5.55 5.55 0 2.46 1.6 4.55 3.82 5.28.28.05.38-.12.38-.27v-.95c-1.55.34-1.88-.65-1.88-.65-.25-.64-.62-.81-.62-.81-.51-.35.04-.34.04-.34.57.04.87.58.87.58.5.86 1.32.61 1.64.47.05-.37.2-.61.36-.75-1.24-.14-2.55-.62-2.55-2.76 0-.61.22-1.11.58-1.5-.06-.14-.25-.71.05-1.48 0 0 .47-.15 1.53.57a5.33 5.33 0 0 1 2.79 0c1.06-.72 1.53-.57 1.53-.57.3.77.11 1.34.05 1.48.36.39.58.89.58 1.5 0 2.14-1.31 2.61-2.56 2.75.21.18.39.53.39 1.08v1.6c0 .15.1.33.39.27A5.54 5.54 0 0 0 17.32 10.8c0-3.07-2.48-5.55-5.55-5.55Z" fill="currentColor" /></svg>{{ profile.githubUrl }}</span>
+                    }
+                    @if (profile.linkedinUrl) {
+                      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.94 8.5A1.44 1.44 0 1 1 5.5 7.06 1.44 1.44 0 0 1 6.94 8.5ZM5.75 10h2.38v8H5.75Zm3.75 0h2.28v1.09h.03A2.5 2.5 0 0 1 14.06 9c2.4 0 2.84 1.58 2.84 3.64v5.36h-2.37v-4.75c0-1.13-.02-2.59-1.58-2.59s-1.82 1.23-1.82 2.5V18H9.5Z" fill="currentColor" /></svg>{{ profile.linkedinUrl }}</span>
+                    }
+                  </div>
                 </div>
               </header>
 
-              @if (hasPreviewSummary) {
+              @if (sectionVisible('PROFILE') && hasPreviewSummary) {
                 <section class="cv-paper-section">
-                  <h2>Summary</h2>
+                  <div class="cv-paper-section__heading">
+                    <span class="cv-paper-section__icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a4 4 0 1 1-4 4 4 4 0 0 1 4-4Zm0 10c3.87 0 7 2.01 7 4.5a.75.75 0 0 1-1.5 0c0-1.45-2.34-3-5.5-3s-5.5 1.55-5.5 3a.75.75 0 0 1-1.5 0C5 16.01 8.13 14 12 14Z" fill="currentColor" /></svg>
+                    </span>
+                    <h2>Summary</h2>
+                    <span class="cv-paper-section__line"></span>
+                  </div>
                   <p>{{ profile.summary }}</p>
                 </section>
               }
 
-              @if (skillGroups.length > 0) {
+              @if (sectionVisible('SKILLS') && skillGroups.length > 0) {
                 <section class="cv-paper-section">
-                  <h2>Skills</h2>
-                  <div class="cv-paper-skill-groups">
+                  <div class="cv-paper-section__heading">
+                    <span class="cv-paper-section__icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5a3.5 3.5 0 0 1 3.47 3h3.03A1.5 1.5 0 0 1 20 9v2.5A1.5 1.5 0 0 1 18.5 13h-1v2.5A1.5 1.5 0 0 1 16 17h-3v-1.5h3V13H8v2.5h3V17H8a1.5 1.5 0 0 1-1.5-1.5V13h-1A1.5 1.5 0 0 1 4 11.5V9a1.5 1.5 0 0 1 1.5-1.5h3.03A3.5 3.5 0 0 1 12 4.5Z" fill="currentColor" /></svg>
+                    </span>
+                    <h2>Skills</h2>
+                    <span class="cv-paper-section__line"></span>
+                  </div>
+                  <div class="cv-paper-skill-cloud">
                     @for (group of skillGroups; track trackBySkillGroup($index, group)) {
-                      <article>
-                        <h3>{{ group.category }}</h3>
-                        <p>{{ skillNames(group.skills) }}</p>
-                      </article>
+                      @for (skill of group.skills; track trackBySkill($index, skill)) {
+                        <span>{{ skill.name }}</span>
+                      }
                     }
                   </div>
                 </section>
               }
 
-              <section class="cv-paper-section">
-                <h2>Projects</h2>
-                @if (visibleProjects.length > 0) {
-                  <div class="cv-paper-projects">
-                    @for (project of visibleProjects; track trackByProject($index, project)) {
-                      <article>
-                        <div class="cv-paper-section__title-row">
-                          <h3>{{ project.title || 'Untitled Project' }}</h3>
-                          @if (project.projectUrl) {
-                            <a [href]="project.projectUrl" target="_blank" rel="noreferrer">Project link</a>
-                          }
-                        </div>
-                        @if (projectHasMissingDescription(project)) {
-                          <p class="cv-paper-warning">Project description missing</p>
-                        } @else {
-                          <p>{{ project.description }}</p>
-                        }
-                        @if (project.skills.length > 0) {
-                          <p class="cv-paper-muted">{{ skillNamesWithDots(project.skills) }}</p>
-                        }
-                      </article>
-                    }
-                  </div>
-                } @else {
-                  <p class="cv-paper-empty">No visible projects selected for this CV.</p>
-                }
-              </section>
-
-              @if (experience.length > 0) {
+              @if (sectionVisible('PROJECTS')) {
                 <section class="cv-paper-section">
-                  <h2>Experience</h2>
+                  <div class="cv-paper-section__heading">
+                    <span class="cv-paper-section__icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.75 5h10.5A2.75 2.75 0 0 1 20 7.75v8.5A2.75 2.75 0 0 1 17.25 19H6.75A2.75 2.75 0 0 1 4 16.25v-8.5A2.75 2.75 0 0 1 6.75 5Zm0 1.5A1.25 1.25 0 0 0 5.5 7.75v8.5a1.25 1.25 0 0 0 1.25 1.25h10.5a1.25 1.25 0 0 0 1.25-1.25v-8.5a1.25 1.25 0 0 0-1.25-1.25H6.75Zm1.5 2h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Zm0 3.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 1 1 0-1.5Z" fill="currentColor" /></svg>
+                    </span>
+                    <h2>Projects</h2>
+                    <span class="cv-paper-section__line"></span>
+                  </div>
+                  @if (visibleProjects.length > 0) {
+                    <div class="cv-paper-projects">
+                      @for (project of visibleProjects; track trackByProject($index, project)) {
+                        <article>
+                          <div class="cv-paper-section__title-row">
+                            <h3>{{ project.title || 'Untitled Project' }}</h3>
+                            @if (project.projectUrl) {
+                              <a [href]="project.projectUrl" target="_blank" rel="noreferrer">Project link</a>
+                            }
+                          </div>
+                          @if (projectHasMissingDescription(project)) {
+                            <p class="cv-paper-warning">Project description missing</p>
+                          } @else {
+                            <p>{{ project.description }}</p>
+                          }
+                          @if (project.skills.length > 0) {
+                            <p class="cv-paper-muted">{{ skillNamesWithDots(project.skills) }}</p>
+                          }
+                        </article>
+                      }
+                    </div>
+                  } @else {
+                    <p class="cv-paper-empty">No visible projects selected for this CV.</p>
+                  }
+                </section>
+              }
+
+              @if (sectionVisible('EXPERIENCE') && experience.length > 0) {
+                <section class="cv-paper-section">
+                  <div class="cv-paper-section__heading">
+                    <span class="cv-paper-section__icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7h1.5A2.5 2.5 0 0 1 20 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-8A2.5 2.5 0 0 1 6.5 7H8V5.5Z" fill="currentColor" /></svg>
+                    </span>
+                    <h2>Experience</h2>
+                    <span class="cv-paper-section__line"></span>
+                  </div>
                   <div class="cv-paper-repeat-list">
                     @for (item of experience; track trackByIndex($index)) {
                       @if (item.company || item.role || item.summary) {
@@ -521,7 +1769,7 @@
                           <p class="cv-paper-muted">
                             {{ item.location }}
                             @if (item.startDate || item.endDate || item.current) {
-                              <span> • {{ item.startDate || 'Start' }} - {{ item.current ? 'Present' : (item.endDate || 'End') }}</span>
+                              <span> · {{ item.startDate || 'Start' }} - {{ item.current ? 'Present' : (item.endDate || 'End') }}</span>
                             }
                           </p>
                           @if (item.summary) {
@@ -534,23 +1782,24 @@
                 </section>
               }
 
-              @if (education.length > 0) {
+              @if (sectionVisible('EDUCATION') && education.length > 0) {
                 <section class="cv-paper-section">
-                  <h2>Education</h2>
+                  <div class="cv-paper-section__heading">
+                    <span class="cv-paper-section__icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 3 8.5 12 13l7.5-3.75V15H21V8.5L12 4Zm-6 8.26V15.5c0 2.21 2.69 4 6 4s6-1.79 6-4v-3.24L12 15l-6-2.74Z" fill="currentColor" /></svg>
+                    </span>
+                    <h2>Education</h2>
+                    <span class="cv-paper-section__line"></span>
+                  </div>
                   <div class="cv-paper-repeat-list">
                     @for (item of education; track trackByIndex($index)) {
                       @if (item.school || item.degree || item.description) {
                         <article>
                           <div class="cv-paper-section__title-row">
                             <h3>{{ item.school || 'School' }}</h3>
-                            <span>{{ item.degree }}</span>
+                            <span>{{ item.startDate || '' }} @if (item.startDate || item.endDate || item.current) { - {{ item.current ? 'Present' : (item.endDate || '') }} }</span>
                           </div>
-                          <p class="cv-paper-muted">
-                            {{ item.fieldOfStudy }}
-                            @if (item.location) {
-                              <span> • {{ item.location }}</span>
-                            }
-                          </p>
+                          <p class="cv-paper-muted">{{ item.degree }} @if (item.fieldOfStudy) { · {{ item.fieldOfStudy }} }</p>
                           @if (item.description) {
                             <p>{{ item.description }}</p>
                           }
@@ -561,17 +1810,33 @@
                 </section>
               }
 
-              @if (languages.length > 0) {
+              @if (sectionVisible('LANGUAGES') && languages.length > 0) {
                 <section class="cv-paper-section">
-                  <h2>Languages</h2>
-                  <div class="cv-paper-language-list">
+                  <div class="cv-paper-section__heading">
+                    <span class="cv-paper-section__icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5a7.5 7.5 0 1 0 7.5 7.5A7.5 7.5 0 0 0 12 4.5Zm0-1.5A9 9 0 1 1 3 12a9 9 0 0 1 9-9Zm-.75 4.25a.75.75 0 0 1 1.5 0v4.44l3.03 1.75a.75.75 0 1 1-.76 1.3l-3.4-1.97a.75.75 0 0 1-.37-.65V7.25Z" fill="currentColor" /></svg>
+                    </span>
+                    <h2>Languages</h2>
+                    <span class="cv-paper-section__line"></span>
+                  </div>
+                  <div class="cv-paper-language-list cv-paper-language-list--bars">
                     @for (item of languages; track trackByIndex($index)) {
                       @if (item.name || item.proficiency) {
-                        <span>{{ item.name }} @if (item.proficiency) { <strong>({{ item.proficiency }})</strong> }</span>
+                        <div class="cv-paper-language">
+                          <div class="cv-paper-language__head">
+                            <strong>{{ item.name || 'Language' }}</strong>
+                            <span>{{ languageLevelLabel(item.proficiency) }}</span>
+                          </div>
+                          <div class="cv-paper-language__track">
+                            <span class="cv-paper-language__fill" [style.width.%]="languageLevelPercent(item.proficiency)"></span>
+                          </div>
+                        </div>
                       }
                     }
                   </div>
                 </section>
+              }
+              }
               }
             </article>
           </div>

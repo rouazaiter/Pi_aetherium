@@ -16,6 +16,7 @@ public class CVPdfRenderData {
     private Long draftId;
     private String theme;
     private JsonNode settings;
+    private String profileImageSource;
     private List<Section> sections;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -46,12 +46,20 @@
         } @else {
           @for (group of suggestedGroups(); track group.id) {
             <article class="group-card" (click)="openGroup(group)">
-              <img [src]="group.imageUrl" [alt]="group.name" />
+              <div class="group-card__media">
+                <img [src]="group.imageUrl" [alt]="group.name" />
+                <span class="group-card__menu" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M6 12a1.6 1.6 0 1 1 0 .01V12Zm6 0a1.6 1.6 0 1 1 0 .01V12Zm6 0a1.6 1.6 0 1 1 0 .01V12Z" fill="currentColor" /></svg>
+                </span>
+              </div>
               <div class="group-body">
                 <span class="topic-chip">{{ group.topic }}</span>
                 <h4>{{ group.name }}</h4>
                 <p>{{ group.description }}</p>
-                <div class="meta">{{ group.members }} members · Owner {{ group.owner }}</div>
+                <div class="meta">
+                  <span>{{ group.members }} members</span>
+                  <span>Owner {{ group.owner }}</span>
+                </div>
               </div>
             </article>
           }

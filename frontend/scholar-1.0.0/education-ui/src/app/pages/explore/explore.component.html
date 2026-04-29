@@ -49,12 +49,17 @@
         <div class="explore-filter-group">
           <label class="explore-field">
             <span>Skills</span>
-            <input
-              #skillSearchInput
-              type="search"
-              [(ngModel)]="skillSearchTerm"
-              (ngModelChange)="onSkillSearchInput()"
-              placeholder="Search skills..." />
+            <span class="explore-inline-search">
+              <span class="explore-inline-search__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M10.75 4a6.75 6.75 0 1 0 4.23 12l4.51 4.52 1.06-1.06-4.52-4.51A6.75 6.75 0 0 0 10.75 4Zm0 1.5a5.25 5.25 0 1 1 0 10.5a5.25 5.25 0 0 1 0-10.5Z" fill="currentColor" /></svg>
+              </span>
+              <input
+                #skillSearchInput
+                type="search"
+                [(ngModel)]="skillSearchTerm"
+                (ngModelChange)="onSkillSearchInput()"
+                placeholder="Search skills..." />
+            </span>
           </label>
 
           @if (loadingSkills) {
@@ -119,7 +124,12 @@
         </div>
 
         <div class="explore-sidebar__actions">
-          <button type="button" class="explore-primary-btn explore-primary-btn--full" (click)="applyFilters()">Apply Filters</button>
+          <button type="button" class="explore-primary-btn explore-primary-btn--full" (click)="applyFilters()">
+            <span class="explore-btn__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4.5 6.25A1.75 1.75 0 0 1 6.25 4.5h11.5a1.75 1.75 0 0 1 1.3 2.92l-4.55 5.1v4.73a1 1 0 0 1-.55.9l-3 1.5A1 1 0 0 1 9.5 18.75v-6.23l-4.55-5.1a1.75 1.75 0 0 1-.45-1.17Z" fill="currentColor" /></svg>
+            </span>
+            <span>Apply Filters</span>
+          </button>
           <button type="button" class="explore-link-btn" (click)="resetAll()">Reset all</button>
         </div>
       </section>
@@ -129,7 +139,9 @@
       <section class="explore-panel explore-search-panel">
         <div class="explore-search-bar">
           <label class="explore-search-input">
-            <span class="explore-search-input__icon">Q</span>
+            <span class="explore-search-input__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M10.75 4a6.75 6.75 0 1 0 4.23 12l4.51 4.52 1.06-1.06-4.52-4.51A6.75 6.75 0 0 0 10.75 4Zm0 1.5a5.25 5.25 0 1 1 0 10.5a5.25 5.25 0 0 1 0-10.5Z" fill="currentColor" /></svg>
+            </span>
             <input
               type="search"
               [(ngModel)]="searchQuery"
@@ -163,6 +175,7 @@
               class="explore-tab"
               [class.explore-tab--active]="activeTab === 'portfolios'"
               (click)="setActiveTab('portfolios')">
+              <span class="explore-tab__icon" aria-hidden="true">◫</span>
               Portfolios
             </button>
             <button
@@ -170,6 +183,7 @@
               class="explore-tab"
               [class.explore-tab--active]="activeTab === 'projects'"
               (click)="setActiveTab('projects')">
+              <span class="explore-tab__icon" aria-hidden="true">◧</span>
               Projects
             </button>
             <button
@@ -177,6 +191,7 @@
               class="explore-tab"
               [class.explore-tab--active]="activeTab === 'collections'"
               (click)="setActiveTab('collections')">
+              <span class="explore-tab__icon" aria-hidden="true">▣</span>
               Collections
             </button>
           </div>
@@ -252,7 +267,8 @@
                   tabindex="0"
                   (click)="openPortfolio(card)"
                   (keydown)="onCardKeydown($event, 'portfolios', card)">
-                  <span class="explore-card__arrow" aria-hidden="true">></span>
+                  <div class="explore-card__banner" aria-hidden="true"></div>
+                  <span class="explore-card__arrow" aria-hidden="true">›</span>
                   <div class="explore-card__head">
                     <div class="explore-avatar">
                       @if (card.profileImage) {
@@ -281,9 +297,9 @@
                   </div>
 
                   <div class="explore-card__stats">
-                    <span>{{ card.projectCount }} Projects</span>
+                    <span><strong>⌁</strong>{{ card.projectCount }} Projects</span>
                     @if (portfolioConnections(card); as connections) {
-                      <span>{{ connections }} Connections</span>
+                      <span><strong>◌</strong>{{ connections }} Connections</span>
                     }
                   </div>
                 </article>
@@ -407,7 +423,7 @@
 
         <section class="explore-cta">
           <div class="explore-cta__copy">
-            <div class="explore-cta__icon">GO</div>
+            <div class="explore-cta__icon">◎</div>
             <div>
               <h2>Discover. Connect. Grow.</h2>
               <p>

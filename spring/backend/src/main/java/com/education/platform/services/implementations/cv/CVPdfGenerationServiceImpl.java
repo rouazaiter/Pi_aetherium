@@ -6,6 +6,7 @@ import com.education.platform.entities.cv.CVSection;
 import com.education.platform.repositories.cv.CVDraftRepository;
 import com.education.platform.services.interfaces.cv.CVPdfGenerationService;
 import com.education.platform.services.interfaces.cv.CVPdfRenderer;
+import com.education.platform.services.interfaces.cv.CVTemplateConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,14 +24,17 @@ public class CVPdfGenerationServiceImpl implements CVPdfGenerationService {
     private final CVDraftRepository cvDraftRepository;
     private final List<CVPdfRenderer> renderers;
     private final ObjectMapper objectMapper;
+    private final CVProfileImageSourceResolver profileImageSourceResolver;
 
     public CVPdfGenerationServiceImpl(
             CVDraftRepository cvDraftRepository,
             List<CVPdfRenderer> renderers,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            CVProfileImageSourceResolver profileImageSourceResolver) {
         this.cvDraftRepository = cvDraftRepository;
         this.renderers = renderers;
         this.objectMapper = objectMapper;
+        this.profileImageSourceResolver = profileImageSourceResolver;
     }
 
     @Override
@@ -78,6 +82,7 @@ public class CVPdfGenerationServiceImpl implements CVPdfGenerationService {
                 .draftId(draft.getId())
                 .theme(normalizeTheme(draft.getTheme()))
                 .settings(readJson(draft.getSettingsJson()))
+                .profileImageSource(resolveProfileImageSource(draft))
                 .sections(draft.getSections().stream().map(this::toSection).toList())
                 .createdAt(draft.getCreatedAt())
                 .updatedAt(draft.getUpdatedAt())
@@ -103,10 +108,24 @@ public class CVPdfGenerationServiceImpl implements CVPdfGenerationService {
     }
 
     private String normalizeTheme(String theme) {
-        return theme == null || theme.isBlank() ? CVDraftServiceImpl.DEFAULT_THEME : theme.trim().toUpperCase();
+        return CVTemplateConstants.normalizeTemplateOrAlias(theme);
     }
 
     private String sanitizeThemeForFilename(String theme) {
         return normalizeTheme(theme).toLowerCase().replace('_', '-');
+    }
+
+    private String resolveProfileImageSource(CVDraft draft) {
+        CVSection profileSection = draft.getSections().stream()
+                .filter(section -> section != null && section.getType() != null && section.getType().name().equals("PROFILE"))
+                .findFirst()
+                .orElse(null);
+        if (profileSection == null) {
+            return null;
+        }
+
+        JsonNode profile = readJson(profileSection.getContentJson());
+        String profilePicture = profile == null ? null : profile.path("profilePicture").asText(null);
+        return profileImageSourceResolver.resolvePdfSafeSource(profilePicture);
     }
 }

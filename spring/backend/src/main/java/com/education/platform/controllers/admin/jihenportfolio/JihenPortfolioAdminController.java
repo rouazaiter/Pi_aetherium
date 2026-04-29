@@ -22,6 +22,7 @@ import com.education.platform.entities.portfolio.ModerationStatus;
 import com.education.platform.entities.portfolio.Visibility;
 import com.education.platform.services.interfaces.admin.jihenportfolio.JihenPortfolioAdminService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,6 +39,7 @@ import java.util.List;
 // Jihen Portfolio Admin
 @RestController
 @RequestMapping("/api/admin-jihen/portfolio")
+@PreAuthorize("hasRole('ADMIN')")
 public class JihenPortfolioAdminController {
 
     private final JihenPortfolioAdminService adminService;

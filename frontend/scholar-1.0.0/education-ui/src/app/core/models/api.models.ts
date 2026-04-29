@@ -516,6 +516,121 @@ export interface AdminReclamationUpdateRequest {
   adminResponse?: string | null;
 }
 
+export type AccountStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING_VERIFICATION';
+
+export interface AdminDashboardSummaryResponse {
+  totalUsers: number;
+  totalStudents: number;
+  totalAdmins: number;
+  totalPortfolios: number;
+  totalCvProfiles: number;
+  totalCvDrafts: number;
+  totalReclamations: number;
+  totalSubscriptions: number;
+  activeSubscriptions: number;
+  pendingReclamations: number;
+  pendingAdminActions: number;
+}
+
+export interface AdminMonthlyActivityPointResponse {
+  label: string;
+  users: number;
+  portfolios: number;
+  cvDrafts: number;
+  reclamations: number;
+  subscriptions: number;
+}
+
+export interface AdminStatusCountResponse {
+  status: string;
+  count: number;
+}
+
+export interface AdminRecentActivityResponse {
+  type: string;
+  title: string;
+  subtitle: string | null;
+  status: string | null;
+  createdAt: string | null;
+}
+
+export interface AdminDashboardActivityResponse {
+  monthlyActivity: AdminMonthlyActivityPointResponse[];
+  reclamationsByStatus: AdminStatusCountResponse[];
+  recentActivity: AdminRecentActivityResponse[];
+}
+
+export interface AdminPageResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  totalPages: number;
+}
+
+export interface AdminUserSummaryResponse {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: Role;
+  accountStatus: AccountStatus;
+  createdAt: string | null;
+  lastLogin: string | null;
+}
+
+export interface AdminUserDetailResponse extends AdminUserSummaryResponse {
+  portfolioCount: number;
+  cvProfileCount: number;
+  cvDraftCount: number;
+  reclamationCount: number;
+  subscriptionCount: number;
+}
+
+export interface AdminUserStatusUpdateRequest {
+  active: boolean;
+}
+
+export interface AdminPortfolioSummaryResponse {
+  id: number;
+  title: string;
+  ownerUsername: string | null;
+  ownerName: string | null;
+  visibility: PortfolioVisibility | null;
+  moderationStatus: string | null;
+  projectCount: number;
+  totalViews: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AdminCvSummaryResponse {
+  userId: number;
+  profileId: number | null;
+  username: string;
+  fullName: string | null;
+  headline: string | null;
+  visibility: PortfolioVisibility | null;
+  preferredTemplate: string | null;
+  draftCount: number;
+  profileUpdatedAt: string | null;
+  latestDraftUpdatedAt: string | null;
+}
+
+export interface AdminSubscriptionSummaryResponse {
+  id: number;
+  userId: number | null;
+  username: string | null;
+  email: string | null;
+  subscriptionPlan: SubscriptionPlan | null;
+  status: SubscriptionStatus | null;
+  dateOfSubscription: string | null;
+  expirationDate: string | null;
+  billingDate: string | null;
+  autoRenew: boolean;
+}
+
 export interface CvPreviewSkillDto {
   id: number;
   name: string;
@@ -547,6 +662,7 @@ export interface CvPreviewProfileDto {
   headline?: string | null;
   summary?: string | null;
   location?: string | null;
+  profilePicture?: string | null;
   githubUrl?: string | null;
   linkedinUrl?: string | null;
   linkedInUrl?: string | null;

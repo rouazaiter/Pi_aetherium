@@ -211,7 +211,7 @@ export class RegisterComponent {
       return;
     }
     if (this.form.controls.companyWebsite.value?.trim()) {
-      this.errorMsg = 'Inscription impossible. RÃ©essayez plus tard.';
+      this.errorMsg = 'Registration failed. Please try again later.';
       return;
     }
     if (this.form.invalid) {
@@ -243,7 +243,7 @@ export class RegisterComponent {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMsg = messageFromHttpError(err, 'Inscription impossible.');
+        this.errorMsg = messageFromHttpError(err, 'Registration failed.');
       },
     });
   }

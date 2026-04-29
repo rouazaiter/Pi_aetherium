@@ -57,6 +57,7 @@ public class RoomSessionController {
         response.put("status", room.getStatus().name());
         response.put("startTime", room.getStartTime());
         response.put("agoraChannelName", room.getAgoraChannelName());
+        response.put("workspaceAccessBlocked", room.isWorkspaceAccessBlocked());
 
         return ResponseEntity.ok(response);
     }
@@ -73,6 +74,7 @@ public class RoomSessionController {
             response.put("startTime", room.getStartTime());
             response.put("endTime", room.getEndTime());
             response.put("agoraChannelName", room.getAgoraChannelName());
+            response.put("workspaceAccessBlocked", room.isWorkspaceAccessBlocked());
             return ResponseEntity.ok(response);
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -91,6 +93,7 @@ public class RoomSessionController {
             roomMap.put("status", room.getStatus().name());
             roomMap.put("startTime", room.getStartTime());
             roomMap.put("participantCount", roomSessionService.getActiveParticipants(room.getId()).size());
+            roomMap.put("workspaceAccessBlocked", room.isWorkspaceAccessBlocked());
             response.add(roomMap);
         }
 
@@ -124,6 +127,41 @@ public class RoomSessionController {
         }
     }
 
+    @PostMapping("/join-by-name")
+    public ResponseEntity<?> joinRoomByName(@RequestBody Map<String, String> request) {
+        String roomName = Objects.toString(request.get("roomName"), "").trim();
+        String userName = Objects.toString(request.get("userName"), "").trim();
+
+        if (roomName.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Room name is required"));
+        }
+
+        try {
+            Long userId = Long.parseLong(Objects.toString(request.get("userId"), "").trim());
+            return roomSessionService.getActiveRoomByName(roomName).map(room -> {
+                SessionParticipant participant = roomSessionService.joinRoom(room.getId(), userId, userName);
+
+                messagingTemplate.convertAndSend("/topic/room/" + room.getId(), Map.of(
+                        "type", "USER_JOINED",
+                        "userId", participant.getUserId(),
+                        "userName", participant.getUserName()
+                ));
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("roomId", room.getId());
+                response.put("roomName", room.getName());
+                response.put("hostUserId", room.getHostUserId());
+                response.put("hostUserName", resolveHostUserName(room.getHostUserId()));
+                response.put("workspaceAccessBlocked", room.isWorkspaceAccessBlocked());
+                return ResponseEntity.ok(response);
+            }).orElse(ResponseEntity.badRequest().body(Map.of("error", "No active room found with this name")));
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid userId"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/{id}/leave")
     public ResponseEntity<?> leaveRoom(@PathVariable Long id, @RequestBody Map<String, String> request) {
         Long userId = Long.parseLong(request.get("userId"));
@@ -137,6 +175,26 @@ public class RoomSessionController {
             ));
 
             return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/workspace-access")
+    public ResponseEntity<?> setWorkspaceAccess(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+        try {
+            Long userId = parseLongField(request.get("userId"), "userId");
+            boolean blocked = Boolean.parseBoolean(Objects.toString(request.get("blocked"), "false"));
+            RoomSession room = roomSessionService.setWorkspaceAccessBlocked(id, userId, blocked);
+            messagingTemplate.convertAndSend("/topic/room/" + id, Map.of(
+                    "type", "ACCESS_LOCK_UPDATED",
+                    "roomId", id,
+                    "workspaceAccessBlocked", room.isWorkspaceAccessBlocked()
+            ));
+            return ResponseEntity.ok(Map.of(
+                    "roomId", room.getId(),
+                    "workspaceAccessBlocked", room.isWorkspaceAccessBlocked()
+            ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

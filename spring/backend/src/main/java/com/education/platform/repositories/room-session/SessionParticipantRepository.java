@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface SessionParticipantRepository extends JpaRepository<SessionParticipant, Long> {
     List<SessionParticipant> findBySessionId(Long sessionId);
     Optional<SessionParticipant> findBySessionIdAndUserId(Long sessionId, Long userId);
+    Optional<SessionParticipant> findBySessionIdAndUserIdAndLeftAtIsNull(Long sessionId, Long userId);
     List<SessionParticipant> findBySessionIdAndLeftAtIsNull(Long sessionId);
     boolean existsBySessionIdAndUserIdAndLeftAtIsNull(Long sessionId, Long userId);
+    boolean existsBySessionIdAndUserIdAndRoleAndLeftAtIsNull(Long sessionId, Long userId, SessionParticipant.ParticipantRole role);
 }

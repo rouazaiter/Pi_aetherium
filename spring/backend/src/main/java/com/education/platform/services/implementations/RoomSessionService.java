@@ -55,6 +55,34 @@ public class RoomSessionService implements IRoomSessionService {
     }
 
     @Override
+    public Optional<RoomSession> getActiveRoomByName(String roomName) {
+        if (roomName == null || roomName.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        return roomSessionRepository.findFirstByStatusAndNameIgnoreCase(
+                RoomSession.SessionStatus.ACTIVE,
+                roomName.trim()
+        );
+    }
+
+    @Override
+    @Transactional
+    public RoomSession setWorkspaceAccessBlocked(Long roomId, Long actorUserId, boolean blocked) {
+        RoomSession room = roomSessionRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        boolean isHostParticipant = participantRepository.existsBySessionIdAndUserIdAndRoleAndLeftAtIsNull(
+                roomId,
+                actorUserId,
+                SessionParticipant.ParticipantRole.HOST
+        );
+        if (!isHostParticipant) {
+            throw new RuntimeException("Only HOST can change workspace access");
+        }
+        room.setWorkspaceAccessBlocked(blocked);
+        return roomSessionRepository.save(room);
+    }
+
+    @Override
     @Transactional
     public SessionParticipant joinRoom(Long roomId, Long userId, String userName) {
         RoomSession room = roomSessionRepository.findById(roomId)
@@ -64,8 +92,10 @@ public class RoomSessionService implements IRoomSessionService {
             throw new RuntimeException("Room is no longer active");
         }
 
-        if (participantRepository.existsBySessionIdAndUserIdAndLeftAtIsNull(roomId, userId)) {
-            throw new RuntimeException("User already in room");
+        Optional<SessionParticipant> existingActiveParticipant =
+                participantRepository.findBySessionIdAndUserIdAndLeftAtIsNull(roomId, userId);
+        if (existingActiveParticipant.isPresent()) {
+            return existingActiveParticipant.get();
         }
 
         SessionParticipant participant = new SessionParticipant(

@@ -15,6 +15,10 @@ public interface IRoomSessionService {
 
     List<RoomSession> getActiveRooms();
 
+    Optional<RoomSession> getActiveRoomByName(String roomName);
+
+    RoomSession setWorkspaceAccessBlocked(Long roomId, Long actorUserId, boolean blocked);
+
     SessionParticipant joinRoom(Long roomId, Long userId, String userName);
 
     void leaveRoom(Long roomId, Long userId);

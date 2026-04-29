@@ -35,6 +35,9 @@ public class RoomSession {
     @Column(name = "agora_token")
     private String agoraToken;
 
+    @Column(name = "workspace_access_blocked", nullable = false)
+    private boolean workspaceAccessBlocked = false;
+
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SessionParticipant> participants = new ArrayList<>();
 
@@ -144,5 +147,13 @@ public class RoomSession {
 
     public void setRecordings(List<SessionRecording> recordings) {
         this.recordings = recordings;
+    }
+
+    public boolean isWorkspaceAccessBlocked() {
+        return workspaceAccessBlocked;
+    }
+
+    public void setWorkspaceAccessBlocked(boolean workspaceAccessBlocked) {
+        this.workspaceAccessBlocked = workspaceAccessBlocked;
     }
 }

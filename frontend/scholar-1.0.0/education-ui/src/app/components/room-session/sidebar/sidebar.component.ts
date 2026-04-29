@@ -10,7 +10,10 @@ import { CommonModule } from '@angular/common';
 })
 export class SidebarComponent {
   @Input() activeSection: 'code' | 'whiteboard' = 'code';
+  @Input() isHost = false;
+  @Input() workspaceAccessBlocked = false;
   @Output() activeSectionChange = new EventEmitter<'code' | 'whiteboard'>();
+  @Output() workspaceAccessToggle = new EventEmitter<boolean>();
 
   select(section: 'code' | 'whiteboard'): void {
     this.activeSectionChange.emit(section);
@@ -22,6 +25,10 @@ export class SidebarComponent {
       return `${base} bg-white text-[#464EB8] font-medium border-l-4 border-[#464EB8] rounded-r-md`;
     }
     return `${base} text-slate-600 hover:bg-slate-200/50 rounded-lg`;
+  }
+
+  toggleWorkspaceAccess(): void {
+    this.workspaceAccessToggle.emit(!this.workspaceAccessBlocked);
   }
 }
 

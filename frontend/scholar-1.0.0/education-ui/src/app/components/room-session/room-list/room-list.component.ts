@@ -2,11 +2,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { RoomSessionService, RoomSession } from '../../../core/services/room-session/room-session.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AppLayoutComponent } from '../app-layout/app-layout.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-room-list',
@@ -16,7 +19,8 @@ import { TopbarComponent } from '../topbar/topbar.component';
   styleUrls: ['./room-list.component.scss']
 })
 export class RoomListComponent implements OnInit, OnDestroy {
-  activeRooms: any[] = [];
+  hostRooms: RoomSession[] = [];
+  participantRooms: RoomSession[] = [];
   newRoomName = '';
   joinRoomName = '';
   userId = 0;
@@ -113,13 +117,63 @@ export class RoomListComponent implements OnInit, OnDestroy {
   loadActiveRooms(): void {
     this.loading = true;
     this.error = '';
-    this.roomSessionService.getActiveRooms().subscribe({
-      next: (rooms) => {
-        this.activeRooms = rooms;
+    this.roomSessionService.getMyActiveRoomsByRole(this.userId).subscribe({
+      next: (roomsByRole) => {
+        this.hostRooms = roomsByRole.hostRooms || [];
+        this.participantRooms = roomsByRole.participantRooms || [];
         this.loading = false;
       },
       error: () => {
-        this.error = 'Failed to connect to server. Make sure backend is running on port 8080.';
+        // Fallback for older backend versions that don't provide /active/by-user.
+        this.loadActiveRoomsFallback();
+      }
+    });
+  }
+
+  private loadActiveRoomsFallback(): void {
+    this.roomSessionService.getActiveRooms().subscribe({
+      next: (rooms) => {
+        const participantLookups = rooms.map((room) =>
+          this.roomSessionService.getParticipants(room.id).pipe(
+            map((participants) => ({ room, participants })),
+            catchError(() => of({ room, participants: [] as any[] }))
+          )
+        );
+
+        if (participantLookups.length === 0) {
+          this.hostRooms = [];
+          this.participantRooms = [];
+          this.loading = false;
+          return;
+        }
+
+        forkJoin(participantLookups).subscribe({
+          next: (results) => {
+            const hostRooms: RoomSession[] = [];
+            const participantRooms: RoomSession[] = [];
+
+            results.forEach(({ room, participants }) => {
+              const me = participants.find((p: any) => p.userId === this.userId && !p.leftAt);
+              if (!me) return;
+              if (me.role === 'HOST') {
+                hostRooms.push(room);
+              } else {
+                participantRooms.push(room);
+              }
+            });
+
+            this.hostRooms = hostRooms;
+            this.participantRooms = participantRooms;
+            this.loading = false;
+          },
+          error: () => {
+            this.error = `Failed to connect to server. Make sure backend is running on ${environment.apiUrl}.`;
+            this.loading = false;
+          }
+        });
+      },
+      error: () => {
+        this.error = `Failed to connect to server. Make sure backend is running on ${environment.apiUrl}.`;
         this.loading = false;
       }
     });

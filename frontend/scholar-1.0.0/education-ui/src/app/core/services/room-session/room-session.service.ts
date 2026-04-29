@@ -9,6 +9,7 @@ export interface RoomSession {
   hostUserId: number;
   hostUserName?: string;
   workspaceAccessBlocked?: boolean;
+  participantCount?: number;
   status: 'ACTIVE' | 'ENDED';
   startTime: Date;
   endTime?: Date;
@@ -52,6 +53,11 @@ export interface JoinRoomByNameResponse {
   workspaceAccessBlocked?: boolean;
 }
 
+export interface MyRoomsByRoleResponse {
+  hostRooms: RoomSession[];
+  participantRooms: RoomSession[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +77,10 @@ export class RoomSessionService {
 
   getActiveRooms(): Observable<RoomSession[]> {
     return this.http.get<RoomSession[]>(`${this.apiUrl}/active`);
+  }
+
+  getMyActiveRoomsByRole(userId: number): Observable<MyRoomsByRoleResponse> {
+    return this.http.get<MyRoomsByRoleResponse>(`${this.apiUrl}/active/by-user/${userId}`);
   }
 
   joinRoom(roomId: number, userId: number, userName: string): Observable<Participant> {

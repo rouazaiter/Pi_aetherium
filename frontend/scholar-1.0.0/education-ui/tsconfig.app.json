@@ -12,10 +12,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts"
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/main
   ],
   "exclude": [
     "src/**/*.spec.ts"

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RoomSessionService, RoomSession } from '../../../core/services/room-session/room-session.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { AppLayoutComponent } from '../app-layout/app-layout.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
@@ -25,12 +26,19 @@ export class RoomListComponent implements OnInit, OnDestroy {
 
   constructor(
     private roomSessionService: RoomSessionService,
-    private router: Router
+    private router: Router,
+    private auth: AuthService
   ) {}
 
   ngOnInit(): void {
-    const storedUserId = localStorage.getItem('userId');
-    this.userId = storedUserId ? +storedUserId : 1;
+    const authUserId = this.auth.auth()?.userId;
+    this.userId = typeof authUserId === 'number' ? authUserId : 0;
+    if (!this.userId) {
+      this.error = 'Session expirée. Veuillez vous reconnecter.';
+      this.loading = false;
+      void this.router.navigate(['/login']);
+      return;
+    }
     this.loadActiveRooms();
 
     this.refreshInterval = setInterval(() => {
@@ -48,6 +56,11 @@ export class RoomListComponent implements OnInit, OnDestroy {
     const roomName = this.newRoomName?.trim();
     if (!roomName) {
       alert('Please enter a room name');
+      return;
+    }
+    if (!this.userId) {
+      alert('You must be logged in to create a room.');
+      void this.router.navigate(['/login']);
       return;
     }
 

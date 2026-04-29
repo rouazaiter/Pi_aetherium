@@ -8,6 +8,10 @@ function shouldAttachJwt(url: string): boolean {
   if (url.includes('/api/auth/')) {
     return false;
   }
+  // Support relative API calls when Angular dev server proxy is used (e.g. /api/whiteboard/config).
+  if (url.startsWith('/api/')) {
+    return true;
+  }
   const base = (environment.apiUrl ?? '').trim().replace(/\/$/, '');
   if (!base) {
     return url.startsWith('/api/');

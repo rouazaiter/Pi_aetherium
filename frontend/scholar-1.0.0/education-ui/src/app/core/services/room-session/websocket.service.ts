@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { Client, Message } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 declare global {
   interface Window {
@@ -34,6 +35,7 @@ export interface WhiteboardAction {
 export class WebSocketService {
   private stompClient: Client | null = null;
   private connected = false;
+  private activeRoomId: number | null = null;
   private connectionSubject = new Subject<boolean>();
   private chatSubject = new Subject<ChatMessage>();
   private roomEventSubject = new Subject<RoomEvent>();
@@ -45,16 +47,24 @@ export class WebSocketService {
   whiteboardActions$ = this.whiteboardSubject.asObservable();
 
   connect(roomId: number): void {
-    if (this.connected) {
+    if (this.connected && this.activeRoomId === roomId) {
       return;
     }
 
-    const socket = new window.SockJS('/ws');
+    if (this.stompClient) {
+      this.disconnect();
+    }
+
+    this.activeRoomId = roomId;
     this.stompClient = new Client({
-      webSocketFactory: () => socket
+      webSocketFactory: () => {
+        const SockJSCtor = window.SockJS || SockJS;
+        return new SockJSCtor('/ws');
+      },
+      reconnectDelay: 3000
     });
 
-    this.stompClient.onConnect = (frame: any) => {
+    this.stompClient.onConnect = () => {
       this.connected = true;
       this.connectionSubject.next(true);
 
@@ -74,6 +84,16 @@ export class WebSocketService {
       });
     };
 
+    this.stompClient.onStompError = () => {
+      this.connected = false;
+      this.connectionSubject.next(false);
+    };
+
+    this.stompClient.onWebSocketError = () => {
+      this.connected = false;
+      this.connectionSubject.next(false);
+    };
+
     this.stompClient.onDisconnect = () => {
       this.connected = false;
       this.connectionSubject.next(false);
@@ -87,6 +107,7 @@ export class WebSocketService {
       this.stompClient.deactivate();
       this.stompClient = null;
       this.connected = false;
+      this.activeRoomId = null;
       this.connectionSubject.next(false);
     }
   }

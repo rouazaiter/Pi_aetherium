@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface WhiteboardRoom {
   uuid: string;
@@ -26,7 +27,7 @@ export interface FastboardModule {
   providedIn: 'root'
 })
 export class WhiteboardService {
-  private apiUrl = '/api/whiteboard';
+  private readonly apiUrl = `${environment.apiUrl}/api/whiteboard`;
   private fastboardLoadPromise: Promise<FastboardModule> | null = null;
 
   constructor(private http: HttpClient) {}
@@ -50,8 +51,8 @@ export class WhiteboardService {
    * @param lifespanMs Token lifespan in milliseconds (default 1 hour)
    */
   getRoomToken(
-    uuid: string, 
-    role: 'writer' | 'reader' | 'admin' = 'writer', 
+    uuid: string,
+    role: 'writer' | 'reader' | 'admin' = 'writer',
     lifespanMs: number = 3600000
   ): Observable<RoomTokenResponse> {
     return this.http.post<RoomTokenResponse>(`${this.apiUrl}/room-token`, {

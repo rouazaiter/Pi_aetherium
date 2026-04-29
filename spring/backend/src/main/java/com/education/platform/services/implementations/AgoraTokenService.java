@@ -2,12 +2,9 @@ package com.education.platform.services.implementations;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.education.platform.agora.RtcTokenBuilder2;
 import com.education.platform.services.interfaces.IAgoraTokenService;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,22 +22,27 @@ public class AgoraTokenService implements IAgoraTokenService {
 
     @Override
     public String generateToken(String channelName, Long userId, int expireTime) {
-        if (appId == null || appId.isEmpty() || appCertificate == null || appCertificate.isEmpty()) {
+        String normalizedAppId = normalize(appId);
+        String normalizedCertificate = normalize(appCertificate);
+        if (!isValidAgoraHex(normalizedAppId) || !isValidAgoraHex(normalizedCertificate)) {
             return "";
         }
-
-        long issueTs = System.currentTimeMillis() / 1000;
-        long expire = issueTs + (expireTime > 0 ? expireTime : tokenExpiry);
-
-        String uidStr = userId != null ? userId.toString() : "0";
-        String signature = generateSignature(channelName, uidStr, String.valueOf(issueTs), String.valueOf(expire));
-
-        return String.format("%s:%s:%s:%s:%s",
-                appId,
-                userId,
-                issueTs,
-                expire,
-                signature);
+        String normalizedChannel = normalize(channelName);
+        if (normalizedChannel.isEmpty()) {
+            return "";
+        }
+        int uid = userId != null && userId > 0 ? (int) (userId & 0xFFFFFFFFL) : 0;
+        int ttl = expireTime > 0 ? expireTime : tokenExpiry;
+        RtcTokenBuilder2 tokenBuilder = new RtcTokenBuilder2();
+        return tokenBuilder.buildTokenWithUid(
+                normalizedAppId,
+                normalizedCertificate,
+                normalizedChannel,
+                uid,
+                RtcTokenBuilder2.Role.ROLE_PUBLISHER,
+                ttl,
+                ttl
+        );
     }
 
     @Override
@@ -48,28 +50,21 @@ public class AgoraTokenService implements IAgoraTokenService {
         return generateToken(channelName, userId, tokenExpiry);
     }
 
-    private String generateSignature(String channelName, String uid, String issueTs, String expire) {
-        String signature = "";
-        try {
-            String rawSignature = appId + channelName + uid + issueTs + expire;
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(appCertificate.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            mac.init(secretKeySpec);
-            byte[] hash = mac.doFinal(rawSignature.getBytes(StandardCharsets.UTF_8));
-            signature = Base64.getEncoder().encodeToString(hash);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return signature;
-    }
-
     @Override
     public Map<String, String> generateTokenForRoom(String channelName, Long userId) {
         Map<String, String> result = new HashMap<>();
         String token = generateTokenForUser(channelName, userId);
         result.put("token", token);
-        result.put("appId", appId);
+        result.put("appId", normalize(appId));
         result.put("channelName", channelName);
         return result;
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private boolean isValidAgoraHex(String value) {
+        return value != null && value.matches("^[A-Fa-f0-9]{32}$");
     }
 }

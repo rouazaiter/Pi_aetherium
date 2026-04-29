@@ -73,6 +73,15 @@
         }
         </div>
 
+        <a
+          routerLink="/rooms"
+          routerLinkActive="app-nav__link--active"
+          class="app-nav__link"
+          (click)="closeNav()"
+        >
+          Sessions
+        </a>
+
         @if (auth.isLoggedIn()) {
           <div class="app-nav__user-menu-wrap">
             <button

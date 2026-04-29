@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface RecordingUploadResponse {
   sessionId: number;
@@ -13,7 +14,7 @@ export interface RecordingUploadResponse {
   providedIn: 'root'
 })
 export class RecordingUploadService {
-  private readonly apiUrl = '/api/recordings';
+  private readonly apiUrl = `${environment.apiUrl}/api/recordings`;
 
   constructor(private http: HttpClient) {}
 

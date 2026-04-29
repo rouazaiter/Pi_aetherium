@@ -15,8 +15,8 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./pages/home/home.component').then((m) => m.HomeComponent),
   },
-  { path: 'rooms', component: RoomListComponent },
-  { path: 'rooms/:roomId', component: RoomSessionComponent },
+  { path: 'rooms', canActivate: [authGuard], component: RoomListComponent },
+  { path: 'rooms/:roomId', canActivate: [authGuard], component: RoomSessionComponent },
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),

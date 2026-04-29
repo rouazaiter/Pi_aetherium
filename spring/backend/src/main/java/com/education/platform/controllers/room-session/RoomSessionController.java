@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.education.platform.models.*;
+import com.education.platform.repositories.UserRepository;
 import com.education.platform.services.interfaces.IAgoraTokenService;
 import com.education.platform.services.interfaces.IRoomSessionService;
 
@@ -25,6 +26,7 @@ public class RoomSessionController {
     private final IRoomSessionService roomSessionService;
     private final IAgoraTokenService agoraTokenService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
 
     @Value("${app.upload.directory:./uploads/recordings}")
     private String uploadDirectory;
@@ -32,10 +34,12 @@ public class RoomSessionController {
     public RoomSessionController(
             IRoomSessionService roomSessionService,
             IAgoraTokenService agoraTokenService,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate,
+            UserRepository userRepository) {
         this.roomSessionService = roomSessionService;
         this.agoraTokenService = agoraTokenService;
         this.messagingTemplate = messagingTemplate;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
@@ -49,6 +53,7 @@ public class RoomSessionController {
         response.put("id", room.getId());
         response.put("name", room.getName());
         response.put("hostUserId", room.getHostUserId());
+        response.put("hostUserName", resolveHostUserName(room.getHostUserId()));
         response.put("status", room.getStatus().name());
         response.put("startTime", room.getStartTime());
         response.put("agoraChannelName", room.getAgoraChannelName());
@@ -63,6 +68,7 @@ public class RoomSessionController {
             response.put("id", room.getId());
             response.put("name", room.getName());
             response.put("hostUserId", room.getHostUserId());
+            response.put("hostUserName", resolveHostUserName(room.getHostUserId()));
             response.put("status", room.getStatus().name());
             response.put("startTime", room.getStartTime());
             response.put("endTime", room.getEndTime());
@@ -81,6 +87,7 @@ public class RoomSessionController {
             roomMap.put("id", room.getId());
             roomMap.put("name", room.getName());
             roomMap.put("hostUserId", room.getHostUserId());
+            roomMap.put("hostUserName", resolveHostUserName(room.getHostUserId()));
             roomMap.put("status", room.getStatus().name());
             roomMap.put("startTime", room.getStartTime());
             roomMap.put("participantCount", roomSessionService.getActiveParticipants(room.getId()).size());
@@ -194,12 +201,19 @@ public class RoomSessionController {
     }
 
     @PostMapping("/{id}/messages")
-    public ResponseEntity<?> sendMessage(@PathVariable Long id, @RequestBody Map<String, String> request) {
-        Long senderId = Long.parseLong(request.get("senderId"));
-        String senderName = request.get("senderName");
-        String content = request.get("content");
-
+    public ResponseEntity<?> sendMessage(@PathVariable Long id, @RequestBody Map<String, Object> request) {
         try {
+            Long senderId = parseLongField(request.get("senderId"), "senderId");
+            String senderName = Objects.toString(request.get("senderName"), "").trim();
+            String content = Objects.toString(request.get("content"), "").trim();
+
+            if (content.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Message content is required"));
+            }
+            if (senderName.isEmpty()) {
+                senderName = "User";
+            }
+
             ChatMessage message = roomSessionService.addMessage(id, senderId, senderName, content);
 
             messagingTemplate.convertAndSend("/topic/room/" + id + "/chat", Map.of(
@@ -210,10 +224,47 @@ public class RoomSessionController {
                     "timestamp", message.getTimestamp()
             ));
 
-            return ResponseEntity.ok(Map.of("success", true));
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", message.getId());
+            response.put("senderId", message.getSenderId());
+            response.put("senderName", message.getSenderName());
+            response.put("content", message.getContent());
+            response.put("timestamp", message.getTimestamp());
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    private Long parseLongField(Object value, String fieldName) {
+        if (value == null) {
+            throw new IllegalArgumentException("Missing required field: " + fieldName);
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        String textValue = value.toString().trim();
+        if (textValue.isEmpty()) {
+            throw new IllegalArgumentException("Missing required field: " + fieldName);
+        }
+        try {
+            return Long.parseLong(textValue);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Invalid numeric field: " + fieldName);
+        }
+    }
+
+    private String resolveHostUserName(Long hostUserId) {
+        if (hostUserId == null) {
+            return "Unknown";
+        }
+        return userRepository.findById(hostUserId)
+                .map(user -> {
+                    String username = user.getUsername();
+                    return (username == null || username.isBlank()) ? "User #" + hostUserId : username;
+                })
+                .orElse("User #" + hostUserId);
     }
 
     @PostMapping("/{id}/token")
@@ -223,6 +274,13 @@ public class RoomSessionController {
         return roomSessionService.getRoom(id).map(room -> {
             Map<String, String> tokenData = agoraTokenService.generateTokenForRoom(
                     room.getAgoraChannelName(), userId);
+            String appId = tokenData.getOrDefault("appId", "").trim();
+            String token = tokenData.getOrDefault("token", "").trim();
+            if (appId.isEmpty() || token.isEmpty()) {
+                return ResponseEntity.internalServerError().body(Map.of(
+                        "error", "Agora configuration is invalid. Verify agora.app.id and agora.app.certificate in backend configuration."
+                ));
+            }
             return ResponseEntity.ok(tokenData);
         }).orElse(ResponseEntity.notFound().build());
     }

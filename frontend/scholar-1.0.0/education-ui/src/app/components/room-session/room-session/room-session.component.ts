@@ -7,6 +7,7 @@ import { RoomSessionService, RoomSession, Participant } from '../../../core/serv
 import { WebSocketService } from '../../../core/services/room-session/websocket.service';
 import { AgoraService } from '../../../core/services/room-session/agora.service';
 import { RecordingService, RecordingState } from '../../../core/services/room-session/recording.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { VideoPanelComponent } from '../video-panel/video-panel.component';
 import { ChatPanelComponent } from '../chat-panel/chat-panel.component';
 import { AppLayoutComponent } from '../app-layout/app-layout.component';
@@ -54,13 +55,18 @@ export class RoomSessionComponent implements OnInit, OnDestroy {
     private roomSessionService: RoomSessionService,
     private websocketService: WebSocketService,
     private agoraService: AgoraService,
-    private recordingService: RecordingService
+    private recordingService: RecordingService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.roomId = +this.route.snapshot.paramMap.get('roomId')!;
-    this.userId = +localStorage.getItem('userId')!;
-    this.userName = localStorage.getItem('userName') || 'User';
+    const authUser = this.authService.auth();
+    const storedUserId = localStorage.getItem('userId');
+    const parsedUserId = storedUserId ? Number(storedUserId) : NaN;
+    this.userId = authUser?.userId
+      ?? (Number.isFinite(parsedUserId) && parsedUserId > 0 ? parsedUserId : 1);
+    this.userName = authUser?.username || localStorage.getItem('userName') || 'User';
 
     this.loadRoom();
     this.connectWebSocket();

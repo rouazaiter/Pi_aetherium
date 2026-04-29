@@ -1,3 +1,4 @@
+@import 'aos/dist/aos.css';
 * {
   box-sizing: border-box;
   margin: 0;
@@ -18,7 +19,8 @@ html.dark body {
 }
 
 body {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .material-symbols-outlined {

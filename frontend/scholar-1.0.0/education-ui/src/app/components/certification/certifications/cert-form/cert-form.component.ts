@@ -118,66 +118,81 @@ export class CertFormComponent implements OnInit {
       return;
     }
 
+    // If no certId yet (new cert), we need to save first to get an ID
+    if (!this.certId) {
+      this.toast.info('Saving certification first to generate image…');
+      this.loading = true;
+      this.certService.create({ ...this.form, status: 'DRAFT' }).subscribe({
+        next: cert => {
+          this.certId = cert.id;
+          this.isEdit = true;
+          this.loading = false;
+          this._doGenerateImage(cert.id);
+        },
+        error: e => {
+          this.loading = false;
+          this.toast.error('Save failed: ' + e.message);
+        }
+      });
+      return;
+    }
+
+    this._doGenerateImage(this.certId);
+  }
+
+  private _doGenerateImage(id: number): void {
     this.generatingImage = true;
     this.imageLoaded     = false;
-    this.imagePreviewUrl = null;
-    this.form.coverImageUrl = null;
+    this.toast.info('🎨 Generating cover image — this may take ~20 seconds…');
 
-    const topic = this.form.title.trim();
-    const cat   = (this.form.category || 'technology').trim();
-    const diff  = this.form.difficulty || 'INTERMEDIATE';
+    this.certService.generateImage(id).subscribe({
+      next: res => {
+        const url = res.coverImageUrl;
+        if (!url) {
+          this.generatingImage = false;
+          this.toast.error('❌ No image URL returned. Try again.');
+          return;
+        }
 
-    const colorScheme = diff === 'BEGINNER' ? 'teal green neon'
-                      : diff === 'ADVANCED' ? 'red purple neon'
-                      : 'blue cyan neon';
+        // Pre-load the image to confirm it's accessible
+        const img = new Image();
+        const timeout = setTimeout(() => {
+          img.onload = null; img.onerror = null;
+          // Even if pre-load times out, the URL is valid — just use it
+          this.imagePreviewUrl    = url;
+          this.form.coverImageUrl = url;
+          this.imageLoaded        = true;
+          this.generatingImage    = false;
+          this.toast.success('✅ Cover image generated!');
+        }, 30000);
 
-    const prompt  = `${topic} ${cat} 3D render dark background ${colorScheme} cinematic no text`;
-    const encoded = encodeURIComponent(prompt);
-    const seed    = Math.abs(topic.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % 99999);
-    const url     = `https://image.pollinations.ai/prompt/${encoded}?width=800&height=450&seed=${seed}&nologo=true`;
+        img.onload = () => {
+          clearTimeout(timeout);
+          this.imagePreviewUrl    = url;
+          this.form.coverImageUrl = url;
+          this.imageLoaded        = true;
+          this.generatingImage    = false;
+          this.toast.success('✅ Cover image generated!');
+        };
 
-    this.toast.info('🎨 Generating image — please wait ~15 seconds…');
+        img.onerror = () => {
+          clearTimeout(timeout);
+          // URL may still be valid even if browser blocks the pre-load
+          // (CORS, etc.) — set it anyway so the <img> tag can try
+          this.imagePreviewUrl    = url;
+          this.form.coverImageUrl = url;
+          this.imageLoaded        = true;
+          this.generatingImage    = false;
+          this.toast.success('✅ Cover image generated!');
+        };
 
-    // Use a hidden Image object to load — avoids CORS issues with HttpClient blob fetch
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-
-    // Timeout after 40s
-    const timeout = setTimeout(() => {
-      img.onload = null;
-      img.onerror = null;
-      this.generatingImage = false;
-      this.toast.error('❌ Image took too long. Try again.');
-    }, 40000);
-
-    img.onload = () => {
-      clearTimeout(timeout);
-      this.imagePreviewUrl    = url;
-      this.form.coverImageUrl = url;
-      this.imageLoaded        = true;
-      this.generatingImage    = false;
-      this.toast.success('✅ Cover image generated!');
-    };
-
-    img.onerror = () => {
-      clearTimeout(timeout);
-      // Retry once without crossOrigin (some CDNs block it)
-      const img2 = new Image();
-      img2.onload = () => {
-        this.imagePreviewUrl    = url;
-        this.form.coverImageUrl = url;
-        this.imageLoaded        = true;
-        this.generatingImage    = false;
-        this.toast.success('✅ Cover image generated!');
-      };
-      img2.onerror = () => {
+        img.src = url;
+      },
+      error: e => {
         this.generatingImage = false;
-        this.toast.error('❌ Image generation failed. Check your internet connection and try again.');
-      };
-      img2.src = url;
-    };
-
-    img.src = url;
+        this.toast.error('❌ Image generation failed: ' + e.message);
+      }
+    });
   }
 
   onImageError(): void {

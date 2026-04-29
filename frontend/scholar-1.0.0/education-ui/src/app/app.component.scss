@@ -9,8 +9,8 @@ $nav-h: 72px;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(122, 106, 216, 0.12);
-  box-shadow: 0 4px 24px rgba(30, 30, 30, 0.06);
+  border-bottom: 1px solid rgba(30, 30, 30, 0.06);
+  box-shadow: 0 2px 12px rgba(30, 30, 30, 0.04);
 }
 
 .app-nav__inner {
@@ -416,7 +416,7 @@ $nav-h: 72px;
 
 .page-content {
   min-height: calc(100vh - 140px);
-  padding-top: 1rem;
+  padding-top: 0.25rem;
 }
 
 .page-content--immersive {

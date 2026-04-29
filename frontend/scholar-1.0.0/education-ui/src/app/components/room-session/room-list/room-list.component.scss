@@ -1,1 +1,26 @@
+.room-name-input {
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  caret-color: #000;
+  background-color: #fff !important;
+
+  &::placeholder {
+    color: #9ca3af !important;
+    -webkit-text-fill-color: #9ca3af !important;
+    opacity: 1;
+  }
+}
+
+:host-context(.dark) .room-name-input {
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  caret-color: #000;
+  background-color: #fff !important;
+
+  &::placeholder {
+    color: #9ca3af !important;
+    -webkit-text-fill-color: #9ca3af !important;
+    opacity: 1;
+  }
+}
 

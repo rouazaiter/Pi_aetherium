@@ -1,66 +1,98 @@
-<div class="main-banner" id="top">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-10 offset-lg-1">
-        <div class="header-text">
-          <span class="category">Plateforme éducative</span>
-          <h2>Votre espace profil, abonnements et réseau d’amis</h2>
-          <p>
-            Cette application Angular parle à votre API Spring Boot (JWT, profil, abonnements, amis). Démarrez le
-            backend sur le port <strong>8081</strong>, puis connectez-vous ou créez un compte.
-          </p>
-          <div class="buttons">
-            @if (auth.isLoggedIn()) {
-              <div class="main-button">
-                <a routerLink="/profile">Mon profil</a>
-              </div>
-            } @else {
-              <div class="main-button">
-                <a routerLink="/register">Créer un compte</a>
-              </div>
-              <div class="main-button">
-                <a routerLink="/login">Se connecter</a>
-              </div>
-            }
+<main class="home-landing">
+  <section class="home-hero">
+    <div class="home-container home-hero__grid">
+      <div class="home-hero__content" data-aos="fade-up" data-aos-duration="900">
+        <span class="home-badge">Expert-led innovation</span>
+        <h1>Master the Future of <span>Technology</span></h1>
+        <p>
+          Build your career with a premium learning ecosystem: guided paths, practical labs, social mentoring,
+          AI-assisted feedback, and portfolio-ready outcomes.
+        </p>
+
+        <div class="home-hero__actions">
+          @if (auth.isLoggedIn()) {
+            <a class="home-btn home-btn--primary" routerLink="/profile">Go to my profile</a>
+            <a class="home-btn home-btn--ghost" routerLink="/explore">Explore community</a>
+          } @else {
+            <a class="home-btn home-btn--primary" routerLink="/register">Create account</a>
+            <a class="home-btn home-btn--ghost" routerLink="/login">Sign in</a>
+          }
+        </div>
+
+        @if (!auth.isLoggedIn() && hasOAuthClients) {
+          <div class="home-social-wrap" data-aos="fade-up" data-aos-delay="150">
+            <app-social-login [showGoogleHeading]="true" [flushTop]="true" />
           </div>
-          @if (!auth.isLoggedIn() && hasOAuthClients) {
-            <div class="home-social-wrap mx-auto mt-4" style="max-width: 380px">
-              <app-social-login [showGoogleHeading]="true" [flushTop]="true" />
-            </div>
+        }
+      </div>
+
+      <div class="home-hero__visual" data-aos="fade-left" data-aos-duration="1000">
+        <div class="home-orb home-orb--one"></div>
+        <div class="home-orb home-orb--two"></div>
+        <div class="home-kpi-grid">
+          @for (kpi of heroStats; track kpi.label) {
+            <article class="home-kpi-card">
+              <strong>{{ kpi.value }}</strong>
+              <span>{{ kpi.label }}</span>
+            </article>
           }
         </div>
       </div>
     </div>
-  </div>
-</div>
+  </section>
 
-<section class="services section py-5" id="services">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12 text-center mb-4">
-        <div class="section-heading">
-          <h6>Fonctionnalités</h6>
-          <h2>Ce que propose l’API</h2>
-        </div>
+  <section class="home-features">
+    <div class="home-container">
+      <div class="home-section-head" data-aos="fade-up">
+        <h2>Built for serious learners</h2>
+        <p>From fundamentals to advanced delivery, every section is designed for practical progression.</p>
       </div>
-      <div class="col-md-4">
-        <div class="service-item p-4 h-100 rounded-3 bg-light">
-          <h4>Profil</h4>
-          <p class="mb-0">Lecture et mise à jour via <code>/api/profile/me</code>.</p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="service-item p-4 h-100 rounded-3 bg-light">
-          <h4>Abonnements</h4>
-          <p class="mb-0">Plans FREE, STANDARD, PREMIUM — <code>/api/subscriptions</code>.</p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="service-item p-4 h-100 rounded-3 bg-light">
-          <h4>Amis</h4>
-          <p class="mb-0">Liste, ajout par nom d’utilisateur, suppression — <code>/api/friends</code>.</p>
-        </div>
+
+      <div class="home-feature-grid">
+        @for (feature of featureHighlights; track feature.title; let i = $index) {
+          <article class="home-feature-card" data-aos="zoom-in-up" [attr.data-aos-delay]="i * 120">
+            <span class="home-feature-card__icon">{{ feature.icon }}</span>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </article>
+        }
       </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <section class="home-instructors">
+    <div class="home-container">
+      <div class="home-section-head" data-aos="fade-up">
+        <h2>Meet our expert instructors</h2>
+        <p>Learn from professionals who architected platforms, secured systems, and shipped products at scale.</p>
+      </div>
+
+      <div class="home-instructor-grid">
+        @for (instructor of instructors; track instructor.name; let i = $index) {
+          <article class="home-instructor-card" data-aos="fade-up" [attr.data-aos-delay]="i * 90">
+            <div class="home-instructor-card__avatar">{{ instructor.initials }}</div>
+            <h3>{{ instructor.name }}</h3>
+            <h4>{{ instructor.role }}</h4>
+            <p>{{ instructor.bio }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="home-cta" data-aos="fade-up" data-aos-duration="900">
+    <div class="home-container home-cta__content">
+      <h2>Start your learning journey today</h2>
+      <p>Join professionals building future-ready skills with guided, project-based learning.</p>
+      <div class="home-cta__actions">
+        @if (auth.isLoggedIn()) {
+          <a class="home-btn home-btn--primary" routerLink="/social-hub">Enter social hub</a>
+          <a class="home-btn home-btn--ghost-light" routerLink="/cv">Build my CV</a>
+        } @else {
+          <a class="home-btn home-btn--primary" routerLink="/register">Create free account</a>
+          <a class="home-btn home-btn--ghost-light" routerLink="/login">Contact us</a>
+        }
+      </div>
+    </div>
+  </section>
+</main>

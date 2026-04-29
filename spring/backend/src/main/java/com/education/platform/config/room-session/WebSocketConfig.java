@@ -25,14 +25,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins(parseAllowedOrigins())
+                .setAllowedOriginPatterns(parseAllowedOrigins())
                 .withSockJS();
     }
 
     private String[] parseAllowedOrigins() {
-        return Arrays.stream(allowedOrigins.split(","))
+        String[] configuredOrigins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(origin -> !origin.isEmpty())
                 .toArray(String[]::new);
+        if (configuredOrigins.length == 0) {
+            return new String[]{"http://localhost:*", "http://127.0.0.1:*"};
+        }
+        return configuredOrigins;
     }
 }

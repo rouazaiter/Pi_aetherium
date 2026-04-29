@@ -1,13 +1,9 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import DailyIframe from '@daily-co/daily-js';
 
-declare global {
-  interface Window {
-    DailyIframe: any;
-  }
-}
+const DAILY_DEMO_ROOM_URL = 'https://demo.daily.co/hello';
+const DAILY_ROOM_URL_STORAGE_KEY = 'dailyRoomUrl';
 
 @Component({
   selector: 'app-video-panel',
@@ -22,15 +18,11 @@ export class VideoPanelComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() isHost: boolean = false;
   @Input() userName: string = 'You';
   @Input() dailyRoomUrl: string = '';
-
   @ViewChild('videoContainer') videoContainer!: ElementRef<HTMLDivElement>;
 
   error = '';
+  usingFallbackRoom = false;
   private callFrame: any = null;
-
-  private destroy$ = new Subject<void>();
-
-  constructor() {}
 
   ngOnInit(): void {}
 
@@ -38,66 +30,79 @@ export class VideoPanelComponent implements OnInit, OnDestroy, AfterViewInit {
     void this.initDailyCall();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  async ngOnDestroy(): Promise<void> {
     if (this.callFrame) {
+      try {
+        await this.callFrame.leave();
+      } catch {
+        // ignore leave error during teardown
+      }
       this.callFrame.destroy();
+      this.callFrame = null;
     }
   }
 
   private async initDailyCall(): Promise<void> {
-    if (!this.dailyRoomUrl) {
-      this.error = 'Daily room URL not configured';
-      return;
-    }
+    try {
+      const roomUrl = this.resolveRoomUrl();
+      if (!roomUrl) {
+        this.error = 'Daily room URL is missing. Set a URL in localStorage key "dailyRoomUrl".';
+        return;
+      }
 
-    if (!window.DailyIframe) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.daily.co/daily-js/v0.62.0/daily-iframe.js';
-      script.onload = () => this.createCallFrame();
-      script.onerror = () => {
-        this.error = 'Failed to load Daily.co SDK';
-      };
-      document.head.appendChild(script);
-    } else {
-      this.createCallFrame();
+      if (!this.videoContainer?.nativeElement) {
+        this.error = 'Video container is not ready.';
+        return;
+      }
+
+      this.callFrame = DailyIframe.createFrame(this.videoContainer.nativeElement, {
+        showLeaveButton: false,
+        showFullscreenButton: true,
+        iframeStyle: {
+          width: '100%',
+          height: '100%',
+          border: '0',
+          borderRadius: '12px'
+        }
+      });
+
+      this.callFrame.on('error', (event: any) => {
+        this.error = event?.errorMsg || 'Daily connection error.';
+      });
+
+      await this.callFrame.join({
+        url: roomUrl,
+        userName: this.userName || `User ${this.userId}`,
+        startVideoOff: false,
+        startAudioOff: false
+      });
+    } catch (err: any) {
+      this.error = err?.message || 'Unable to join Daily room.';
     }
   }
 
-  private createCallFrame(): void {
-    if (!this.videoContainer?.nativeElement || !window.DailyIframe) {
+  private resolveRoomUrl(): string {
+    const inputUrl = this.dailyRoomUrl?.trim();
+    if (inputUrl) {
+      this.usingFallbackRoom = false;
+      return inputUrl;
+    }
+    const storedUrl = localStorage.getItem(DAILY_ROOM_URL_STORAGE_KEY)?.trim() || '';
+    if (storedUrl) {
+      this.usingFallbackRoom = false;
+      return storedUrl;
+    }
+    this.usingFallbackRoom = true;
+    return DAILY_DEMO_ROOM_URL;
+  }
+
+  openRoomSettings(): void {
+    const current = this.dailyRoomUrl?.trim() || localStorage.getItem(DAILY_ROOM_URL_STORAGE_KEY) || DAILY_DEMO_ROOM_URL;
+    const next = window.prompt('Paste Daily room URL', current);
+    if (!next || !next.trim()) {
       return;
     }
-
-    this.callFrame = window.DailyIframe.createFrame(this.videoContainer.nativeElement, {
-      iframeStyle: {
-        width: '100%',
-        height: '100%',
-        border: 'none',
-        borderRadius: '8px',
-      },
-      showLeaveButton: true,
-      userData: {
-        userName: this.userName,
-      },
-    });
-
-    this.callFrame.on('joined-meeting', () => {
-      console.log('Joined Daily meeting');
-    });
-
-    this.callFrame.on('left-meeting', () => {
-      console.log('Left Daily meeting');
-    });
-
-    this.callFrame.on('error', (err: any) => {
-      console.error('Daily error:', err);
-      this.error = err?.errorMsg || 'Daily call error';
-    });
-
-    this.callFrame.join({
-      url: this.dailyRoomUrl,
-    });
+    localStorage.setItem(DAILY_ROOM_URL_STORAGE_KEY, next.trim());
+    window.location.reload();
   }
 }

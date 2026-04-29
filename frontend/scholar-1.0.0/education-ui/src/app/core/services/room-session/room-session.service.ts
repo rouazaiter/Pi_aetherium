@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface RoomSession {
   id: number;
   name: string;
   hostUserId: number;
+  hostUserName?: string;
   status: 'ACTIVE' | 'ENDED';
   startTime: Date;
   endTime?: Date;
@@ -45,7 +47,7 @@ export interface Recording {
   providedIn: 'root'
 })
 export class RoomSessionService {
-  private apiUrl = '/api/rooms';
+  private readonly apiUrl = `${environment.apiUrl}/api/rooms`;
 
   constructor(private http: HttpClient) {}
 
@@ -82,8 +84,8 @@ export class RoomSessionService {
     return this.http.get<ChatMessage[]>(`${this.apiUrl}/${roomId}/messages`);
   }
 
-  sendMessage(roomId: number, senderId: number, senderName: string, content: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${roomId}/messages`, { senderId, senderName, content });
+  sendMessage(roomId: number, senderId: number, senderName: string, content: string): Observable<ChatMessage> {
+    return this.http.post<ChatMessage>(`${this.apiUrl}/${roomId}/messages`, { senderId, senderName, content });
   }
 
   getAgoraToken(roomId: number, userId: number): Observable<{ token: string; appId: string; channelName: string }> {

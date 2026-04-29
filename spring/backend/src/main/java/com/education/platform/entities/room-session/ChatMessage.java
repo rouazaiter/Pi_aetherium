@@ -12,8 +12,14 @@ public class ChatMessage {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "session_id", nullable = false, insertable = false, updatable = false)
     private RoomSession session;
+
+    @Column(name = "session_id", nullable = false)
+    private Long sessionId;
+
+    @Column(name = "room_id", nullable = false)
+    private Long roomId;
 
     @Column(name = "sender_id", nullable = false)
     private Long senderId;
@@ -32,6 +38,8 @@ public class ChatMessage {
 
     public ChatMessage(RoomSession session, Long senderId, String senderName, String content) {
         this.session = session;
+        this.sessionId = session != null ? session.getId() : null;
+        this.roomId = session != null ? session.getId() : null;
         this.senderId = senderId;
         this.senderName = senderName;
         this.content = content;
@@ -52,6 +60,24 @@ public class ChatMessage {
 
     public void setSession(RoomSession session) {
         this.session = session;
+        this.sessionId = session != null ? session.getId() : null;
+        this.roomId = session != null ? session.getId() : null;
+    }
+
+    public Long getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public Long getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(Long roomId) {
+        this.roomId = roomId;
     }
 
     public Long getSenderId() {

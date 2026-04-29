@@ -6,12 +6,16 @@ import { JihenCvComponent } from './pages/jihen-cv/jihen-cv.component';
 import { JihenPortfolioComponent } from './pages/jihen-portfolio/jihen-portfolio.component';
 import { PortfolioMentorComponent } from './pages/portfolio-mentor/portfolio-mentor.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { RoomListComponent } from './components/room-session/room-list/room-list.component';
+import { RoomSessionComponent } from './components/room-session/room-session/room-session.component';
 
 export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/home/home.component').then((m) => m.HomeComponent),
   },
+  { path: 'rooms', component: RoomListComponent },
+  { path: 'rooms/:roomId', component: RoomSessionComponent },
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),

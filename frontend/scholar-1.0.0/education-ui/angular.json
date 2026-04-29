@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
@@ -8,13 +8,16 @@
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss",
-          "skipTests": true
+          "skipTests": true,
+          "standalone": true
         },
         "@schematics/angular:class": {
-          "skipTests": true
+          "skipTests": true,
+          "standalone": true
         },
         "@schematics/angular:directive": {
-          "skipTests": true
+          "skipTests": true,
+          "standalone": true
         },
         "@schematics/angular:guard": {
           "skipTests": true
@@ -23,7 +26,8 @@
           "skipTests": true
         },
         "@schematics/angular:pipe": {
-          "skipTests": true
+          "skipTests": true,
+          "standalone": true
         },
         "@schematics/angular:resolver": {
           "skipTests": true
@@ -48,6 +52,7 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/favicon.ico",
               {
                 "glob": "**/*",
                 "input": "src/assets",

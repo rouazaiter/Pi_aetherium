@@ -1,0 +1,226 @@
+<div *ngIf="loading" class="co-loading">
+  <div class="spinner spinner--lg"></div>
+  <p>Loading checkout…</p>
+</div>
+
+<div *ngIf="!loading && cert" class="co-page">
+  <button class="co-back" (click)="goBack()">← Back</button>
+
+  <div class="co-layout">
+
+    <!-- ── Order summary ──────────────────────────────────────────────── -->
+    <div class="co-summary">
+      <!-- Cover image -->
+      <div *ngIf="cert.coverImageUrl" class="summary-cover">
+        <img [src]="cert.coverImageUrl" [alt]="cert.title" class="summary-cover-img"
+             (error)="$any($event.target).style.display='none'" />
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-icon" *ngIf="!cert.coverImageUrl">🎓</div>
+        <div class="summary-info">
+          <span class="summary-label">Certification</span>
+          <h2 class="summary-title">{{ cert.title }}</h2>
+          <div class="summary-meta">
+            <span>⏱ {{ cert.durationMinutes }} min</span>
+            <span>❓ {{ totalQuestions }} questions</span>
+            <span>🎯 {{ cert.passingScore }}% to pass</span>
+          </div>
+        </div>
+        <div class="summary-price-row">
+          <span class="summary-price-label">Total</span>
+          <span class="summary-price" *ngIf="cert.price > 0">${{ cert.price | number:'1.2-2' }}</span>
+          <span class="summary-price summary-price--free" *ngIf="cert.price === 0">FREE</span>
+        </div>
+      </div>
+
+      <div class="security-badges">
+        <div class="sec-badge"><span>🔒</span><span>Secured by Stripe</span></div>
+        <div class="sec-badge"><span>✅</span><span>Instant access after payment</span></div>
+        <div class="sec-badge"><span>🎓</span><span>Certificate on passing</span></div>
+      </div>
+    </div>
+
+    <!-- ── Checkout form ───────────────────────────────────────────────── -->
+    <div class="co-form-panel">
+
+      <!-- Step indicator -->
+      <div class="steps" *ngIf="step !== 'processing' && step !== 'done'">
+        <div class="step"
+             [class.step--active]="step === 'email'"
+             [class.step--done]="step === 'payment' || step === 'verify'">
+          <span class="step-num">{{ (step === 'payment' || step === 'verify') ? '✓' : '1' }}</span>
+          <span>Your Info</span>
+        </div>
+        <div class="step-line" *ngIf="cert.price > 0"></div>
+        <div class="step"
+             [class.step--active]="step === 'payment'"
+             [class.step--done]="step === 'verify'"
+             *ngIf="cert.price > 0">
+          <span class="step-num">{{ step === 'verify' ? '✓' : '2' }}</span>
+          <span>Payment</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" [class.step--active]="step === 'verify'">
+          <span class="step-num">{{ cert.price > 0 ? '3' : '2' }}</span>
+          <span>Verify Email</span>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="co-error">{{ error }}</div>
+
+      <!-- ── Step 1: Email + Name ──────────────────────────────────────── -->
+      <div *ngIf="step === 'email'" class="co-step">
+        <h3>{{ cert.price > 0 ? 'Your Information' : 'Enroll for Free' }}</h3>
+        <p class="co-step-desc">
+          {{ cert.price > 0
+            ? 'Enter your details to proceed to secure payment.'
+            : 'Enter your details to enroll instantly.' }}
+        </p>
+
+        <div class="co-field">
+          <label>Full Name</label>
+          <input type="text" [(ngModel)]="fullName" class="co-input"
+                 placeholder="e.g. John Smith"
+                 (keyup.enter)="confirmEmail()" />
+        </div>
+        <div class="co-field">
+          <label>Email Address</label>
+          <input type="email" [(ngModel)]="userIdentifier" class="co-input"
+                 placeholder="you@example.com"
+                 (keyup.enter)="confirmEmail()" />
+        </div>
+        <div class="co-field">
+          <label>
+            Phone Number
+            <span class="co-field-optional">optional — for SMS payment confirmation</span>
+          </label>
+          <div class="co-phone-wrap">
+            <span class="co-phone-prefix">📱</span>
+            <input type="tel" [(ngModel)]="phoneNumber" class="co-input co-input--phone"
+                   placeholder="+21612345678"
+                   (keyup.enter)="confirmEmail()" />
+          </div>
+          <span class="co-field-hint">International format · e.g. +1 555 000 1234 or +216 12 345 678</span>
+        </div>
+
+        <button class="co-btn co-btn--primary" (click)="confirmEmail()" [disabled]="processing">
+          <span *ngIf="!processing">
+            {{ cert.price > 0 ? 'Continue to Payment →' : '🎓 Enroll for Free' }}
+          </span>
+          <span *ngIf="processing" class="btn-loading"><span class="spinner"></span> Checking…</span>
+        </button>
+      </div>
+
+      <!-- ── Step 2: Stripe Payment ────────────────────────────────────── -->
+      <div *ngIf="step === 'payment'" class="co-step">
+        <h3>Secure Payment</h3>
+        <p class="co-step-desc">
+          Enrolling as <strong>{{ fullName }}</strong> · <span class="email-sm">{{ userIdentifier }}</span>
+        </p>
+
+        <!-- Stripe loading -->
+        <div *ngIf="stripeLoading" class="stripe-loading">
+          <div class="spinner"></div>
+          <span>Initializing secure payment…</span>
+        </div>
+
+        <!-- Stripe Elements mount point -->
+        <div id="stripe-payment-element" class="stripe-element-wrap" [class.hidden]="stripeLoading"></div>
+
+        <div class="co-total-row" *ngIf="!stripeLoading">
+          <span>Total charged today</span>
+          <strong>${{ cert.price | number:'1.2-2' }}</strong>
+        </div>
+
+        <button class="co-btn co-btn--stripe" (click)="pay()"
+                [disabled]="processing || stripeLoading">
+          <span *ngIf="!processing">
+            🔒 Pay ${{ cert.price | number:'1.2-2' }} with Stripe
+          </span>
+          <span *ngIf="processing" class="btn-loading">
+            <span class="spinner"></span> Processing…
+          </span>
+        </button>
+
+        <div class="stripe-badge">
+          <span>Powered by</span>
+          <strong>Stripe</strong>
+          <span>· 256-bit SSL encryption</span>
+        </div>
+
+        <button class="co-btn-link" (click)="step = 'email'">← Change details</button>
+      </div>
+
+      <!-- ── Step 3: Email Verification ───────────────────────────────── -->
+      <div *ngIf="step === 'verify'" class="co-step co-step--verify">
+        <div class="verify-icon">✉️</div>
+        <h3>Check Your Email</h3>
+        <p class="co-step-desc">
+          {{ cert.price > 0 ? 'Payment confirmed! We' : 'We' }} sent a 6-digit verification code to<br>
+          <strong>{{ userIdentifier }}</strong>
+        </p>
+        <p class="co-step-desc co-step-desc--sm">
+          The code is valid for <strong>5 minutes</strong>. Check your spam folder if you don't see it.
+        </p>
+
+        <div class="code-input-wrap">
+          <input type="text" class="code-input"
+                 [value]="verificationCode"
+                 (input)="onCodeInput($event)"
+                 placeholder="000000"
+                 maxlength="6"
+                 [disabled]="processing"
+                 (keyup.enter)="verifyCode()" />
+        </div>
+
+        <button class="co-btn co-btn--primary" (click)="verifyCode()"
+                [disabled]="processing || verificationCode.length < 6">
+          <span *ngIf="!processing">🔓 Verify & Unlock Certification</span>
+          <span *ngIf="processing" class="btn-loading">
+            <span class="spinner"></span> Verifying…
+          </span>
+        </button>
+
+        <div class="resend-row">
+          <button class="btn-resend" (click)="resendCode()"
+                  [disabled]="resendCooldown > 0 || processing">
+            {{ resendCooldown > 0 ? 'Resend in ' + resendCooldown + 's' : "Didn't receive it? Resend code" }}
+          </button>
+        </div>
+
+        <button class="co-btn-link" (click)="step = cert.price > 0 ? 'payment' : 'email'">
+          ← Go back
+        </button>
+      </div>
+
+      <!-- ── Processing ────────────────────────────────────────────────── -->
+      <div *ngIf="step === 'processing'" class="co-step co-step--center">
+        <div class="spinner spinner--xl"></div>
+        <h3>Processing your enrollment…</h3>
+        <p class="co-step-desc">Please wait, this only takes a moment.</p>
+      </div>
+
+      <!-- ── Done ──────────────────────────────────────────────────────── -->
+      <div *ngIf="step === 'done'" class="co-step co-step--center">
+        <div class="done-icon">🎉</div>
+        <h3>Certification Unlocked!</h3>
+        <p class="co-step-desc">
+          Welcome, <strong>{{ fullName || userIdentifier }}</strong>!<br>
+          You now have full access to <strong>{{ cert.title }}</strong>.
+        </p>
+        <div class="done-actions">
+          <button class="co-btn co-btn--practice"
+                  (click)="router.navigate(['/store', certId, 'practice'])">
+            🧪 Warm Up with Practice
+          </button>
+          <button class="co-btn co-btn--primary" (click)="startExam()">
+            🚀 Start Real Exam
+          </button>
+        </div>
+        <button class="co-btn-link" (click)="goToStore()">← Back to Store</button>
+      </div>
+
+    </div>
+  </div>
+</div>

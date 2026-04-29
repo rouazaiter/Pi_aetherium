@@ -1,0 +1,97 @@
+.room-check { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.rc-header { display: flex; align-items: flex-start; gap: 1rem; background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.rc-header-icon { font-size: 2.5rem; flex-shrink: 0; }
+.rc-header-text { h2 { margin: 0 0 .3rem; font-size: 1.2rem; color: #0f172a; } p { margin: 0; color: #64748b; font-size: .875rem; line-height: 1.5; } }
+
+// ── State panels ──────────────────────────────────────────────────────────────
+.rc-state { background: #fff; border-radius: 14px; padding: 3rem 2rem; box-shadow: 0 1px 3px rgba(0,0,0,.06); display: flex; flex-direction: column; align-items: center; gap: .75rem; text-align: center; }
+.rc-state--error { border: 1.5px solid #fca5a5; }
+.rc-state-icon { font-size: 3rem; }
+.rc-state-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; }
+.rc-state-sub   { font-size: .82rem; color: #94a3b8; margin: 0; max-width: 360px; line-height: 1.5; }
+.rc-state p     { margin: 0; color: #64748b; font-size: .875rem; }
+.btn-retry { background: #4f46e5; color: #fff; border: none; border-radius: 9px; padding: .65rem 1.5rem; font-size: .875rem; font-weight: 700; cursor: pointer; margin-top: .5rem; &:hover { background: #4338ca; } }
+
+// ── Camera section ────────────────────────────────────────────────────────────
+.rc-camera-section { display: flex; flex-direction: column; gap: .75rem; }
+.rc-camera-section--hidden { display: none; }
+
+// ── Phase label ───────────────────────────────────────────────────────────────
+.phase-label { display: flex; justify-content: center; }
+.phase-badge { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem 1rem; border-radius: 20px; font-size: .8rem; font-weight: 700; }
+.phase-badge--scan     { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.phase-badge--confirm  { background: #f0fdf4; color: #065f46; border: 1px solid #bbf7d0; }
+.phase-badge--approved { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+
+// ── Video wrap ────────────────────────────────────────────────────────────────
+.video-wrap {
+  position: relative; border-radius: 14px; overflow: hidden;
+  background: #0f172a; aspect-ratio: 4/3;
+  border: 3px solid #334155; transition: border-color .3s;
+  &--ok   { border-color: #10b981; }
+  &--warn { border-color: #ef4444; animation: borderPulse 1s ease-in-out infinite; }
+}
+@keyframes borderPulse { 0%,100%{border-color:#ef4444} 50%{border-color:#fca5a5} }
+.rc-video  { width: 100%; height: 100%; object-fit: cover; display: block; transform: scaleX(-1); }
+.rc-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+// ── Video badge ───────────────────────────────────────────────────────────────
+.video-badge { position: absolute; top: .75rem; left: .75rem; display: flex; align-items: center; gap: .4rem; background: rgba(15,23,42,.8); backdrop-filter: blur(6px); color: #fff; padding: .35rem .85rem; border-radius: 20px; font-size: .78rem; font-weight: 700; transition: background .3s; }
+.video-badge--green { background: rgba(16,185,129,.85); }
+.video-badge--red   { background: rgba(239,68,68,.85); }
+.video-badge--blue  { background: rgba(59,130,246,.85); }
+.badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+.badge-dot--pulse { background: #fbbf24; animation: dotPulse .8s ease-in-out infinite; }
+.badge-dot--green { background: #fff; }
+.badge-dot--red   { background: #fff; }
+@keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+// ── Approved overlay ──────────────────────────────────────────────────────────
+.approved-overlay { position: absolute; inset: 0; background: rgba(16,185,129,.4); display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.approved-check { font-size: 5rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.approved-overlay p { color: #fff; font-size: 1.2rem; font-weight: 700; margin: .5rem 0 0; text-shadow: 0 2px 8px rgba(0,0,0,.3); }
+
+// ── Status bar ────────────────────────────────────────────────────────────────
+.rc-status { background: #f8fafc; border-radius: 10px; padding: .85rem 1.1rem; font-size: .875rem; color: #475569; font-weight: 500; text-align: center; border: 1.5px solid #e2e8f0; transition: all .3s; }
+.rc-status--ok   { background: #f0fdf4; border-color: #6ee7b7; color: #065f46; }
+.rc-status--warn { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+
+// ── Scan progress ─────────────────────────────────────────────────────────────
+.scan-progress-wrap, .confirm-progress-wrap { display: flex; flex-direction: column; gap: .4rem; background: #fff; border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.scan-progress-header, .confirm-progress-header { display: flex; justify-content: space-between; font-size: .82rem; font-weight: 700; color: #1e293b; }
+.scan-progress-track, .confirm-progress-track { height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
+.scan-progress-fill    { height: 100%; background: linear-gradient(90deg, #3b82f6, #6366f1); border-radius: 5px; transition: width .4s ease; }
+.confirm-progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 5px; transition: width .4s ease; }
+.scan-hint { margin: .4rem 0 0; font-size: .78rem; color: #94a3b8; line-height: 1.5; }
+
+// ── Cancel ────────────────────────────────────────────────────────────────────
+.btn-cancel { background: none; border: none; color: #94a3b8; font-size: .85rem; cursor: pointer; padding: .25rem; text-align: center; width: 100%; &:hover { color: #64748b; text-decoration: underline; } }
+
+// ── Spinners ──────────────────────────────────────────────────────────────────
+.spinner { display: inline-block; border-radius: 50%; animation: spin .6s linear infinite; }
+.spinner { width: 20px; height: 20px; border: 2px solid rgba(99,102,241,.2); border-top-color: #6366f1; }
+.spinner--lg    { width: 44px; height: 44px; border-width: 4px; }
+.spinner--green { border-color: rgba(16,185,129,.2); border-top-color: #10b981; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Scene dots ────────────────────────────────────────────────────────────────
+.scene-dots { display: flex; gap: .5rem; justify-content: center; margin: .4rem 0; }
+.scene-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #e2e8f0; border: 2px solid #cbd5e1;
+  transition: all .3s ease;
+  &--filled { background: linear-gradient(135deg, #3b82f6, #6366f1); border-color: #6366f1; box-shadow: 0 0 6px rgba(99,102,241,.4); }
+}
+
+// ── Motion indicator ──────────────────────────────────────────────────────────
+.motion-row { display: flex; align-items: center; gap: .6rem; margin-top: .5rem; }
+.motion-label { font-size: .75rem; font-weight: 600; color: #64748b; white-space: nowrap; }
+.motion-bar-track { flex: 1; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+.motion-bar-fill { height: 100%; border-radius: 4px; transition: width .2s ease, background .3s; max-width: 100%; }
+.motion-bar-fill--active { background: linear-gradient(90deg, #10b981, #34d399); }
+.motion-bar-fill--idle   { background: #ef4444; }
+.motion-status { font-size: .72rem; font-weight: 700; white-space: nowrap; color: #ef4444; }
+.motion-status--active { color: #10b981; }

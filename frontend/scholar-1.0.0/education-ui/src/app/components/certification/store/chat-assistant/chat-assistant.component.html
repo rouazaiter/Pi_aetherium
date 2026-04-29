@@ -1,0 +1,165 @@
+<!-- ── Floating bubble ──────────────────────────────────────────────────────── -->
+<div class="chat-bubble" [class.chat-bubble--open]="isOpen" (click)="toggle()"
+     title="Certification Advisor">
+  <div class="bubble-icon" *ngIf="!isOpen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      <circle cx="9"  cy="10" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+    <span class="bubble-label">Ask AI</span>
+  </div>
+  <div class="bubble-close" *ngIf="isOpen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ── Chat panel ───────────────────────────────────────────────────────────── -->
+<div class="chat-panel" [class.chat-panel--open]="isOpen">
+
+  <!-- Header -->
+  <div class="cp-header">
+    <div class="cp-header__avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </div>
+    <div class="cp-header__info">
+      <div class="cp-header__name">Certification Advisor</div>
+      <div class="cp-header__status">
+        <span class="status-dot"></span>
+        <span>{{ isTyping ? 'Typing…' : 'Online' }}</span>
+      </div>
+    </div>
+    <button class="cp-header__clear" (click)="clearHistory()" title="Clear conversation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+      </svg>
+    </button>
+    <button class="cp-header__close" (click)="close()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="cp-messages">
+
+    <ng-container *ngFor="let msg of messages; let i = index">
+
+      <!-- ── Assistant message ─────────────────────────────────────────────── -->
+      <div *ngIf="msg.role === 'assistant'" class="msg msg--assistant">
+        <div class="msg__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <div class="msg__body">
+          <div class="msg__bubble msg__bubble--assistant"
+               [innerHTML]="formatContent(msg.content)">
+          </div>
+
+          <!-- Recommendation cards -->
+          <div *ngIf="msg.recommendations && msg.recommendations.length" class="rec-cards">
+            <div class="rec-cards__label">Recommended for you</div>
+            <div class="rec-card" *ngFor="let cert of msg.recommendations"
+                 (click)="openCert(cert.id)">
+              <div class="rec-card__cover"
+                   [style.background]="cert.coverImageUrl ? 'none' : 'linear-gradient(135deg,#4f46e5,#6366f1)'">
+                <img *ngIf="cert.coverImageUrl" [src]="cert.coverImageUrl"
+                     [alt]="cert.title" class="rec-card__img"
+                     (error)="$any($event.target).style.display='none'"/>
+                <span *ngIf="!cert.coverImageUrl" class="rec-card__emoji">🎓</span>
+              </div>
+              <div class="rec-card__info">
+                <div class="rec-card__title">{{ cert.title }}</div>
+                <div class="rec-card__meta">
+                  <span class="rec-tag"
+                        [style.background]="difficultyBg(cert.difficulty)"
+                        [style.color]="difficultyColor(cert.difficulty)">
+                    {{ cert.difficulty }}
+                  </span>
+                  <span class="rec-tag rec-tag--cat">{{ cert.category }}</span>
+                </div>
+                <div class="rec-card__price">
+                  <span *ngIf="cert.price > 0">${{ cert.price | number:'1.2-2' }}</span>
+                  <span *ngIf="cert.price === 0" class="rec-free">FREE</span>
+                </div>
+              </div>
+              <div class="rec-card__arrow">→</div>
+            </div>
+          </div>
+
+          <div class="msg__time">{{ msg.timestamp | date:'HH:mm' }}</div>
+        </div>
+      </div>
+
+      <!-- ── User message ──────────────────────────────────────────────────── -->
+      <div *ngIf="msg.role === 'user'" class="msg msg--user">
+        <div class="msg__body">
+          <div class="msg__bubble msg__bubble--user">{{ msg.content }}</div>
+          <div class="msg__time msg__time--right">{{ msg.timestamp | date:'HH:mm' }}</div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- Typing indicator -->
+    <div *ngIf="isTyping" class="msg msg--assistant">
+      <div class="msg__avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </div>
+      <div class="msg__body">
+        <div class="msg__bubble msg__bubble--assistant typing-bubble">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- Quick actions (shown only when few messages) -->
+  <div *ngIf="messages.length <= 2 && !isTyping" class="quick-actions">
+    <button *ngFor="let action of quickActions"
+            class="qa-btn"
+            (click)="sendQuickAction(action)">
+      <span class="qa-icon">{{ action.icon }}</span>
+      <span>{{ action.label }}</span>
+    </button>
+  </div>
+
+  <!-- Input -->
+  <div class="cp-input-row">
+    <textarea #inputEl
+              class="cp-input"
+              [(ngModel)]="inputText"
+              (keydown)="onKeydown($event)"
+              placeholder="Ask about certifications…"
+              rows="1"
+              [disabled]="isTyping">
+    </textarea>
+    <button class="cp-send"
+            (click)="send()"
+            [disabled]="!inputText.trim() || isTyping"
+            [class.cp-send--active]="inputText.trim()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <div class="cp-footer">Powered by SkillHub AI · Certification advice only</div>
+
+</div>

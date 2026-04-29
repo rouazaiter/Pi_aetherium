@@ -1,0 +1,216 @@
+<div *ngIf="loading" class="loading">
+  <div class="spinner spinner--lg"></div>
+  <p>Loading your result…</p>
+</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div *ngIf="enrollment && !loading" class="result-page">
+
+  <!-- ── Score card ──────────────────────────────────────────────────────── -->
+  <div class="result-card" [class.result-card--pass]="enrollment.passed"
+                           [class.result-card--fail]="!enrollment.passed">
+    <div class="result-card__body">
+      <!-- Score ring -->
+      <div class="score-ring-wrap">
+        <svg class="score-ring" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+          <circle cx="60" cy="60" r="54" fill="none"
+                  [attr.stroke]="enrollment.passed ? '#059669' : '#dc2626'"
+                  stroke-width="10" stroke-linecap="round"
+                  [attr.stroke-dasharray]="circumference"
+                  [attr.stroke-dashoffset]="dashOffset"
+                  transform="rotate(-90 60 60)"/>
+          <text x="60" y="65" text-anchor="middle" font-size="22" font-weight="800"
+                [attr.fill]="enrollment.passed ? '#059669' : '#dc2626'">
+            {{ scorePercent }}%
+          </text>
+        </svg>
+      </div>
+
+      <!-- Verdict + info -->
+      <div class="result-info">
+        <div class="verdict" [class.verdict--pass]="enrollment.passed"
+                             [class.verdict--fail]="!enrollment.passed">
+          {{ enrollment.passed ? '🏆 Congratulations! You Passed!' : '😔 Not Quite There' }}
+        </div>
+        <p class="cert-name">{{ enrollment.certificationTitle }}</p>
+
+        <div class="result-stats">
+          <div class="r-stat">
+            <span class="r-val">{{ scorePercent }}%</span>
+            <span class="r-lbl">Your Score</span>
+          </div>
+          <div class="r-stat">
+            <span class="r-val">{{ enrollment.passed ? '✅' : '❌' }}</span>
+            <span class="r-lbl">Result</span>
+          </div>
+          <div class="r-stat">
+            <span class="r-val">{{ enrollment.amountPaid | currency }}</span>
+            <span class="r-lbl">Paid</span>
+          </div>
+          <div class="r-stat">
+            <span class="r-val">{{ enrollment.completedAt | date:'mediumDate' }}</span>
+            <span class="r-lbl">Completed</span>
+          </div>
+        </div>
+
+        <!-- Share buttons (pass only) -->
+        <div *ngIf="enrollment.passed" class="share-row">
+          <button class="btn-linkedin" (click)="openLinkedInModal()">
+            <svg class="li-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+            Share on LinkedIn
+          </button>
+          <a class="btn-verify-link"
+             [href]="'/verify?id=' + certIdFormatted"
+             target="_blank">
+            🔗 Verification Link
+          </a>
+          <button *ngIf="!feedbackAlreadySubmitted"
+                  class="btn-feedback" (click)="openFeedbackModal()">
+            💬 Give Feedback
+          </button>
+          <span *ngIf="feedbackAlreadySubmitted" class="feedback-done-badge">
+            ✓ Feedback submitted
+          </span>
+        </div>
+
+        <div *ngIf="!enrollment.passed" class="retry-note">
+          📚 Keep studying and try again.
+          <div *ngIf="enrollment.attemptCount < enrollment.maxAttempts" class="retry-info">
+            You have <strong>{{ enrollment.maxAttempts - enrollment.attemptCount }}</strong> attempt(s) remaining — no additional payment needed.
+          </div>
+
+          <!-- Cooldown active -->
+          <div *ngIf="isCooldownActive" class="cooldown-block">
+            <div class="cooldown-block__icon">⏳</div>
+            <div class="cooldown-block__text">
+              <div class="cooldown-block__label">Cooldown period — come back in</div>
+              <div class="cooldown-block__timer">{{ cooldownDisplay }}</div>
+              <div class="cooldown-block__sub">A 24-hour waiting period is required between attempts.</div>
+            </div>
+          </div>
+
+          <!-- Retry available -->
+          <button *ngIf="enrollment.attemptCount < enrollment.maxAttempts && !isCooldownActive"
+                  class="btn-retry" (click)="retryExam()">
+            🔄 Retry Exam (Free)
+          </button>
+
+          <div *ngIf="enrollment.attemptCount >= enrollment.maxAttempts" class="retry-exhausted">
+            ⚠️ Maximum attempts reached. Contact support if you need help.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Certificate section (passed only) ──────────────────────────────── -->
+  <div *ngIf="enrollment.passed" class="cert-section">
+    <div class="cert-section__header">
+      <div>
+        <h3>🎓 Your Certificate</h3>
+        <p>Your achievement has been officially recorded and is ready to download.</p>
+      </div>
+      <div class="cert-header-actions">
+        <button class="btn-download" (click)="downloadCertificate()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading cert -->
+    <div *ngIf="loadingCert" class="cert-loading">
+      <div class="spinner spinner--lg"></div>
+      <p>Generating your certificate…</p>
+    </div>
+
+    <!-- Inline PDF viewer -->
+    <div *ngIf="showCertPreview && certPdfUrl" class="cert-viewer-wrap">
+      <iframe [src]="certPdfUrl"
+              class="cert-viewer"
+              title="Your Certificate"
+              frameborder="0">
+      </iframe>
+    </div>
+  </div>
+
+  <!-- ── Actions ─────────────────────────────────────────────────────────── -->
+  <div class="result-actions">
+    <a routerLink="/store" class="btn btn-outline">← Back to Store</a>
+    <a routerLink="/store/my" class="btn btn-primary">📋 My Certifications</a>
+  </div>
+
+</div>
+
+<!-- ── Feedback Modal ──────────────────────────────────────────────────────── -->
+<app-feedback-modal
+  *ngIf="showFeedbackModal && enrollment"
+  [enrollmentId]="enrollment.id"
+  [certTitle]="enrollment.certificationTitle"
+  [score]="scorePercent"
+  (closed)="closeFeedbackModal()"
+  (submitted)="onFeedbackSubmitted()">
+</app-feedback-modal>
+
+<!-- ── LinkedIn Post Modal ─────────────────────────────────────────────────── --><div *ngIf="showLinkedInModal" class="modal-overlay" (click)="closeLinkedInModal()">
+  <div class="li-modal" (click)="$event.stopPropagation()">
+
+    <div class="li-modal__header">
+      <div class="li-modal__title">
+        <svg class="li-icon li-icon--lg" viewBox="0 0 24 24" fill="#0A66C2">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        <span>Share Your Achievement</span>
+      </div>
+      <button class="li-modal__close" (click)="closeLinkedInModal()">✕</button>
+    </div>
+
+    <div class="li-modal__body">
+      <!-- Loading state -->
+      <div *ngIf="loadingPost" class="li-loading">
+        <div class="spinner spinner--lg spinner--blue"></div>
+        <p>AI is crafting your post…</p>
+      </div>
+
+      <!-- Post preview -->
+      <div *ngIf="!loadingPost" class="li-post-preview">
+        <div class="li-post-header">
+          <div class="li-avatar">{{ (enrollment?.fullName || enrollment?.userIdentifier || 'U').charAt(0).toUpperCase() }}</div>
+          <div>
+            <div class="li-post-name">{{ enrollment?.fullName || enrollment?.userIdentifier }}</div>
+            <div class="li-post-meta">Posting to LinkedIn</div>
+          </div>
+        </div>
+        <textarea class="li-post-text"
+                  [(ngModel)]="linkedInPost"
+                  rows="10"
+                  placeholder="Your post will appear here…">
+        </textarea>
+        <div class="li-char-count" [class.li-char-count--warn]="linkedInPost.length > 2800">
+          {{ linkedInPost.length }} / 3000 characters
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loadingPost" class="li-modal__footer">
+      <button class="btn-copy" (click)="copyPost()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        {{ postCopied ? '✓ Copied!' : 'Copy Text' }}
+      </button>
+      <button class="btn-share-li" (click)="shareOnLinkedIn()">
+        <svg class="li-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        Post to LinkedIn
+      </button>
+    </div>
+
+  </div>
+</div>

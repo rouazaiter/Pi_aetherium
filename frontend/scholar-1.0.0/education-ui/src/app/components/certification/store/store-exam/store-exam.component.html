@@ -1,0 +1,264 @@
+<div *ngIf="loading" class="exam-loading">
+  <div class="spinner spinner--lg"></div>
+  <p>Loading your exam…</p>
+</div>
+
+<div *ngIf="error && !cert" class="alert alert-danger">{{ error }}</div>
+
+<!-- ── Room Check Gate ──────────────────────────────────────────────────────── -->
+<div *ngIf="!loading && cert && !roomCheckPassed" class="room-check-gate">
+  <app-room-check
+    (approved)="onRoomApproved()"
+    (cancelled)="goBack()">
+  </app-room-check>
+</div>
+
+<!-- ── Exam (only shown after room check passes) ───────────────────────────── -->
+<div *ngIf="!loading && cert && roomCheckPassed" class="exam-shell">
+
+  <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
+  <div class="exam-topbar">
+    <div class="exam-topbar__left">
+      <span class="exam-cert-name">{{ cert.title }}</span>
+      <span class="secure-badge">🔒 Monitored</span>
+    </div>
+
+    <div class="exam-topbar__center">
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progress"></div>
+      </div>
+      <span class="progress-label">{{ currentIndex + 1 }} / {{ questions.length }}</span>
+    </div>
+
+    <div class="exam-topbar__right">
+      <!-- Timer -->
+      <div class="timer"
+           [class.timer--warning]="timerWarning"
+           [class.timer--critical]="timerCritical">
+        <span class="timer-icon">⏱</span>
+        <span class="timer-display">{{ timerDisplay }}</span>
+      </div>
+      <!-- Answered count -->
+      <span class="answered-pill">
+        <span class="answered-dot"></span>
+        {{ answeredCount }}/{{ questions.length }}
+      </span>
+    </div>
+  </div>
+
+  <div class="exam-body">
+
+    <!-- ── Question navigator ──────────────────────────────────────────────── -->
+    <div class="q-nav-panel">
+      <p class="q-nav-title">Questions</p>
+      <div class="q-nav-grid">
+        <button *ngFor="let q of questions; let i = index"
+                class="q-nav-dot"
+                [class.q-nav-dot--current]="i === currentIndex"
+                [class.q-nav-dot--answered]="hasAnswerFor(q.id) && !isSkipped(q.id)"
+                [class.q-nav-dot--skipped]="isSkipped(q.id)"
+                (click)="goTo(i)" [title]="'Q' + (i+1)">{{ i + 1 }}</button>
+      </div>
+      <div class="q-nav-legend">
+        <span class="legend-item"><span class="legend-dot legend-dot--answered"></span>Answered</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--skipped"></span>Skipped</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--current"></span>Current</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--empty"></span>Unanswered</span>
+      </div>
+      <!-- Stats -->
+      <div class="nav-stats">
+        <div class="nav-stat"><span class="ns-val">{{ answeredCount }}</span><span class="ns-lbl">Answered</span></div>
+        <div class="nav-stat"><span class="ns-val">{{ skippedCount }}</span><span class="ns-lbl">Skipped</span></div>
+        <div class="nav-stat"><span class="ns-val">{{ questions.length - answeredCount - skippedCount }}</span><span class="ns-lbl">Remaining</span></div>
+      </div>
+    </div>
+
+    <!-- ── Question card ───────────────────────────────────────────────────── -->
+    <div class="q-main" *ngIf="current">
+
+      <!-- Proctor camera — above the question card -->
+      <div *ngIf="roomCheckPassed && !submitting" class="proctor-bar">
+        <div class="proctor-bar__cam">
+          <video id="proctor-video" class="proctor-bar__video" autoplay muted playsinline></video>
+          <div class="proctor-bar__live">
+            <span class="proctor-dot"></span>
+            <span>Live</span>
+          </div>
+        </div>
+        <div class="proctor-bar__info">
+          <span class="proctor-bar__label">🔒 Proctoring Active</span>
+          <span class="proctor-bar__sub">Your camera is being monitored throughout the exam</span>
+        </div>
+      </div>
+      <div class="q-card" [class.q-card--skipped]="isSkipped(current.id)">
+
+        <!-- Skipped banner -->
+        <div *ngIf="isSkipped(current.id)" class="skipped-banner">
+          <span>⏭ This question was skipped</span>
+          <button class="btn-unskip" (click)="unskip()">Answer it now</button>
+        </div>
+
+        <div class="q-card__meta">
+          <span class="q-type-chip" [class]="'chip-' + current.type.toLowerCase()">
+            {{ typeLabel(current.type) }}
+          </span>
+          <span class="q-pts">{{ current.points }} pts</span>
+        </div>
+
+        <h2 class="q-text">{{ current.questionText }}</h2>
+
+        <!-- MCQ / SCENARIO -->
+        <div *ngIf="current.type === 'MCQ' || current.type === 'SCENARIO'" class="answer-zone">
+          <label class="answer-label">Select one answer</label>
+          <div class="options-list">
+            <label *ngFor="let opt of current.options"
+                   class="option-item"
+                   [class.option-item--selected]="getAnswer(current.id) === opt.charAt(0)">
+              <input type="radio" [name]="'q'+current.id" [value]="opt.charAt(0)"
+                     [checked]="getAnswer(current.id) === opt.charAt(0)"
+                     (change)="setAnswer(opt.charAt(0))" />
+              <span class="option-letter">{{ opt.charAt(0) }}</span>
+              <span class="option-text">{{ opt.substring(3) }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- MULTI_SELECT -->
+        <div *ngIf="current.type === 'MULTI_SELECT'" class="answer-zone">
+          <label class="answer-label">Select all that apply</label>
+          <div class="options-list">
+            <label *ngFor="let opt of current.options"
+                   class="option-item option-item--check"
+                   [class.option-item--selected]="isMultiSelected(current.id, opt)">
+              <input type="checkbox" [checked]="isMultiSelected(current.id, opt)"
+                     (change)="toggleMultiSelect(current.id, opt)" />
+              <span class="option-letter option-letter--check">{{ opt.charAt(0) }}</span>
+              <span class="option-text">{{ opt.substring(3) }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- CODE -->
+        <div *ngIf="current.type === 'CODE'" class="answer-zone">
+          <div class="code-header" *ngIf="current.codeLanguage">
+            <span class="lang-badge">{{ current.codeLanguage }}</span>
+          </div>
+          <div *ngIf="current.options && current.options.length > 0">
+            <label class="answer-label">What is the output / result?</label>
+            <div class="options-list">
+              <label *ngFor="let opt of current.options"
+                     class="option-item"
+                     [class.option-item--selected]="getAnswer(current.id) === opt.charAt(0)">
+                <input type="radio" [name]="'q'+current.id" [value]="opt.charAt(0)"
+                       [checked]="getAnswer(current.id) === opt.charAt(0)"
+                       (change)="setAnswer(opt.charAt(0))" />
+                <span class="option-letter">{{ opt.charAt(0) }}</span>
+                <span class="option-text option-text--code">{{ opt.substring(3) }}</span>
+              </label>
+            </div>
+          </div>
+          <div *ngIf="!current.options || current.options.length === 0">
+            <label class="answer-label">Write your code below</label>
+            <textarea class="answer-textarea answer-textarea--code" rows="10"
+                      placeholder="// Write your code here…"
+                      [value]="getAnswer(current.id)"
+                      (input)="setAnswer($any($event.target).value)"></textarea>
+          </div>
+        </div>
+
+        <!-- ORDERING -->
+        <div *ngIf="current.type === 'ORDERING'" class="answer-zone">
+          <label class="answer-label">Arrange in the correct order using the arrows</label>
+          <div class="ordering-list">
+            <div *ngFor="let item of getOrderedOptions(current.id, current.options!); let i = index"
+                 class="ordering-item">
+              <span class="ordering-num">{{ i + 1 }}</span>
+              <span class="ordering-text">{{ item }}</span>
+              <div class="ordering-controls">
+                <button class="order-btn" (click)="moveOrderItem(current.id, current.options!, i, -1)"
+                        [disabled]="i === 0">↑</button>
+                <button class="order-btn" (click)="moveOrderItem(current.id, current.options!, i, 1)"
+                        [disabled]="i === current.options!.length - 1">↓</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAG_DROP / MATCH -->
+        <div *ngIf="current.type === 'DRAG_DROP' || current.type === 'MATCH'" class="answer-zone">
+          <label class="answer-label">Match each item on the left with the correct item on the right</label>
+          <div class="match-rows">
+            <div *ngFor="let choice of current.choices" class="match-row">
+              <div class="match-left-item">{{ choice.matchLeft }}</div>
+              <span class="match-connector">→</span>
+              <select class="match-select"
+                      [value]="getMatchValue(current.id, choice.id)"
+                      (change)="setMatchAnswerExam(current.id, choice.id, $any($event.target).value)">
+                <option value="">— Select —</option>
+                <option *ngFor="let opt of getMatchOptionsExam(current)"
+                        [value]="opt"
+                        [disabled]="isMatchOptionUsedExam(current.id, opt, choice.id)">
+                  {{ opt }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- FILL_BLANK -->
+        <div *ngIf="current.type === 'FILL_BLANK'" class="answer-zone">
+          <label class="answer-label">Your Answer</label>
+          <input type="text" class="answer-input"
+                 placeholder="Type your answer here…"
+                 [value]="getAnswer(current.id)"
+                 (input)="setAnswer($any($event.target).value)" />
+        </div>
+
+        <!-- EXPLAIN / WRITE -->
+        <div *ngIf="current.type === 'EXPLAIN' || current.type === 'WRITE'" class="answer-zone">
+          <label class="answer-label">{{ current.type === 'EXPLAIN' ? 'Explain your answer' : 'Write your response' }}</label>
+          <textarea class="answer-textarea" rows="7"
+                    placeholder="Write your answer here…"
+                    [value]="getAnswer(current.id)"
+                    (input)="setAnswer($any($event.target).value)"></textarea>
+        </div>
+      </div>
+
+      <!-- Navigation bar -->
+      <div class="q-nav-bar">
+        <button class="nav-btn nav-btn--prev" (click)="prev()" [disabled]="currentIndex === 0">← Prev</button>
+
+        <div class="nav-center">
+          <span *ngIf="hasAnswerFor(current.id) && !isSkipped(current.id)" class="saved-indicator">✓ Saved</span>
+          <button *ngIf="!isSkipped(current.id) && !hasAnswerFor(current.id)"
+                  class="btn-skip" (click)="skip()">⏭ Skip</button>
+        </div>
+
+        <button *ngIf="currentIndex < questions.length - 1" class="nav-btn nav-btn--next" (click)="next()">Next →</button>
+        <button *ngIf="currentIndex === questions.length - 1"
+                class="nav-btn nav-btn--submit" (click)="submit()" [disabled]="submitting">
+          <span *ngIf="submitting" class="spinner"></span>
+          {{ submitting ? 'Submitting…' : '✅ Submit Exam' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Security Warning Modal ──────────────────────────────────────────────── -->
+<div *ngIf="showSecurityWarning" class="security-overlay">
+  <div class="security-modal">
+    <div class="security-modal__icon">⚠️</div>
+    <h3>Security Warning</h3>
+    <p>{{ securityMessage }}</p>
+    <div class="security-modal__meta">
+      <span class="violation-count">Violation {{ securityViolations }} of 2</span>
+      <span class="violation-note">The next violation will auto-submit your exam immediately.</span>
+    </div>
+    <button class="btn-security-dismiss" (click)="dismissSecurityWarning()">
+      ✅ I Understand — Return to Exam
+    </button>
+  </div>
+</div>
+
+<!-- end of exam page -->

@@ -38,6 +38,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        // ── SkillHub certification endpoints (public) ──────
+                        .requestMatchers("/api/store/**").permitAll()
+                        .requestMatchers("/api/certifications/**").permitAll()
+                        .requestMatchers("/api/enrollments/**").permitAll()
+                        .requestMatchers("/api/analytics/**").permitAll()
+                        .requestMatchers("/api/feedback/**").permitAll()
+                        .requestMatchers("/api/verify/**").permitAll()
+                        .requestMatchers("/api/verify").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll()
+                        .requestMatchers("/api/questions/**").permitAll()
+                        .requestMatchers("/api/webhooks/**").permitAll()
+                        // ─────────────────────────────────────────────────
                         .requestMatchers(HttpMethod.GET, "/api/files/profile-pictures/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/files/voice-messages/**").permitAll()
                         .requestMatchers("/error").permitAll()

@@ -1,0 +1,420 @@
+<!-- ── Skeleton ──────────────────────────────────────────────────────────────── -->
+<div *ngIf="loading" class="sd-page">
+  <div class="sd-hero sd-hero--skel">
+    <div class="skel skel-hero-title"></div>
+    <div class="skel skel-hero-sub"></div>
+  </div>
+  <div class="sd-body">
+    <div class="sd-main">
+      <div class="skel skel-section"></div>
+      <div class="skel skel-section skel-section--sm"></div>
+    </div>
+    <div class="sd-sidebar">
+      <div class="skel skel-card-full"></div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="error && !cert" class="sd-error">{{ error }}</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- MAIN PAGE                                                                  -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div *ngIf="cert && !loading" class="sd-page">
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+  <div class="sd-hero" [class.sd-hero--has-cover]="cert.coverImageUrl">
+
+    <!-- Cover image background -->
+    <div *ngIf="cert.coverImageUrl" class="sd-hero__cover">
+      <img [src]="cert.coverImageUrl" [alt]="cert.title"
+           (error)="$any($event.target).parentElement.style.display='none'" />
+    </div>
+    <div class="sd-hero__overlay"></div>
+
+    <div class="sd-hero__content">
+      <!-- Back -->
+      <a routerLink="/store" class="sd-back">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+        </svg>
+        Back to Store
+      </a>
+
+      <!-- Badges -->
+      <div class="sd-hero__badges">
+        <span class="sd-badge"
+              [style.background]="difficultyConfig.bg"
+              [style.color]="difficultyConfig.color">
+          {{ difficultyConfig.icon }} {{ difficultyConfig.label }}
+        </span>
+        <span class="sd-badge sd-badge--cat">{{ cert.category }}</span>
+        <span *ngIf="cert.price === 0" class="sd-badge sd-badge--free">FREE</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="sd-hero__title">{{ cert.title }}</h1>
+      <p class="sd-hero__desc">{{ cert.description }}</p>
+
+      <!-- Quick stats strip -->
+      <div class="sd-hero__stats">
+        <div class="sd-hstat">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+          </svg>
+          <span>{{ timeLimit }} min</span>
+        </div>
+        <div class="sd-hstat">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+          </svg>
+          <span>{{ totalQuestions }} questions</span>
+        </div>
+        <div class="sd-hstat">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span>Pass at {{ passingScore }}%</span>
+        </div>
+        <div class="sd-hstat">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <span>~{{ estimatedSuccessRate }}% pass rate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Body layout ────────────────────────────────────────────────────────── -->
+  <div class="sd-body">
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- LEFT / MAIN COLUMN                                                    -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div class="sd-main">
+
+      <!-- ── Assessment Overview ─────────────────────────────────────────── -->
+      <section class="sd-section">
+        <div class="sd-section__header">
+          <div class="sd-section__icon">📋</div>
+          <h2>Assessment Overview</h2>
+        </div>
+        <div class="sd-overview-grid">
+          <div class="sd-overview-item">
+            <div class="sd-overview-item__icon" style="background:#ede9fe;color:#4f46e5">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <div class="sd-overview-item__val">{{ timeLimit }} minutes</div>
+              <div class="sd-overview-item__lbl">Time Limit</div>
+            </div>
+          </div>
+          <div class="sd-overview-item">
+            <div class="sd-overview-item__icon" style="background:#dbeafe;color:#1d4ed8">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <div class="sd-overview-item__val">{{ totalQuestions }} questions</div>
+              <div class="sd-overview-item__lbl">Total Questions</div>
+            </div>
+          </div>
+          <div class="sd-overview-item">
+            <div class="sd-overview-item__icon" style="background:#d1fae5;color:#059669">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <div class="sd-overview-item__val">{{ passingScore }}%</div>
+              <div class="sd-overview-item__lbl">Passing Score</div>
+            </div>
+          </div>
+          <div class="sd-overview-item">
+            <div class="sd-overview-item__icon"
+                 [style.background]="difficultyConfig.bg"
+                 [style.color]="difficultyConfig.color">
+              <span style="font-size:1.1rem">{{ difficultyConfig.icon }}</span>
+            </div>
+            <div>
+              <div class="sd-overview-item__val">{{ difficultyConfig.label }}</div>
+              <div class="sd-overview-item__lbl">Difficulty Level</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Skills & Insights ───────────────────────────────────────────── -->
+      <section class="sd-section">
+        <div class="sd-section__header">
+          <div class="sd-section__icon">🧠</div>
+          <h2>Skills Validated</h2>
+        </div>
+        <p class="sd-section__desc">
+          This certification validates your practical knowledge across the following areas:
+        </p>
+        <div class="sd-skill-tags">
+          <span *ngFor="let skill of skillTags" class="sd-skill-tag">{{ skill }}</span>
+        </div>
+
+        <!-- Insight metrics -->
+        <div class="sd-insights">
+          <div class="sd-insight">
+            <div class="sd-insight__ring">
+              <svg viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="24" fill="none" stroke="#e2e8f0" stroke-width="5"/>
+                <circle cx="30" cy="30" r="24" fill="none" stroke="#6366f1" stroke-width="5"
+                        stroke-linecap="round"
+                        [attr.stroke-dasharray]="2 * 3.14159 * 24"
+                        [attr.stroke-dashoffset]="(2 * 3.14159 * 24) * (1 - estimatedSuccessRate / 100)"
+                        transform="rotate(-90 30 30)"/>
+                <text x="30" y="34" text-anchor="middle" font-size="11" font-weight="800" fill="#4f46e5">
+                  {{ estimatedSuccessRate }}%
+                </text>
+              </svg>
+            </div>
+            <div class="sd-insight__text">
+              <div class="sd-insight__val">Est. Success Rate</div>
+              <div class="sd-insight__sub">Based on difficulty level</div>
+            </div>
+          </div>
+          <div class="sd-insight">
+            <div class="sd-insight__ring">
+              <svg viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="24" fill="none" stroke="#e2e8f0" stroke-width="5"/>
+                <circle cx="30" cy="30" r="24" fill="none" stroke="#10b981" stroke-width="5"
+                        stroke-linecap="round" stroke-dasharray="100 51"
+                        transform="rotate(-90 30 30)"/>
+                <text x="30" y="34" text-anchor="middle" font-size="9" font-weight="800" fill="#059669">
+                  ~{{ timeLimit / 2 }}m
+                </text>
+              </svg>
+            </div>
+            <div class="sd-insight__text">
+              <div class="sd-insight__val">Avg Completion</div>
+              <div class="sd-insight__sub">~{{ timeLimit / 2 }} of {{ timeLimit }} min used</div>
+            </div>
+          </div>
+          <div class="sd-insight">
+            <div class="sd-insight__ring">
+              <svg viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="24" fill="none" stroke="#e2e8f0" stroke-width="5"/>
+                <circle cx="30" cy="30" r="24" fill="none" stroke="#f59e0b" stroke-width="5"
+                        stroke-linecap="round" stroke-dasharray="120 31"
+                        transform="rotate(-90 30 30)"/>
+                <text x="30" y="34" text-anchor="middle" font-size="9" font-weight="800" fill="#d97706">
+                  {{ skillTags.length }}
+                </text>
+              </svg>
+            </div>
+            <div class="sd-insight__text">
+              <div class="sd-insight__val">Skills Covered</div>
+              <div class="sd-insight__sub">{{ skillTags.length }} core competencies</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Who this is for ─────────────────────────────────────────────── -->
+      <section class="sd-section">
+        <div class="sd-section__header">
+          <div class="sd-section__icon">👥</div>
+          <h2>Who This Is For</h2>
+        </div>
+        <div class="sd-two-col">
+          <div class="sd-list-card sd-list-card--green">
+            <div class="sd-list-card__title">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              Target Learners
+            </div>
+            <ul class="sd-list">
+              <li *ngFor="let item of targetAudience">{{ item }}</li>
+            </ul>
+          </div>
+          <div class="sd-list-card sd-list-card--blue">
+            <div class="sd-list-card__title">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+              </svg>
+              Prerequisites
+            </div>
+            <ul class="sd-list">
+              <li *ngFor="let item of prerequisites">{{ item }}</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── What this proves ────────────────────────────────────────────── -->
+      <section class="sd-section">
+        <div class="sd-section__header">
+          <div class="sd-section__icon">🏆</div>
+          <h2>What This Certification Proves</h2>
+        </div>
+        <div class="sd-value-grid">
+          <div class="sd-value-card">
+            <div class="sd-value-card__icon">💼</div>
+            <div class="sd-value-card__title">Career Credibility</div>
+            <div class="sd-value-card__desc">
+              Demonstrate verified expertise to employers and clients with a tamper-proof digital certificate.
+            </div>
+          </div>
+          <div class="sd-value-card">
+            <div class="sd-value-card__icon">🔍</div>
+            <div class="sd-value-card__desc">
+              Every certificate includes a unique ID and QR code that employers can verify instantly online.
+            </div>
+            <div class="sd-value-card__title">Verifiable Proof</div>
+          </div>
+          <div class="sd-value-card">
+            <div class="sd-value-card__icon">📈</div>
+            <div class="sd-value-card__title">Real-World Relevance</div>
+            <div class="sd-value-card__desc">
+              Questions are designed around real scenarios, not just theory — proving you can apply skills on the job.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Exam Rules ──────────────────────────────────────────────────── -->
+      <section class="sd-section">
+        <div class="sd-section__header">
+          <div class="sd-section__icon">📜</div>
+          <h2>Exam Rules & Conditions</h2>
+        </div>
+        <div class="sd-rules">
+          <div *ngFor="let rule of examRules" class="sd-rule">
+            <span class="sd-rule__icon">{{ rule.icon }}</span>
+            <span class="sd-rule__text">{{ rule.text }}</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- RIGHT / STICKY SIDEBAR                                                -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div class="sd-sidebar">
+      <div class="sd-card">
+
+        <!-- Price -->
+        <div class="sd-card__price">
+          <span *ngIf="cert.price > 0" class="sd-price">${{ cert.price | number:'1.2-2' }}</span>
+          <span *ngIf="cert.price === 0" class="sd-price sd-price--free">FREE</span>
+          <span class="sd-price-note">{{ cert.price > 0 ? 'one-time · instant access' : 'no payment required' }}</span>
+        </div>
+
+        <!-- ── Not enrolled ─────────────────────────────────────────────── -->
+        <ng-container *ngIf="!enrollment">
+          <button class="sd-cta sd-cta--primary" (click)="clickEnroll()">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            {{ cert.price > 0 ? 'Start Certification — $' + (cert.price | number:'1.2-2') : 'Start Certification — Free' }}
+          </button>
+          <button class="sd-cta sd-cta--secondary" (click)="startPractice()">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+            </svg>
+            Preview with Practice Exam
+          </button>
+          <p class="sd-card__note">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>
+            Secure checkout · Email verification required
+          </p>
+        </ng-container>
+
+        <!-- ── Enrolled, not completed ──────────────────────────────────── -->
+        <ng-container *ngIf="enrollment?.status === 'ENROLLED'">
+          <div class="sd-enrolled-badge">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            You're enrolled
+          </div>
+          <button class="sd-cta sd-cta--primary" (click)="startExam()">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+            </svg>
+            Take the Exam Now
+          </button>
+          <button class="sd-cta sd-cta--secondary" (click)="startPractice()">
+            🧪 Warm Up with Practice
+          </button>
+        </ng-container>
+
+        <!-- ── Completed ────────────────────────────────────────────────── -->
+        <ng-container *ngIf="enrollment?.status === 'COMPLETED'">
+          <div class="sd-result-block"
+               [class.sd-result-block--pass]="enrollment!.passed"
+               [class.sd-result-block--fail]="!enrollment!.passed">
+            <div class="sd-result-block__icon">{{ enrollment!.passed ? '🏆' : '❌' }}</div>
+            <div class="sd-result-block__label">{{ enrollment!.passed ? 'Passed' : 'Failed' }}</div>
+            <div class="sd-result-block__score">{{ enrollment!.score | number:'1.0-1' }}%</div>
+          </div>
+          <button class="sd-cta sd-cta--primary" (click)="viewResult()">
+            📊 View Full Result
+          </button>
+        </ng-container>
+
+        <!-- Divider -->
+        <div class="sd-card__divider"></div>
+
+        <!-- Perks -->
+        <div class="sd-perks">
+          <div class="sd-perk">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" style="color:#10b981">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Instant access after payment
+          </div>
+          <div class="sd-perk">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" style="color:#10b981">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Certificate issued on passing
+          </div>
+          <div class="sd-perk">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" style="color:#10b981">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Verifiable QR code on certificate
+          </div>
+          <div class="sd-perk">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" style="color:#10b981">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Practice exam included
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Identity modal ──────────────────────────────────────────────────────── -->
+<div *ngIf="showNameModal" class="sd-modal-overlay" (click)="showNameModal = false">
+  <div class="sd-modal" (click)="$event.stopPropagation()">
+    <div class="sd-modal__icon">👤</div>
+    <h3>Enter your details</h3>
+    <p>We need your email to track your progress and send your certificate.</p>
+    <input #nameInput type="text" class="sd-modal__input"
+           placeholder="your@email.com"
+           (keyup.enter)="confirmName(nameInput.value)" autofocus />
+    <div class="sd-modal__actions">
+      <button class="sd-modal__btn sd-modal__btn--ghost" (click)="showNameModal = false">Cancel</button>
+      <button class="sd-modal__btn sd-modal__btn--primary" (click)="confirmName(nameInput.value)">Continue →</button>
+    </div>
+  </div>
+</div>

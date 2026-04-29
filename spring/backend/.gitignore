@@ -5,3 +5,8 @@
 .classpath
 .project
 .settings/
+
+# Local secrets — never commit
+.env.local
+.env.*.local
+*.env

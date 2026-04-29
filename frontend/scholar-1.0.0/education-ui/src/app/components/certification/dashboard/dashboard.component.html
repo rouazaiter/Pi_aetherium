@@ -1,0 +1,100 @@
+<div class="dashboard">
+  <div class="dash-header">
+    <div>
+      <h2>Dashboard</h2>
+      <p class="dash-sub">Welcome back — here's what's happening.</p>
+    </div>
+    <a routerLink="/certifications/create" class="btn btn-primary">+ New Certification</a>
+  </div>
+
+  <!-- Skeleton stats -->
+  <div *ngIf="loading" class="stats-grid">
+    <div *ngFor="let i of [1,2,3,4]" class="stat-card skel-card">
+      <div class="skel skel-val"></div>
+      <div class="skel skel-lbl"></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div *ngIf="!loading" class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-value">{{ total }}</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value">{{ published }}</div>
+      <div class="stat-label">Published</div>
+    </div>
+    <div class="stat-card stat-yellow">
+      <div class="stat-icon">📝</div>
+      <div class="stat-value">{{ drafts }}</div>
+      <div class="stat-label">Drafts</div>
+    </div>
+    <div class="stat-card stat-gray">
+      <div class="stat-icon">🗄</div>
+      <div class="stat-value">{{ archived }}</div>
+      <div class="stat-label">Archived</div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="section">
+    <h3 class="section-title">Quick Actions</h3>
+    <div class="action-grid">
+      <a routerLink="/certifications/create" class="action-card">
+        <span class="ac-icon">✏️</span>
+        <span class="ac-label">Create Manually</span>
+        <span class="ac-arrow">→</span>
+      </a>
+      <a routerLink="/certifications/create" [queryParams]="{mode:'llm'}" class="action-card action-ai">
+        <span class="ac-icon">🤖</span>
+        <span class="ac-label">Generate with AI</span>
+        <span class="ac-arrow">→</span>
+      </a>
+      <a routerLink="/certifications/create" [queryParams]="{mode:'pdf'}" class="action-card action-pdf">
+        <span class="ac-icon">📄</span>
+        <span class="ac-label">Import from PDF</span>
+        <span class="ac-arrow">→</span>
+      </a>
+      <a routerLink="/store" class="action-card action-store">
+        <span class="ac-icon">🛒</span>
+        <span class="ac-label">View Store</span>
+        <span class="ac-arrow">→</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Recent -->
+  <div class="section" *ngIf="!loading && recent.length > 0">
+    <div class="section-header">
+      <h3 class="section-title">Recent Certifications</h3>
+      <a routerLink="/certifications" class="view-all">View all →</a>
+    </div>
+    <div class="recent-table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th>Title</th><th>Category</th><th>Status</th><th>Price</th><th>Created</th><th></th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let cert of recent">
+            <td class="fw-600">{{ cert.title }}</td>
+            <td class="muted">{{ cert.category }}</td>
+            <td>
+              <span class="badge"
+                [class.badge-success]="cert.status === 'PUBLISHED'"
+                [class.badge-warning]="cert.status === 'DRAFT'"
+                [class.badge-secondary]="cert.status === 'ARCHIVED'">
+                {{ cert.status }}
+              </span>
+            </td>
+            <td class="fw-600">{{ cert.price | currency }}</td>
+            <td class="muted">{{ cert.createdAt | date:'mediumDate' }}</td>
+            <td><a [routerLink]="['/certifications', cert.id]" class="btn btn-sm btn-outline">View</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

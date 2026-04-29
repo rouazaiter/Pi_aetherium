@@ -1,0 +1,50 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name">SkillHub</span>
+    </div>
+    <nav class="nav">
+      <a routerLink="/skillhub/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🏠</span><span>Dashboard</span>
+      </a>
+      <div class="nav-section">Admin</div>
+      <a routerLink="/skillhub/certifications" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <span class="nav-icon">🎓</span><span>Certifications</span>
+      </a>
+      <a routerLink="/skillhub/certifications/analytics" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <span class="nav-icon">📈</span><span>Analytics</span>
+      </a>
+      <div class="nav-section">Frontoffice</div>
+      <a routerLink="/skillhub/store" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <span class="nav-icon">🛒</span><span>Store</span>
+      </a>
+      <a routerLink="/skillhub/store/my" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <span class="nav-icon">📋</span><span>My Certifications</span>
+      </a>
+      <a routerLink="/skillhub/verify" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <span class="nav-icon">🔍</span><span>Verify Certificate</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="content-area">
+    <header class="topbar">
+      <div class="topbar-title">SkillHub Admin</div>
+      <div class="topbar-right">
+        <span class="topbar-badge">v1.0</span>
+      </div>
+    </header>
+    <main class="main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<app-toast></app-toast>
+<app-confirm-modal></app-confirm-modal>

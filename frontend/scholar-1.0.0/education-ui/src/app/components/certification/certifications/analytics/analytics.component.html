@@ -1,0 +1,465 @@
+<div class="analytics-page">
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- PAGE HEADER                                                             -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <h2>Analytics Dashboard</h2>
+      <p class="page-sub">Exam performance insights across all certifications</p>
+    </div>
+    <div class="page-header__right">
+      <button class="btn-toggle-filters"
+              [class.btn-toggle-filters--active]="showFilters"
+              (click)="showFilters = !showFilters">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
+          <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L13 10.414V15a1 1 0 01-.553.894l-4 2A1 1 0 017 17v-6.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
+        </svg>
+        Filters
+        <span *ngIf="hasActiveFilters" class="filter-badge">●</span>
+      </button>
+      <button class="btn-refresh" (click)="loadData()" title="Refresh data">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
+          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- FILTER BAR                                                              -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div class="filter-bar" [class.filter-bar--open]="showFilters">
+    <div class="filter-bar__inner">
+
+      <!-- Quick date presets -->
+      <div class="filter-group">
+        <label class="filter-label">Quick Range</label>
+        <div class="preset-pills">
+          <button *ngFor="let p of datePresets; let i = index"
+                  class="preset-pill"
+                  [class.preset-pill--active]="activePreset === i"
+                  (click)="applyPreset(p.days, i)">
+            {{ p.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Certification -->
+      <div class="filter-group">
+        <label class="filter-label">Certification</label>
+        <select class="filter-select" [(ngModel)]="filters.certificationId" (ngModelChange)="onFilterChange()">
+          <option [ngValue]="null">All Certifications</option>
+          <option *ngFor="let c of certifications" [ngValue]="c.id">{{ c.title }}</option>
+        </select>
+      </div>
+
+      <!-- Difficulty -->
+      <div class="filter-group">
+        <label class="filter-label">Difficulty</label>
+        <select class="filter-select" [(ngModel)]="filters.difficulty" (ngModelChange)="onFilterChange()">
+          <option value="">All Levels</option>
+          <option *ngFor="let d of difficulties" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+
+      <!-- Category -->
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <select class="filter-select" [(ngModel)]="filters.category" (ngModelChange)="onFilterChange()">
+          <option value="">All Categories</option>
+          <option *ngFor="let cat of availableCategories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <!-- Date from -->
+      <div class="filter-group">
+        <label class="filter-label">From</label>
+        <input type="date" class="filter-select" [(ngModel)]="filters.dateFrom" (ngModelChange)="onFilterChange()" />
+      </div>
+
+      <!-- Date to -->
+      <div class="filter-group">
+        <label class="filter-label">To</label>
+        <input type="date" class="filter-select" [(ngModel)]="filters.dateTo" (ngModelChange)="onFilterChange()" />
+      </div>
+
+      <!-- Clear -->
+      <div class="filter-group filter-group--action">
+        <button *ngIf="hasActiveFilters" class="btn-clear-filters" (click)="clearFilters()">
+          ✕ Clear all
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Active filter chips -->
+    <div *ngIf="hasActiveFilters" class="active-chips">
+      <span *ngIf="filters.certificationId" class="chip">
+        📋 {{ getCertName(filters.certificationId) }}
+        <button (click)="filters.certificationId = null; onFilterChange()">✕</button>
+      </span>
+      <span *ngIf="filters.difficulty" class="chip">
+        🎯 {{ filters.difficulty }}
+        <button (click)="filters.difficulty = ''; onFilterChange()">✕</button>
+      </span>
+      <span *ngIf="filters.category" class="chip">
+        🏷 {{ filters.category }}
+        <button (click)="filters.category = ''; onFilterChange()">✕</button>
+      </span>
+      <span *ngIf="filters.dateFrom || filters.dateTo" class="chip">
+        📅 {{ filters.dateFrom || '…' }} → {{ filters.dateTo || '…' }}
+        <button (click)="filters.dateFrom = ''; filters.dateTo = ''; activePreset = null; onFilterChange()">✕</button>
+      </span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- LOADING SKELETON                                                        -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="skeleton-wrap">
+    <div class="kpi-row">
+      <div *ngFor="let i of [1,2,3,4]" class="kpi-card skel-card">
+        <div class="skel skel-icon"></div>
+        <div class="skel skel-val"></div>
+        <div class="skel skel-lbl"></div>
+      </div>
+    </div>
+    <div class="chart-row chart-row--2">
+      <div class="chart-card skel-card" style="height:320px"></div>
+      <div class="chart-card skel-card" style="height:320px"></div>
+    </div>
+    <div class="chart-card skel-card" style="height:280px"></div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert-danger">⚠️ {{ error }}</div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- CONTENT                                                                 -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="!loading && data">
+
+    <!-- ── KPI row ──────────────────────────────────────────────────────── -->
+    <div class="kpi-row">
+
+      <div class="kpi-card kpi-card--indigo">
+        <div class="kpi-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        </div>
+        <div class="kpi-card__body">
+          <span class="kpi-val">{{ data.totalEnrollments }}</span>
+          <span class="kpi-lbl">Total Enrollments</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card--violet">
+        <div class="kpi-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <path d="M9 12h6M9 16h4"/>
+          </svg>
+        </div>
+        <div class="kpi-card__body">
+          <span class="kpi-val">{{ data.completedExams }}</span>
+          <span class="kpi-lbl">Exams Completed</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card--emerald">
+        <div class="kpi-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+          </svg>
+        </div>
+        <div class="kpi-card__body">
+          <span class="kpi-val">{{ passRateDisplay }}</span>
+          <span class="kpi-lbl">Pass Rate</span>
+          <span class="kpi-trend" [class.kpi-trend--up]="data.overallPassRate >= 70"
+                                  [class.kpi-trend--down]="data.overallPassRate < 50">
+            {{ kpiTrend.pass }}
+          </span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card--amber">
+        <div class="kpi-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="kpi-card__body">
+          <span class="kpi-val">{{ avgScoreDisplay }}</span>
+          <span class="kpi-lbl">Average Score</span>
+          <span class="kpi-trend" [class.kpi-trend--up]="data.averageScore >= 70"
+                                  [class.kpi-trend--down]="data.averageScore < 50">
+            {{ kpiTrend.score }}
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Row 1: Pass/Fail + Score Distribution ─────────────────────────── -->
+    <div class="chart-row chart-row--2">
+
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">🎯</span>
+            <h3>Pass vs Fail Rate</h3>
+          </div>
+          <span class="chart-badge chart-badge--purple">Doughnut</span>
+        </div>
+        <div *ngIf="data.completedExams > 0">
+          <div class="chart-wrap chart-wrap--sm">
+            <canvas #passFailChart></canvas>
+          </div>
+          <div class="chart-legend-row">
+            <span class="legend-dot" style="background:#10b981"></span>
+            <span>Passed: <strong>{{ data.passCount }}</strong> ({{ passRateDisplay }})</span>
+            <span class="legend-dot ml" style="background:#ef4444"></span>
+            <span>Failed: <strong>{{ data.failCount }}</strong></span>
+          </div>
+        </div>
+        <div *ngIf="data.completedExams === 0" class="no-data">
+          <span class="no-data-icon">📭</span>
+          <p>No completed exams yet</p>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">📊</span>
+            <h3>Score Distribution</h3>
+          </div>
+          <span class="chart-badge chart-badge--blue">Histogram</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas #scoreDistChart></canvas>
+        </div>
+        <div class="chart-hint">
+          <span class="hint-dot" style="background:#10b981"></span>≥70% pass &nbsp;
+          <span class="hint-dot" style="background:#f59e0b"></span>50–69% &nbsp;
+          <span class="hint-dot" style="background:#ef4444"></span>&lt;50% fail
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Row 2: Monthly Trend (full width) ─────────────────────────────── -->
+    <div class="chart-card" *ngIf="data.monthlyTrend.length > 0">
+      <div class="chart-card__header">
+        <div class="chart-card__title">
+          <span class="chart-icon">📈</span>
+          <h3>Performance Trend Over Time</h3>
+        </div>
+        <span class="chart-badge chart-badge--indigo">Line</span>
+      </div>
+      <div class="chart-wrap chart-wrap--lg">
+        <canvas #trendChart></canvas>
+      </div>
+    </div>
+
+    <!-- ── Row 3: Avg Score + Enrollments ────────────────────────────────── -->
+    <div class="chart-row chart-row--2">
+
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">🏅</span>
+            <h3>Average Score per Certification</h3>
+          </div>
+          <span class="chart-badge chart-badge--green">Bar</span>
+        </div>
+        <div *ngIf="data.avgScorePerCert.length > 0" class="chart-wrap chart-wrap--md">
+          <canvas #avgScoreChart></canvas>
+        </div>
+        <div *ngIf="data.avgScorePerCert.length === 0" class="no-data">
+          <span class="no-data-icon">📭</span><p>No data yet</p>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <div class="chart-card__title">
+            <span class="chart-icon">👥</span>
+            <h3>Enrollments per Certification</h3>
+          </div>
+          <span class="chart-badge chart-badge--amber">Bar</span>
+        </div>
+        <div *ngIf="data.enrollmentsPerCert.length > 0" class="chart-wrap chart-wrap--md">
+          <canvas #enrollmentsChart></canvas>
+        </div>
+        <div *ngIf="data.enrollmentsPerCert.length === 0" class="no-data">
+          <span class="no-data-icon">📭</span><p>No enrollments yet</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Row 4: Question Difficulty ────────────────────────────────────── -->
+    <div class="chart-card" *ngIf="data.questionDifficulty.length > 0">
+      <div class="chart-card__header">
+        <div class="chart-card__title">
+          <span class="chart-icon">🧠</span>
+          <h3>Question Difficulty — Correct Rate</h3>
+        </div>
+        <span class="chart-badge chart-badge--rose">Heatmap</span>
+      </div>
+      <p class="chart-desc">Hardest questions at top — lowest correct rate first</p>
+      <div class="chart-wrap chart-wrap--xl">
+        <canvas #difficultyChart></canvas>
+      </div>
+      <div class="chart-hint">
+        <span class="hint-dot" style="background:#10b981"></span>Easy ≥70% &nbsp;
+        <span class="hint-dot" style="background:#f59e0b"></span>Medium 40–69% &nbsp;
+        <span class="hint-dot" style="background:#ef4444"></span>Hard &lt;40%
+      </div>
+    </div>
+
+    <!-- ── Row 5: Most Failed Questions ──────────────────────────────────── -->
+    <div class="chart-card" *ngIf="data.mostFailedQuestions.length > 0">
+      <div class="chart-card__header">
+        <div class="chart-card__title">
+          <span class="chart-icon">⚠️</span>
+          <h3>Most Failed Questions</h3>
+        </div>
+        <span class="chart-badge chart-badge--rose">Bar</span>
+      </div>
+      <p class="chart-desc">Questions with the highest failure rate — focus content improvements here</p>
+      <div class="chart-wrap chart-wrap--xl">
+        <canvas #mostFailedChart></canvas>
+      </div>
+    </div>
+
+    <!-- ── Empty state ────────────────────────────────────────────────────── -->
+    <div *ngIf="data.totalEnrollments === 0" class="empty-analytics">
+      <div class="empty-icon">📊</div>
+      <h3>No data yet</h3>
+      <p>Analytics will appear once users start enrolling and taking exams.</p>
+    </div>
+
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- FEEDBACK INSIGHTS SECTION                                               -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div class="feedback-section">
+    <div class="feedback-section__header">
+      <div>
+        <h2>💬 User Feedback Insights</h2>
+        <p>Aggregated feedback from candidates who passed their exams</p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loadingFeedback" class="feedback-loading">
+      <div class="skel skel-card" style="height:180px"></div>
+      <div class="skel skel-card" style="height:180px"></div>
+    </div>
+
+    <!-- No feedback yet -->
+    <div *ngIf="!loadingFeedback && feedbackInsights.length === 0" class="feedback-empty">
+      <div class="feedback-empty__icon">💬</div>
+      <h3>No feedback yet</h3>
+      <p>Feedback will appear here once candidates submit their post-exam reviews.</p>
+    </div>
+
+    <!-- Feedback cards grid -->
+    <div *ngIf="!loadingFeedback && feedbackInsights.length > 0" class="feedback-grid">
+      <div *ngFor="let ins of feedbackInsights"
+           class="feedback-card"
+           [class.feedback-card--flagged]="flagCount(ins) > 0">
+
+        <!-- Card header -->
+        <div class="feedback-card__header">
+          <div class="feedback-card__title">
+            <span class="feedback-card__cert">{{ ins.certificationTitle }}</span>
+            <span class="feedback-card__count">{{ ins.totalFeedbacks }} response{{ ins.totalFeedbacks !== 1 ? 's' : '' }}</span>
+          </div>
+          <div class="feedback-card__score">
+            Avg score: <strong>{{ ins.avgScore }}%</strong>
+          </div>
+        </div>
+
+        <!-- Alert flags -->
+        <div *ngIf="flagCount(ins) > 0" class="feedback-flags">
+          <span *ngIf="ins.flaggedTooHard"      class="flag flag--red">🔥 Too Hard</span>
+          <span *ngIf="ins.flaggedTooEasy"      class="flag flag--blue">😌 Too Easy</span>
+          <span *ngIf="ins.flaggedNotRelevant"  class="flag flag--orange">❌ Low Relevance</span>
+          <span *ngIf="ins.flaggedTimeTooShort" class="flag flag--purple">⏩ Time Too Short</span>
+        </div>
+
+        <!-- Metrics row -->
+        <div class="feedback-metrics">
+
+          <!-- Difficulty -->
+          <div class="fb-metric">
+            <div class="fb-metric__label">Difficulty</div>
+            <div class="fb-metric__dominant">
+              {{ difficultyEmoji(ins.dominantDifficulty) }} {{ ins.dominantDifficulty }}
+            </div>
+            <div class="fb-bars">
+              <div class="fb-bar-row" *ngFor="let key of ['EASY','BALANCED','HARD']">
+                <span class="fb-bar-key">{{ key }}</span>
+                <div class="fb-bar-track">
+                  <div class="fb-bar-fill fb-bar-fill--diff"
+                       [style.width.%]="pctOf(ins.difficultyBreakdown, key, ins.totalFeedbacks)">
+                  </div>
+                </div>
+                <span class="fb-bar-pct">{{ pctOf(ins.difficultyBreakdown, key, ins.totalFeedbacks) }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Time -->
+          <div class="fb-metric">
+            <div class="fb-metric__label">Time</div>
+            <div class="fb-metric__dominant">
+              {{ timeEmoji(ins.dominantTime) }} {{ ins.dominantTime?.replace('_', ' ') }}
+            </div>
+            <div class="fb-bars">
+              <div class="fb-bar-row" *ngFor="let key of ['TOO_SHORT','ADEQUATE','TOO_LONG']">
+                <span class="fb-bar-key">{{ key.replace('_', ' ') }}</span>
+                <div class="fb-bar-track">
+                  <div class="fb-bar-fill fb-bar-fill--time"
+                       [style.width.%]="pctOf(ins.timeBreakdown, key, ins.totalFeedbacks)">
+                  </div>
+                </div>
+                <span class="fb-bar-pct">{{ pctOf(ins.timeBreakdown, key, ins.totalFeedbacks) }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Relevance -->
+          <div class="fb-metric">
+            <div class="fb-metric__label">Relevance</div>
+            <div class="fb-metric__dominant">
+              {{ relevanceEmoji(ins.dominantRelevance) }} {{ ins.dominantRelevance }}
+            </div>
+            <div class="fb-bars">
+              <div class="fb-bar-row" *ngFor="let key of ['YES','PARTIALLY','NO']">
+                <span class="fb-bar-key">{{ key }}</span>
+                <div class="fb-bar-track">
+                  <div class="fb-bar-fill fb-bar-fill--rel"
+                       [style.width.%]="pctOf(ins.relevanceBreakdown, key, ins.totalFeedbacks)">
+                  </div>
+                </div>
+                <span class="fb-bar-pct">{{ pctOf(ins.relevanceBreakdown, key, ins.totalFeedbacks) }}%</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

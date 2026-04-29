@@ -57,5 +57,56 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/admin-reclamations/admin-reclamations.component').then((m) => m.AdminReclamationsComponent),
   },
+
+  // ── SkillHub Certification routes (isolated under /skillhub) ────────────
+  // These load inside their own LayoutComponent (sidebar) — completely
+  // separate from app.component's navbar/footer. No merge conflicts.
+  {
+    path: 'skillhub',
+    loadComponent: () =>
+      import('./components/certification/layout/layout.component').then(
+        (m) => m.LayoutComponent
+      ),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./components/certification/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent
+          ),
+      },
+      {
+        path: 'certifications',
+        loadChildren: () =>
+          import('./components/certification/certifications/certifications.module').then(
+            (m) => m.CertificationsModule
+          ),
+      },
+      {
+        path: 'store',
+        loadChildren: () =>
+          import('./components/certification/store/store.module').then(
+            (m) => m.StoreModule
+          ),
+      },
+      {
+        path: 'verify',
+        loadChildren: () =>
+          import('./components/certification/verify/verify.module').then(
+            (m) => m.VerifyModule
+          ),
+      },
+    ],
+  },
+  // Showcase is public (no sidebar) — stays at root level
+  {
+    path: 'showcase',
+    loadChildren: () =>
+      import('./components/certification/showcase/showcase.module').then(
+        (m) => m.ShowcaseModule
+      ),
+  },
+
   { path: '**', redirectTo: '' },
 ];

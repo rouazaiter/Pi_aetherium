@@ -1,0 +1,296 @@
+<!-- Skeleton loading -->
+<div *ngIf="loading" class="detail-page">
+  <div class="skel-header">
+    <div class="skel skel-title"></div>
+    <div class="skel skel-btn"></div>
+  </div>
+  <div class="skel-meta-row">
+    <div *ngFor="let i of [1,2,3,4]" class="skel skel-meta"></div>
+  </div>
+  <div class="skel skel-section"></div>
+</div>
+
+<div *ngIf="error && !cert" class="alert alert-danger">{{ error }}</div>
+
+<div *ngIf="cert && !loading" class="detail-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a routerLink="/certifications">Certifications</a>
+    <span class="bc-sep">›</span>
+    <span>{{ cert.title }}</span>
+  </nav>
+
+  <!-- Header card -->
+  <div class="header-card">
+    <div class="header-left">
+      <div class="badge-row">
+        <span class="badge" [class]="difficultyBadge(cert.difficulty)">{{ cert.difficulty }}</span>
+        <span class="badge" [class]="statusBadge(cert.status)">{{ cert.status }}</span>
+        <span class="badge badge-cat">{{ cert.category }}</span>
+      </div>
+      <h1>{{ cert.title }}</h1>
+      <p class="cert-desc">{{ cert.description }}</p>
+    </div>
+    <div class="header-actions">
+      <a [routerLink]="['/certifications', cert.id, 'edit']" class="btn btn-outline">✏️ Edit Info</a>
+      <a routerLink="/certifications" class="btn btn-ghost">← Back</a>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-pill"><span class="stat-icon">⏱</span><div><span class="stat-val">{{ cert.durationMinutes }}</span><span class="stat-lbl">min</span></div></div>
+    <div class="stat-pill"><span class="stat-icon">🎯</span><div><span class="stat-val">{{ cert.passingScore }}%</span><span class="stat-lbl">to pass</span></div></div>
+    <div class="stat-pill"><span class="stat-icon">💰</span><div><span class="stat-val">{{ cert.price | currency }}</span><span class="stat-lbl">price</span></div></div>
+    <div class="stat-pill"><span class="stat-icon">❓</span><div><span class="stat-val">{{ allQuestions.length }}</span><span class="stat-lbl">questions</span></div></div>
+  </div>
+
+  <!-- Exams -->
+  <div *ngFor="let exam of cert.exams; let ei = index" class="exam-block">
+    <div class="exam-block-header">
+      <div class="exam-block-title">
+        <span class="exam-index">Exam {{ ei + 1 }}</span>
+        <h2>{{ exam.title }}</h2>
+      </div>
+      <div class="exam-block-meta">
+        <span>⏱ {{ exam.timeLimit }} min</span>
+        <span>🎯 {{ exam.passingScore }}% pass</span>
+        <span class="q-count-badge">{{ exam.questions.length }} questions</span>
+      </div>
+    </div>
+
+    <div *ngIf="exam.questions.length === 0" class="empty-exam">
+      <span class="empty-icon">📭</span>
+      <p>No questions in this exam yet.</p>
+    </div>
+
+    <!-- Question list -->
+    <div class="question-list">
+      <div *ngFor="let q of exam.questions; let qi = index"
+           class="q-card" [class.q-card--editing]="editingQ?.id === q.id">
+
+        <div class="q-card-header">
+          <span class="q-index">{{ qi + 1 }}</span>
+          <span class="q-type-chip" [class]="'chip-' + q.type.toLowerCase()">
+            {{ typeLabels[q.type] || q.type }}
+          </span>
+          <span class="q-pts-badge">{{ q.points }} pts</span>
+          <div class="q-card-actions">
+            <button class="icon-btn icon-btn--edit" title="Edit" (click)="openEdit(q)">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+            </button>
+            <button class="icon-btn icon-btn--delete" title="Delete" (click)="deleteQuestion(q)">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <p class="q-text">{{ q.questionText }}</p>
+
+        <!-- MCQ / MULTI_SELECT / SCENARIO / CODE / ORDERING — show all options -->
+        <div *ngIf="q.options && q.options.length > 0" class="q-options-preview">
+          <div *ngFor="let opt of q.options; let oi = index"
+               class="q-opt"
+               [class.q-opt--correct]="q.expectedAnswer && q.expectedAnswer.toUpperCase().split(',').includes(optionLetter(oi))">
+            <span class="q-opt__letter"
+                  [class.q-opt__letter--correct]="q.expectedAnswer && q.expectedAnswer.toUpperCase().split(',').includes(optionLetter(oi))">
+              {{ optionLetter(oi) }}
+            </span>
+            <span class="q-opt__text">{{ opt }}</span>
+            <span *ngIf="q.expectedAnswer && q.expectedAnswer.toUpperCase().split(',').includes(optionLetter(oi))"
+                  class="q-opt__check">✓</span>
+          </div>
+        </div>
+
+        <!-- FILL_BLANK -->
+        <div *ngIf="q.type === 'FILL_BLANK'" class="q-detail">
+          <span class="detail-label">Expected answer</span>
+          <span class="detail-value answer-pill">{{ q.expectedAnswer }}</span>
+        </div>
+
+        <!-- CODE (free-text) -->
+        <div *ngIf="q.type === 'CODE' && (!q.options || q.options.length === 0)" class="q-detail">
+          <span class="detail-label">Language</span>
+          <span class="detail-value lang-pill">{{ q.codeLanguage }}</span>
+          <pre *ngIf="q.expectedAnswer" class="code-block">{{ q.expectedAnswer }}</pre>
+        </div>
+
+        <!-- EXPLAIN / WRITE -->
+        <div *ngIf="q.type === 'EXPLAIN' || q.type === 'WRITE'" class="q-detail">
+          <span class="detail-label">Model answer</span>
+          <p class="detail-value model-answer">{{ q.expectedAnswer }}</p>
+        </div>
+
+        <!-- MATCH / DRAG_DROP -->
+        <div *ngIf="(q.type === 'MATCH' || q.type === 'DRAG_DROP') && q.choices.length > 0" class="match-grid">
+          <div *ngFor="let c of q.choices" class="match-pair">
+            <span class="match-l">{{ c.matchLeft }}</span>
+            <span class="match-arrow">→</span>
+            <span class="match-r">{{ c.matchRight }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- EDIT QUESTION MODAL                                                        -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div *ngIf="editingQ" class="modal-overlay" (click)="closeEdit()">
+  <div class="edit-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="edit-modal__header">
+      <div>
+        <p class="edit-modal__sub">Editing question</p>
+        <h3 class="edit-modal__title">
+          {{ editingQ.questionText | slice:0:60 }}{{ editingQ.questionText.length > 60 ? '…' : '' }}
+        </h3>
+      </div>
+      <button class="close-btn" (click)="closeEdit()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="edit-modal__body">
+      <div *ngIf="editError" class="alert alert-danger">{{ editError }}</div>
+
+      <!-- Type / Points / Order -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Question Type</label>
+          <select [(ngModel)]="editForm.type" class="field-input" (ngModelChange)="onTypeChange()">
+            <option *ngFor="let t of questionTypes" [value]="t">{{ typeLabels[t] }}</option>
+          </select>
+        </div>
+        <div class="field field--sm">
+          <label class="field-label">Points</label>
+          <input type="number" [(ngModel)]="editForm.points" class="field-input" min="0" />
+        </div>
+        <div class="field field--sm">
+          <label class="field-label">Order</label>
+          <input type="number" [(ngModel)]="editForm.orderIndex" class="field-input" min="1" />
+        </div>
+      </div>
+
+      <!-- Question text -->
+      <div class="field">
+        <label class="field-label">Question Text</label>
+        <textarea [(ngModel)]="editForm.questionText" rows="3" class="field-input"></textarea>
+      </div>
+
+      <!-- CODE language -->
+      <div *ngIf="editForm.type === 'CODE'" class="field">
+        <label class="field-label">Programming Language</label>
+        <input type="text" [(ngModel)]="editForm.codeLanguage"
+               placeholder="java, python, javascript…" class="field-input" />
+      </div>
+
+      <!-- ── OPTIONS EDITOR (MCQ / MULTI_SELECT / SCENARIO / CODE / ORDERING) ── -->
+      <div *ngIf="hasOptions(editForm.type)" class="options-editor">
+        <div class="options-editor__header">
+          <label class="field-label">Answer Options</label>
+          <span class="options-editor__hint">
+            {{ editForm.type === 'MULTI_SELECT' ? 'Check all correct answers' : 'Select the correct answer' }}
+          </span>
+        </div>
+
+        <div class="options-list">
+          <div *ngFor="let opt of editForm.options; let oi = index; trackBy: trackByIndex"
+               class="option-row"
+               [class.option-row--correct]="editForm.type === 'MULTI_SELECT' ? isCorrectMulti(oi) : isCorrectSingle(oi)">
+
+            <!-- Correct answer selector -->
+            <div class="option-selector">
+              <!-- Single answer (MCQ / SCENARIO / CODE / ORDERING) -->
+              <input *ngIf="editForm.type !== 'MULTI_SELECT'"
+                     type="radio"
+                     [name]="'correct_' + editingQ!.id"
+                     [checked]="isCorrectSingle(oi)"
+                     (change)="setSingleAnswer(oi)"
+                     class="option-radio" />
+              <!-- Multi answer -->
+              <input *ngIf="editForm.type === 'MULTI_SELECT'"
+                     type="checkbox"
+                     [checked]="isCorrectMulti(oi)"
+                     (change)="toggleMultiAnswer(oi)"
+                     class="option-checkbox" />
+            </div>
+
+            <!-- Letter badge -->
+            <span class="option-letter"
+                  [class.option-letter--correct]="editForm.type === 'MULTI_SELECT' ? isCorrectMulti(oi) : isCorrectSingle(oi)">
+              {{ optionLetter(oi) }}
+            </span>
+
+            <!-- Option text input -->
+            <input type="text"
+                   [(ngModel)]="editForm.options[oi]"
+                   [placeholder]="'Option ' + optionLetter(oi)"
+                   class="option-text-input"
+                   [class.option-text-input--correct]="editForm.type === 'MULTI_SELECT' ? isCorrectMulti(oi) : isCorrectSingle(oi)" />
+
+            <!-- Remove button -->
+            <button *ngIf="editForm.options.length > 2"
+                    class="option-remove" (click)="removeOption(oi)" title="Remove option">
+              <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Add option -->
+        <button *ngIf="editForm.options.length < 8"
+                class="btn-add-option" (click)="addOption()">
+          + Add option
+        </button>
+
+        <!-- Correct answer display -->
+        <div class="correct-answer-display" *ngIf="editForm.expectedAnswer">
+          <span class="correct-answer-display__label">Correct answer:</span>
+          <span class="correct-answer-display__value">{{ editForm.expectedAnswer }}</span>
+        </div>
+      </div>
+
+      <!-- ── PLAIN ANSWER (FILL_BLANK / EXPLAIN / WRITE) ── -->
+      <div *ngIf="!hasOptions(editForm.type) && editForm.type !== 'MATCH' && editForm.type !== 'DRAG_DROP'" class="field">
+        <label class="field-label">
+          {{ editForm.type === 'FILL_BLANK' ? 'Expected Answer' : 'Model Answer' }}
+        </label>
+        <textarea [(ngModel)]="editForm.expectedAnswer"
+                  [rows]="editForm.type === 'FILL_BLANK' ? 1 : 3"
+                  class="field-input"></textarea>
+      </div>
+
+      <!-- ── MATCH / DRAG_DROP pairs ── -->
+      <div *ngIf="editForm.type === 'MATCH' || editForm.type === 'DRAG_DROP'" class="field">
+        <label class="field-label">Match Pairs</label>
+        <div class="match-pairs-editor">
+          <div *ngFor="let pair of editForm.matchPairs; let i = index; trackBy: trackByIndex"
+               class="match-pair-row">
+            <span class="pair-num">{{ i + 1 }}</span>
+            <input type="text" [(ngModel)]="pair.left"  placeholder="Left item"  class="field-input" />
+            <span class="pair-arrow">→</span>
+            <input type="text" [(ngModel)]="pair.right" placeholder="Right item" class="field-input" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="edit-modal__footer">
+      <button class="btn btn-ghost" (click)="closeEdit()">Cancel</button>
+      <button class="btn btn-save" (click)="saveEdit()" [disabled]="saving">
+        <span *ngIf="saving" class="spinner"></span>
+        {{ saving ? 'Saving…' : 'Save Changes' }}
+      </button>
+    </div>
+
+  </div>
+</div>

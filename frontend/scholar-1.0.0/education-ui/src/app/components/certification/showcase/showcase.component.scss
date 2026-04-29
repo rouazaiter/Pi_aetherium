@@ -1,0 +1,236 @@
+// ── Page shell ────────────────────────────────────────────────────────────────
+.sc-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 60%, #0f172a 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem 1rem 3rem;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+// ── Loading ───────────────────────────────────────────────────────────────────
+.sc-loading {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  color: rgba(255,255,255,.6); font-size: .9rem;
+}
+.sc-loading__ring {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: #C9A84C;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Error ─────────────────────────────────────────────────────────────────────
+.sc-error {
+  text-align: center; color: #fff; max-width: 400px;
+  &__icon { font-size: 3rem; margin-bottom: 1rem; }
+  h2 { font-size: 1.3rem; margin: 0 0 .5rem; }
+  p  { color: rgba(255,255,255,.6); font-size: .9rem; }
+}
+
+// ── Content wrapper ───────────────────────────────────────────────────────────
+.sc-content {
+  width: 100%; max-width: 480px;
+  display: flex; flex-direction: column; gap: 1.25rem;
+  animation: fadeUp .4s ease;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+.sc-hero {
+  text-align: center; position: relative; padding: 1.5rem 0 .5rem;
+  overflow: hidden;
+}
+.sc-hero__badge {
+  font-size: 3.5rem; display: block; margin-bottom: .5rem;
+  animation: bounce .6s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes bounce { from { transform: scale(0); } to { transform: scale(1); } }
+.sc-hero__congrats {
+  font-size: 2rem; font-weight: 900; color: #fff; margin: 0 0 .4rem;
+  background: linear-gradient(135deg, #F0D060, #C9A84C);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sc-hero__sub { font-size: .875rem; color: rgba(255,255,255,.65); margin: 0; }
+
+// ── Confetti ──────────────────────────────────────────────────────────────────
+.sc-hero__confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.confetti-piece {
+  position: absolute; width: 8px; height: 8px; border-radius: 2px;
+  animation: confettiFall 2.5s ease-in forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
+}
+.confetti-piece--1  { left:  0%; animation-delay: .12s; background: #F0D060; }
+.confetti-piece--2  { left:  9%; animation-delay: .24s; background: #C9A84C; }
+.confetti-piece--3  { left: 18%; animation-delay: .36s; background: #10b981; }
+.confetti-piece--4  { left: 27%; animation-delay: .48s; background: #6366f1; }
+.confetti-piece--5  { left: 36%; animation-delay: .60s; background: #ef4444; }
+.confetti-piece--6  { left: 45%; animation-delay: .72s; background: #f59e0b; }
+.confetti-piece--7  { left: 54%; animation-delay: .84s; background: #0ea5e9; }
+.confetti-piece--8  { left: 63%; animation-delay: .96s; background: #8b5cf6; }
+.confetti-piece--9  { left: 72%; animation-delay:1.08s; background: #ec4899; }
+.confetti-piece--10 { left: 81%; animation-delay:1.20s; background: #14b8a6; }
+.confetti-piece--11 { left: 90%; animation-delay:1.32s; background: #f97316; }
+.confetti-piece--12 { left: 99%; animation-delay:1.44s; background: #84cc16; }
+
+// ── Certificate card ──────────────────────────────────────────────────────────
+.sc-card {
+  background: #fff; border-radius: 24px; overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.2);
+}
+
+// Brand header
+.sc-card__brand {
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1.1rem 1.5rem;
+  background: linear-gradient(135deg, #0d1b2a, #1a3a5c);
+}
+.sc-brand-logo {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #C9A84C, #F0D060);
+  color: #0d1b2a; font-size: 18px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+}
+.sc-brand-info { flex: 1; }
+.sc-brand-name { display: block; font-size: .8rem; font-weight: 800; color: #fff; letter-spacing: 3px; }
+.sc-brand-sub  { font-size: .65rem; color: rgba(255,255,255,.5); letter-spacing: .04em; }
+.sc-verified-seal {
+  display: flex; align-items: center; gap: .3rem;
+  background: rgba(16,185,129,.2); color: #34d399;
+  border: 1px solid rgba(16,185,129,.3);
+  padding: .25rem .7rem; border-radius: 20px;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+}
+
+// Holder
+.sc-card__holder { padding: 1.5rem 1.5rem .5rem; text-align: center; }
+.sc-holder-label {
+  font-size: .7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: #94a3b8; margin-bottom: .4rem;
+}
+.sc-holder-name {
+  font-size: 1.75rem; font-weight: 800; color: #0f172a;
+  font-style: italic; font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.2;
+}
+
+// Cert title
+.sc-card__cert { padding: .75rem 1.5rem 1rem; text-align: center; }
+.sc-cert-label {
+  font-size: .7rem; color: #94a3b8; text-transform: uppercase;
+  letter-spacing: .06em; margin-bottom: .35rem;
+}
+.sc-cert-title {
+  font-size: 1.1rem; font-weight: 800; color: #0f172a; line-height: 1.3;
+  margin-bottom: .6rem;
+}
+.sc-cert-meta { display: flex; gap: .4rem; justify-content: center; flex-wrap: wrap; }
+.sc-tag {
+  display: inline-flex; align-items: center; gap: .25rem;
+  padding: .25em .85em; border-radius: 20px;
+  font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  &--cat { background: #eff6ff; color: #1d4ed8; }
+}
+
+// Stats row
+.sc-card__stats {
+  display: flex; align-items: center; gap: 1.25rem;
+  padding: 1rem 1.5rem 1.25rem;
+  background: #f8fafc;
+}
+.sc-score { display: flex; flex-direction: column; align-items: center; gap: .3rem; flex-shrink: 0; }
+.sc-score__ring { width: 90px; height: 90px; }
+.sc-score__label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; }
+.sc-stats-divider { width: 1px; height: 80px; background: #e2e8f0; flex-shrink: 0; }
+.sc-meta-col { flex: 1; display: flex; flex-direction: column; gap: .6rem; }
+.sc-meta-item {}
+.sc-meta-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; }
+.sc-meta-value {
+  font-size: .82rem; font-weight: 700; color: #0f172a; margin-top: .1rem;
+  &--mono { font-family: 'Courier New', monospace; font-size: .78rem; color: #4f46e5; }
+}
+
+// Gold divider
+.sc-gold-line {
+  height: 2px; margin: 0 1.5rem;
+  background: linear-gradient(90deg, transparent, #C9A84C 30%, #F0D060 50%, #C9A84C 70%, transparent);
+}
+
+// Skills
+.sc-card__skills { padding: 1rem 1.5rem 1.5rem; }
+.sc-skills-label {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: #94a3b8; margin-bottom: .6rem;
+}
+.sc-skills-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+.sc-skill-tag {
+  background: #ede9fe; color: #4c1d95; border: 1px solid #c4b5fd;
+  padding: .25em .75em; border-radius: 20px; font-size: .72rem; font-weight: 700;
+}
+
+// ── Share section ─────────────────────────────────────────────────────────────
+.sc-share {
+  background: rgba(255,255,255,.06); border-radius: 16px;
+  padding: 1.25rem 1.5rem; border: 1px solid rgba(255,255,255,.1);
+}
+.sc-share__title {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: rgba(255,255,255,.5); margin-bottom: .85rem;
+  text-align: center;
+}
+.sc-share__buttons { display: flex; gap: .6rem; }
+
+.sc-share-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: .5rem;
+  border: none; border-radius: 12px; padding: .75rem .5rem;
+  font-size: .8rem; font-weight: 700; cursor: pointer;
+  transition: all .15s;
+  &:hover { transform: translateY(-2px); }
+
+  &--whatsapp {
+    background: #25D366; color: #fff;
+    &:hover { background: #1ebe5d; box-shadow: 0 4px 16px rgba(37,211,102,.4); }
+  }
+  &--linkedin {
+    background: #0A66C2; color: #fff;
+    &:hover { background: #004182; box-shadow: 0 4px 16px rgba(10,102,194,.4); }
+  }
+  &--copy {
+    background: rgba(255,255,255,.12); color: #fff;
+    border: 1px solid rgba(255,255,255,.2);
+    &:hover { background: rgba(255,255,255,.2); }
+  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.sc-footer {
+  text-align: center; color: rgba(255,255,255,.4); font-size: .72rem;
+  display: flex; flex-direction: column; align-items: center; gap: .3rem;
+  p { margin: 0; }
+  &__brand {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.6);
+    margin-bottom: .2rem;
+  }
+  &__logo {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #C9A84C, #F0D060);
+    color: #0d1b2a; font-size: 11px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+  }
+  &__id { font-family: 'Courier New', monospace; color: rgba(255,255,255,.3); }
+}
+
+// ── Mobile ────────────────────────────────────────────────────────────────────
+@media (max-width: 520px) {
+  .sc-page { padding: 1rem .75rem 2rem; }
+  .sc-hero__congrats { font-size: 1.6rem; }
+  .sc-holder-name { font-size: 1.4rem; }
+  .sc-cert-title { font-size: 1rem; }
+  .sc-share__buttons { flex-direction: column; }
+  .sc-share-btn { padding: .85rem; }
+}

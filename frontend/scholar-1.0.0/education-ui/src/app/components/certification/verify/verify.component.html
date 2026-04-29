@@ -1,0 +1,277 @@
+<div class="vc">
+
+  <!-- ── Page title ──────────────────────────────────────────────────────── -->
+  <div class="vc-title-row">
+    <div>
+      <h1 class="vc-title">🔍 Verify Certificate</h1>
+      <p class="vc-subtitle">Upload a SkillHub certificate PDF to instantly confirm its authenticity</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- UPLOAD ZONE                                                             -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="!searched" class="upload-section">
+
+    <!-- Drop zone -->
+    <div class="drop-zone"
+         [class.drop-zone--over]="dragOver"
+         [class.drop-zone--loading]="uploading"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave($event)"
+         (drop)="onDrop($event)"
+         (click)="openFilePicker()">
+
+      <input #fileInput type="file" accept="application/pdf"
+             class="file-input-hidden"
+             (change)="onFileSelected($event)" />
+
+      <!-- Idle -->
+      <ng-container *ngIf="!uploading">
+        <div class="drop-zone__icon">
+          <svg viewBox="0 0 72 72" fill="none">
+            <rect x="10" y="6" width="42" height="54" rx="5"
+                  stroke="#6366f1" stroke-width="2.5" fill="#eef2ff"/>
+            <line x1="18" y1="22" x2="44" y2="22" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+            <line x1="18" y1="30" x2="44" y2="30" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+            <line x1="18" y1="38" x2="34" y2="38" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+            <!-- Seal badge -->
+            <circle cx="54" cy="54" r="16" fill="#4f46e5"/>
+            <path d="M54 60 L54 48 M50 52 L54 48 L58 52"
+                  stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="drop-zone__title">Drop the certificate PDF here</div>
+        <div class="drop-zone__sub">or <span class="drop-zone__link">click to browse</span></div>
+        <div class="drop-zone__hint">PDF only · Max 10 MB</div>
+      </ng-container>
+
+      <!-- Loading -->
+      <ng-container *ngIf="uploading">
+        <div class="drop-zone__spinner">
+          <svg class="spin-ring" viewBox="0 0 50 50">
+            <circle cx="25" cy="25" r="20" fill="none" stroke="#e0e7ff" stroke-width="4"/>
+            <circle cx="25" cy="25" r="20" fill="none" stroke="#4f46e5" stroke-width="4"
+                    stroke-linecap="round" stroke-dasharray="80 45"
+                    transform="rotate(-90 25 25)"/>
+          </svg>
+        </div>
+        <div class="drop-zone__title">Analysing certificate…</div>
+        <div class="drop-zone__sub" *ngIf="fileName">{{ fileName }}</div>
+      </ng-container>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="uploadError" class="upload-error">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      {{ uploadError }}
+    </div>
+
+    <!-- How it works -->
+    <div class="how-it-works">
+      <div class="hiw-label">How it works</div>
+      <div class="hiw-steps">
+        <div class="hiw-step">
+          <div class="hiw-num">1</div>
+          <div class="hiw-body">
+            <strong>Upload the PDF</strong>
+            <span>Drag & drop or click to select the certificate PDF you want to verify.</span>
+          </div>
+        </div>
+        <div class="hiw-arrow">→</div>
+        <div class="hiw-step">
+          <div class="hiw-num">2</div>
+          <div class="hiw-body">
+            <strong>Automatic extraction</strong>
+            <span>We read the Certificate ID embedded in the document automatically.</span>
+          </div>
+        </div>
+        <div class="hiw-arrow">→</div>
+        <div class="hiw-step">
+          <div class="hiw-num">3</div>
+          <div class="hiw-body">
+            <strong>Instant result</strong>
+            <span>We check our database in real-time and confirm whether it's authentic.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- RESULT                                                                  -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="searched && result" class="result-section">
+
+    <!-- ── VALID ─────────────────────────────────────────────────────────── -->
+    <div *ngIf="result.valid" class="result-card result-card--valid">
+
+      <div class="result-seal result-seal--valid">
+        <div class="seal-icon">
+          <svg viewBox="0 0 56 56" fill="none">
+            <circle cx="28" cy="28" r="26" fill="#10b981" opacity=".1"/>
+            <circle cx="28" cy="28" r="20" fill="#10b981" opacity=".18"/>
+            <circle cx="28" cy="28" r="14" fill="#10b981"/>
+            <path d="M20 28l5.5 5.5L36 22" stroke="white" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="seal-text">
+          <div class="seal-title">✓ Authentic Certificate</div>
+          <div class="seal-sub">Verified against the SkillHub database · {{ formattedDate }}</div>
+        </div>
+        <div class="seal-id">{{ result.certificateId }}</div>
+      </div>
+
+      <div class="result-body">
+
+        <!-- Holder -->
+        <div class="rf rf--hero">
+          <div class="rf-label">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M13 14v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1"/><circle cx="8" cy="5" r="3"/>
+            </svg>
+            Certificate Holder
+          </div>
+          <div class="rf-value rf-value--name">{{ result.holderName }}</div>
+        </div>
+
+        <div class="result-row">
+
+          <!-- Certification -->
+          <div class="rf">
+            <div class="rf-label">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="1" y="2" width="14" height="10" rx="1.5"/>
+                <path d="M5 14h6M8 12v2"/>
+              </svg>
+              Certification
+            </div>
+            <div class="rf-value">{{ result.certificationTitle }}</div>
+            <div class="rf-tags">
+              <span class="tag tag--blue">{{ result.category }}</span>
+              <span class="tag"
+                    [style.background]="difficultyBg"
+                    [style.color]="difficultyColor">{{ result.difficulty }}</span>
+            </div>
+          </div>
+
+          <!-- Score -->
+          <div class="rf">
+            <div class="rf-label">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="15 8 12 8 10 14 6 2 4 8 1 8"/>
+              </svg>
+              Exam Score
+            </div>
+            <div class="score-wrap">
+              <svg class="score-ring" viewBox="0 0 72 72">
+                <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+                <circle cx="36" cy="36" r="30" fill="none" stroke="#10b981" stroke-width="6"
+                        stroke-linecap="round"
+                        [attr.stroke-dasharray]="2 * 3.14159 * 30"
+                        [attr.stroke-dashoffset]="(2 * 3.14159 * 30) * (1 - scorePercent / 100)"
+                        transform="rotate(-90 36 36)"/>
+                <text x="36" y="41" text-anchor="middle" font-size="13"
+                      font-weight="800" fill="#059669">{{ scorePercent }}%</text>
+              </svg>
+              <span class="score-pass">✅ PASSED</span>
+            </div>
+          </div>
+
+          <!-- Date -->
+          <div class="rf">
+            <div class="rf-label">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="1" y="3" width="14" height="12" rx="1.5"/>
+                <path d="M11 1v3M5 1v3M1 7h14"/>
+              </svg>
+              Date Issued
+            </div>
+            <div class="rf-value">{{ formattedDate }}</div>
+          </div>
+
+        </div>
+
+        <!-- Issuer -->
+        <div class="rf rf--issuer">
+          <div class="rf-label">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M8 15s6-3 6-7.5V3.5L8 1.5 2 3.5V7.5c0 4.5 6 7.5 6 7.5z"/>
+            </svg>
+            Issued By
+          </div>
+          <div class="issuer-row">
+            <div class="issuer-logo">S</div>
+            <div>
+              <div class="rf-value">{{ result.issuedBy }}</div>
+              <div class="rf-meta">{{ result.issuerTitle }} · {{ result.platform }}</div>
+            </div>
+            <div class="official-badge">✓ Official Issuer</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="result-footer">
+        <div class="result-footer__note">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13">
+            <circle cx="8" cy="8" r="7"/><path d="M8 5v3M8 11v.5"/>
+          </svg>
+          Verified in real-time · Certificate ID <strong>{{ result.certificateId }}</strong> is on record
+        </div>
+        <button class="btn-again" (click)="reset()">Verify another →</button>
+      </div>
+    </div>
+
+    <!-- ── INVALID ────────────────────────────────────────────────────────── -->
+    <div *ngIf="!result.valid" class="result-card result-card--invalid">
+
+      <div class="result-seal result-seal--invalid">
+        <div class="seal-icon">
+          <svg viewBox="0 0 56 56" fill="none">
+            <circle cx="28" cy="28" r="26" fill="#ef4444" opacity=".1"/>
+            <circle cx="28" cy="28" r="20" fill="#ef4444" opacity=".15"/>
+            <circle cx="28" cy="28" r="14" fill="#ef4444"/>
+            <path d="M21 21l14 14M35 21L21 35" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="seal-text">
+          <div class="seal-title">Certificate Not Verified</div>
+          <div class="seal-sub">
+            <ng-container [ngSwitch]="result.certificateId">
+              <span *ngSwitchCase="'NOT_FOUND_IN_PDF'">No Certificate ID (SKH-XXXXXX) was found in the uploaded PDF</span>
+              <span *ngSwitchCase="'PARSE_ERROR'">Could not read the PDF — it may be corrupted or password-protected</span>
+              <span *ngSwitchCase="'INVALID_FORMAT'">Invalid file format — please upload a PDF file</span>
+              <span *ngSwitchDefault>No record found for <strong>{{ result.certificateId }}</strong></span>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="invalid-body">
+        <p class="invalid-title">This could mean:</p>
+        <ul class="invalid-list">
+          <li>The certificate was not issued by SkillHub</li>
+          <li>The PDF may have been modified or is not the original</li>
+          <li>The Certificate ID does not match our records</li>
+          <li>The exam was not passed — only passed exams generate valid certificates</li>
+        </ul>
+        <p class="invalid-contact">
+          Questions? Contact us at
+          <a href="mailto:support&#64;skillhub.io">support&#64;skillhub.io</a>
+        </p>
+      </div>
+
+      <div class="result-footer">
+        <div></div>
+        <button class="btn-again" (click)="reset()">Try another file →</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

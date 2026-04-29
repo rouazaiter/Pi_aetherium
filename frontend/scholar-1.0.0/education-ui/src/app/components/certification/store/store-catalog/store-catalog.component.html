@@ -1,0 +1,150 @@
+<div class="store-page">
+
+  <!-- Hero -->
+  <div class="store-hero">
+    <h1>🎓 Certification Store</h1>
+    <p>Earn industry-recognized certifications. Pay once, take the exam, get certified.</p>
+  </div>
+
+  <!-- Search + Filters bar -->
+  <div class="toolbar">
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input"
+             placeholder="Search certifications…"
+             [(ngModel)]="searchQuery"
+             (ngModelChange)="onSearchInput($event)" />
+      <button *ngIf="searchQuery" class="clear-btn" (click)="clearSearch()">✕</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <select class="filter-select" [(ngModel)]="difficultyFilter" (ngModelChange)="onFilterChange()">
+        <option value="all">All Levels</option>
+        <option value="BEGINNER">🟢 Beginner</option>
+        <option value="INTERMEDIATE">🟡 Intermediate</option>
+        <option value="ADVANCED">🔴 Advanced</option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="priceFilter" (ngModelChange)="onFilterChange()">
+        <option value="all">All Prices</option>
+        <option value="free">Free</option>
+        <option value="paid">Paid</option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
+        <option *ngFor="let cat of categories" [value]="cat">
+          {{ cat === 'all' ? 'All Categories' : cat }}
+        </option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()">
+        <option value="default">Sort: Default</option>
+        <option value="title-asc">Sort: A → Z</option>
+        <option value="price-asc">Sort: Price ↑</option>
+        <option value="price-desc">Sort: Price ↓</option>
+      </select>
+
+      <button *ngIf="hasActiveFilters" class="btn-reset" (click)="resetFilters()">
+        ✕ Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Results count -->
+  <div class="results-bar" *ngIf="!loading">
+    <span class="results-count">
+      {{ filtered.length }} certification{{ filtered.length !== 1 ? 's' : '' }} found
+    </span>
+    <span class="page-info" *ngIf="totalPages > 1">
+      Page {{ page }} of {{ totalPages }}
+    </span>
+  </div>
+
+  <!-- Skeleton loading -->
+  <div *ngIf="loading" class="cert-grid">
+    <div *ngFor="let r of skeletonRows" class="cert-card cert-card--skeleton">
+      <div class="skel skel-badge"></div>
+      <div class="skel skel-title"></div>
+      <div class="skel skel-desc"></div>
+      <div class="skel skel-desc skel-desc--sm"></div>
+      <div class="skel skel-btn"></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && filtered.length === 0" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>No certifications found</h3>
+    <p>Try adjusting your search or filters.</p>
+    <button class="btn-reset-lg" (click)="resetFilters()">Clear all filters</button>
+  </div>
+
+  <!-- Grid -->
+  <div *ngIf="!loading && paged.length > 0" class="cert-grid">
+    <div *ngFor="let cert of paged" class="cert-card" (click)="viewCert(cert.id)">
+
+      <!-- Cover image -->
+      <div class="card-cover" [class.card-cover--placeholder]="!cert.coverImageUrl">
+        <img *ngIf="cert.coverImageUrl" [src]="cert.coverImageUrl"
+             [alt]="cert.title" class="card-cover-img"
+             (error)="$any($event.target).style.display='none'" />
+        <div *ngIf="!cert.coverImageUrl" class="card-cover-fallback">
+          <span class="cover-emoji">{{ difficultyEmoji(cert.difficulty) }}</span>
+          <span class="cover-category">{{ cert.category }}</span>
+        </div>
+        <span class="card-difficulty-badge" [class]="difficultyClass(cert.difficulty)">
+          {{ difficultyLabel(cert.difficulty) }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="card-meta-top">
+          <span class="category">{{ cert.category }}</span>
+        </div>
+        <h3>{{ cert.title }}</h3>
+        <p class="desc">
+          {{ (cert.description || '') | slice:0:100 }}{{ (cert.description || '').length > 100 ? '…' : '' }}
+        </p>
+        <div class="card-footer">
+          <div class="meta">
+            <span>⏱ {{ cert.durationMinutes }} min</span>
+            <span>🎯 {{ cert.passingScore }}%</span>
+          </div>
+          <div class="price">
+            <span *ngIf="cert.price > 0" class="price-tag">${{ cert.price | number:'1.2-2' }}</span>
+            <span *ngIf="cert.price === 0" class="free-tag">FREE</span>
+          </div>
+        </div>
+        <button class="btn-enroll">View & Enroll →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="pagination">
+    <button class="page-btn page-btn--nav" (click)="goPage(page - 1)" [disabled]="page === 1">
+      ‹
+    </button>
+
+    <ng-container *ngFor="let p of pageNumbers">
+      <span *ngIf="p < 0" class="page-ellipsis">…</span>
+      <button *ngIf="p > 0"
+              class="page-btn"
+              [class.page-btn--active]="p === page"
+              (click)="goPage(p)">{{ p }}</button>
+    </ng-container>
+
+    <button class="page-btn page-btn--nav" (click)="goPage(page + 1)" [disabled]="page === totalPages">
+      ›
+    </button>
+  </div>
+
+</div>
+
+<!-- ── AI Certification Advisor ─────────────────────────────────────────────── -->
+<app-chat-assistant></app-chat-assistant>

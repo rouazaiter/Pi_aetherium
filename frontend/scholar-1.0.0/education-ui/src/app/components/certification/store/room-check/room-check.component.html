@@ -1,0 +1,154 @@
+<div class="room-check">
+
+  <!-- Header -->
+  <div class="rc-header">
+    <div class="rc-header-icon">🔍</div>
+    <div class="rc-header-text">
+      <h2>Room Verification</h2>
+      <p>We need to confirm you are alone and scan the room before the exam begins.</p>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="state === 'error'" class="rc-state rc-state--error">
+    <div class="rc-state-icon">❌</div>
+    <p>{{ statusMessage }}</p>
+    <button class="btn-retry" (click)="retry()">🔄 Try Again</button>
+  </div>
+
+  <!-- Loading model -->
+  <div *ngIf="state === 'loading_model'" class="rc-state">
+    <div class="spinner spinner--lg"></div>
+    <p class="rc-state-title">Loading AI Model</p>
+    <p class="rc-state-sub">Person-detection model loading (first time ~10s, then cached)</p>
+  </div>
+
+  <!-- Opening camera -->
+  <div *ngIf="state === 'loading_camera'" class="rc-state">
+    <div class="spinner spinner--lg spinner--green"></div>
+    <p class="rc-state-title">Opening Camera</p>
+    <p class="rc-state-sub">Please allow camera access when your browser asks.</p>
+  </div>
+
+  <!-- Scan failed -->
+  <div *ngIf="state === 'scan_failed'" class="rc-state rc-state--error">
+    <div class="rc-state-icon">⚠️</div>
+    <p class="rc-state-title">Scan Failed</p>
+    <p>{{ statusMessage }}</p>
+    <p class="rc-state-sub">Please ensure only you are in the room, then try again.</p>
+    <button class="btn-retry" (click)="retry()">🔄 Retry Scan</button>
+  </div>
+
+  <!-- Video (always in DOM so ViewChild resolves) -->
+  <div class="rc-camera-section"
+       [class.rc-camera-section--hidden]="state === 'loading_model' || state === 'loading_camera' || state === 'error' || state === 'scan_failed'">
+
+    <!-- Phase label -->
+    <div class="phase-label" *ngIf="state === 'scan_360'">
+      <span class="phase-badge phase-badge--scan">📷 Phase 1 of 2 — 360° Room Scan</span>
+    </div>
+    <div class="phase-label" *ngIf="state === 'confirm_candidate'">
+      <span class="phase-badge phase-badge--confirm">👤 Phase 2 of 2 — Candidate Confirmation</span>
+    </div>
+    <div class="phase-label" *ngIf="state === 'approved'">
+      <span class="phase-badge phase-badge--approved">✅ Verified</span>
+    </div>
+
+    <!-- Video + canvas -->
+    <div class="video-wrap"
+         [class.video-wrap--ok]="state === 'confirm_candidate' || state === 'approved'"
+         [class.video-wrap--warn]="personCount > 1">
+      <video #videoEl class="rc-video" autoplay muted playsinline></video>
+      <canvas #canvasEl class="rc-canvas"></canvas>
+
+      <!-- Corner badge -->
+      <div class="video-badge"
+           [class.video-badge--green]="personCount === 1 && state !== 'scan_360'"
+           [class.video-badge--red]="personCount > 1"
+           [class.video-badge--blue]="state === 'scan_360'">
+        <span class="badge-dot"
+              [class.badge-dot--pulse]="state === 'scan_360'"
+              [class.badge-dot--green]="state === 'confirm_candidate' && personCount === 1"
+              [class.badge-dot--red]="personCount > 1">
+        </span>
+        <span>
+          {{ personCount === 0 ? 'No one detected'
+           : personCount === 1 ? (state === 'scan_360' ? 'Candidate visible ✓' : 'Candidate confirmed ✓')
+           : personCount + ' people detected ⚠' }}
+        </span>
+      </div>
+
+      <!-- Approved overlay -->
+      <div *ngIf="state === 'approved'" class="approved-overlay">
+        <div class="approved-check">✓</div>
+        <p>Identity Confirmed</p>
+      </div>
+    </div>
+
+    <!-- Status message -->
+    <div class="rc-status"
+         [class.rc-status--ok]="state === 'confirm_candidate' && personCount === 1"
+         [class.rc-status--warn]="personCount > 1">
+      {{ statusMessage }}
+    </div>
+
+    <!-- Phase 1: Scan progress -->
+    <div *ngIf="state === 'scan_360'" class="scan-progress-wrap">
+      <div class="scan-progress-header">
+        <span>360° Room Scan Progress</span>
+        <span>{{ scenesFound }} / {{ SCENES_REQUIRED }} scenes</span>
+      </div>
+      <div class="scan-progress-track">
+        <div class="scan-progress-fill" [style.width.%]="scanProgress"></div>
+      </div>
+
+      <!-- Scene dots -->
+      <div class="scene-dots">
+        <div *ngFor="let i of [0,1,2,3,4,5]"
+             class="scene-dot"
+             [class.scene-dot--filled]="i < scenesFound">
+        </div>
+      </div>
+
+      <!-- Motion indicator -->
+      <div class="motion-row">
+        <span class="motion-label">Camera movement:</span>
+        <div class="motion-bar-track">
+          <div class="motion-bar-fill"
+               [style.width.%]="motionLevel"
+               [class.motion-bar-fill--active]="isMoving"
+               [class.motion-bar-fill--idle]="!isMoving">
+          </div>
+        </div>
+        <span class="motion-status" [class.motion-status--active]="isMoving">
+          {{ isMoving ? '🟢 Moving' : '🔴 Still' }}
+        </span>
+      </div>
+
+      <p class="scan-hint">
+        <strong>Slowly rotate your camera</strong> to show all corners of the room.
+        Each time the background changes significantly, a new scene is recorded.
+        Moving your body without moving the camera will <em>not</em> count.
+      </p>
+    </div>
+
+    <!-- Phase 2: Confirm progress bar -->
+    <div *ngIf="state === 'confirm_candidate'" class="confirm-progress-wrap">
+      <div class="confirm-progress-header">
+        <span>Confirming candidate identity…</span>
+        <span>{{ confirmSeconds }}/{{ CONFIRM_REQUIRED }}s</span>
+      </div>
+      <div class="confirm-progress-track">
+        <div class="confirm-progress-fill" [style.width.%]="confirmProgressPercent"></div>
+      </div>
+      <p class="scan-hint">Face the camera directly and hold still.</p>
+    </div>
+
+  </div>
+
+  <!-- Cancel -->
+  <button *ngIf="state !== 'approved'" class="btn-cancel" (click)="cancel()">
+    Cancel &amp; Go Back
+  </button>
+
+</div>

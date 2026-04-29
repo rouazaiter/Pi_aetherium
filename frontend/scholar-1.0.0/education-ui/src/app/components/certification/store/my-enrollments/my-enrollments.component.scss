@@ -1,0 +1,82 @@
+.my-page { max-width: 860px; margin: 0 auto; }
+
+// ── Email prompt ──────────────────────────────────────────────────────────────
+.email-prompt-wrap { display: flex; justify-content: center; padding: 3rem 1rem; }
+.email-prompt {
+  background: #fff; border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 440px;
+  text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,.08);
+  .prompt-icon { font-size: 3rem; margin-bottom: 1rem; }
+  h2 { margin: 0 0 .5rem; font-size: 1.3rem; color: #0f172a; }
+  p  { color: #64748b; margin: 0 0 1.5rem; font-size: .9rem; line-height: 1.5; }
+}
+.prompt-field { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .75rem; }
+.prompt-input { border: 1.5px solid #e2e8f0; border-radius: 9px; padding: .65rem .9rem; font-size: .95rem; width: 100%; box-sizing: border-box; &:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.1); } }
+.btn-confirm { background: #4f46e5; color: #fff; border: none; border-radius: 9px; padding: .75rem; font-size: .9rem; font-weight: 700; cursor: pointer; &:hover:not(:disabled) { background: #4338ca; } &:disabled { opacity: .5; cursor: not-allowed; } }
+.btn-browse { background: none; border: none; color: #94a3b8; font-size: .82rem; cursor: pointer; &:hover { color: #64748b; text-decoration: underline; } }
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; h2 { margin: 0 0 .2rem; font-size: 1.5rem; color: #0f172a; } }
+.page-sub { margin: 0; color: #64748b; font-size: .875rem; }
+.btn-store { background: #4f46e5; color: #fff; border: none; border-radius: 9px; padding: .55rem 1.1rem; font-size: .875rem; font-weight: 700; cursor: pointer; &:hover { background: #4338ca; } }
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.06); border-top: 3px solid #e2e8f0; }
+.stat-card--blue  { border-top-color: #6366f1; }
+.stat-card--green { border-top-color: #10b981; }
+.stat-card--gold  { border-top-color: #f59e0b; }
+.stat-val { display: block; font-size: 1.75rem; font-weight: 800; color: #0f172a; }
+.stat-lbl { font-size: .72rem; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: .04em; }
+
+// ── Filter tabs ───────────────────────────────────────────────────────────────
+.filter-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; border-bottom: 1px solid #f1f5f9; padding-bottom: .75rem; }
+.tab-btn { background: none; border: none; padding: .45rem .9rem; border-radius: 8px; font-size: .875rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all .15s; &:hover { background: #f1f5f9; color: #1e293b; } &--active { background: #ede9fe; color: #4c1d95; } }
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+.skel { background: linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skel-title   { height: 20px; width: 60%; margin-bottom: .5rem; }
+.skel-meta    { height: 14px; width: 80%; margin-bottom: .75rem; }
+.skel-actions { height: 36px; width: 200px; }
+.enrollment-card--skeleton { pointer-events: none; }
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state { text-align: center; padding: 3.5rem 2rem; background: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); .empty-icon { font-size: 3rem; margin-bottom: 1rem; } h3 { margin: 0 0 .5rem; color: #1e293b; } p { color: #64748b; margin: 0 0 1.5rem; font-size: .9rem; } }
+.btn-browse-lg { background: #4f46e5; color: #fff; border: none; border-radius: 9px; padding: .65rem 1.5rem; font-size: .9rem; font-weight: 700; cursor: pointer; &:hover { background: #4338ca; } }
+
+// ── Enrollment list ───────────────────────────────────────────────────────────
+.enrollment-list { display: flex; flex-direction: column; gap: .75rem; }
+.enrollment-card {
+  background: #fff; border-radius: 14px; padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06); border: 1.5px solid #f1f5f9;
+  display: flex; align-items: center; gap: 1.25rem; transition: box-shadow .15s;
+  &:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+  &--enrolled   { border-left: 4px solid #6366f1; }
+  &--completed  { border-left: 4px solid #10b981; }
+}
+
+// ── Score ring ────────────────────────────────────────────────────────────────
+.score-ring-wrap { flex-shrink: 0; }
+.score-ring { width: 64px; height: 64px; }
+.status-icon { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #f8fafc; border-radius: 50%; flex-shrink: 0; }
+
+// ── Card body ─────────────────────────────────────────────────────────────────
+.card-body { flex: 1; min-width: 0; }
+.card-header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .4rem; }
+.cert-name { margin: 0; font-size: 1rem; font-weight: 700; color: #1e293b; cursor: pointer; &:hover { color: #4f46e5; text-decoration: underline; } }
+.status-badges { flex-shrink: 0; }
+.status-badge { font-size: .72rem; font-weight: 700; padding: .2em .7em; border-radius: 20px; white-space: nowrap; background: #f1f5f9; color: #475569; }
+.status-badge--enrolled { background: #ede9fe; color: #4c1d95; }
+.status-badge--passed   { background: #dcfce7; color: #166534; }
+.status-badge--failed   { background: #fee2e2; color: #991b1b; }
+.card-meta { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .78rem; color: #94a3b8; }
+
+// ── Card actions ──────────────────────────────────────────────────────────────
+.card-actions { display: flex; flex-direction: column; gap: .4rem; flex-shrink: 0; }
+.action-btn { padding: .45rem .9rem; border: none; border-radius: 8px; font-size: .8rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .15s; &:hover { transform: translateY(-1px); } }
+.action-btn--practice { background: #f0fdf4; color: #065f46; &:hover { background: #dcfce7; } }
+.action-btn--exam     { background: #4f46e5; color: #fff; &:hover { background: #4338ca; } }
+.action-btn--result   { background: #f1f5f9; color: #475569; &:hover { background: #e2e8f0; } }
+.action-btn--cert     { background: #fef9c3; color: #854d0e; &:hover { background: #fef3c7; } }
+
+.alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: .75rem 1rem; border-radius: 8px; font-size: .875rem; }

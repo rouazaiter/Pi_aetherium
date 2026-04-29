@@ -1,0 +1,187 @@
+<div class="fb-overlay" (click)="skip()">
+  <div class="fb-modal" (click)="$event.stopPropagation()">
+
+    <!-- ── Header ──────────────────────────────────────────────────────── -->
+    <div class="fb-header">
+      <div class="fb-header__left">
+        <div class="fb-header__icon">💬</div>
+        <div>
+          <div class="fb-header__title">Quick Feedback</div>
+          <div class="fb-header__sub">Help us improve · 3 questions · 30 seconds</div>
+        </div>
+      </div>
+      <button class="fb-close" (click)="skip()" title="Skip feedback">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ── Progress bar ─────────────────────────────────────────────────── -->
+    <div class="fb-progress" *ngIf="step < 4">
+      <div class="fb-progress__track">
+        <div class="fb-progress__fill" [style.width.%]="progressPercent"></div>
+      </div>
+      <div class="fb-progress__steps">
+        <span *ngFor="let s of [1,2,3]"
+              class="fb-step-dot"
+              [class.fb-step-dot--done]="step > s"
+              [class.fb-step-dot--active]="step === s">
+          <span *ngIf="step > s">✓</span>
+          <span *ngIf="step <= s">{{ s }}</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- ── Error ────────────────────────────────────────────────────────── -->
+    <div *ngIf="error" class="fb-error">⚠️ {{ error }}</div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- STEP 1 — Difficulty                                                -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 1" class="fb-body" [@slideIn]>
+      <div class="fb-question">
+        <div class="fb-question__num">1 of 3</div>
+        <h3 class="fb-question__text">How difficult was the exam?</h3>
+        <p class="fb-question__hint">Based on your experience with <strong>{{ certTitle }}</strong></p>
+      </div>
+
+      <div class="fb-options fb-options--3">
+        <button *ngFor="let opt of difficultyOptions"
+                class="fb-option"
+                [class.fb-option--selected]="difficulty === opt.value"
+                (click)="difficulty = opt.value">
+          <span class="fb-option__emoji">{{ opt.emoji }}</span>
+          <span class="fb-option__label">{{ opt.label }}</span>
+          <span class="fb-option__desc">{{ opt.desc }}</span>
+          <span class="fb-option__check" *ngIf="difficulty === opt.value">✓</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- STEP 2 — Time                                                      -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 2" class="fb-body">
+      <div class="fb-question">
+        <div class="fb-question__num">2 of 3</div>
+        <h3 class="fb-question__text">Was the allocated time sufficient?</h3>
+        <p class="fb-question__hint">Did you have enough time to complete all questions?</p>
+      </div>
+
+      <div class="fb-options fb-options--3">
+        <button *ngFor="let opt of timeOptions"
+                class="fb-option"
+                [class.fb-option--selected]="time === opt.value"
+                (click)="time = opt.value">
+          <span class="fb-option__emoji">{{ opt.emoji }}</span>
+          <span class="fb-option__label">{{ opt.label }}</span>
+          <span class="fb-option__desc">{{ opt.desc }}</span>
+          <span class="fb-option__check" *ngIf="time === opt.value">✓</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- STEP 3 — Relevance + Comment                                       -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 3" class="fb-body">
+      <div class="fb-question">
+        <div class="fb-question__num">3 of 3</div>
+        <h3 class="fb-question__text">Was the content relevant to the skills tested?</h3>
+        <p class="fb-question__hint">Did the questions reflect real-world knowledge for this certification?</p>
+      </div>
+
+      <div class="fb-options fb-options--3">
+        <button *ngFor="let opt of relevanceOptions"
+                class="fb-option"
+                [class.fb-option--selected]="relevance === opt.value"
+                (click)="relevance = opt.value">
+          <span class="fb-option__emoji">{{ opt.emoji }}</span>
+          <span class="fb-option__label">{{ opt.label }}</span>
+          <span class="fb-option__desc">{{ opt.desc }}</span>
+          <span class="fb-option__check" *ngIf="relevance === opt.value">✓</span>
+        </button>
+      </div>
+
+      <!-- Optional comment -->
+      <div class="fb-comment-wrap">
+        <label class="fb-comment-label">
+          Any suggestions? <span class="fb-optional">(optional)</span>
+        </label>
+        <textarea class="fb-comment"
+                  [(ngModel)]="comment"
+                  rows="3"
+                  maxlength="500"
+                  placeholder="Share any specific feedback, suggestions, or comments about the exam…">
+        </textarea>
+        <div class="fb-char-count">{{ comment.length }} / 500</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- STEP 4 — Thank you                                                 -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 4" class="fb-body fb-body--center">
+      <div class="fb-thankyou">
+        <div class="fb-thankyou__icon">🙏</div>
+        <h3>Thank you for your feedback!</h3>
+        <p>Your input helps us continuously improve the quality of our certifications.</p>
+
+        <!-- Summary chips -->
+        <div class="fb-summary">
+          <div class="fb-summary-chip fb-summary-chip--diff">
+            <span>Difficulty</span>
+            <strong>{{ difficulty }}</strong>
+          </div>
+          <div class="fb-summary-chip fb-summary-chip--time">
+            <span>Time</span>
+            <strong>{{ time?.replace('_', ' ') }}</strong>
+          </div>
+          <div class="fb-summary-chip fb-summary-chip--rel">
+            <span>Relevance</span>
+            <strong>{{ relevance }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer ───────────────────────────────────────────────────────── -->
+    <div class="fb-footer">
+
+      <!-- Steps 1-3 -->
+      <ng-container *ngIf="step < 4">
+        <button class="fb-btn fb-btn--ghost" (click)="step === 1 ? skip() : back()">
+          {{ step === 1 ? 'Skip' : '← Back' }}
+        </button>
+
+        <div class="fb-footer__right">
+          <span class="fb-footer__hint" *ngIf="!canProceed">Select an option to continue</span>
+          <button *ngIf="step < 3"
+                  class="fb-btn fb-btn--primary"
+                  [disabled]="!canProceed"
+                  (click)="next()">
+            Next →
+          </button>
+          <button *ngIf="step === 3"
+                  class="fb-btn fb-btn--submit"
+                  [disabled]="!canProceed || submitting"
+                  (click)="submit()">
+            <span *ngIf="submitting" class="fb-spinner"></span>
+            {{ submitting ? 'Submitting…' : '✓ Submit Feedback' }}
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Step 4 (done) -->
+      <ng-container *ngIf="step === 4">
+        <div></div>
+        <button class="fb-btn fb-btn--primary" (click)="done()">
+          Continue →
+        </button>
+      </ng-container>
+
+    </div>
+
+  </div>
+</div>

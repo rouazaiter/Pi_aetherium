@@ -1,0 +1,317 @@
+<div class="form-page">
+
+  <!-- Header -->
+  <div class="form-page__header">
+    <div>
+      <nav class="breadcrumb">
+        <a routerLink="/certifications">Certifications</a>
+        <span>›</span>
+        <span>{{ isEdit ? 'Edit' : 'New Certification' }}</span>
+      </nav>
+      <h2>{{ isEdit ? 'Edit Certification' : 'Create Certification' }}</h2>
+    </div>
+    <a routerLink="/certifications" class="btn btn-ghost">✕ Cancel</a>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <!-- Mode selector (create only) -->
+  <div *ngIf="!isEdit" class="mode-selector">
+    <button class="mode-btn" [class.mode-btn--active]="mode === 'manual'" (click)="mode = 'manual'">
+      <span class="mode-icon">✏️</span>
+      <span class="mode-label">Manual</span>
+      <span class="mode-desc">Build questions yourself</span>
+    </button>
+    <button class="mode-btn" [class.mode-btn--active]="mode === 'llm'" (click)="mode = 'llm'">
+      <span class="mode-icon">🤖</span>
+      <span class="mode-label">Generate with AI</span>
+      <span class="mode-desc">Describe a topic, AI does the rest</span>
+    </button>
+    <button class="mode-btn" [class.mode-btn--active]="mode === 'pdf'" (click)="mode = 'pdf'">
+      <span class="mode-icon">📄</span>
+      <span class="mode-label">Import PDF</span>
+      <span class="mode-desc">Extract from course material</span>
+    </button>
+  </div>
+
+  <!-- ── MANUAL ──────────────────────────────────────────────────────────── -->
+  <form *ngIf="mode === 'manual'" (ngSubmit)="submitManual()">
+
+    <div class="card">
+      <div class="card__header">
+        <h3>Certification Details</h3>
+        <p>Basic information about this certification</p>
+      </div>
+      <div class="card__body">
+        <div class="field-grid">
+          <div class="field span-2">
+            <label class="field-label">Title <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="form.title" name="title" required
+                   class="field-input" placeholder="e.g. Spring Boot Fundamentals" />
+          </div>
+          <div class="field">
+            <label class="field-label">Category</label>
+            <input type="text" [(ngModel)]="form.category" name="category"
+                   class="field-input" placeholder="e.g. Backend Development" />
+          </div>
+          <div class="field">
+            <label class="field-label">Price ($)</label>
+            <input type="number" [(ngModel)]="form.price" name="price" min="0"
+                   class="field-input" />
+          </div>
+          <div class="field">
+            <label class="field-label">Difficulty</label>
+            <select [(ngModel)]="form.difficulty" name="difficulty" class="field-input">
+              <option *ngFor="let d of difficulties" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Status</label>
+            <select [(ngModel)]="form.status" name="status" class="field-input">
+              <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Duration (min)</label>
+            <input type="number" [(ngModel)]="form.durationMinutes" name="durationMinutes"
+                   class="field-input" />
+          </div>
+          <div class="field">
+            <label class="field-label">Passing Score (%)</label>
+            <input type="number" [(ngModel)]="form.passingScore" name="passingScore"
+                   min="0" max="100" class="field-input" />
+          </div>
+          <div class="field">
+            <label class="field-label">Valid From</label>
+            <input type="date" [(ngModel)]="form.validFrom" name="validFrom" class="field-input" />
+          </div>
+          <div class="field">
+            <label class="field-label">Expires At</label>
+            <input type="date" [(ngModel)]="form.expiresAt" name="expiresAt" class="field-input" />
+          </div>
+          <div class="field span-2">
+            <label class="field-label">Description</label>
+            <textarea [(ngModel)]="form.description" name="description" rows="3"
+                      class="field-input" placeholder="What will learners gain from this certification?"></textarea>
+          </div>
+        </div>
+
+        <!-- Cover image — inline with the form fields -->
+        <div class="field span-2">
+          <label class="field-label">Cover Image</label>
+          <div class="cover-inline">
+
+            <!-- Preview / skeleton / placeholder -->
+            <div class="cover-inline__img-wrap">
+              <ng-container *ngIf="imagePreviewUrl && !generatingImage">
+                <img [src]="imagePreviewUrl"
+                     class="cover-inline__img cover-inline__img--visible"
+                     alt="Cover" />
+                <button type="button" class="cover-inline__remove" (click)="removeCoverImage()" title="Remove">✕</button>
+              </ng-container>
+              <div *ngIf="!imagePreviewUrl && !generatingImage" class="cover-inline__empty">
+                <span>🖼️</span>
+                <span>No image yet</span>
+              </div>
+              <div *ngIf="generatingImage" class="cover-inline__generating">
+                <div class="cover-gen-spinner"></div>
+                <span>Generating…</span>
+              </div>
+            </div>
+
+            <!-- Generate button + hint -->
+            <div class="cover-inline__actions">
+              <button type="button" class="btn-gen-image"
+                      (click)="generateCoverImage()"
+                      [disabled]="generatingImage">
+                <span *ngIf="!generatingImage">🎨 Generate Image</span>
+                <span *ngIf="generatingImage" class="btn-gen-loading">
+                  <span class="cover-gen-spinner cover-gen-spinner--sm"></span>
+                  Generating…
+                </span>
+              </button>
+              <p class="cover-inline__hint">
+                AI generates a cover image based on the title and category.
+                The image loads in ~10 seconds after clicking.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Questions (create only) -->
+    <div class="card" *ngIf="!isEdit">
+      <div class="card__header">
+        <div>
+          <h3>Exam Questions</h3>
+          <p>Add questions for the exam — or leave empty and generate with AI later</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" (click)="addQuestion()">+ Add Question</button>
+      </div>
+      <div class="card__body">
+
+        <!-- Empty state -->
+        <div *ngIf="questions.length === 0" class="empty-questions">
+          <span class="empty-q-icon">📝</span>
+          <p>No questions yet. Click <strong>+ Add Question</strong> to start building your exam.</p>
+        </div>
+
+        <div *ngFor="let q of questions; let i = index; trackBy: trackByIndex" class="q-builder-card">
+          <div class="q-builder-header">
+            <span class="q-builder-num">Q{{ i + 1 }}</span>
+            <select [(ngModel)]="q.type" [name]="'qtype' + i" class="field-input field-input--sm">
+              <option *ngFor="let t of questionTypes" [value]="t">{{ t }}</option>
+            </select>
+            <div class="q-pts-field">
+              <input type="number" [(ngModel)]="q.points" [name]="'qpts' + i"
+                     placeholder="Pts" class="field-input field-input--xs" />
+              <span class="pts-label">pts</span>
+            </div>
+            <button type="button" class="icon-btn icon-btn--remove" (click)="removeQuestion(i)" title="Remove">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Question Text</label>
+            <textarea [(ngModel)]="q.questionText" [name]="'qtext' + i" rows="2" class="field-input"></textarea>
+          </div>
+
+          <div class="field" *ngIf="q.type !== 'MATCH'">
+            <label class="field-label">{{ q.type === 'FILL_BLANK' ? 'Expected Answer' : 'Model Answer' }}</label>
+            <textarea [(ngModel)]="q.expectedAnswer" [name]="'qans' + i"
+                      [rows]="q.type === 'FILL_BLANK' ? 1 : 2" class="field-input"></textarea>
+          </div>
+
+          <div class="field" *ngIf="q.type === 'CODE'">
+            <label class="field-label">Language</label>
+            <input type="text" [(ngModel)]="q.codeLanguage" [name]="'qlang' + i"
+                   placeholder="java, python, javascript…" class="field-input" />
+          </div>
+
+          <div *ngIf="q.type === 'MATCH'" class="match-section">
+            <div class="match-section-header">
+              <label class="field-label">Match Pairs</label>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="addMatchPair(q)">+ Pair</button>
+            </div>
+            <div *ngFor="let pair of q.matchPairs; let j = index; trackBy: trackByIndex" class="match-pair-row">
+              <span class="pair-num">{{ j + 1 }}</span>
+              <input type="text" [(ngModel)]="pair.left"  [name]="'ml'+i+'_'+j" placeholder="Left"  class="field-input" />
+              <span class="pair-arrow">↔</span>
+              <input type="text" [(ngModel)]="pair.right" [name]="'mr'+i+'_'+j" placeholder="Right" class="field-input" />
+              <button type="button" class="icon-btn icon-btn--remove-sm" (click)="removeMatchPair(q, j)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a routerLink="/certifications" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Saving…' : (isEdit ? 'Update Certification' : 'Create Certification') }}
+      </button>
+    </div>
+  </form>
+
+  <!-- ── AI GENERATE ─────────────────────────────────────────────────────── -->
+  <form *ngIf="mode === 'llm'" (ngSubmit)="submitLlm()">
+    <div class="card">
+      <div class="card__header">
+        <h3>🤖 Generate with AI</h3>
+        <p>Describe the topic and the AI will generate a full certification with mixed question types</p>
+      </div>
+      <div class="card__body">
+        <div class="field-grid">
+          <div class="field span-2">
+            <label class="field-label">Topic <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="llmReq.topic" name="topic" required
+                   class="field-input" placeholder="e.g. Spring Boot REST APIs, Docker fundamentals…" />
+          </div>
+          <div class="field">
+            <label class="field-label">Difficulty</label>
+            <select [(ngModel)]="llmReq.difficulty" name="difficulty" class="field-input">
+              <option *ngFor="let d of difficulties" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Number of Questions</label>
+            <input type="number" [(ngModel)]="llmReq.numberOfQuestions" name="numQ"
+                   min="5" max="75" class="field-input" />
+          </div>
+          <div class="field">
+            <label class="field-label">Time Limit (min)</label>
+            <input type="number" [(ngModel)]="llmReq.timeLimitMinutes" name="timeLimit" class="field-input" />
+          </div>
+          <div class="field span-2">
+            <label class="field-label">Additional Context</label>
+            <textarea [(ngModel)]="llmReq.description" name="desc" rows="3" class="field-input"
+                      placeholder="Any extra context, focus areas, or constraints for the AI…"></textarea>
+          </div>
+        </div>
+
+        <div class="ai-info-box">
+          <span>💡</span>
+          <div>
+            <p><strong>AI generates up to 75 questions with this distribution:</strong></p>
+            <ul>
+              <li>~45% MCQ — single correct answer with 4 realistic options</li>
+              <li>~5% Multi-Select — select all that apply</li>
+              <li>~20% Scenario — real-world situation, pick the best approach</li>
+              <li>~20% Code — output prediction, debugging, logic tracing</li>
+              <li>~10% Interactive — ordering steps, drag &amp; drop matching</li>
+            </ul>
+            <p>Generation takes 15–60 seconds depending on question count.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <a routerLink="/certifications" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Generating…' : '🤖 Generate Certification' }}
+      </button>
+    </div>
+  </form>
+  <!-- ── PDF IMPORT ──────────────────────────────────────────────────────── -->
+  <div *ngIf="mode === 'pdf'">
+    <div class="card">
+      <div class="card__header">
+        <h3>📄 Import from PDF</h3>
+        <p>Upload course material and the AI will extract and structure it into a certification exam</p>
+      </div>
+      <div class="card__body">
+        <label class="upload-zone" [class.upload-zone--active]="selectedFile">
+          <input type="file" accept=".pdf" (change)="onFileChange($event)" hidden />
+          <div *ngIf="!selectedFile" class="upload-idle">
+            <span class="upload-icon">📤</span>
+            <p class="upload-title">Click to upload or drag & drop</p>
+            <p class="upload-hint">PDF files only · Max 20 MB</p>
+          </div>
+          <div *ngIf="selectedFile" class="upload-ready">
+            <span class="upload-icon">✅</span>
+            <p class="upload-title">{{ selectedFile.name }}</p>
+            <p class="upload-hint">Ready to import</p>
+          </div>
+        </label>
+
+        <div class="ai-info-box">
+          <span>💡</span>
+          <p>The AI will read your PDF, extract key concepts, and generate a structured certification exam automatically.</p>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <a routerLink="/certifications" class="btn btn-ghost">Cancel</a>
+      <button class="btn btn-primary" (click)="submitPdf()" [disabled]="loading || !selectedFile">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Importing…' : '📄 Import & Convert' }}
+      </button>
+    </div>
+  </div>
+
+</div>

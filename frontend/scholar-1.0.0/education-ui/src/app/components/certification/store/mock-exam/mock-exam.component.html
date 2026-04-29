@@ -1,0 +1,405 @@
+<!-- Loading / Generating -->
+<div *ngIf="loading" class="mock-loading">
+  <ng-container *ngIf="!generatingQuestions">
+    <div class="spinner spinner--lg"></div>
+    <p>Loading certification…</p>
+  </ng-container>
+  <ng-container *ngIf="generatingQuestions">
+    <div class="generating-wrap">
+      <div class="generating-ring">
+        <svg viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="#e0e7ff" stroke-width="5"/>
+          <circle cx="40" cy="40" r="34" fill="none" stroke="#6366f1" stroke-width="5"
+                  stroke-linecap="round" stroke-dasharray="80 134"
+                  transform="rotate(-90 40 40)"
+                  class="generating-arc"/>
+        </svg>
+        <span class="generating-icon">🤖</span>
+      </div>
+      <h3 class="generating-title">Generating your Warm-Up Exam…</h3>
+      <p class="generating-sub">
+        Our AI is crafting <strong>{{ realQuestionCount }} unique questions</strong> tailored to
+        <strong>{{ cert?.title }}</strong> — different from the real exam so you can practice without spoilers.
+      </p>
+      <div class="generating-steps">
+        <div class="gen-step gen-step--done">✓ Loaded certification</div>
+        <div class="gen-step gen-step--active">⟳ Generating questions with AI…</div>
+        <div class="gen-step">○ Starting exam</div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<!-- ── Results screen ──────────────────────────────────────────────────────── -->
+<div *ngIf="submitted && !loading" class="mock-results">
+  <div class="results-card" [class.results-card--pass]="mockPassed" [class.results-card--fail]="!mockPassed">
+
+    <div class="results-badge">🎯 Warm-Up Exam Complete</div>
+
+    <div class="score-ring-wrap">
+      <svg viewBox="0 0 120 120" class="score-ring">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+        <circle cx="60" cy="60" r="54" fill="none"
+                [attr.stroke]="mockPassed ? '#10b981' : '#ef4444'"
+                stroke-width="10" stroke-linecap="round"
+                [attr.stroke-dasharray]="2 * 3.14159 * 54"
+                [attr.stroke-dashoffset]="(2 * 3.14159 * 54) * (1 - mockScore / 100)"
+                transform="rotate(-90 60 60)"/>
+        <text x="60" y="65" text-anchor="middle" font-size="22" font-weight="800"
+              [attr.fill]="mockPassed ? '#10b981' : '#ef4444'">{{ mockScore }}%</text>
+      </svg>
+    </div>
+
+    <h2 [class.pass-text]="mockPassed" [class.fail-text]="!mockPassed">
+      {{ mockPassed ? '🎉 You\'re ready for the real exam!' : '📚 Keep practicing — you\'re getting there!' }}
+    </h2>
+    <p class="results-sub">
+      {{ correctCount }} / {{ questions.length }} correct · Passing score: {{ cert?.passingScore }}%
+    </p>
+
+    <!-- Per-question breakdown -->
+    <div class="results-breakdown">
+      <div *ngFor="let q of questions; let i = index"
+           class="result-row"
+           [class.result-row--correct]="results.get(q.id)?.isCorrect"
+           [class.result-row--wrong]="results.get(q.id) && !results.get(q.id)!.isCorrect"
+           [class.result-row--unchecked]="!results.get(q.id)">
+        <span class="result-num">Q{{ i + 1 }}</span>
+        <span class="result-icon">
+          {{ !results.get(q.id) ? '—' : results.get(q.id)!.isCorrect ? '✅' : '❌' }}
+        </span>
+        <span class="result-q">{{ q.questionText | slice:0:65 }}{{ (q.questionText || '').length > 65 ? '…' : '' }}</span>
+        <span *ngIf="results.get(q.id) && !results.get(q.id)!.isCorrect && q.expectedAnswer"
+              class="result-correct">
+          ✓ {{ q.expectedAnswer }}
+        </span>
+      </div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn btn-outline" (click)="retryMock()">🔄 Practice Again</button>
+      <button class="btn btn-primary" (click)="goToRealExam()">🚀 Take Real Exam</button>
+    </div>
+    <button class="btn-back-link" (click)="goBack()">← Back to certification</button>
+  </div>
+</div>
+
+<!-- ── Practice session ────────────────────────────────────────────────────── -->
+<div *ngIf="!submitted && !loading && cert" class="mock-shell">
+
+  <!-- Top bar -->
+  <div class="mock-topbar">
+    <div class="mock-topbar__left">
+      <span class="practice-badge">🎯 Warm-Up Exam</span>
+      <span class="mock-cert-name">{{ cert.title }}</span>
+    </div>
+    <div class="mock-topbar__center">
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progress"></div>
+      </div>
+      <span class="progress-label">{{ currentIndex + 1 }} / {{ questions.length }}</span>
+    </div>
+    <div class="mock-topbar__right">
+      <div class="timer" [class.timer--warning]="timerWarning" [class.timer--critical]="timerCritical">
+        <span>⏱</span><span class="timer-display">{{ timerDisplay }}</span>
+      </div>
+      <span class="score-pill">
+        {{ correctCount }}/{{ checkedCount }} correct
+      </span>
+    </div>
+  </div>
+
+  <div class="mock-body">
+
+    <!-- Navigator -->
+    <div class="q-nav-panel">
+      <p class="q-nav-title">Questions</p>
+      <div class="q-nav-grid">
+        <button *ngFor="let q of questions; let i = index"
+                class="q-nav-dot"
+                [class.q-nav-dot--current]="i === currentIndex"
+                [class.q-nav-dot--correct]="results.get(q.id)?.isCorrect"
+                [class.q-nav-dot--wrong]="results.get(q.id) && !results.get(q.id)!.isCorrect"
+                [class.q-nav-dot--locked]="i > currentIndex && !isChecked(getPrevId(i))"
+                (click)="goTo(i)"
+                [title]="'Q' + (i + 1)">{{ i + 1 }}</button>
+      </div>
+      <div class="q-nav-legend">
+        <span class="legend-item"><span class="legend-dot legend-dot--correct"></span>Correct</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--wrong"></span>Wrong</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--current"></span>Current</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--empty"></span>Upcoming</span>
+      </div>
+      <div class="session-stats">
+        <div class="ss-item ss-correct"><span class="ss-val">{{ correctCount }}</span><span class="ss-lbl">Correct</span></div>
+        <div class="ss-item ss-wrong"><span class="ss-val">{{ checkedCount - correctCount }}</span><span class="ss-lbl">Wrong</span></div>
+        <div class="ss-item"><span class="ss-val">{{ questions.length - checkedCount }}</span><span class="ss-lbl">Left</span></div>
+      </div>
+      <div class="practice-tip">
+        💡 Answer each question, then click <strong>Check Answer</strong> to see if you're right.
+      </div>
+    </div>
+
+    <!-- Question card -->
+    <div class="q-main" *ngIf="current">
+
+      <!-- Feedback banner (shown after checking) -->
+      <div *ngIf="isChecked(current.id)" class="feedback-banner"
+           [class.feedback-banner--correct]="getResult(current.id)?.isCorrect"
+           [class.feedback-banner--wrong]="!getResult(current.id)?.isCorrect">
+        <div class="feedback-icon">{{ getResult(current.id)?.isCorrect ? '🎉' : '💡' }}</div>
+        <div class="feedback-body">
+          <span class="feedback-title">
+            {{ getResult(current.id)?.isCorrect ? 'Correct!' : 'Not quite.' }}
+          </span>
+          <!-- LLM feedback for open-ended questions -->
+          <span *ngIf="getResult(current.id)?.llmGraded && getResult(current.id)?.feedback"
+                class="feedback-answer">
+            {{ getResult(current.id)!.feedback }}
+          </span>
+          <!-- Score from LLM -->
+          <span *ngIf="getResult(current.id)?.llmGraded && getResult(current.id)?.llmScore !== undefined"
+                class="feedback-score">
+            Score: {{ getResult(current.id)!.llmScore }}/100
+          </span>
+          <!-- Model answer for wrong non-LLM answers -->
+          <span *ngIf="!getResult(current.id)?.llmGraded && !getResult(current.id)?.isCorrect && current.expectedAnswer"
+                class="feedback-answer">
+            The correct answer is: <strong>{{ current.expectedAnswer }}</strong>
+          </span>
+          <!-- Model answer shown after LLM grading when wrong -->
+          <span *ngIf="getResult(current.id)?.llmGraded && !getResult(current.id)?.isCorrect && current.expectedAnswer"
+                class="feedback-model-answer">
+            <strong>Model answer:</strong> {{ current.expectedAnswer }}
+          </span>
+          <span *ngIf="getResult(current.id)?.isCorrect && !getResult(current.id)?.llmGraded"
+                class="feedback-answer">Well done — keep it up!</span>
+        </div>
+      </div>
+
+      <div class="q-card" [class.q-card--correct]="isChecked(current.id) && getResult(current.id)?.isCorrect"
+                          [class.q-card--wrong]="isChecked(current.id) && !getResult(current.id)?.isCorrect">
+        <div class="q-card__meta">
+          <span class="q-type-chip" [class]="'chip-' + current.type.toLowerCase()">
+            {{ typeLabel(current.type) }}
+          </span>
+          <span class="q-pts">{{ current.points }} pts</span>
+          <span class="q-counter">Question {{ currentIndex + 1 }} of {{ questions.length }}</span>
+        </div>
+
+        <h2 class="q-text">{{ current.questionText }}</h2>
+
+        <!-- MCQ / SCENARIO -->
+        <div *ngIf="current.type === 'MCQ' || current.type === 'SCENARIO'" class="answer-zone">
+          <label class="answer-label">Select one answer</label>
+          <div class="options-list">
+            <label *ngFor="let opt of current.options"
+                   class="option-item"
+                   [class.option-item--selected]="getAnswer(current.id) === opt.charAt(0)"
+                   [class.option-item--correct]="isOptionCorrect(opt, current)"
+                   [class.option-item--wrong]="isOptionWrong(opt, current)"
+                   [class.option-item--disabled]="isChecked(current.id)">
+              <input type="radio" [name]="'q'+current.id" [value]="opt.charAt(0)"
+                     [checked]="getAnswer(current.id) === opt.charAt(0)"
+                     [disabled]="isChecked(current.id)"
+                     (change)="setAnswer(opt.charAt(0))" />
+              <span class="option-letter">{{ opt.charAt(0) }}</span>
+              <span class="option-text">{{ opt.substring(3) }}</span>
+              <span *ngIf="isOptionCorrect(opt, current)" class="option-mark option-mark--correct">✓</span>
+              <span *ngIf="isOptionWrong(opt, current)"   class="option-mark option-mark--wrong">✗</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- MULTI_SELECT -->
+        <div *ngIf="current.type === 'MULTI_SELECT'" class="answer-zone">
+          <label class="answer-label">Select all that apply</label>
+          <div class="options-list">
+            <label *ngFor="let opt of current.options"
+                   class="option-item option-item--check"
+                   [class.option-item--selected]="isMultiSelected(current.id, opt)"
+                   [class.option-item--correct]="isOptionCorrect(opt, current)"
+                   [class.option-item--wrong]="isOptionWrong(opt, current)"
+                   [class.option-item--disabled]="isChecked(current.id)">
+              <input type="checkbox" [checked]="isMultiSelected(current.id, opt)"
+                     [disabled]="isChecked(current.id)"
+                     (change)="toggleMultiSelect(current.id, opt)" />
+              <span class="option-letter option-letter--check">{{ opt.charAt(0) }}</span>
+              <span class="option-text">{{ opt.substring(3) }}</span>
+              <span *ngIf="isOptionCorrect(opt, current)" class="option-mark option-mark--correct">✓</span>
+              <span *ngIf="isOptionWrong(opt, current)"   class="option-mark option-mark--wrong">✗</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- CODE -->
+        <div *ngIf="current.type === 'CODE'" class="answer-zone">
+          <div class="code-header" *ngIf="current.codeLanguage">
+            <span class="lang-badge">{{ current.codeLanguage }}</span>
+          </div>
+          <div *ngIf="current.options && current.options.length > 0">
+            <label class="answer-label">What is the output / result?</label>
+            <div class="options-list">
+              <label *ngFor="let opt of current.options"
+                     class="option-item"
+                     [class.option-item--selected]="getAnswer(current.id) === opt.charAt(0)"
+                     [class.option-item--correct]="isOptionCorrect(opt, current)"
+                     [class.option-item--wrong]="isOptionWrong(opt, current)"
+                     [class.option-item--disabled]="isChecked(current.id)">
+                <input type="radio" [name]="'q'+current.id" [value]="opt.charAt(0)"
+                       [checked]="getAnswer(current.id) === opt.charAt(0)"
+                       [disabled]="isChecked(current.id)"
+                       (change)="setAnswer(opt.charAt(0))" />
+                <span class="option-letter">{{ opt.charAt(0) }}</span>
+                <span class="option-text option-text--code">{{ opt.substring(3) }}</span>
+                <span *ngIf="isOptionCorrect(opt, current)" class="option-mark option-mark--correct">✓</span>
+                <span *ngIf="isOptionWrong(opt, current)"   class="option-mark option-mark--wrong">✗</span>
+              </label>
+            </div>
+          </div>
+          <div *ngIf="!current.options || current.options.length === 0">
+            <label class="answer-label">Write your answer</label>
+            <textarea class="answer-textarea" rows="6"
+                      [disabled]="isChecked(current.id)"
+                      [value]="getAnswer(current.id)"
+                      (input)="setAnswer($any($event.target).value)"></textarea>
+          </div>
+        </div>
+
+        <!-- ORDERING -->
+        <div *ngIf="current.type === 'ORDERING'" class="answer-zone">
+          <label class="answer-label">Arrange in the correct order</label>
+          <div class="ordering-list">
+            <div *ngFor="let item of getOrderedOptions(current.id, current.options!); let i = index"
+                 class="ordering-item" [class.ordering-item--disabled]="isChecked(current.id)">
+              <span class="ordering-num">{{ i + 1 }}</span>
+              <span class="ordering-text">{{ item }}</span>
+              <div class="ordering-controls" *ngIf="!isChecked(current.id)">
+                <button class="order-btn" (click)="moveOrderItem(current.id, current.options!, i, -1)" [disabled]="i === 0">↑</button>
+                <button class="order-btn" (click)="moveOrderItem(current.id, current.options!, i, 1)" [disabled]="i === current.options!.length - 1">↓</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAG_DROP / MATCH -->
+        <div *ngIf="current.type === 'DRAG_DROP' || current.type === 'MATCH'" class="answer-zone">
+          <label class="answer-label">Match each item on the left with the correct item on the right</label>
+          <div *ngIf="current.choices && current.choices.length > 0" class="match-rows">
+            <div *ngFor="let choice of current.choices" class="match-row"
+                 [class.match-row--correct]="isChecked(current.id) && isPairCorrect(current, choice.id)"
+                 [class.match-row--wrong]="isChecked(current.id) && !isPairCorrect(current, choice.id)">
+
+              <!-- Left item -->
+              <div class="match-left-item">{{ choice.matchLeft }}</div>
+              <span class="match-connector">→</span>
+
+              <!-- Select dropdown (before checking) -->
+              <select *ngIf="!isChecked(current.id)"
+                      class="match-select"
+                      [value]="getMatchValue(current.id, choice.id)"
+                      (change)="setMatchAnswer(current.id, choice.id, $any($event.target).value)">
+                <option value="">— Select —</option>
+                <option *ngFor="let opt of getMatchOptions(current)"
+                        [value]="opt"
+                        [disabled]="isMatchOptionUsed(current.id, opt, choice.id)">
+                  {{ opt }}
+                </option>
+              </select>
+
+              <!-- Locked display (after checking) -->
+              <div *ngIf="isChecked(current.id)" class="match-selected-value"
+                   [class.match-selected-value--correct]="isPairCorrect(current, choice.id)"
+                   [class.match-selected-value--wrong]="!isPairCorrect(current, choice.id)">
+                {{ getMatchValue(current.id, choice.id) || '—' }}
+              </div>
+
+              <!-- Correct answer hint when wrong -->
+              <span *ngIf="isChecked(current.id) && !isPairCorrect(current, choice.id)"
+                    class="match-correct-hint">
+                ✓ {{ choice.matchRight }}
+              </span>
+              <span *ngIf="isChecked(current.id) && isPairCorrect(current, choice.id)"
+                    class="match-ok-mark">✓</span>
+            </div>
+          </div>
+          <div *ngIf="!current.choices || current.choices.length === 0" class="match-no-data">
+            ⚠️ No match pairs available for this question.
+          </div>
+        </div>
+
+        <!-- FILL_BLANK -->
+        <div *ngIf="current.type === 'FILL_BLANK'" class="answer-zone">
+          <label class="answer-label">Your Answer</label>
+          <input type="text" class="answer-input"
+                 placeholder="Type your answer here…"
+                 [disabled]="isChecked(current.id)"
+                 [value]="getAnswer(current.id)"
+                 (input)="setAnswer($any($event.target).value)" />
+        </div>
+
+        <!-- EXPLAIN / WRITE -->
+        <div *ngIf="current.type === 'EXPLAIN' || current.type === 'WRITE'" class="answer-zone">
+          <label class="answer-label">{{ current.type === 'EXPLAIN' ? 'Explain your answer' : 'Write your response' }}</label>
+          <textarea class="answer-textarea" rows="5"
+                    [disabled]="isChecked(current.id)"
+                    [value]="getAnswer(current.id)"
+                    (input)="setAnswer($any($event.target).value)"></textarea>
+        </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="action-bar">
+
+        <!-- Left: Prev + Skip -->
+        <div class="action-left">
+          <button class="btn-prev-q" (click)="prev()" [disabled]="currentIndex === 0">
+            ← Prev
+          </button>
+          <button *ngIf="!isChecked(current.id)"
+                  class="btn-skip-q" (click)="next()"
+                  [disabled]="currentIndex === questions.length - 1">
+            ⏭ Skip
+          </button>
+        </div>
+
+        <!-- Right: Check / Next / Finish -->
+        <div class="action-right">
+          <ng-container *ngIf="!isChecked(current.id)">
+            <button class="btn-check"
+                    [disabled]="grading"
+                    [class.btn-check--dim]="!hasAnswer"
+                    (click)="hasAnswer ? checkAnswer() : next()">
+              <span *ngIf="grading" class="spinner spinner--sm"></span>
+              <ng-container *ngIf="!grading">
+                {{ hasAnswer ? '✅ Check Answer' : '→ Next' }}
+              </ng-container>
+              <span *ngIf="grading">Grading with AI…</span>
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="isChecked(current.id)">
+            <button *ngIf="currentIndex < questions.length - 1"
+                    class="btn-next-q" (click)="next()">
+              Next Question →
+            </button>
+            <button *ngIf="currentIndex === questions.length - 1"
+                    class="btn-finish" (click)="finishMock()">
+              📊 See My Results
+            </button>
+          </ng-container>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Finish early -->
+  <div class="finish-early" *ngIf="checkedCount > 0">
+    <button class="btn-finish-early" (click)="finishMock()">
+      End session early ({{ checkedCount }}/{{ questions.length }} answered)
+    </button>
+  </div>
+</div>

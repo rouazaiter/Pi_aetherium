@@ -1,0 +1,46 @@
+<div
+  *ngIf="visible"
+  class="backdrop"
+  [class.closing]="closing"
+  (click)="answer(false)"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="'confirm-title'"
+  [attr.aria-describedby]="'confirm-msg'"
+>
+  <div
+    class="modal"
+    [class.closing]="closing"
+    [class]="'modal modal--' + variant"
+    (click)="$event.stopPropagation()"
+    (animationend)="onBackdropAnimated()"
+  >
+    <!-- Icon -->
+    <div class="modal__icon" [class]="'modal__icon--' + variant">
+      <span>{{ icon }}</span>
+    </div>
+
+    <!-- Content -->
+    <div class="modal__content">
+      <h3 id="confirm-title" class="modal__title">{{ title }}</h3>
+      <p  id="confirm-msg"   class="modal__message">{{ message }}</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="modal__actions">
+      <button
+        class="btn btn--cancel"
+        (click)="answer(false)"
+        type="button"
+      >{{ cancelLabel }}</button>
+
+      <button
+        #confirmBtn
+        class="btn"
+        [class]="'btn btn--' + variant"
+        (click)="answer(true)"
+        type="button"
+      >{{ confirmLabel }}</button>
+    </div>
+  </div>
+</div>

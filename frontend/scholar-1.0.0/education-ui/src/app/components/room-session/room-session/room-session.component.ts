@@ -37,6 +37,7 @@ export class RoomSessionComponent implements OnInit, OnDestroy {
   room: RoomSession | null = null;
   participants: Participant[] = [];
   isHost = false;
+  workspaceAccessBlocked = false;
   activeWorkspaceTab: 'code' | 'whiteboard' = 'code';
   recordingError = '';
   isRecording = false;
@@ -113,6 +114,21 @@ export class RoomSessionComponent implements OnInit, OnDestroy {
     this.roomSessionService.leaveRoom(this.roomId, this.userId).subscribe();
   }
 
+  onWorkspaceAccessToggle(blocked: boolean): void {
+    if (!this.isHost) {
+      return;
+    }
+    this.roomSessionService.setWorkspaceAccess(this.roomId, this.userId, blocked).subscribe({
+      next: (res) => {
+        this.workspaceAccessBlocked = !!res.workspaceAccessBlocked;
+      },
+      error: (err) => {
+        const message = err?.error?.error || 'Unable to update workspace access.';
+        this.recordingError = message;
+      }
+    });
+  }
+
   formatDuration(seconds: number): string {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -127,11 +143,16 @@ export class RoomSessionComponent implements OnInit, OnDestroy {
     this.roomSessionService.getRoom(this.roomId).subscribe(room => {
       this.room = room;
       this.isHost = room.hostUserId === this.userId;
+      this.workspaceAccessBlocked = !!room.workspaceAccessBlocked;
       document.title = `${room.name} - Room Session`;
     });
 
     this.roomSessionService.getParticipants(this.roomId).subscribe(participants => {
       this.participants = participants;
+      const me = participants.find(p => p.userId === this.userId && !p.leftAt);
+      if (me) {
+        this.isHost = me.role === 'HOST';
+      }
     });
   }
 
@@ -153,6 +174,10 @@ export class RoomSessionComponent implements OnInit, OnDestroy {
       .subscribe(event => {
         if (event.type === 'ROOM_ENDED') {
           window.location.href = '/rooms';
+          return;
+        }
+        if (event.type === 'ACCESS_LOCK_UPDATED') {
+          this.workspaceAccessBlocked = !!event.workspaceAccessBlocked;
         }
       });
   }

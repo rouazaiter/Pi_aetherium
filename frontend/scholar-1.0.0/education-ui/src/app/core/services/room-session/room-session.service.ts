@@ -8,6 +8,7 @@ export interface RoomSession {
   name: string;
   hostUserId: number;
   hostUserName?: string;
+  workspaceAccessBlocked?: boolean;
   status: 'ACTIVE' | 'ENDED';
   startTime: Date;
   endTime?: Date;
@@ -43,6 +44,14 @@ export interface Recording {
   createdAt: Date;
 }
 
+export interface JoinRoomByNameResponse {
+  roomId: number;
+  roomName: string;
+  hostUserId: number;
+  hostUserName?: string;
+  workspaceAccessBlocked?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -66,6 +75,17 @@ export class RoomSessionService {
 
   joinRoom(roomId: number, userId: number, userName: string): Observable<Participant> {
     return this.http.post<Participant>(`${this.apiUrl}/${roomId}/join`, { userId, userName });
+  }
+
+  joinRoomByName(roomName: string, userId: number, userName: string): Observable<JoinRoomByNameResponse> {
+    return this.http.post<JoinRoomByNameResponse>(`${this.apiUrl}/join-by-name`, { roomName, userId, userName });
+  }
+
+  setWorkspaceAccess(roomId: number, userId: number, blocked: boolean): Observable<{ roomId: number; workspaceAccessBlocked: boolean }> {
+    return this.http.post<{ roomId: number; workspaceAccessBlocked: boolean }>(
+      `${this.apiUrl}/${roomId}/workspace-access`,
+      { userId, blocked }
+    );
   }
 
   leaveRoom(roomId: number, userId: number): Observable<any> {

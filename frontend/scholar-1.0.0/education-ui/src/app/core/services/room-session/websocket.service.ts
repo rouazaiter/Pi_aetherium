@@ -18,10 +18,11 @@ export interface ChatMessage {
 }
 
 export interface RoomEvent {
-  type: 'USER_JOINED' | 'USER_LEFT' | 'ROOM_ENDED';
+  type: 'USER_JOINED' | 'USER_LEFT' | 'ROOM_ENDED' | 'ACCESS_LOCK_UPDATED';
   userId?: number;
   userName?: string;
   roomId?: number;
+  workspaceAccessBlocked?: boolean;
 }
 
 export interface WhiteboardAction {

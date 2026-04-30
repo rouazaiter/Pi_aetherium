@@ -34,6 +34,22 @@
           <span class="font-body-md">Drive</span>
         </a>
       </li>
+      <li class="pt-3">
+        <button
+          *ngIf="isHost"
+          type="button"
+          class="w-full flex items-center gap-3 px-3 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all duration-150 ease-in-out"
+          (click)="toggleWorkspaceAccess()">
+          <span class="material-symbols-outlined text-[20px]">{{ workspaceAccessBlocked ? 'lock_open' : 'lock' }}</span>
+          <span class="font-body-md">{{ workspaceAccessBlocked ? 'Unlock Access' : 'Lock Access' }}</span>
+        </button>
+        <div
+          *ngIf="!isHost && workspaceAccessBlocked"
+          class="w-full flex items-center gap-3 px-3 py-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg">
+          <span class="material-symbols-outlined text-[20px]">lock</span>
+          <span class="font-body-md">Access blocked</span>
+        </div>
+      </li>
     </ul>
   </nav>
   <div class="px-3 pt-4 border-t border-slate-200 space-y-1">

@@ -6,11 +6,19 @@
     (recordingToggle)="toggleRecording()">
   </app-topbar>
 
-  <app-sidebar [activeSection]="activeWorkspaceTab" (activeSectionChange)="activeWorkspaceTab = $event"></app-sidebar>
+  <app-sidebar
+    [activeSection]="activeWorkspaceTab"
+    [isHost]="isHost"
+    [workspaceAccessBlocked]="workspaceAccessBlocked"
+    (activeSectionChange)="activeWorkspaceTab = $event"
+    (workspaceAccessToggle)="onWorkspaceAccessToggle($event)">
+  </app-sidebar>
 
   <app-editor
     layout-main
     [roomId]="roomId"
+    [isHost]="isHost"
+    [workspaceAccessBlocked]="workspaceAccessBlocked"
     [activeTab]="activeWorkspaceTab"
     (activeTabChange)="activeWorkspaceTab = $event">
   </app-editor>

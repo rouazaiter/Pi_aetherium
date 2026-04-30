@@ -16,6 +16,7 @@ import { WhiteboardPanelComponent } from '../whiteboard-panel/whiteboard-panel.c
 export class EditorComponent {
   @Input() roomId = 0;
   @Input() isHost = false;
+  @Input() workspaceAccessBlocked = false;
   @Input() recordingActive = false;
   @Input() recordingDuration = '0:00';
   @Input() activeTab: 'code' | 'whiteboard' = 'code';

@@ -18,7 +18,9 @@ import { TopbarComponent } from '../topbar/topbar.component';
 export class RoomListComponent implements OnInit, OnDestroy {
   activeRooms: any[] = [];
   newRoomName = '';
+  joinRoomName = '';
   userId = 0;
+  userName = '';
   loading = true;
   error = '';
 
@@ -31,8 +33,10 @@ export class RoomListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const authUserId = this.auth.auth()?.userId;
+    const authUser = this.auth.auth();
+    const authUserId = authUser?.userId;
     this.userId = typeof authUserId === 'number' ? authUserId : 0;
+    this.userName = authUser?.username || 'User';
     if (!this.userId) {
       this.error = 'Session expirée. Veuillez vous reconnecter.';
       this.loading = false;
@@ -76,6 +80,30 @@ export class RoomListComponent implements OnInit, OnDestroy {
 
   joinRoom(room: RoomSession): void {
     this.router.navigate(['/rooms', room.id]);
+  }
+
+  joinByRoomName(): void {
+    const roomName = this.joinRoomName.trim();
+    if (!roomName) {
+      alert('Please enter a room name to join.');
+      return;
+    }
+    if (!this.userId) {
+      alert('You must be logged in to join a room.');
+      void this.router.navigate(['/login']);
+      return;
+    }
+
+    this.roomSessionService.joinRoomByName(roomName, this.userId, this.userName).subscribe({
+      next: (joinedRoom) => {
+        this.joinRoomName = '';
+        this.router.navigate(['/rooms', joinedRoom.roomId]);
+      },
+      error: (err) => {
+        const message = err?.error?.error || err?.message || 'Unable to join room';
+        alert(message);
+      }
+    });
   }
 
   formatDate(date: Date): string {

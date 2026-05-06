@@ -100,6 +100,17 @@ public class RoomSessionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/active/by-user/{userId}")
+    public ResponseEntity<?> getActiveRoomsByUser(@PathVariable Long userId) {
+        List<RoomSession> hostRooms = roomSessionService.getActiveRoomsForUserByRole(userId, SessionParticipant.ParticipantRole.HOST);
+        List<RoomSession> participantRooms = roomSessionService.getActiveRoomsForUserByRole(userId, SessionParticipant.ParticipantRole.PARTICIPANT);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("hostRooms", mapRooms(hostRooms));
+        response.put("participantRooms", mapRooms(participantRooms));
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{id}/join")
     public ResponseEntity<?> joinRoom(@PathVariable Long id, @RequestBody Map<String, String> request) {
         Long userId = Long.parseLong(request.get("userId"));
@@ -323,6 +334,23 @@ public class RoomSessionController {
                     return (username == null || username.isBlank()) ? "User #" + hostUserId : username;
                 })
                 .orElse("User #" + hostUserId);
+    }
+
+    private List<Map<String, Object>> mapRooms(List<RoomSession> rooms) {
+        List<Map<String, Object>> mapped = new ArrayList<>();
+        for (RoomSession room : rooms) {
+            Map<String, Object> roomMap = new HashMap<>();
+            roomMap.put("id", room.getId());
+            roomMap.put("name", room.getName());
+            roomMap.put("hostUserId", room.getHostUserId());
+            roomMap.put("hostUserName", resolveHostUserName(room.getHostUserId()));
+            roomMap.put("status", room.getStatus().name());
+            roomMap.put("startTime", room.getStartTime());
+            roomMap.put("participantCount", roomSessionService.getActiveParticipants(room.getId()).size());
+            roomMap.put("workspaceAccessBlocked", room.isWorkspaceAccessBlocked());
+            mapped.add(roomMap);
+        }
+        return mapped;
     }
 
     @PostMapping("/{id}/token")

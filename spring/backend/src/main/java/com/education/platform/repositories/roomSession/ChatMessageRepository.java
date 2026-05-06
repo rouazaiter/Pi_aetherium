@@ -2,7 +2,7 @@ package com.education.platform.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import com.education.platform.models.ChatMessage;
+import com.education.platform.entities.roomSession.ChatMessage;
 
 import java.util.List;
 

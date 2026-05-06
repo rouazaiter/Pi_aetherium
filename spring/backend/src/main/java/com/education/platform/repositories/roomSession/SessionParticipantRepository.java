@@ -2,7 +2,8 @@ package com.education.platform.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import com.education.platform.models.SessionParticipant;
+import com.education.platform.entities.roomSession.RoomSession;
+import com.education.platform.entities.roomSession.SessionParticipant;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,11 @@ public interface SessionParticipantRepository extends JpaRepository<SessionParti
     Optional<SessionParticipant> findBySessionIdAndUserId(Long sessionId, Long userId);
     Optional<SessionParticipant> findBySessionIdAndUserIdAndLeftAtIsNull(Long sessionId, Long userId);
     List<SessionParticipant> findBySessionIdAndLeftAtIsNull(Long sessionId);
+    List<SessionParticipant> findByUserIdAndLeftAtIsNullAndRoleAndSessionStatus(
+            Long userId,
+            SessionParticipant.ParticipantRole role,
+            RoomSession.SessionStatus sessionStatus
+    );
     boolean existsBySessionIdAndUserIdAndLeftAtIsNull(Long sessionId, Long userId);
     boolean existsBySessionIdAndUserIdAndRoleAndLeftAtIsNull(Long sessionId, Long userId, SessionParticipant.ParticipantRole role);
 }

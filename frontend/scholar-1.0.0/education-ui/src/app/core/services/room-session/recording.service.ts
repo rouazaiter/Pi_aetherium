@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { RecordingUploadService } from './recording-upload.service';
 
@@ -209,8 +210,13 @@ export class RecordingService {
       console.log('Uploading recording:', sessionId, this.recordingCount);
       const fileName = `${sessionId}_${this.recordingCount}.webm`;
       await this.recordingUploadService.uploadScreenRecording(sessionId, blob, fileName);
-    } catch {
-      const message = 'Upload failed. Please verify backend availability and file size limits.';
+    } catch (err) {
+      const backendMessage = err instanceof HttpErrorResponse
+        ? (err.error?.error || err.error?.message || err.message || '')
+        : (err as Error)?.message || '';
+      const message = backendMessage
+        ? `Upload failed: ${backendMessage}`
+        : 'Upload failed. Please verify backend availability and file size limits.';
       this.errorSubject.next(message);
       throw new Error(message);
     }

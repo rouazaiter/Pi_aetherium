@@ -42,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/rooms/**").permitAll()
                         // Allow unauthenticated access to whiteboard helper endpoints (room creation / token)
                         .requestMatchers("/api/whiteboard/**").permitAll()
+                        // Allow unauthenticated access to recording uploads (screen recordings). If you prefer recordings protected, remove this and ensure the client sends a valid JWT.
+                        .requestMatchers("/api/recordings/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/files/profile-pictures/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/files/voice-messages/**").permitAll()

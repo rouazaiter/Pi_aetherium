@@ -1,5 +1,7 @@
 package com.education.platform.controllers.roomSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,8 @@ import java.util.Map;
 @RequestMapping("/api/recordings")
 public class RecordingController {
 
+    private static final Logger log = LoggerFactory.getLogger(RecordingController.class);
+
     @Value("${app.recordings.directory:./recordings}")
     private String recordingsDirectory;
 
@@ -30,6 +34,17 @@ public class RecordingController {
             @RequestParam("video") MultipartFile video,
             @RequestParam("sessionId") Long sessionId,
             @RequestParam(value = "fileName", required = false) String fileName) {
+        try {
+            var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                log.info("Recording upload request by principal='{}' authenticated={} authorities={}",
+                        auth.getName(), auth.isAuthenticated(), auth.getAuthorities());
+            } else {
+                log.info("Recording upload request by anonymous user");
+            }
+        } catch (Exception e) {
+            log.warn("Failed to log authentication for recording upload", e);
+        }
 
         if (sessionId == null || sessionId <= 0) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid sessionId"));

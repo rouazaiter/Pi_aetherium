@@ -15,7 +15,7 @@ public class ApiExceptionHandler {
     public ResponseEntity<?> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                 .body(Map.of(
-                        "error", "Uploaded file exceeds the allowed size limit.",
+                        "error", "Uploaded file exceeds the allowed size limit (500 MB).",
                         "details", ex.getMessage() != null ? ex.getMessage() : ""
                 ));
     }

@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/rooms/**").permitAll()
+                        // Allow unauthenticated access to whiteboard helper endpoints (room creation / token)
+                        .requestMatchers("/api/whiteboard/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/files/profile-pictures/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/files/voice-messages/**").permitAll()

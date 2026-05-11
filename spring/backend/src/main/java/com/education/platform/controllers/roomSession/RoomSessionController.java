@@ -1,4 +1,4 @@
-package com.education.platform.controllers;
+package com.education.platform.controllers.roomSession;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.education.platform.models.*;
+import com.education.platform.entities.roomSession.*;
 import com.education.platform.repositories.UserRepository;
 import com.education.platform.services.interfaces.IAgoraTokenService;
 import com.education.platform.services.interfaces.IRoomSessionService;

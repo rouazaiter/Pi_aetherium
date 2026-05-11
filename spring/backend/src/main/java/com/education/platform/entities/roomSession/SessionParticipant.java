@@ -1,4 +1,4 @@
-package com.education.platform.models;
+package com.education.platform.entities.roomSession;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package com.education.platform.config;
+package com.education.platform.config.roomSession;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.education.platform.controllers;
+package com.education.platform.controllers.roomSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

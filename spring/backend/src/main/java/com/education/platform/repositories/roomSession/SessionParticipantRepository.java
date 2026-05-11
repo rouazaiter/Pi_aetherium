@@ -1,4 +1,4 @@
-package com.education.platform.repositories;
+package com.education.platform.repositories.roomSession;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

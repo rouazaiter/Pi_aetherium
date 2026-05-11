@@ -1,4 +1,4 @@
-package com.education.platform.models.dto;
+package com.education.platform.dto.roomSession;
 
 import java.time.LocalDateTime;
 

@@ -1,9 +1,9 @@
 package com.education.platform.services.interfaces;
 
-import com.education.platform.models.ChatMessage;
-import com.education.platform.models.RoomSession;
-import com.education.platform.models.SessionParticipant;
-import com.education.platform.models.SessionRecording;
+import com.education.platform.entities.roomSession.ChatMessage;
+import com.education.platform.entities.roomSession.RoomSession;
+import com.education.platform.entities.roomSession.SessionParticipant;
+import com.education.platform.entities.roomSession.SessionRecording;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +14,7 @@ public interface IRoomSessionService {
     Optional<RoomSession> getRoom(Long roomId);
 
     List<RoomSession> getActiveRooms();
+    List<RoomSession> getActiveRoomsForUserByRole(Long userId, SessionParticipant.ParticipantRole role);
 
     Optional<RoomSession> getActiveRoomByName(String roomName);
 

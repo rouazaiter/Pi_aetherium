@@ -2,8 +2,8 @@ package com.education.platform.services.implementations;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.education.platform.models.*;
-import com.education.platform.repositories.*;
+import com.education.platform.entities.roomSession.*;
+import com.education.platform.repositories.roomSession.*;
 import com.education.platform.services.interfaces.IRoomSessionService;
 
 import java.time.LocalDateTime;
@@ -52,6 +52,22 @@ public class RoomSessionService implements IRoomSessionService {
     @Override
     public List<RoomSession> getActiveRooms() {
         return roomSessionRepository.findByStatus(RoomSession.SessionStatus.ACTIVE);
+    }
+
+    @Override
+    public List<RoomSession> getActiveRoomsForUserByRole(Long userId, SessionParticipant.ParticipantRole role) {
+        if (userId == null || role == null) {
+            return List.of();
+        }
+        return participantRepository
+                .findByUserIdAndLeftAtIsNullAndRoleAndSessionStatus(
+                        userId,
+                        role,
+                        RoomSession.SessionStatus.ACTIVE
+                )
+                .stream()
+                .map(SessionParticipant::getSession)
+                .toList();
     }
 
     @Override
